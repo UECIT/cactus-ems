@@ -1,10 +1,12 @@
 package uk.nhs.ctp.service;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -125,13 +127,10 @@ public class AuditService {
 	}
 	
 	private String createContainedAudit(List<Resource> contained) {
-		final StringBuilder containedResources = new StringBuilder();
 		
-		contained.stream().forEach(resource -> {
-			containedResources.append(fhirParser.encodeResourceToString(resource));
-		});
-		
-		return MessageFormat.format("[{0}]", containedResources.toString().replaceAll("\\}\\{", "},{"));
+        return !contained.isEmpty() ? 
+                fhirParser.encodeResourceToString(new Bundle().setEntry(contained.stream().map(resource -> 
+                    new BundleEntryComponent().setResource(resource)).collect(Collectors.toList()))) : null;
 	}
 
 }

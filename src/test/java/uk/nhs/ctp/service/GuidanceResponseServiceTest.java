@@ -1,10 +1,9 @@
 package uk.nhs.ctp.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
-import java.util.List;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.spy;
 
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CarePlan;
@@ -23,7 +22,6 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RequestGroup;
 import org.hl7.fhir.dstu3.model.RequestGroup.RequestIntent;
 import org.hl7.fhir.dstu3.model.RequestGroup.RequestStatus;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,15 +30,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.nhs.ctp.exception.EMSException;
+import uk.nhs.ctp.service.resolver.GuidanceResponseResolver;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
 public class GuidanceResponseServiceTest {
 
 	@Autowired
-	private GuidanceResponseService guidanceResponseService;
+    private GuidanceResponseResolver guidanceResponseService;
 	
-	private GuidanceResponseService spyGuidanceResponseService;
+    private GuidanceResponseResolver spyGuidanceResponseService;
 
 	GuidanceResponse successResponse, dataRequiredResponse, outputDataMultipleResponse, outputDataSingularResponse,
 			invalidResponse;
@@ -53,7 +52,7 @@ public class GuidanceResponseServiceTest {
 
 	@Before
 	public void setup() {
-		spyGuidanceResponseService = spy(new GuidanceResponseService());
+        spyGuidanceResponseService = spy(new GuidanceResponseResolver());
 		
 		result = new RequestGroup();
 		result.setStatus(RequestStatus.ACTIVE);
@@ -113,40 +112,6 @@ public class GuidanceResponseServiceTest {
 		
 		result.addAction().setResource(new Reference(careplan));
 
-	}
-
-//	@Test
-//	public void testResultRetrievedWhenStatusIsSuccess() {
-//		spyGuidanceResponseService.processGuidanceResponse(successResponse, 1L, 1L);
-//		
-//		verify(spyGuidanceResponseService, times(1)).getResult(successResponse);
-//	}
-
-//	@Test
-//	public void testQuestionnaireReferenceRetrievedWhenStatusIsDataRequired() {
-//		spyGuidanceResponseService.processGuidanceResponse(dataRequiredResponse, 1L, 1L);
-//		
-//		verify(spyGuidanceResponseService, times(1)).getQuestionnaireReference(dataRequiredResponse);
-//	}
-
-	@Test
-	public void testGetOutputDataReturnsCorrectResourcesWhenGuidanceResponseOutputDataHasOneResource() {
-		List<Resource> resources = guidanceResponseService.getOutputData(outputDataSingularResponse);
-		
-		assertTrue(resources.size() == 1);
-		assertTrue(resources.get(0) instanceof Observation);
-		assertThat((Observation) resources.get(0)).isEqualToComparingFieldByField(observation1);
-	}
-
-	@Test
-	public void testGetOutputDataReturnsCorrectResourcesWhenGuidanceResponseOutputDataHasMultipleResources() {
-		List<Resource> resources = guidanceResponseService.getOutputData(outputDataMultipleResponse);
-		
-		assertTrue(resources.size() == 2);
-		assertTrue(resources.get(0) instanceof Observation);
-		assertThat((Observation) resources.get(0)).isEqualToComparingFieldByField(observation1);
-		assertTrue(resources.get(1) instanceof Observation);
-		assertThat((Observation) resources.get(1)).isEqualToComparingFieldByField(observation2);
 	}
 
 	@Test

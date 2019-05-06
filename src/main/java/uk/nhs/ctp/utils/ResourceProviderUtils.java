@@ -57,7 +57,14 @@ public class ResourceProviderUtils {
 	}
 	
 	public static <T extends Resource> T getResource(Resource resource, Class<T> resourceClass) {
-		return  resourceClass.cast(resource);
+        T t = null;
+        
+        try {
+            t = resourceClass.cast(resource);
+        } catch (ClassCastException e) {
+        }
+        
+        return t;
 	}
 	
 	public static <T extends Resource> T getResource(List<Resource> resources, Class<T> resourceClass) {

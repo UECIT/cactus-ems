@@ -1,10 +1,13 @@
 package uk.nhs.ctp.service;
 
 import java.net.ConnectException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.hl7.fhir.dstu3.model.GuidanceResponse;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Questionnaire;
+import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +23,7 @@ import uk.nhs.ctp.service.dto.CdssResponseDTO;
 import uk.nhs.ctp.service.dto.CdssResult;
 import uk.nhs.ctp.service.dto.TriageLaunchDTO;
 import uk.nhs.ctp.service.dto.TriageQuestion;
+import uk.nhs.ctp.service.resolver.ResponseResolver;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
 
 @Service
@@ -34,15 +38,25 @@ public class TriageService {
 
 	@Autowired
 	private ParametersService parametersService;
-
-	@Autowired
-	private GuidanceResponseService guidanceResponseService;
 	
 	@Autowired
 	private ResponseService responseService;
 
 	@Autowired
 	private AuditService auditService;
+    
+    @Autowired
+    private CdssSupplierService cdssSupplierService;
+    
+    private Map<Class<?>, ResponseResolver<? extends Resource>> responseResolverMap = new HashMap<>();
+
+    @Autowired
+    public <T extends Resource> void setResponseResolvers(List<ResponseResolver<T>> responseResolvers) {
+        responseResolvers.forEach(resolver -> {
+            responseResolverMap.put(resolver.getResourceClass(), resolver);
+        });
+        
+    }
 
 	/**
 	 * Creates case from test case scenario and patient details and launches first
@@ -129,15 +143,7 @@ public class TriageService {
 	protected CdssResult updateCaseUsingCdss(CdssRequestDTO requestDetails)
 			throws ConnectException, JsonProcessingException {
 
-		Parameters parameters = parametersService.getEvaluateParameters(requestDetails.getCaseId(),
-				requestDetails.getQuestionResponse(), requestDetails.getSettings(),
-				requestDetails.isAmendingPrevious());
-
-		GuidanceResponse guidanceResponse = cdssService.evaluateServiceDefinition(parameters,
-				requestDetails.getCdssSupplierId(), requestDetails.getServiceDefinitionId(),
-				requestDetails.getCaseId());
-
-		CdssResult cdssResult = guidanceResponseService.processGuidanceResponse(guidanceResponse, requestDetails.getCdssSupplierId(), requestDetails.getCaseId());
+        CdssResult cdssResult = amendCaseUsingCdss(requestDetails);
 
 		if (cdssResult.hasOutputData() || cdssResult.getSessionId() != null) {
 			LOG.info("Update case for " + requestDetails.getCaseId());
@@ -162,12 +168,13 @@ public class TriageService {
 				requestDetails.getQuestionResponse(), requestDetails.getSettings(),
 				requestDetails.isAmendingPrevious());
 
-		GuidanceResponse guidanceResponse = cdssService.evaluateServiceDefinition(parameters,
-				requestDetails.getCdssSupplierId(), requestDetails.getServiceDefinitionId(),
-				requestDetails.getCaseId());
+        Resource resource = cdssService.evaluateServiceDefinition(
+                parameters, requestDetails.getCdssSupplierId(), 
+                requestDetails.getServiceDefinitionId(), requestDetails.getCaseId());
 
-		CdssResult cdssResult = guidanceResponseService.processGuidanceResponse(guidanceResponse, requestDetails.getCdssSupplierId(), requestDetails.getCaseId());
-
+        CdssResult cdssResult = responseResolverMap.get(resource.getClass())
+                .resolve(resource, cdssSupplierService.getCdssSupplier(requestDetails.getCdssSupplierId()));
+        
 		return cdssResult;
 	}
 

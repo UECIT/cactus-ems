@@ -35,8 +35,8 @@
     "moment": "^2.24.0",
     "ngx-highlightjs": "^3.0.3",
     "ngx-json-viewer": "^2.3.1",
-    "rxjs": "^6.0.0",
-    "rxjs-compat": "^6.2.0",
+    "rxjs": "6.0.0",
+    "rxjs-compat": "6.2.0",
     "xml-beautifier": "^0.4.0",
     "zone.js": "~0.8.26"
   },

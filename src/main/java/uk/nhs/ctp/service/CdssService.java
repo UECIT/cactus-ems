@@ -9,10 +9,12 @@ import javax.net.ssl.SSLSession;
 import org.hl7.fhir.dstu3.model.GuidanceResponse;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Questionnaire;
+import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ServiceDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -32,6 +34,9 @@ import uk.nhs.ctp.repos.CdssSupplierRepository;
 @Service
 public class CdssService {
 	private static final Logger LOG = LoggerFactory.getLogger(CdssService.class);
+	
+    @Value("${ems.request.bundle:false}")
+    private boolean sendRequestAsBundle;
 
 	@Autowired
 	private CdssSupplierRepository cdssSupplierRepository;
@@ -56,7 +61,7 @@ public class CdssService {
 	 * @return {@link GuidanceResponse}
 	 * @throws JsonProcessingException
 	 */
-	public GuidanceResponse evaluateServiceDefinition(Parameters parameters, Long cdssSupplierId,
+    public Resource evaluateServiceDefinition(Parameters parameters, Long cdssSupplierId,
 			String serviceDefinitionId, Long caseId) throws ConnectException, JsonProcessingException {
 		String requestBody = FhirContext.forDstu3().newJsonParser().encodeResourceToString(parameters);
 
@@ -66,7 +71,7 @@ public class CdssService {
 
 		auditService.createAuditEntry(caseId, requestBody, responseBody);
 
-		return (GuidanceResponse) FhirContext.forDstu3().newJsonParser().parseResource(responseBody);
+		return (Resource) FhirContext.forDstu3().newJsonParser().parseResource(responseBody);
 	}
 
 	/**
