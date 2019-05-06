@@ -129,6 +129,12 @@
     <div class="result">
     <mat-card style="padding-right: 30px;">
         <mat-card-title class="col-12">Interim Result: {{ questionnaire.result }} 
+            <button *ngIf="handoverMessage && reports && !isloadingReport" id="continue" class="col-sm-5 offset-sm-2" (click)="openDialog()">
+                View Result/Reports
+            </button>
+            <button *ngIf="!handoverMessage || !reports || isloadingReport" id="continue" class="col-sm-5 offset-sm-2" style="padding:0px!important;" disabled>
+                View Result/Reports <mat-progress-bar mode="indeterminate" style="width:100%;padding: 0;margin: 0;"></mat-progress-bar>
+            </button>
         </mat-card-title>
         <mat-tab-group style="clear: both;">
             <mat-tab label="Interim result:">
@@ -203,6 +209,21 @@
 
         <mat-card style="margin-right: 30px;">
         <mat-card-title class="col-8" style="display:inline-block;">Result: {{ questionnaire.result }}</mat-card-title>
+
+        <button *ngIf="handoverMessage && reports && !isloadingReport" id="continue" class="col-sm-4 offset-sm-0" (click)="openDialog()" style="display:inline-block;">
+            View Result/Reports
+        </button>
+
+        <a *ngIf="handoverMessage && reports" href="{{getPostCallInformationTemplateURL()}}" target="blank">
+            <button *ngIf="handoverMessage && reports" id="continue" class="col-sm-4 offset-sm-0" style="display:inline-block;">
+                View Post Call Information
+            </button>
+        </a>
+
+        <button *ngIf="!handoverMessage || !reports || isloadingReport" id="continue" class="col-sm-4 offset-sm-0" style="padding:0px!important;display:inline-block;" disabled>
+            View Result/Reports <mat-progress-bar mode="indeterminate" style="width:100%;padding: 0;margin: 0;"></mat-progress-bar>
+        </button>
+
         <mat-tab-group style="clear: both;">
         <mat-tab label="Result Details" *ngIf="questionnaire.referralRequest">
             <mat-card>

@@ -24,6 +24,7 @@ import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.dstu3.model.Patient.PatientCommunicationComponent;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Person;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
@@ -326,10 +327,14 @@ public class ParametersService {
 		List<HumanName> names = new ArrayList<HumanName>();
 		names.add(new HumanName().setFamily(caseEntity.getLastName()).addGiven(caseEntity.getFirstName()));
 
+		CodeableConcept language = new CodeableConcept();
+		language.addCoding().setCode("en").setDisplay("English").setSystem("http://uecdi-tom-terminology.eu-west-2.elasticbeanstalk.com/fhir/CodeSystem/languages");
+		
 		parameters.addParameter().setName(SystemConstants.PATIENT)
 				.setResource(new Patient().setName(names)
 						.setGender(Enumerations.AdministrativeGender.fromCode(caseEntity.getGender()))
-						.setBirthDate(caseEntity.getDateOfBirth()));
+						.setBirthDate(caseEntity.getDateOfBirth())
+						.addCommunication(new PatientCommunicationComponent(language)));
 
 		Observation genderObservation = new Observation().setStatus(Observation.ObservationStatus.FINAL)
 				.setCode(new CodeableConcept().addCoding(new Coding(SystemURL.SNOMED, "263495000", "Gender")))

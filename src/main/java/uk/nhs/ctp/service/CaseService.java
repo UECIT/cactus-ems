@@ -104,11 +104,11 @@ public class CaseService {
 							amended = true;
 						}
 					}
-				}
 
-				if (!amended) {
-					LOG.info("Adding Observation for case " + triageCase.getId());
-					triageCase.addObservation(createCaseObservation((Observation) resource));
+					if (!amended) {
+						LOG.info("Adding Observation for case " + triageCase.getId());
+						triageCase.addObservation(createCaseObservation((Observation) resource));
+					}
 				}
 			} else if (resource instanceof Immunization) {
 				boolean amended = false;
@@ -121,7 +121,7 @@ public class CaseService {
 						immunisation.setTimestamp(new Date());
 					}
 				}
-
+				
 				if (!amended) {
 					LOG.info("Adding Immunization for case " + triageCase.getId());
 					triageCase.addImmunization(createCaseImmunization((Immunization) resource));
@@ -141,7 +141,7 @@ public class CaseService {
 						LOG.error(e.getMessage());
 					}
 				}
-
+				
 				if (!amended) {
 					LOG.info("Adding Medication for case " + triageCase.getId());
 					triageCase.addMedication(createCaseMedication((MedicationAdministration) resource));
@@ -151,10 +151,10 @@ public class CaseService {
 			else {
 				Parameters currentParameters = (Parameters) resource;
 				ParametersParameterComponent currentParameter = currentParameters.getParameterFirstRep();
-
+				
 				triageCase.addParameter(createCaseParameter(currentParameter));
 			}
-
+			
 		});
 
 		return caseRepository.save(triageCase);
@@ -208,7 +208,7 @@ public class CaseService {
 
 		return caseObservation;
 	}
-
+	
 	/**
 	 * Create CaseParameter from ParametersParameterComponent resource
 	 * 
@@ -222,7 +222,7 @@ public class CaseService {
 		try {
 			caseParameter.setValue(parameter.getValue().toString());
 		} catch (Exception e) {
-
+			
 		}
 		caseParameter.setTimestamp(new Date());
 

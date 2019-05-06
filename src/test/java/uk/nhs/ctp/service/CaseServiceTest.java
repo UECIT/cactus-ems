@@ -27,10 +27,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
-import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.repos.PatientRepository;
 import uk.nhs.ctp.repos.TestScenarioRepository;
@@ -97,7 +97,7 @@ public class CaseServiceTest {
 		
 		when(mockCaseRepository.findOne(1L)).thenReturn(triageCase);
 		when(mockCaseRepository.save(any(Cases.class))).thenReturn(triageCase);
-        when(observation.getValue()).thenReturn(new BooleanType(true));
+		when(observation.getValue()).thenReturn(new BooleanType(true));
 		doReturn(caseObservation).when(spyCaseService).createCaseObservation(observation);
 		doReturn(caseImmunization).when(spyCaseService).createCaseImmunization(immunization);
 		doReturn(caseMedication).when(spyCaseService).createCaseMedication(medication);

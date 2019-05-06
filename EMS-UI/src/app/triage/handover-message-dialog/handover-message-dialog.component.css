@@ -1,0 +1,22 @@
+/deep/.report .ngx-json-viewer {
+    height: auto !important;
+    background: #f8f8f8;
+}
+
+/deep/.report .mat-tab-header {
+    /* position: fixed; */
+    background: #ffffff;
+    z-index: 10;
+}
+
+/deep/.report .mat-tab-body-wrapper {
+    height: 74vh;
+}
+
+/deep/.report-backdrop {
+    background:rgba(0, 0, 0, 0.5);
+}
+
+/deep/.report .mat-dialog-content {
+    max-height: 85vh;
+}

@@ -1,12 +1,17 @@
 package uk.nhs.ctp.service.report.decorators;
 
 import org.hl7.fhir.dstu3.model.Patient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import uk.nhs.ctp.service.TerminologyService;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.report.npfit.hl7.localisation.TemplateContent;
+import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145201GB01LanguageCommunication;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145201GB01Patient;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145201GB01PatientRole;
+import uk.nhs.ctp.service.report.org.hl7.v3.CS;
 import uk.nhs.ctp.service.report.org.hl7.v3.CVNPfITCodedplainRequired;
 import uk.nhs.ctp.service.report.org.hl7.v3.CsEntityNameUse;
 import uk.nhs.ctp.service.report.org.hl7.v3.PN;
@@ -17,6 +22,15 @@ import uk.nhs.ctp.utils.ResourceProviderUtils;
 
 @Component
 public class RecordTargetDocumentDecorator implements OneOneOneDecorator {
+	
+	@Autowired
+	private TerminologyService terminologyService;
+	
+	@Value("${ems.terminology.administrative.gender.system}")
+	private String administrativeGenderSystem;
+	
+	@Value("${ems.terminology.human.language.system}")
+	private String humanLanguageSystem;
 
 	@Override
 	public void decorate(POCDMT200001GB02ClinicalDocument document, ReportRequestDTO request) {
@@ -46,12 +60,19 @@ public class RecordTargetDocumentDecorator implements OneOneOneDecorator {
 		TS birthTime = new TS();
 		birthTime.setValue(fhirPatient.getBirthDate().toString());
 		patient.setBirthTime(birthTime);
+		patient.setAdministrativeGenderCode(terminologyService.getCode(fhirPatient.getGender().getSystem(), administrativeGenderSystem, fhirPatient.getGender().getDefinition()));
 		
-		CVNPfITCodedplainRequired administrativeGenderCode = new CVNPfITCodedplainRequired();
-		administrativeGenderCode.setCode(fhirPatient.getGender().getDefinition());
-		administrativeGenderCode.setCodeSystem(fhirPatient.getGender().getSystem());
-		administrativeGenderCode.setDisplayName(fhirPatient.getGender().getDisplay());
-		patient.setAdministrativeGenderCode(administrativeGenderCode);
+		// ComunicationLanguage - TEMP
+		COCDTP145201GB01LanguageCommunication language = new COCDTP145201GB01LanguageCommunication();
+		CS languagecode = new CS();
+		
+		CVNPfITCodedplainRequired tempCode = terminologyService.getCode(fhirPatient.getCommunicationFirstRep().getLanguage().getCodingFirstRep().getSystem(), humanLanguageSystem, fhirPatient.getCommunicationFirstRep().getLanguage().getCodingFirstRep().getCode());
+		languagecode.setCode(tempCode.getCode());
+		languagecode.setCodeSystem(tempCode.getCodeSystem());
+		languagecode.setDisplayName(tempCode.getDisplayName());
+		
+		language.setLanguageCode(languagecode);
+		patient.getLanguageCommunication().add(language);
 		
 		patientRole.setPatientPatient(patient);
 		recordTarget.setCOCDTP145201GB01PatientRole(patientRole);

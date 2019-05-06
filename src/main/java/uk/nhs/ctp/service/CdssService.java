@@ -6,6 +6,8 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
 
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.GuidanceResponse;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Questionnaire;
@@ -34,10 +36,10 @@ import uk.nhs.ctp.repos.CdssSupplierRepository;
 @Service
 public class CdssService {
 	private static final Logger LOG = LoggerFactory.getLogger(CdssService.class);
-	
-    @Value("${ems.request.bundle:false}")
-    private boolean sendRequestAsBundle;
 
+	@Value("${ems.request.bundle:false}")
+	private boolean sendRequestAsBundle;
+	
 	@Autowired
 	private CdssSupplierRepository cdssSupplierRepository;
 
@@ -61,10 +63,12 @@ public class CdssService {
 	 * @return {@link GuidanceResponse}
 	 * @throws JsonProcessingException
 	 */
-    public Resource evaluateServiceDefinition(Parameters parameters, Long cdssSupplierId,
+	public Resource evaluateServiceDefinition(Parameters parameters, Long cdssSupplierId,
 			String serviceDefinitionId, Long caseId) throws ConnectException, JsonProcessingException {
-		String requestBody = FhirContext.forDstu3().newJsonParser().encodeResourceToString(parameters);
-
+		
+		String requestBody = FhirContext.forDstu3().newJsonParser().encodeResourceToString(sendRequestAsBundle ? 
+				new Bundle().addEntry(new BundleEntryComponent().setResource(parameters)) : parameters);
+		
 		String responseBody = sendHttpRequest(getBaseUrl(cdssSupplierId) + "/" + SystemConstants.SERVICE_DEFINITION
 				+ "/" + serviceDefinitionId + "/" + SystemConstants.EVALUATE, HttpMethod.POST,
 				new HttpEntity<>(requestBody, headers));

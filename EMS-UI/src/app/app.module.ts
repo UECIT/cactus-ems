@@ -51,7 +51,9 @@ import { ManageSettingsComponent } from './manage-settings/manage-settings.compo
 import { QuestionsDisplayComponent } from './triage/questions-display/questions-display.component';
 import {WebStorageModule} from 'h5webstorage';
 import { ViewAuditsComponent } from './view-audits/view-audits.component';
+import { HandoverMessageDialogComponent } from './triage/handover-message-dialog/handover-message-dialog.component';
 import { ResourceService } from './service/resource.service';
+import { ReportService } from './service/report.service';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { HighlightModule } from 'ngx-highlightjs';
 import xml from 'highlight.js/lib/languages/xml';
@@ -93,9 +95,10 @@ export function hljsLanguages() {
     DosDisplayComponent,
     ManageSettingsComponent,
     QuestionsDisplayComponent,
-    ViewAuditsComponent
+    ViewAuditsComponent,
+    HandoverMessageDialogComponent
   ],
-  entryComponents: [SwitchSupplierDialogComponent, SwitchServicePromptDialogComponent],
+  entryComponents: [SwitchSupplierDialogComponent, SwitchServicePromptDialogComponent, HandoverMessageDialogComponent],
   imports: [
     BrowserModule,
     StoreModule.forRoot({
@@ -128,6 +131,7 @@ export function hljsLanguages() {
     ServiceDefinitionService,
     AuditService,
     ResourceService,
+    ReportService,
     {provide: MAT_DATE_LOCALE, useValue: 'en-GB'}],
   bootstrap: [AppComponent]
 })

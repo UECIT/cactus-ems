@@ -1,3 +1,4 @@
+import { HandoverMessageDialogComponent } from '../handover-message-dialog/handover-message-dialog.component';
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import {
   Questionnaire,
@@ -6,6 +7,15 @@ import {
   TriageQuestion
 } from '../../model/questionnaire';
 import { QuestionnaireResponse } from '../../model/processTriage';
+import { MatDialog } from '@angular/material';
+import { ReportService } from 'src/app/service/report.service';
+import beautify from 'xml-beautifier';
+import { environment } from 'src/environments/environment';
+
+export interface DialogData {
+  handoverMessage: any;
+  reports: any;
+}
 
 @Component({
   selector: 'app-questionnaire',
@@ -22,8 +32,28 @@ export class QuestionnaireComponent implements OnInit {
   freeText: Map<string, string>;
   url: Map<string, string> = new Map();
   enableWhen: Map<string, string[]> = new Map();
+  handoverMessage: any;
+  reports: any;
+  isloadingReport: boolean;
 
-  constructor() {}
+  constructor(public dialog: MatDialog, private reportService: ReportService) {}
+
+  openDialog(): void {
+    const dialogRef = this.dialog.open(HandoverMessageDialogComponent, {
+      height: '95vh',
+      width: '95vw',
+      panelClass: 'report',
+      backdropClass: 'report-backdrop',
+      data: {
+        handoverMessage: this.handoverMessage,
+        reports: this.reports
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log(result);
+    });
+  }
 
   async ngOnInit() {
     if (this.questionnaire.triageQuestions != null) {
@@ -74,6 +104,12 @@ export class QuestionnaireComponent implements OnInit {
           );
         }
       }
+    }
+
+    // check for result and build the handoverMessage and corresponding reports.
+    if (this.questionnaire.referralRequest != null) {
+      await this.getHandoverMessage();
+      await this.get111Report();
     }
   }
 
@@ -291,5 +327,52 @@ export class QuestionnaireComponent implements OnInit {
     ) {
       return true;
     }
+  }
+
+  async getHandoverMessage() {
+    this.handoverMessage = await this.reportService.getHandover(this.questionnaire.caseId, this.questionnaire.referralRequest.resourceId);
+    await this.reportService.postHandoverTemplate(this.handoverMessage);
+  }
+
+  getPostCallInformationTemplateURL() {
+    return `${environment.UECDI_API}/handover/${this.handoverMessage.id}`;
+  }
+
+  async get111Report() {
+// tslint:disable-next-line: max-line-length
+    this.isloadingReport = true;
+    const reports = await this.reportService.getReport(this.questionnaire.caseId, this.questionnaire.referralRequest.resourceId, this.handoverMessage);
+    reports.forEach(async report => {
+      if (report.reportType === 'ONE_ONE_ONE') {
+        this.isloadingReport = true;
+        report.ValidationReport = await this.reportService.validate111Report(report.request);
+        this.isloadingReport = false;
+      }
+
+      if (report.reportType === 'AMBULANCE') {
+        this.isloadingReport = true;
+        report.ValidationReport = await this.reportService.validateAmbulanceRequest(report.request);
+        this.isloadingReport = false;
+      }
+
+      if (report.contentType === 'XML') {
+        if (report.request) {
+          report.request = beautify(report.request);
+        }
+        if (report.response) {
+          report.response = beautify(report.response);
+        }
+      }
+
+      if (report.contentType === 'JSON') {
+        if (report.request) {
+          report.request = JSON.parse(report.request);
+        }
+        if (report.response) {
+          report.response = JSON.parse(report.response);
+        }
+      }
+    });
+    this.reports = reports.reverse();
   }
 }

@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueType;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.dstu3.model.Resource;
 import org.springframework.stereotype.Component;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -55,16 +55,17 @@ public class ResourceProviderUtils {
 				new InvalidRequestException("Invalid parameter type in request body. Should be " + type.toString()),
 				SystemCode.BAD_REQUEST, IssueType.INVALID);
 	}
-	
+
 	public static <T extends Resource> T getResource(Resource resource, Class<T> resourceClass) {
-        T t = null;
-        
-        try {
-            t = resourceClass.cast(resource);
-        } catch (ClassCastException e) {
-        }
-        
-        return t;
+		T t = null;
+		
+		try {
+			t = resourceClass.cast(resource);
+		} catch (ClassCastException e) {
+		}
+		
+		return t;
+		
 	}
 	
 	public static <T extends Resource> T getResource(List<Resource> resources, Class<T> resourceClass) {

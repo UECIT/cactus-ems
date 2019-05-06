@@ -127,10 +127,9 @@ public class AuditService {
 	}
 	
 	private String createContainedAudit(List<Resource> contained) {
-		
-        return !contained.isEmpty() ? 
-                fhirParser.encodeResourceToString(new Bundle().setEntry(contained.stream().map(resource -> 
-                    new BundleEntryComponent().setResource(resource)).collect(Collectors.toList()))) : null;
+		return !contained.isEmpty() ? 
+				fhirParser.encodeResourceToString(new Bundle().setEntry(contained.stream().map(resource -> 
+					new BundleEntryComponent().setResource(resource)).collect(Collectors.toList()))) : null;
 	}
 
 }

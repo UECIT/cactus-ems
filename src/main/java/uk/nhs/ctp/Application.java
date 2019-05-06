@@ -52,5 +52,10 @@ public class Application extends SpringBootServletInitializer {
 		FhirContext ctx = FhirContext.forDstu3();
 		return ctx.newJsonParser();
 	}
+	
+	@Bean
+	public FhirContext fhirContext() {
+		return FhirContext.forDstu3();
+	}
 
 }

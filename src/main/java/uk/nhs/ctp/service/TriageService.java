@@ -44,20 +44,20 @@ public class TriageService {
 
 	@Autowired
 	private AuditService auditService;
-    
-    @Autowired
-    private CdssSupplierService cdssSupplierService;
-    
-    private Map<Class<?>, ResponseResolver<? extends Resource>> responseResolverMap = new HashMap<>();
+	
+	@Autowired
+	private CdssSupplierService cdssSupplierService;
+	
+	private Map<Class<?>, ResponseResolver<? extends Resource>> responseResolverMap = new HashMap<>();
 
-    @Autowired
-    public <T extends Resource> void setResponseResolvers(List<ResponseResolver<T>> responseResolvers) {
-        responseResolvers.forEach(resolver -> {
-            responseResolverMap.put(resolver.getResourceClass(), resolver);
-        });
-        
-    }
-
+	@Autowired
+	public <T extends Resource> void setResponseResolvers(List<ResponseResolver<T>> responseResolvers) {
+		responseResolvers.forEach(resolver -> {
+			responseResolverMap.put(resolver.getResourceClass(), resolver);
+		});
+		
+	}
+	
 	/**
 	 * Creates case from test case scenario and patient details and launches first
 	 * triage request
@@ -142,9 +142,9 @@ public class TriageService {
 	 */
 	protected CdssResult updateCaseUsingCdss(CdssRequestDTO requestDetails)
 			throws ConnectException, JsonProcessingException {
-
-        CdssResult cdssResult = amendCaseUsingCdss(requestDetails);
-
+		
+		CdssResult cdssResult = amendCaseUsingCdss(requestDetails);
+		
 		if (cdssResult.hasOutputData() || cdssResult.getSessionId() != null) {
 			LOG.info("Update case for " + requestDetails.getCaseId());
 			caseService.updateCase(requestDetails.getCaseId(), cdssResult.getOutputData(), cdssResult.getSessionId());
@@ -168,13 +168,13 @@ public class TriageService {
 				requestDetails.getQuestionResponse(), requestDetails.getSettings(),
 				requestDetails.isAmendingPrevious());
 
-        Resource resource = cdssService.evaluateServiceDefinition(
-                parameters, requestDetails.getCdssSupplierId(), 
-                requestDetails.getServiceDefinitionId(), requestDetails.getCaseId());
+		Resource resource = cdssService.evaluateServiceDefinition(
+				parameters, requestDetails.getCdssSupplierId(), 
+				requestDetails.getServiceDefinitionId(), requestDetails.getCaseId());
 
-        CdssResult cdssResult = responseResolverMap.get(resource.getClass())
-                .resolve(resource, cdssSupplierService.getCdssSupplier(requestDetails.getCdssSupplierId()));
-        
+		CdssResult cdssResult = responseResolverMap.get(resource.getClass())
+				.resolve(resource, cdssSupplierService.getCdssSupplier(requestDetails.getCdssSupplierId()));
+
 		return cdssResult;
 	}
 

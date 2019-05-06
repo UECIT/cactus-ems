@@ -1,9 +1,10 @@
 package uk.nhs.ctp.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.spy;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
+import java.util.List;
 
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CarePlan;
@@ -22,6 +23,7 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RequestGroup;
 import org.hl7.fhir.dstu3.model.RequestGroup.RequestIntent;
 import org.hl7.fhir.dstu3.model.RequestGroup.RequestStatus;
+import org.hl7.fhir.dstu3.model.Resource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,9 +39,9 @@ import uk.nhs.ctp.service.resolver.GuidanceResponseResolver;
 public class GuidanceResponseServiceTest {
 
 	@Autowired
-    private GuidanceResponseResolver guidanceResponseService;
+	private GuidanceResponseResolver guidanceResponseService;
 	
-    private GuidanceResponseResolver spyGuidanceResponseService;
+	private GuidanceResponseResolver spyGuidanceResponseService;
 
 	GuidanceResponse successResponse, dataRequiredResponse, outputDataMultipleResponse, outputDataSingularResponse,
 			invalidResponse;
@@ -52,7 +54,7 @@ public class GuidanceResponseServiceTest {
 
 	@Before
 	public void setup() {
-        spyGuidanceResponseService = spy(new GuidanceResponseResolver());
+		spyGuidanceResponseService = spy(new GuidanceResponseResolver());
 		
 		result = new RequestGroup();
 		result.setStatus(RequestStatus.ACTIVE);
@@ -113,6 +115,20 @@ public class GuidanceResponseServiceTest {
 		result.addAction().setResource(new Reference(careplan));
 
 	}
+
+//	@Test
+//	public void testResultRetrievedWhenStatusIsSuccess() {
+//		spyGuidanceResponseService.processGuidanceResponse(successResponse, 1L, 1L);
+//		
+//		verify(spyGuidanceResponseService, times(1)).getResult(successResponse);
+//	}
+
+//	@Test
+//	public void testQuestionnaireReferenceRetrievedWhenStatusIsDataRequired() {
+//		spyGuidanceResponseService.processGuidanceResponse(dataRequiredResponse, 1L, 1L);
+//		
+//		verify(spyGuidanceResponseService, times(1)).getQuestionnaireReference(dataRequiredResponse);
+//	}
 
 	@Test
 	public void testGetResultRetrievesResultCorrectly() {

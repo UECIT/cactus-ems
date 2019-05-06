@@ -42,7 +42,9 @@ VALUES
 INSERT INTO
  cdss_decoupling.cdss_supplier (id, name, base_url) 
 VALUES
- (1, 'CDSS Stub', 'http://localhost:8080/fhir/');
+ (1, 'CDSS Stub', 'http://ec2-3-8-182-163.eu-west-2.compute.amazonaws.com:8080/cdss-supplier-stub/fhir/'),
+ (2, 'Health Navigator', 'https://hnnhspoc.azurewebsites.net/'),
+ (3, 'Capita', 'https://nhsddigitalpocapi.azurewebsites.net/');
 
 INSERT INTO
  cdss_decoupling.service_definition (id, cdss_supplier_id, service_definition_id, description) 
@@ -54,8 +56,16 @@ VALUES
  (5, 1, 5, 'Palpitations past 2 hours and currently experiencing'),
  (6, 1, 6, 'Fallen and hurt right knee'),
  (7, 1, 7, 'Mental Health Scenario'),
- (8, 1, 8, 'None of the Above Scenario'),
- (9, 1, 9, 'Mental Health Table Scenario');
+ (8, 2, 'HN1', 'Vomiting and fever'),
+ (9, 2, 'HN2', 'Headache'),
+ (10, 2, 'HN3', 'Leg Injury, Blunt Trauma'),
+ (11, 2, 'HN4', 'Cut to right hand 7 days ago'),
+ (12, 2, 'HN5', 'Palpitations past 2 hours and currently experiencing'),
+ (13, 2, 'HN6', 'Fallen and hurt right knee'),
+ (14, 2, 'HN7', 'Mental Health Scenario'),
+ (15, 3, '65', 'Vomiting and fever'),
+ (16, 1, 8, 'None of the Above Scenario'),
+ (17, 1, 9, 'Mental Health Table Scenario');
 
 INSERT INTO
  cdss_decoupling.user_cdss_supplier (username, cdss_supplier_id)
