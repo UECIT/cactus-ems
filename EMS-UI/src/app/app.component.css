@@ -1,0 +1,16 @@
+.u377_div {
+    border-width: 0px;
+    height: 40px;
+    background: inherit;
+    background-color: #005EB8;
+    border: none;
+    border-radius: 0px;
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    padding: 0 8%;
+}
+
+.homeButton {
+    color: white;
+}

@@ -1,0 +1,13 @@
+.checkCapacitySummaryResponse{
+    margin: 15px;
+}
+
+#search {
+    border: none;
+    background-color: rgba(0, 94, 184, 0.776470588235294);
+    color: white;
+    float: right;
+    margin-top: 15px;
+    cursor: pointer;
+    text-align: center;
+}

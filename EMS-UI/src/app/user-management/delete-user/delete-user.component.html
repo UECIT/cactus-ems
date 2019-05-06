@@ -1,0 +1,34 @@
+<div class="container-fluid">
+        <div class="row">
+          <div class="header col-10 offset-1 col-sm-6 offset-sm-3">
+            {{ title }}
+          </div>
+          <div class="form col-10 offset-1 col-sm-6 offset-sm-3" *ngIf="loaded">
+            <div class="alert alert-warning" *ngIf="warning">
+                {{ warningMessage }}
+            </div>
+            <div class="message">
+              Are you sure you want to delete this user?
+            </div>
+            <div class="input">
+              <mat-form-field class="full-width">
+                <input disabled matInput placeholder="Name" [value]="user.name" (input)="user.name = $event.target.value">
+              </mat-form-field>
+            </div>
+            <div class="input">
+              <mat-form-field class="full-width">
+                <input disabled matInput placeholder="Username" [value]="user.username" (input)="user.username = $event.target.value">
+              </mat-form-field>
+            </div>
+            <div class="buttons">
+              <span class="actionButton" (click)="deleteUser()">Delete User</span>
+              <span class="cancelButton" [routerLink]="['/users/update']" [queryParams]="{username: user.username}">Cancel</span>
+            </div>
+            <div class="alert alert-danger" *ngIf="error">
+                {{ errorMessage }}
+                <app-error-display [(errorObject)]="errorObject"></app-error-display>
+            </div>
+          </div>
+        </div>
+      </div>
+        

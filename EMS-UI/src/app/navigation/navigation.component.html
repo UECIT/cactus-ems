@@ -1,0 +1,17 @@
+<div class="u377_div col-12" *ngIf="isLoggedIn">
+
+  <button class="homeButton" mat-button routerLink="/main">Home</button>
+  <button class="homeButton" mat-button [matMenuTriggerFor]="account">Account</button>
+  <mat-menu #account="matMenu" [overlapTrigger]="false">
+    <button mat-menu-item routerLink="/account/password" [queryParams]="{username: username}"> Change Password</button>
+    <button mat-menu-item (click)="logoff()">Log Off</button>
+  </mat-menu>
+
+  <button class="homeButton" mat-button [matMenuTriggerFor]="menu" *ngIf="isAdmin">Admin</button>
+  <mat-menu #menu="matMenu" [overlapTrigger]="false">
+    <button mat-menu-item routerLink="/users">Manage Users</button>
+    <button mat-menu-item routerLink="/suppliers">Manage CDSS Suppliers</button>
+    <button mat-menu-item routerLink="/settings">Manage Settings</button>
+    <button mat-menu-item routerLink="/view-audits">View Audits</button>
+  </mat-menu>
+</div>

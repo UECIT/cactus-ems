@@ -1,0 +1,40 @@
+
+
+<div *ngIf="state | async as patient">
+    
+<div class="container-fluid">
+        <div class="row">
+          <div class="col-4">
+            <span class="patientBanner">
+              <strong>{{ patient.lastName }}, {{ patient.firstName }} ({{ patient.title}})  </strong>
+            </span>
+          </div>
+          
+    
+          <!-- Birthdate and deceased date -->
+          <div class="col-3 patientBanner">
+            <span class="patientBanner">
+              <i>Born </i>
+                <strong>{{ patient.dateOfBirth}} </strong>
+                <span>(<strong>{{ patient.dateOfBirth | age }}</strong>)</span>
+            </span>
+          </div>
+           <!-- Gender-->
+          <div class="col-2 patientBanner">
+            <span class="patientBanner">
+              <i>Gender </i>
+              <strong>{{ patient.gender}}</strong>
+            </span>
+          </div>
+    
+          <!-- NHS number -->
+          <div class="col-3 patientBanner">
+            <span class="patientBanner">
+              <i>NHS No. </i>
+              <strong >{{ patient.nhsNumber}}</strong>
+            </span>
+          </div>
+    
+        </div>
+
+</div>

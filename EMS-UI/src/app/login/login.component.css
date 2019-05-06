@@ -1,0 +1,17 @@
+.body-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.body-content > * {
+  width: 100%;
+}
+
+.login-button {
+  background-color:rgba(0, 94, 184, 1);
+  color:white;
+}
+
+.login {
+  padding: 30px 30%;
+}

@@ -1,0 +1,51 @@
+
+.header {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #005EB8;
+    color: white;
+}
+
+.users {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    padding: 1%;
+    border-color: lightgrey;
+    border-style: solid;
+    border-width: 0 1px 1px 1px;
+    white-space: nowrap;
+}
+
+.users tr {
+    border-bottom: 1px solid lightgrey;
+}
+
+.actionButton {
+    background-color: white;
+    border: 2px solid #425563;
+    padding: 5px 25px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.actionButton:hover {
+    background-color: lightgray;
+    color: white;
+}
+
+.actions {
+    float: right;
+}
+
+
+#createUser {
+    border: none;
+    background-color: #009639;
+    color: white;
+    float: right;
+    margin: 20px;
+}
+
+#createUser:hover {
+    background-color: #0096398a;
+} 

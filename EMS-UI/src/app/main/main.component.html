@@ -1,0 +1,58 @@
+  <div class="row">
+    <div class="col-sm-12 text-center">
+      <div class="sectionTitle patientSection">1. Select Patient</div>
+      <nav class="patientSection d-flex flex-wrap">
+          <div *ngFor="let patient of patients" class="">
+            <button mat-raised-button [class.selected]="patient == selectedPatient" class="btn btn-primary btnSearch text-center" (click)="addPatientToStore(patient)">
+                <div>
+                  {{ patient.title }} {{ patient.firstName }} {{ patient.lastName }}
+                </div>
+                <div>
+                  Age: {{ patient.dateOfBirth | age }}
+                </div>
+            </button>
+          </div>
+      </nav>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-12 text-center">
+      <div class="sectionTitle cdssSection">2. Select CDSS</div>
+      <!-- Overrides the background color from the patients section -->
+      <nav class="cdssSection d-flex flex-wrap">
+          <div *ngFor="let supplier of cdssSuppliers">
+            <button mat-raised-button [class.selected]="supplier == selectedSupplier" class="btn btn-primary btnSearch text-center" (click)="getServiceDefinitionForSupplier(supplier)">
+                {{ supplier.name }}
+            </button>
+          </div>
+      </nav>
+    </div>
+  </div>  
+
+  <div class="row"  *ngIf="serviceDefinitions != null">
+    <div class="col-sm-12 text-center">
+      <div class="sectionTitle contextSection">3. Set Context</div>
+      <nav class="contextSection">
+        <mat-form-field  *ngIf="serviceDefinitions != null">
+          <mat-select placeholder="Service Definition" [(ngModel)]="selectedServiceDefinition">
+            <mat-option *ngFor="let serviceDefinition of serviceDefinitions" [value]="serviceDefinition.serviceDefinitionId">{{ serviceDefinition.description }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field  *ngIf="serviceDefinitions != null">
+          <mat-select [(ngModel)]="selectedQueryType">
+            <mat-option value="id">Get by Id</mat-option>
+            <mat-option value="attributes">Search by Attributes</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </nav>
+    </div>
+  </div>
+  
+
+  <button mat-button class="btn btn-primary launch" (click)="triage()"
+  [disabled]="disableLaunch()">Launch</button>
+
+  <div class="row" *ngIf="selectedServiceDefinition != null">
+    <app-service-definition class="col-md-6" [(selectedServiceDefinition)]="selectedServiceDefinition" [(selectedQueryType)]="selectedQueryType" [(selectedSupplier)]="selectedSupplier"></app-service-definition>
+  </div>

@@ -1,0 +1,73 @@
+/* You can add global styles to this file, and also import other style files */
+@import "~bootstrap/dist/css/bootstrap.css";
+@import '~@angular/material/theming';
+@import '~highlight.js/styles/github.css';
+
+@include mat-core();
+
+$app-primary: mat-palette($mat-indigo);
+$app-accent:  mat-palette($mat-blue, A200, A100, A400);
+
+// The warn palette is optional (defaults to red).
+$app-warn:    mat-palette($mat-red);
+
+// Create the theme object (a Sass map containing all of the palettes).
+$app-theme: mat-light-theme($app-primary, $app-accent, $app-warn);
+
+// Include theme styles for core and each component used in your app.
+// Alternatively, you can import and @include the theme mixins for each component
+// that you are using.
+@include angular-material-theme($app-theme);
+
+body {
+        margin: 0 auto; 
+        font-family: Arial, Helvetica, sans-serif;
+}
+
+.parent {
+        padding-top: 2.5%;
+        padding-bottom: 2%;
+}
+
+.logo {
+        float: right;
+}
+
+.alert {
+        margin-top: 10px;
+        border-radius: 0%;
+        font-size: 13px;
+        text-align: center;
+        background-color: white;
+}
+
+.alert-danger {
+        border-color: #DA291C;
+        color: #DA291C;
+}
+
+.alert-warning {
+        border-color: #ED8B00;
+        color: #ED8B00;
+}
+
+form {
+        font-size: 13px;
+}
+
+.full-width {
+        width: 98%;
+}
+.row {
+        padding: 0px!important;
+}
+.mat-pseudo-checkbox {
+        display: none!important;
+}
+
+app-banner {
+        display: block;
+        background-color: #ffb81c;
+        padding: 15px 20px;
+        margin-bottom: 15px;
+      }

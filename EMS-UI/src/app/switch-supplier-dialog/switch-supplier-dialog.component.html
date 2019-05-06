@@ -1,0 +1,25 @@
+<h1 mat-dialog-title>Switch Supplier:</h1>
+<div mat-dialog-content>
+  <p>Please select a cdss supplier?</p>
+  <mat-form-field>
+    <mat-select placeholder="Cdss Supplier" [(value)]="data.cdssSupplier">
+      <mat-option *ngFor="let cdssSupplier of cdssSuppliers" [value]="cdssSupplier">
+        {{cdssSupplier.name}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <p *ngIf="data.cdssSupplier != null">Please select a service definition?</p>
+  <mat-form-field *ngIf="data.cdssSupplier != null">
+    <mat-select placeholder="Service Definition" [(value)]="data.serviceDefinition">
+      <mat-option *ngFor="let serviceDefinition of data.cdssSupplier.serviceDefinitions" [value]="serviceDefinition.serviceDefinitionId">
+        {{serviceDefinition.description}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">No Thanks</button>
+  <button mat-button [mat-dialog-close]="data" cdkFocusInitial>Ok</button>
+</div>

@@ -1,0 +1,84 @@
+<div class="container-fluid">
+
+  <div class="row">
+    <div class="col-xs-10 col-md-10 offset-md-1">
+      <div class="header">
+        View Audits
+      </div>
+      <mat-progress-bar mode="indeterminate" *ngIf="!loaded"></mat-progress-bar>
+      <div *ngIf="!error && loaded" class="audits table-responsive">
+        <!-- filters -->
+        <div>
+          <mat-form-field class="col-xs-3 col-md-3">
+            <input matInput [matDatepicker]="fromPicker" placeholder="from Date" [value]="fromDate"
+              (dateInput)="updateFromDate($event)" (dateChange)="updateFromDate($event)">
+            <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+            <mat-datepicker #fromPicker></mat-datepicker>
+          </mat-form-field>
+          <section class="checkbox-section col-xs-3 col-md-3">
+            <mat-checkbox class="checkbox-margin" [(ngModel)]="includeClosed" (change)="getAudits()">Include closed
+            </mat-checkbox>
+          </section>
+          <section class="checkbox-section col-xs-3 col-md-3">
+            <mat-checkbox class="checkbox-margin" [(ngModel)]="includeIncomplete" (change)="getAudits()">Include
+              incomplete</mat-checkbox>
+          </section>
+          <mat-form-field class="col-xs-3 col-md-3">
+            <input matInput [matDatepicker]="toPicker" placeholder="to Date" [value]="toDate"
+              (dateInput)="updateToDate($event)" (dateChange)="updateToDate($event)">
+            <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+            <mat-datepicker #toPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <div class="col-xs-8 col-md-8 display-inline">
+          <table mat-table matSort [dataSource]="dataSource"
+            class="table table-borderless table-hover col-xs-12 col-md-12 ">
+            <!-- Id Column -->
+            <ng-container matColumnDef="id">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> No. </th>
+              <td mat-cell *matCellDef="let element"> {{element.id}} </td>
+            </ng-container>
+
+            <!-- First Name Column -->
+            <ng-container matColumnDef="firstName">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> First Name </th>
+              <td mat-cell *matCellDef="let element"> {{element.firstName}} </td>
+            </ng-container>
+
+            <!-- Last Name Column -->
+            <ng-container matColumnDef="lastName">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Last Name </th>
+              <td mat-cell *matCellDef="let element"> {{element.lastName}} </td>
+            </ng-container>
+
+            <!-- Timestamp Column -->
+            <ng-container matColumnDef="timestamp">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Timestamp </th>
+              <td mat-cell *matCellDef="let element"> {{formatDate2(element.timestamp)}} </td>
+            </ng-container>
+
+            <!-- Action Column -->
+            <ng-container matColumnDef="action">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Action </th>
+              <td mat-cell *matCellDef="let element"> <button mat-raised-button color="primary"
+                  (click)="getAudit(element.id)">Open Audit</button> </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+
+        <mat-card class="col-xs-4 col-md-4 display-inline audit-display">
+          <mat-card-title>View Audit:</mat-card-title>
+          <ngx-json-viewer [json]="selectedAudit" [expanded]="true"></ngx-json-viewer>
+        </mat-card>
+
+        <mat-paginator [length]="totalElements" [pageSize]="numberOfElements" [pageSizeOptions]="[5, 10, 25, 100]"
+          (page)="pageEvent = handlePage($event)">
+        </mat-paginator>
+      </div>
+    </div>
+  </div>
+</div>

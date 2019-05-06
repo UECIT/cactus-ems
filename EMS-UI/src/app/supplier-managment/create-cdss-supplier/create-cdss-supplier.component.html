@@ -1,0 +1,58 @@
+<mat-progress-bar mode="indeterminate" *ngIf="!loaded"></mat-progress-bar>
+<div class="container-fluid" *ngIf="loaded">
+  <div class="row">
+    <div class="header col-10 offset-1 col-sm-6 offset-sm-3">
+      {{ title }}
+    </div>
+    <form [formGroup]="formData"  (ngSubmit)="createSupplier(formData.value)" class="form col-10 offset-1 col-sm-6 offset-sm-3">
+      <div class="alert alert-warning" *ngIf="warning">
+          {{ warningMessage }}
+      </div>
+      <div class="input">
+        <mat-form-field class="full-width">
+          <input matInput placeholder="Name" formControlName="name">
+          <mat-error *ngIf="name.invalid && (name.dirty || name.touched)">
+            Name is required (max 20)
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div class="input">
+        <mat-form-field class="full-width">
+          <input matInput placeholder="BaseURL" formControlName="baseUrl">
+          <mat-error *ngIf="baseUrl.invalid && (baseUrl.dirty || baseUrl.touched)">
+            BaseUrl is required (max 1000)
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <hr>
+
+      <div>
+      Service Definitions:
+        <mat-list class="serviceDefinitionList" dense *ngFor="let serviceDefinition of serviceDefinitions">
+          <mat-list-item class="serviceDefinitionListItem"> {{serviceDefinition.serviceDefinitionId}}: {{serviceDefinition.description}} <mat-icon class="serviceDefinitionListClose" matListIcon (click)="removeServiceDefinition(serviceDefinition)">close</mat-icon></mat-list-item>
+        </mat-list>
+      </div>
+
+      <div>
+        <mat-form-field class="">
+          <input matInput placeholder="Service Definition Id e.g. CD1" formControlName="serviceDefinitionId">
+        </mat-form-field>
+        <mat-form-field class="">
+          <input matInput placeholder="Service Description e.g. Headache" formControlName="serviceDescription">
+        </mat-form-field>
+        <span class="actionButton" (click)="addSeviceDefinition(formData.value)">Add Service Definition</span>
+      </div>
+
+      <div class="buttons">
+        <button type="submit" [disabled]="!formData.valid" class="actionButton">Save</button>
+        <span class="cancelButton" [routerLink]="['/suppliers']">Cancel</span>
+      </div>
+      <div class="alert alert-danger" *ngIf="error">
+          {{ errorMessage }}
+          <app-error-display [(errorObject)]="errorObject"></app-error-display>
+      </div>
+    </form>
+  </div>
+</div>
+  

@@ -1,0 +1,105 @@
+<mat-progress-bar mode="indeterminate" *ngIf="!loaded"></mat-progress-bar>
+<div class="container-fluid">
+  <div class="row" *ngIf="loaded">
+    <div class="header col-10 offset-1 col-sm-6 offset-sm-3">
+      {{ title }}
+    </div>
+    <div class="alert alert-danger" *ngIf="error">
+      {{ errorMessage }}
+      <app-error-display [(errorObject)]="errorObject"></app-error-display>
+    </div>
+    <form *ngIf="!error" [formGroup]="formData" (ngSubmit)="updateSettings(formData.value)" class="form col-10 offset-1 col-sm-6 offset-sm-3">
+      <div class="alert alert-warning" *ngIf="warning">
+          {{ warningMessage }}
+      </div>
+
+      <h3>Initiating Person</h3>
+      <div class="input">
+        <mat-form-field class="full-width">
+          <input matInput placeholder="Name" formControlName="initiatingPersonName">
+        </mat-form-field>
+      </div>
+      <div class="input">
+        <mat-form-field class="full-width">
+          <input matInput placeholder="Telecom" formControlName="initiatingPersonTelecom">
+        </mat-form-field>
+      </div>
+      <div class="input">
+        <mat-form-field class="full-width">
+          <input matInput placeholder="Gender" formControlName="initiatingPersonGender">
+        </mat-form-field>
+      </div>
+      <div class="input">
+        <mat-form-field class="full-width">
+          <input matInput placeholder="Birth Date" formControlName="initiatingPersonBirthDate">
+        </mat-form-field>
+      </div>
+
+      <div class="input">
+        <mat-form-field class="full-width">
+          <input matInput placeholder="User Type" formControlName="userType">
+        </mat-form-field>
+      </div>
+      <div class="input">
+        <mat-form-field class="full-width">
+          <input matInput placeholder="User Language" formControlName="userLanguage">
+        </mat-form-field>
+      </div>
+      <div class="input">
+        <mat-form-field class="full-width">
+          <input matInput placeholder="User Task Context" formControlName="userTaskContext">
+        </mat-form-field>
+      </div>
+      <hr>
+
+
+      <h3>Receiving Person</h3>
+      <div class="input">
+        <mat-form-field class="full-width">
+          <input matInput placeholder="Name" formControlName="receivingPersonName">
+        </mat-form-field>
+      </div>
+      <div class="input">
+        <mat-form-field class="full-width">
+          <input matInput placeholder="Telecom" formControlName="receivingPersonTelecom">
+        </mat-form-field>
+      </div>
+      <div class="input">
+        <mat-form-field class="full-width">
+          <input matInput placeholder="Gender" formControlName="receivingPersonGender">
+        </mat-form-field>
+      </div>
+      <div class="input">
+        <mat-form-field class="full-width">
+          <input matInput placeholder="Birth Date" formControlName="receivingPersonBirthDate">
+        </mat-form-field>
+      </div>
+      <div class="input">
+        <mat-form-field class="full-width">
+          <input matInput placeholder="Recipient Type" formControlName="recipientType">
+        </mat-form-field>
+      </div>
+      <div class="input">
+        <mat-form-field class="full-width">
+          <input matInput placeholder="Recipient Language" formControlName="recipientLanguage">
+        </mat-form-field>
+      </div>
+      <hr>
+
+      <div class="input">
+        <mat-form-field class="full-width">
+          <input matInput placeholder="Setting" formControlName="setting">
+        </mat-form-field>
+      </div>
+
+      <div class="buttons">
+        <button [disabled]="!formData.valid" type="submit" class="actionButton">Save</button>
+        <span class="cancelButton" [routerLink]="['/users']">Cancel</span>
+      </div>
+      <div class="alert alert-danger" *ngIf="updateError">
+        {{ updateErrorMessage }}
+      </div>
+    </form>
+  </div>
+</div>
+  

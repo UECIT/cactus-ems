@@ -1,0 +1,38 @@
+<div class="container-fluid">
+    <div class="row bar">
+        <div class="col-sm-5 offset-sm-1">
+            <span class="context" *ngIf="case">
+                {{case.party.description}}
+            </span>
+        </div>
+        <div class="col-sm-5">
+            <span class="context">
+                {{cdssSupplierName}}
+            </span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12 skillset">
+            <span>User Skillset: <strong *ngIf="case"> {{case.skillset.description}}</strong></span>
+        </div>
+    </div>
+    <div class="row">
+        <button [disabled]="!checkAllRequieredQuestionsAreAnswered()" id="continue" class="col-sm-5" (click)="continue(false)">
+            Continue
+        </button>
+        <button id="continue" class="col-sm-5 offset-sm-2" (click)="openDialog()">
+            Switch Supplier
+        </button>
+    </div>
+
+    <div class="row">
+        <button id="exit" class="col-sm-8 offset-sm-2" (click)="endTriage()">
+            End Test
+        </button>
+    </div>
+
+    <div class="row">
+        <app-audit-display class="col-md-12" [(caseId)]="caseId"></app-audit-display>
+    </div>
+
+</div>

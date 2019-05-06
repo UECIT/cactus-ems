@@ -1,0 +1,55 @@
+<div class="container-fluid">
+
+  <div class="row">
+    <div class="col-xs-12 col-md-10 offset-md-1">
+      <div class="header">
+        Current User Accounts
+      </div>
+      <mat-progress-bar mode="indeterminate" *ngIf="!loaded"></mat-progress-bar>
+      <div *ngIf="!error && loaded" class="users table-responsive">
+        <table class="table table-borderless table-hover ">
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Username</th>
+              <th scope="col">Role</th>
+              <th scope="col">CDSS Suppliers</th>
+              <th scope="col">Enabled</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users">
+              <td>{{ user.name }}</td>
+              <td>{{ user.username }}</td>
+              <td>{{ user.role | role }}</td>
+              <td>
+                <div *ngIf="user.role === 'ROLE_CDSS'">
+                  <div *ngFor="let supplier of user.cdssSuppliers">{{ supplier.name }}</div>
+                </div>
+              </td>
+              <td>
+                <div *ngIf="user.role !== 'ROLE_ADMIN'">
+                  {{ user.enabled ? "Yes" : "No" }}
+                </div>
+              </td>
+              <td>
+                <div class="actions">
+                  <span class="actionButton" [routerLink]="['/users/update']" [queryParams]="{username: user.username}">Edit</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div>
+          <span id="createUser" class="actionButton" [routerLink]="['/users/create']">Create New User</span> 
+        </div>
+      </div>
+      <div class="alert alert-danger" *ngIf="error">
+            {{ errorMessage }}
+            <app-error-display [(errorObject)]="errorObject"></app-error-display>
+      </div>
+    </div>
+  </div>
+</div>
+  

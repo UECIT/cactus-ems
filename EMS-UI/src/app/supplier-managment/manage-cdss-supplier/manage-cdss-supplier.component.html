@@ -1,0 +1,47 @@
+<div class="container-fluid">
+
+  <div class="row">
+    <div class="col-xs-12 col-md-10 offset-md-1">
+      <div class="header">
+        Current Cdss Suppliers
+      </div>
+      <mat-progress-bar mode="indeterminate" *ngIf="!loaded"></mat-progress-bar>
+      <div *ngIf="!error && loaded" class="suppliers table-responsive">
+        <table class="table table-borderless table-hover ">
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">BaseUrl</th>
+              <th scope="col">Service Descriptions</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let supplier of suppliers">
+              <td>{{ supplier.name }}</td>
+              <td>{{ supplier.baseUrl }}</td>
+              <td>
+                <ul>
+                  <li *ngFor="let serviceDefinition of supplier.serviceDefinitions">{{ serviceDefinition.description }}</li>
+                </ul>
+              </td>
+              <td>
+                <div class="actions">
+                  <span class="actionButton" [routerLink]="['/suppliers/update']" [queryParams]="{supplier: supplier.id}">Edit</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div>
+          <span id="createSupplier" class="actionButton" [routerLink]="['/suppliers/create']">Create New Supplier</span> 
+        </div>
+      </div>
+      <div class="alert alert-danger" *ngIf="error">
+            {{ errorMessage }}
+            <app-error-display [(errorObject)]="errorObject"></app-error-display>
+      </div>
+    </div>
+  </div>
+</div>
+  

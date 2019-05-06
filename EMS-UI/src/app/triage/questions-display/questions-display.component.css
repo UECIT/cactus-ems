@@ -1,0 +1,16 @@
+.bar {
+    background-color: rgba(0, 94, 184, 0.776470588235294);
+    color: white;   
+    height: auto;
+    min-height: 70px;
+    font-size: 20px;
+    display: block;
+}
+.question {
+    vertical-align: middle;
+    line-height: 70px;
+}
+hr {
+    margin:0px;
+    border-top: 1px solid rgba(0, 0, 0, 0.3);
+}

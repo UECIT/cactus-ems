@@ -1,0 +1,22 @@
+<div class="login">
+  <h2>Login</h2>
+        <mat-card>
+                <mat-card-content>
+                        <form #loginForm="ngForm" (ngSubmit)="login(loginForm.value)" class="body-content" novalidate>
+                                <mat-form-field>
+                                        <input matInput placeholder="Username" name="username" ngModel>
+                                </mat-form-field>
+
+                                <mat-form-field>
+                                        <input matInput type="password" placeholder="Password" name="password" ngModel>
+                                </mat-form-field>
+
+                                <button mat-button class="btn btn-primary login-button">Login</button>
+                        </form>
+                        <div class="alert alert-danger" *ngIf="error">
+                                {{ errorMessage }}
+                                <app-error-display [(errorObject)]="errorObject"></app-error-display>
+                        </div>
+                </mat-card-content>
+        </mat-card>
+</div>

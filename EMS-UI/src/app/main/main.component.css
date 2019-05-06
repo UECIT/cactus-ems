@@ -1,0 +1,47 @@
+.sectionTitle {
+  text-align: left; 
+  padding: 20px 20px 0 20px; 
+}
+
+nav {
+  display: flex;
+  margin: auto;
+  justify-content: left;
+  padding: 10px 30px;
+  
+}
+
+.patientSection {
+  background-color: rgba(242, 242, 242, 1);
+}
+
+.cdssSection {
+  background-color:rgba(232, 237, 238, 1);
+}
+
+.contextSection {
+  background-color: rgba(214, 220, 226, 0.74);
+}
+
+.btnSearch {
+  flex: 0 0 20%;
+  min-width: 170px;
+  width:100%;
+  max-width: 33%;
+  /* any width as long a % times number of items does not exceed 100% */
+  text-align: center;
+  background: white;
+  color: #333333;
+  white-space:normal;
+  margin: 5px;
+  border: white solid 2px;  
+}
+
+.btnSearch.selected {
+  border: #005EB8 solid 2px;
+}
+
+.launch {
+    background-color: rgba(0, 103, 71, 1); 
+    color: white;
+}
