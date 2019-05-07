@@ -1,8 +1,8 @@
 package uk.nhs.ctp.service.report.decorators;
 
-import org.hl7.fhir.dstu3.model.Practitioner;
 import org.springframework.stereotype.Component;
 
+import resources.CareConnectPractitioner;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.report.npfit.hl7.localisation.TemplateContent;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145202GB02IntendedRecipient;
@@ -43,7 +43,8 @@ public class PrimaryInformationRecipientDocumentDecorator implements OneOneOneDe
 		COCDTP145202GB02Person assignedPerson = new COCDTP145202GB02Person();
 		assignedPerson.setClassCode(assignedPerson.getClassCode());
 		assignedPerson.setDeterminerCode(assignedPerson.getDeterminerCode());
-		Practitioner fhirPractitioner = ResourceProviderUtils.getResource(request.getBundle(), Practitioner.class);
+		CareConnectPractitioner fhirPractitioner = 
+				ResourceProviderUtils.getResource(request.getBundle(), CareConnectPractitioner.class);
 				
 		PN practitionerName = new PN();
 		practitionerName.getContent().add(fhirPractitioner.getNameFirstRep().getNameAsSingleString());

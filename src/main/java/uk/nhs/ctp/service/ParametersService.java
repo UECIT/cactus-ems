@@ -24,8 +24,6 @@ import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
-import org.hl7.fhir.dstu3.model.Patient.PatientCommunicationComponent;
-import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Person;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus;
@@ -40,13 +38,14 @@ import org.springframework.stereotype.Service;
 
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.SystemURL;
-import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.CaseParameter;
+import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.exception.EMSException;
 import uk.nhs.ctp.repos.CaseRepository;
+import uk.nhs.ctp.service.builder.CareConnectPatientBuilder;
 import uk.nhs.ctp.service.dto.SettingsDTO;
 import uk.nhs.ctp.service.dto.TriageQuestion;
 import uk.nhs.ctp.utils.ErrorHandlingUtils;
@@ -58,6 +57,9 @@ public class ParametersService {
 
 	@Autowired
 	private CaseRepository caseRepository;
+	
+	@Autowired
+	private CareConnectPatientBuilder careConnectPatientBuilder;
 
 	public Parameters getEvaluateParameters(Long caseId, TriageQuestion[] questionResponse, SettingsDTO settings,
 			Boolean amending) {
@@ -71,12 +73,13 @@ public class ParametersService {
 		setRequestId(caseId, parameters);
 
 		try {
-			setPatient(caseEntity, parameters);
+			parameters.addParameter().setName(SystemConstants.PATIENT).setResource(careConnectPatientBuilder.build(caseEntity));
 		} catch (FHIRException e) {
 			LOG.error("Cannot parse gender code", e);
 			throw new EMSException(HttpStatus.INTERNAL_SERVER_ERROR, "Cannot parse patient gender code", e);
 		}
 
+		setObservations(caseEntity, parameters);
 		setContext(caseEntity, parameters);
 		setQuestionnaireResponse(questionResponse, parameters, amending);
 		addObservationInputData(caseEntity, parameters);
@@ -322,19 +325,7 @@ public class ParametersService {
 		inputParameters.setResource(inputParamsResource);
 	}
 
-	private void setPatient(Cases caseEntity, Parameters parameters) throws FHIRException {
-
-		List<HumanName> names = new ArrayList<HumanName>();
-		names.add(new HumanName().setFamily(caseEntity.getLastName()).addGiven(caseEntity.getFirstName()));
-
-		CodeableConcept language = new CodeableConcept();
-		language.addCoding().setCode("en").setDisplay("English").setSystem("http://uecdi-tom-terminology.eu-west-2.elasticbeanstalk.com/fhir/CodeSystem/languages");
-		
-		parameters.addParameter().setName(SystemConstants.PATIENT)
-				.setResource(new Patient().setName(names)
-						.setGender(Enumerations.AdministrativeGender.fromCode(caseEntity.getGender()))
-						.setBirthDate(caseEntity.getDateOfBirth())
-						.addCommunication(new PatientCommunicationComponent(language)));
+	private void setObservations(Cases caseEntity, Parameters parameters) throws FHIRException {
 
 		Observation genderObservation = new Observation().setStatus(Observation.ObservationStatus.FINAL)
 				.setCode(new CodeableConcept().addCoding(new Coding(SystemURL.SNOMED, "263495000", "Gender")))

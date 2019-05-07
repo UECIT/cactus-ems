@@ -27,11 +27,8 @@ import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.EpisodeOfCare;
 import org.hl7.fhir.dstu3.model.EpisodeOfCare.EpisodeOfCareStatus;
 import org.hl7.fhir.dstu3.model.HumanName;
-import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Patient.PatientCommunicationComponent;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.Practitioner.PractitionerQualificationComponent;
@@ -51,7 +48,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import resources.CareConnectPatient;
 import uk.nhs.ctp.SystemURL;
 import uk.nhs.ctp.entities.AuditEntry;
 import uk.nhs.ctp.entities.AuditRecord;
@@ -69,6 +68,9 @@ public class HandoverService {
 	
 	@Autowired 
 	private AuditRecordRepository auditRecordRepository;
+	
+	@Autowired
+	private IParser fhirParser;
 	
 	@Autowired
 	ObjectMapper mapper;
@@ -93,15 +95,13 @@ public class HandoverService {
 		ReferralRequest referralRequest = client != null ? 
 				getReferralRequest(url, client) :
 				ResourceProviderUtils.getResource(containedBundle, ReferralRequest.class);
-				
-		// Add Resources to Bundle
-		Practitioner generalPractitioner = getGeneralPractitioner();
-		Patient patient = getPatient(caseEntity);
-		patient.addGeneralPractitioner(new Reference(generalPractitioner));
+		
+		CareConnectPatient patient = getPatient(lastEntry);
 		Encounter encounter = getEncounter(patient);
 		Composition composition = getComposition(encounter, patient);
 		
 		Practitioner practitioner = getRecipient(caseEntity);
+		
 		addResourceToBundle(bundle, composition);
 		addResourceToBundle(bundle, patient);
 		addResourceToBundle(bundle, practitioner);
@@ -158,7 +158,7 @@ public class HandoverService {
 		addResourceToBundle(bundle, whatYouCanDoCarePlan);
 	}
 
-	public Encounter getEncounter(Patient patient) {
+	public Encounter getEncounter(CareConnectPatient patient) {
 		Encounter encounter = new Encounter();
 		// Set the status of the encounter
 		encounter.setStatus(EncounterStatus.FINISHED);
@@ -278,7 +278,7 @@ public class HandoverService {
 		}
 	}
 
-	public Composition getComposition(Encounter encounter, Patient patient) {
+	public Composition getComposition(Encounter encounter, CareConnectPatient patient) {
 		Composition composition = new Composition();
 		composition.setStatus(CompositionStatus.FINAL);
 		composition.setType(new CodeableConcept()
@@ -328,11 +328,6 @@ public class HandoverService {
 	private Practitioner getRecipient(Cases caseEntity) {
 		Practitioner practitioner = new Practitioner();
 		
-		Identifier identifier = new Identifier();
-		identifier.setSystem("https://fhir.nhs.uk/Id/nhs-number");
-		identifier.setValue("9476719917");
-		practitioner.getIdentifier().add(identifier);
-		
 		HumanName name = new HumanName();
 		name.addSuffix("Dr");
 		name.addGiven("John");
@@ -360,64 +355,14 @@ public class HandoverService {
 	}
 
 
-	private Patient getPatient(Cases caseEntity) {
-		Patient patient = new Patient();
+	private CareConnectPatient getPatient(AuditEntry lastEntry) {
+		Parameters parameters = ResourceProviderUtils.getResource(fhirParser.parseResource(
+				Bundle.class, lastEntry.getCdssServiceDefinitionRequest()), Parameters.class);
 		
-		Identifier identifier = new Identifier();
-		identifier.setSystem("https://fhir.nhs.uk/Id/nhs-number");
-		identifier.setValue(caseEntity.getNhsNumber());
-		patient.getIdentifier().add(identifier);
-		
-		HumanName name = new HumanName();
-		name.addGiven(caseEntity.getFirstName());
-		name.setFamily(caseEntity.getLastName());
-		patient.getName().add(name);
-		
-		patient.setGender(getGender(caseEntity.getGender()));
-		patient.setBirthDate(caseEntity.getDateOfBirth());
-		
-		CodeableConcept language = new CodeableConcept();
-		language.addCoding().setCode("en").setDisplay("English").setSystem("http://uecdi-tom-terminology.eu-west-2.elasticbeanstalk.com/fhir/CodeSystem/languages");
-		patient.addCommunication(new PatientCommunicationComponent(language));
-		
-		Address address = new Address();
-		address.addLine("2 St Hilds Court");
-		address.addLine("Renny's Ln");
-		address.setCity("Durham");
-		address.setPostalCode("DH1 2HP");
-		patient.addAddress(address);
-		
-		return patient;
-	}
-	
-	private Practitioner getGeneralPractitioner () {
-		// Build GeneralPractitioner
-		Practitioner generalPractitioner = new Practitioner();
-		generalPractitioner.setId("#1234");
-		HumanName gpName = new HumanName();
-		gpName.addPrefix("Dr");
-		gpName.addGiven("M");
-		gpName.setFamily("Khan");
-		generalPractitioner.addName(gpName);
-
-		Address gpAddress = new Address();
-		gpAddress.addLine("Dunelm Medical Practice");
-		gpAddress.addLine("Gilesgate Medical Centre");
-		gpAddress.addLine("Sunderland Rd");
-		gpAddress.setCity("Durham");
-		gpAddress.setPostalCode("S25 4HE");
-		generalPractitioner.addAddress(gpAddress);
-
-		PractitionerQualificationComponent practitionerQualificationComponent = new PractitionerQualificationComponent();
-		CodeableConcept codeableConcept = new CodeableConcept();
-		codeableConcept.addCoding().setCode("62247001").setDisplay("General practitioner").setSystem(SystemURL.SNOMED);
-		practitionerQualificationComponent.setCode(codeableConcept);
-		generalPractitioner.addQualification(practitionerQualificationComponent);
-
-		return generalPractitioner;
+		return (CareConnectPatient)ResourceProviderUtils.getParameterByName(
+				parameters.getParameter(), "patient").getResource();
 	}
 			
-	
 	private IGenericClient getClient(FhirContext ctx, String url) {
 		try {
 			IGenericClient client = ctx.newRestfulGenericClient(buildBaseUrl(url));
@@ -434,16 +379,6 @@ public class HandoverService {
 		} else {
 			return uri.getProtocol() + "://" + uri.getAuthority();
 		}
-	}
-	
-	private AdministrativeGender getGender(String gender) {
-		if (gender.contentEquals("male")) {
-			return AdministrativeGender.MALE;
-		}
-		if (gender.contentEquals("female")) {
-			return AdministrativeGender.FEMALE;
-		}
-		return AdministrativeGender.UNKNOWN;
 	}
 
 }

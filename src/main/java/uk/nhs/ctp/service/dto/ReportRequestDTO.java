@@ -1,11 +1,19 @@
 package uk.nhs.ctp.service.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+import resources.CareConnectOrganization;
+import resources.CareConnectPatient;
+import resources.CareConnectPractitioner;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
 
 public class ReportRequestDTO {
@@ -24,9 +32,17 @@ public class ReportRequestDTO {
 
 	public void setHandoverJson(String handoverJson) {
 		this.handoverJson = handoverJson;
-		this.setReferralRequest(
-				FhirContext.forDstu3().newJsonParser().parseResource(ReferralRequest.class, this.handoverJson));
-		this.setBundle(ResourceProviderUtils.getResources(referralRequest.getContained(), Bundle.class).get(0));
+		
+		List<Class<? extends IBaseResource>> resourceClasses = new ArrayList<>();
+		resourceClasses.add(CareConnectPatient.class);
+		resourceClasses.add(CareConnectOrganization.class);
+		resourceClasses.add(CareConnectPractitioner.class);
+		
+		IParser fhirParser = FhirContext.forDstu3().newJsonParser();
+		fhirParser.setPreferTypes(resourceClasses);
+		
+		setReferralRequest(fhirParser.parseResource(ReferralRequest.class, this.handoverJson));
+		setBundle(ResourceProviderUtils.getResources(referralRequest.getContained(), Bundle.class).get(0));
 	}
 	public Long getCaseId() {
 		return caseId;

@@ -29,6 +29,7 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.exception.EMSException;
 import uk.nhs.ctp.repos.CdssSupplierRepository;
@@ -45,6 +46,9 @@ public class CdssService {
 
 	@Autowired
 	private AuditService auditService;
+	
+	@Autowired
+	private IParser fhirParser;
 
 	private HttpHeaders headers;
 	private RestTemplate restTemplate;
@@ -65,10 +69,10 @@ public class CdssService {
 	 */
 	public Resource evaluateServiceDefinition(Parameters parameters, Long cdssSupplierId,
 			String serviceDefinitionId, Long caseId) throws ConnectException, JsonProcessingException {
-		
-		String requestBody = FhirContext.forDstu3().newJsonParser().encodeResourceToString(sendRequestAsBundle ? 
+			
+		String requestBody = fhirParser.encodeResourceToString(sendRequestAsBundle ? 
 				new Bundle().addEntry(new BundleEntryComponent().setResource(parameters)) : parameters);
-		
+
 		String responseBody = sendHttpRequest(getBaseUrl(cdssSupplierId) + "/" + SystemConstants.SERVICE_DEFINITION
 				+ "/" + serviceDefinitionId + "/" + SystemConstants.EVALUATE, HttpMethod.POST,
 				new HttpEntity<>(requestBody, headers));

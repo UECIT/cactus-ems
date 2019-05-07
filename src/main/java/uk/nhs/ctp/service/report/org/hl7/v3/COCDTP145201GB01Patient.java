@@ -10,6 +10,7 @@ package uk.nhs.ctp.service.report.org.hl7.v3;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -76,7 +77,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "languageCommunication"
 })
 public class COCDTP145201GB01Patient {
-
+	
     @XmlElement(required = true)
     protected CVNPfITCodedplainRequired administrativeGenderCode;
     @XmlElement(required = true)

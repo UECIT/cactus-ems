@@ -1,5 +1,7 @@
 package uk.nhs.ctp;
 
+import java.util.Arrays;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -14,6 +16,9 @@ import org.springframework.web.client.RestTemplate;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import resources.CareConnectOrganization;
+import resources.CareConnectPatient;
+import resources.CareConnectPractitioner;
 
 @ServletComponentScan
 @SpringBootApplication
@@ -49,8 +54,11 @@ public class Application extends SpringBootServletInitializer {
 	
 	@Bean
 	public IParser fhirParser() {
-		FhirContext ctx = FhirContext.forDstu3();
-		return ctx.newJsonParser();
+		IParser fhirParser = fhirContext().newJsonParser();
+		fhirParser.setPreferTypes(Arrays.asList(
+				CareConnectPatient.class, CareConnectPractitioner.class, CareConnectOrganization.class));
+		
+		return fhirParser;
 	}
 	
 	@Bean
