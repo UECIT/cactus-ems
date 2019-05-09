@@ -36,7 +36,7 @@ export class QuestionnaireComponent implements OnInit {
   reports: any;
   isloadingReport: boolean;
 
-  constructor(public dialog: MatDialog, private reportService: ReportService) {}
+  constructor(public dialog: MatDialog, private reportService: ReportService) { }
 
   openDialog(): void {
     const dialogRef = this.dialog.open(HandoverMessageDialogComponent, {
@@ -126,9 +126,9 @@ export class QuestionnaireComponent implements OnInit {
     if (enableOrNot != null) {
       const hasAnswer = this.answerSelected.filter(
         answer => answer.triageQuestion.questionId === enableOrNot[0]
-       );
+      );
       if (hasAnswer.length > 0) {
-      return enableOrNot[1] !== 'true';
+        return enableOrNot[1] !== 'true';
       }
     }
     return false;
@@ -339,10 +339,11 @@ export class QuestionnaireComponent implements OnInit {
   }
 
   async get111Report() {
-// tslint:disable-next-line: max-line-length
+    // tslint:disable-next-line: max-line-length
     this.isloadingReport = true;
     const reports = await this.reportService.getReport(this.questionnaire.caseId, this.questionnaire.referralRequest.resourceId, this.handoverMessage);
-    reports.forEach(async report => {
+    for (let index = 0; index < reports.length; index++) {
+      const report = reports[index];
       if (report.reportType === 'ONE_ONE_ONE') {
         this.isloadingReport = true;
         report.ValidationReport = await this.reportService.validate111Report(report.request);
@@ -372,7 +373,7 @@ export class QuestionnaireComponent implements OnInit {
           report.response = JSON.parse(report.response);
         }
       }
-    });
+    }
     this.reports = reports.reverse();
   }
 }

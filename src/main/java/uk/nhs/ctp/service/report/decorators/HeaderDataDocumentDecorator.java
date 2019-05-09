@@ -1,7 +1,7 @@
 package uk.nhs.ctp.service.report.decorators;
 
 import java.math.BigInteger;
-import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.springframework.stereotype.Component;
@@ -11,11 +11,11 @@ import uk.nhs.ctp.service.report.npfit.hl7.localisation.MessageType;
 import uk.nhs.ctp.service.report.org.hl7.v3.CV;
 import uk.nhs.ctp.service.report.org.hl7.v3.IINPfITUuidMandatory;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02ClinicalDocument;
+import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02ClinicalDocument.EffectiveTime;
+import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02ClinicalDocument.VersionNumber;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02ClinicalDocumentTypeId;
 import uk.nhs.ctp.service.report.org.hl7.v3.STTitle;
 import uk.nhs.ctp.service.report.org.hl7.v3.TEL;
-import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02ClinicalDocument.EffectiveTime;
-import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02ClinicalDocument.VersionNumber;
 
 @Component
 public class HeaderDataDocumentDecorator implements OneOneOneDecorator {
@@ -41,7 +41,8 @@ public class HeaderDataDocumentDecorator implements OneOneOneDecorator {
 
 		// The HL7 attribute effectiveTime is used to define the creation time of the CDA document.
 		EffectiveTime effectiveTime = new EffectiveTime();
-		effectiveTime.setValue(new Timestamp(new Date().getTime()).toString());
+		SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
+		effectiveTime.setValue(format.format(new Date()));
 		document.setEffectiveTime(effectiveTime);
 
 		// The HL7 attribute id uses an identifier to identify each unique instance of a clinical document.

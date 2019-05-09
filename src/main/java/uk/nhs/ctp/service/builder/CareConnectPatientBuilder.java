@@ -4,13 +4,19 @@ import datatypes.NHSNumberIdentifier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
+import org.hl7.fhir.dstu3.model.Address.AddressType;
+import org.hl7.fhir.dstu3.model.Address.AddressUse;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
+import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointUse;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Patient.PatientCommunicationComponent;
+import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -59,6 +65,40 @@ public class CareConnectPatientBuilder {
 		
 		patient.setNominatedPharmacy(new Reference(pharmacy));
 		patient.addGeneralPractitioner(new Reference(careConnectPractitionerBuilder.build(pharmacy)));
+		
+		patient.addAddress()
+			.setUse(AddressUse.HOME)
+			.setType(AddressType.BOTH)
+			.addLine("20 example street")
+			.addLine("flat 1")
+			.setCity("Leeds")
+			.setDistrict("Headingly")
+			.setPostalCode("LS6 4EX")
+			.setCountry("United Kingdom")
+			.setPeriod(new Period().setStart(new Date()).setEnd(new Date()));
+		
+		patient.addTelecom()
+			.setSystem(ContactPointSystem.PHONE)
+			.setValue("0123 123 1234")
+			.setUse(ContactPointUse.HOME)
+			.setRank(1)
+			.setPeriod(new Period().setStart(new Date()).setEnd(new Date()));
+		
+		patient.addTelecom()
+			.setSystem(ContactPointSystem.PHONE)
+			.setValue("01234 567 899")
+			.setUse(ContactPointUse.MOBILE)
+			.setRank(2)
+			.setPeriod(new Period().setStart(new Date()).setEnd(new Date()));
+		
+		patient.addTelecom()
+			.setSystem(ContactPointSystem.EMAIL)
+			.setValue("exmaple@example.com")
+			.setUse(ContactPointUse.HOME)
+			.setRank(3)
+			.setPeriod(new Period().setStart(new Date()).setEnd(new Date()));
+		
+		
 		
 		return patient;
 	}

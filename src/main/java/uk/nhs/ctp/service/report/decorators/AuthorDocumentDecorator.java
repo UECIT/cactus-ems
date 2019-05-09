@@ -1,6 +1,6 @@
 package uk.nhs.ctp.service.report.decorators;
 
-import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.springframework.stereotype.Component;
@@ -8,19 +8,19 @@ import org.springframework.stereotype.Component;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.report.npfit.hl7.localisation.TemplateContent;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145200GB01AssignedAuthor;
+import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145200GB01AssignedAuthor.TemplateId;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145200GB01Organization;
+import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145200GB01Organization.Id;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145200GB01Person;
 import uk.nhs.ctp.service.report.org.hl7.v3.CVNPfITCodedplainRequired;
 import uk.nhs.ctp.service.report.org.hl7.v3.CsEntityNameUse;
 import uk.nhs.ctp.service.report.org.hl7.v3.ON;
 import uk.nhs.ctp.service.report.org.hl7.v3.PN;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02Author;
-import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02ClinicalDocument;
-import uk.nhs.ctp.service.report.org.hl7.v3.REPCMT200001GB02AmbulanceRequest;
-import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145200GB01AssignedAuthor.TemplateId;
-import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145200GB01Organization.Id;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02Author.FunctionCode;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02Author.Time;
+import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02ClinicalDocument;
+import uk.nhs.ctp.service.report.org.hl7.v3.REPCMT200001GB02AmbulanceRequest;
 
 @Component
 public class AuthorDocumentDecorator implements OneOneOneDecorator, AmbulanceDecorator {
@@ -39,6 +39,7 @@ public class AuthorDocumentDecorator implements OneOneOneDecorator, AmbulanceDec
 		POCDMT200001GB02Author author  = new POCDMT200001GB02Author();
 		// The HL7 attribute typeCode uses a code to describe this class as an author participation.
 		author.setTypeCode(author.getTypeCode());
+		author.getContextControlCode().add("OP");
 
 		// The HL7 (NHS localisation) attribute contentId, when valued in an instance, provides a unique forward pointing identifier for the template 
 		TemplateContent templateContent = new TemplateContent();
@@ -55,7 +56,8 @@ public class AuthorDocumentDecorator implements OneOneOneDecorator, AmbulanceDec
 
 		// The HL7 attribute author time is used to indicate when the person authored the CDA document.
 		Time time = new Time();
-		time.setValue(new Timestamp(new Date().getTime()).toString());
+		SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
+		time.setValue(format.format(new Date()));
 		author.setTime(time);
 		
 		// Set the assignedAuthor

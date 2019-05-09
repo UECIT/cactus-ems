@@ -1,6 +1,7 @@
 package uk.nhs.ctp.service.report;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -68,7 +69,9 @@ public class AmbulanceReportService implements Reportable {
 		
 		// The HL7 attribute effectiveTime is used to define when the request for an ambulance was made.
 		EffectiveTime effectiveTime = new EffectiveTime();
-		effectiveTime.setValue(new Timestamp(new Date().getTime()).toString());
+		
+		SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
+		effectiveTime.setValue(format.format(new Date()));
 		ambulanceRequestReport.setEffectiveTime(effectiveTime);
 		
 		// The HL7 attribute id holds a unique identifier for this care provision request.
@@ -79,9 +82,6 @@ public class AmbulanceReportService implements Reportable {
 		for (AmbulanceDecorator decorator : decorators) {
 			decorator.decorate(ambulanceRequestReport, request);	
 		}
-		
-		// The contact details given by the responsible party as a contact point for the Ambulance Request process. CAN BE NULL
-		ambulanceRequestReport.setCallBackContact(null);
 		
 		// This class is a information recipient class - It is used for the list of recipients of the ambulance request message.
 //		REPCMT200001GB02PrimaryInformationRecipient primaryInformationRecipient = new REPCMT200001GB02PrimaryInformationRecipient();
