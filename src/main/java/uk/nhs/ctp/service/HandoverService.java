@@ -3,6 +3,7 @@ package uk.nhs.ctp.service;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.hl7.fhir.dstu3.model.Address;
@@ -26,6 +27,8 @@ import org.hl7.fhir.dstu3.model.Encounter.EncounterStatus;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.EpisodeOfCare;
 import org.hl7.fhir.dstu3.model.EpisodeOfCare.EpisodeOfCareStatus;
+import org.hl7.fhir.dstu3.model.Flag;
+import org.hl7.fhir.dstu3.model.Flag.FlagStatus;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.dstu3.model.Parameters;
@@ -52,6 +55,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import resources.CareConnectPatient;
 import uk.nhs.ctp.SystemURL;
+import uk.nhs.ctp.config.ObjectProperties;
 import uk.nhs.ctp.entities.AuditEntry;
 import uk.nhs.ctp.entities.AuditRecord;
 import uk.nhs.ctp.entities.Cases;
@@ -74,6 +78,9 @@ public class HandoverService {
 	
 	@Autowired
 	ObjectMapper mapper;
+	
+	@Autowired
+	ObjectProperties flags;
 
 	public String getHandoverMessage(String url, Long caseId) throws MalformedURLException, JsonProcessingException {
 		
@@ -117,7 +124,26 @@ public class HandoverService {
 		
 		// add bundle to referralRequest
 		referralRequest.addSupportingInfo(new Reference(bundle));
+		
+		buildFlags(referralRequest, patient);
+		
 		return ctx.newJsonParser().encodeResourceToString(referralRequest);
+	}
+	
+	public void buildFlags(ReferralRequest referralRequest, CareConnectPatient patient) {
+		
+		List<Coding> codes = flags.getFlags();
+		
+		codes.stream().forEach(code -> {
+			Flag trauma = new Flag()
+					.setStatus(FlagStatus.ACTIVE)
+					.setCode(new CodeableConcept().addCoding(code))
+					.setSubject(new Reference(patient));
+			trauma.setId("#" + code.getCode());
+			referralRequest.addSupportingInfo().setReference("#" + code.getCode());
+			referralRequest.addContained(trauma);
+		});
+		
 	}
 
 	public void buildAppointment(Bundle bundle, ReferralRequest referralRequest) {

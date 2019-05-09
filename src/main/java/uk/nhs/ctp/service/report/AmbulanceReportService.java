@@ -1,6 +1,5 @@
 package uk.nhs.ctp.service.report;
 
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -79,15 +78,30 @@ public class AmbulanceReportService implements Reportable {
 		identifier.setRoot("1234-1234-1234-1234");
 		ambulanceRequestReport.setId(identifier);
 		
-		for (AmbulanceDecorator decorator : decorators) {
-			decorator.decorate(ambulanceRequestReport, request);	
-		}
-		
 		// This class is a information recipient class - It is used for the list of recipients of the ambulance request message.
 //		REPCMT200001GB02PrimaryInformationRecipient primaryInformationRecipient = new REPCMT200001GB02PrimaryInformationRecipient();
 //		primaryInformationRecipient.setTypeCode(primaryInformationRecipient.getTypeCode());
 //		ambulanceRequestReport.getInformationRecipient().add(primaryInformationRecipient);
+		
+		// setup PertinentInformation objects and populate fixed data.
+		setupPertinentInformation(ambulanceRequestReport);
+		
+		for (AmbulanceDecorator decorator : decorators) {
+			decorator.decorate(ambulanceRequestReport, request);	
+		}
+		
+		// This class is act relationship of reason. - This class indicates the triage outcome is the reason for the ambulance request.
+		REPCMT200001GB02Reason reason = new REPCMT200001GB02Reason();
+		reason.setTypeCode(reason.getTypeCode());
+		ambulanceRequestReport.setReason(reason);
+		
+		// This class is a replacement relationship class. - It is used when the ambulance request message is being replaced by an updated version. CAN BE NULL
+		ambulanceRequestReport.setReplacementOf(null);
+		
+		return ambulanceRequestReport;
+	}
 
+	private void setupPertinentInformation(REPCMT200001GB02AmbulanceRequest ambulanceRequestReport) {
 		// This class is a relationship of pertinent information. - It is used to indicate information about whether the patient has suffered trauma pertinent to the ambulance request.
 		ambulanceRequestReport.setPertinentInformation((REPCMT200001GB02PertinentInformation2) 
 				createPertinentInformation(new REPCMT200001GB02PertinentInformation2(), 
@@ -126,16 +140,6 @@ public class AmbulanceReportService implements Reportable {
 		ambulanceRequestReport.setPertinentInformation8(null);
 		
 		// ambulanceRequestReport.setPertinentInformation9(null); // referral request clinical discriminator (reason reference) 
-		
-		// This class is act relationship of reason. - This class indicates the triage outcome is the reason for the ambulance request.
-		REPCMT200001GB02Reason reason = new REPCMT200001GB02Reason();
-		reason.setTypeCode(reason.getTypeCode());
-		ambulanceRequestReport.setReason(reason);
-		
-		// This class is a replacement relationship class. - It is used when the ambulance request message is being replaced by an updated version. CAN BE NULL
-		ambulanceRequestReport.setReplacementOf(null);
-		
-		return ambulanceRequestReport;
 	}
 	
 	private <B extends BL, F extends Flag> PertinentInformation<B, F> createPertinentInformation(PertinentInformation<B, F> info, F flag, B b) {
