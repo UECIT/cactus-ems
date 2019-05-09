@@ -55,7 +55,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import resources.CareConnectPatient;
 import uk.nhs.ctp.SystemURL;
-import uk.nhs.ctp.config.ObjectProperties;
+import uk.nhs.ctp.config.FlagProperties;
 import uk.nhs.ctp.entities.AuditEntry;
 import uk.nhs.ctp.entities.AuditRecord;
 import uk.nhs.ctp.entities.Cases;
@@ -80,7 +80,7 @@ public class HandoverService {
 	ObjectMapper mapper;
 	
 	@Autowired
-	ObjectProperties flags;
+	FlagProperties flags;
 
 	public String getHandoverMessage(String url, Long caseId) throws MalformedURLException, JsonProcessingException {
 		

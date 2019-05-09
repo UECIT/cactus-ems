@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationProperties("ambulance.request")
-public class ObjectProperties {
+public class FlagProperties {
 	
 	private List<Coding> flags = new ArrayList<>();
 
