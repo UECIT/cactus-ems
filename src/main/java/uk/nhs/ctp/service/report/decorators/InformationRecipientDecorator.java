@@ -3,7 +3,6 @@ package uk.nhs.ctp.service.report.decorators;
 import java.util.List;
 
 import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.springframework.stereotype.Component;
 
 import resources.CareConnectOrganization;
@@ -12,16 +11,15 @@ import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.report.npfit.hl7.localisation.TemplateContent;
 import uk.nhs.ctp.service.report.org.hl7.v3.AD;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145202GB02IntendedRecipient;
-import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145202GB02Organization;
-import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145202GB02Organization.Id;
-import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145202GB02Organization.TemplateId;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145202GB02Person;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145203GB03IntendedRecipient;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145203GB03Organization;
+import uk.nhs.ctp.service.report.org.hl7.v3.CV;
 import uk.nhs.ctp.service.report.org.hl7.v3.CsEntityNameUse;
 import uk.nhs.ctp.service.report.org.hl7.v3.CsNullFlavor;
 import uk.nhs.ctp.service.report.org.hl7.v3.CsPostalAddressUse;
 import uk.nhs.ctp.service.report.org.hl7.v3.CsTelecommunicationAddressUse;
+import uk.nhs.ctp.service.report.org.hl7.v3.IINPfITOidRequiredAssigningAuthorityName;
 import uk.nhs.ctp.service.report.org.hl7.v3.ON;
 import uk.nhs.ctp.service.report.org.hl7.v3.PN;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02ClinicalDocument;
@@ -62,8 +60,34 @@ public class InformationRecipientDecorator implements OneOneOneDecorator, Ambula
 		COCDTP145202GB02IntendedRecipient intendedRecipientPractitioner = new COCDTP145202GB02IntendedRecipient();
 		intendedRecipientPractitioner.setClassCode(intendedRecipientPractitioner.getClassCode());
 		
-		// TODO THIS IS DIFFERENT
-		// build assignedPerson
+		AD practitionerAddress = new AD();
+		practitionerAddress.getContent().add(informationRecipient.getAddressFirstRep().getLine().get(0).getValue());
+		practitionerAddress.getContent().add(informationRecipient.getAddressFirstRep().getLine().get(1).getValue());
+		practitionerAddress.getContent().add(informationRecipient.getAddressFirstRep().getCity());
+		practitionerAddress.getContent().add(informationRecipient.getAddressFirstRep().getPostalCode());
+		practitionerAddress.getUse().add(CsPostalAddressUse.PHYS);
+		intendedRecipientPractitioner.setAddr(practitionerAddress);
+		
+		IINPfITOidRequiredAssigningAuthorityName id = new IINPfITOidRequiredAssigningAuthorityName();
+		id.setNullFlavor(CsNullFlavor.NA);
+		intendedRecipientPractitioner.getId().add(id);
+		
+		CV recipientRoleCode = new CV();
+		recipientRoleCode.setCodeSystem("2.16.840.1.113883.2.1.3.2.4.17.124");
+		recipientRoleCode.setCode("NR0270");
+		recipientRoleCode.setDisplayName("Salaried General Practitioner");
+		intendedRecipientPractitioner.setRecipientRoleCode(recipientRoleCode);
+		
+		TEL phone = new TEL();
+		phone.setValue(informationRecipient.getTelecomFirstRep().getValue());
+		phone.getUse().add(CsTelecommunicationAddressUse.H);
+		intendedRecipientPractitioner.getTelecom().add(phone);
+		
+		COCDTP145202GB02IntendedRecipient.TemplateId templateId = new COCDTP145202GB02IntendedRecipient.TemplateId();
+		templateId.setRoot("2.16.840.1.113883.2.1.3.2.4.18.2");
+		templateId.setExtension("COCD_TP145203GB03#representedOrganization");
+		intendedRecipientPractitioner.setTemplateId(templateId);
+		
 		COCDTP145202GB02Person assignedPerson = new COCDTP145202GB02Person();
 		assignedPerson.setClassCode(assignedPerson.getClassCode());
 		assignedPerson.setDeterminerCode(assignedPerson.getDeterminerCode());
@@ -73,9 +97,13 @@ public class InformationRecipientDecorator implements OneOneOneDecorator, Ambula
 		practitionerName.getUse().add(CsEntityNameUse.L);
 		assignedPerson.setName(practitionerName);
 		
+		COCDTP145202GB02Person.TemplateId assignedPersonTemplateId = new COCDTP145202GB02Person.TemplateId();
+		assignedPersonTemplateId.setRoot("2.16.840.1.113883.2.1.3.2.4.18.2");
+		assignedPersonTemplateId.setExtension("COCD_TP145202GB02#assignedPerson");
+		assignedPerson.setTemplateId(assignedPersonTemplateId);
+		
 		intendedRecipientPractitioner.setAssignedPerson(assignedPerson);
 		primaryInformationRecipient.setCOCDTP145202GB02IntendedRecipient(intendedRecipientPractitioner);
-		
 		
 		return primaryInformationRecipient;
 	}

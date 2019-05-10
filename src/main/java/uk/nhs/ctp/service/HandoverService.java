@@ -3,11 +3,8 @@ package uk.nhs.ctp.service;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.stream.Collectors;
 
 import org.hl7.fhir.dstu3.model.Address;
@@ -361,7 +358,7 @@ public class HandoverService {
 
 	private void addRecipient(Cases caseEntity, ReferralRequest referralRequest) {
 		
-		referralRequest.setRecipient(new ArrayList());
+		referralRequest.setRecipient(new ArrayList<Reference>());
 		
 		Organization recipientOrganization = new Organization();
 		recipientOrganization.setActive(true);
