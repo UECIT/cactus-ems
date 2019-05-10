@@ -33,13 +33,13 @@ public class InformationRecipientDecorator implements OneOneOneDecorator, Ambula
 	@Override
 	public void decorate(REPCMT200001GB02AmbulanceRequest document, ReportRequestDTO request) {
 		List<POCDMT200001GB02PrimaryInformationRecipient> informationRecipients = document.getInformationRecipient();
-		document.getInformationRecipient().addAll(createInformationRecipients(informationRecipients, request));
+		createInformationRecipients(informationRecipients, request);
 	}
 
 	@Override
 	public void decorate(POCDMT200001GB02ClinicalDocument document, ReportRequestDTO request) {
 		List<POCDMT200001GB02PrimaryInformationRecipient> informationRecipients = document.getInformationRecipient();
-		document.getInformationRecipient().addAll(createInformationRecipients(informationRecipients, request));
+		createInformationRecipients(informationRecipients, request);
 	}
 	
 	private List<POCDMT200001GB02PrimaryInformationRecipient> createInformationRecipients(List<POCDMT200001GB02PrimaryInformationRecipient> informationRecipients, ReportRequestDTO request) {
