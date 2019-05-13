@@ -1,10 +1,12 @@
 package uk.nhs.ctp.service.handover.decorator.referral;
 
 import org.hl7.fhir.dstu3.model.Address;
+import org.hl7.fhir.dstu3.model.Address.AddressType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.HumanName;
+import org.hl7.fhir.dstu3.model.HumanName.NameUse;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
@@ -23,7 +25,8 @@ public class AuthorRequesterDecorator implements ResourceDecorator<ReferralReque
 			.addLine("111 Handler Street")
 			.addLine("Westgate")
 			.setCity("Leeds")
-			.setPostalCode("LS1 1SL");
+			.setPostalCode("LS1 1SL")
+			.setType(AddressType.PHYSICAL);
 		
 		CodeableConcept relationship = new CodeableConcept().addCoding(new Coding()
 			.setSystem("https://fhir.hl7.org.uk/STU3/CodeSystem/CareConnect-SDSJobRoleName-1")
@@ -39,9 +42,10 @@ public class AuthorRequesterDecorator implements ResourceDecorator<ReferralReque
 		
 		author.addAddress(address);
 		author.addIdentifier(new Identifier().setType(relationship));
-		author.addName(new HumanName().setFamily("Smith").addGiven("Jane").addPrefix("Ms"));
 		author.addTelecom().setValue("0800 000 0000");
-		
+		author.addName(new HumanName()
+				.setFamily("Smith").addGiven("Jane").addPrefix("Ms").setUse(NameUse.OFFICIAL));
+	
 		author.setActive(true);
 		author.setGender(AdministrativeGender.FEMALE);
 		author.setId("#agent");

@@ -15,6 +15,7 @@ import resources.CareConnectPatient;
 import resources.CareConnectPractitioner;
 import uk.nhs.ctp.service.TerminologyService;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
+import uk.nhs.ctp.service.report.decorators.mapping.CodingToCVNPfITCodedplainRequiredMapper;
 import uk.nhs.ctp.service.report.npfit.hl7.localisation.TemplateContent;
 import uk.nhs.ctp.service.report.org.hl7.v3.AD;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145201GB01LanguageCommunication;
@@ -36,7 +37,7 @@ import uk.nhs.ctp.utils.ResourceProviderUtils;
 public class RecordTargetDocumentDecorator implements OneOneOneDecorator {
 	
 	@Autowired
-	private TerminologyService terminologyService;
+	private CodingToCVNPfITCodedplainRequiredMapper codeableConceptMapper;
 	
 	@Value("${ems.terminology.administrative.gender.system}")
 	private String administrativeGenderSystem;
@@ -98,14 +99,14 @@ public class RecordTargetDocumentDecorator implements OneOneOneDecorator {
 		TS birthTime = new TS();
 		birthTime.setValue(fhirPatient.getBirthDate().toString());
 		patient.setBirthTime(birthTime);
-		patient.setAdministrativeGenderCode(terminologyService.getCode(
+		patient.setAdministrativeGenderCode(codeableConceptMapper.map(
 				fhirPatient.getGender().getSystem(), administrativeGenderSystem, fhirPatient.getGender().getDefinition()));
 		
 		// ComunicationLanguage - TEMP
 		COCDTP145201GB01LanguageCommunication language = new COCDTP145201GB01LanguageCommunication();
 		CS languagecode = new CS();
 		
-		CVNPfITCodedplainRequired tempCode = terminologyService.getCode(fhirPatient.getCommunicationFirstRep().getLanguage().getCodingFirstRep().getSystem(), humanLanguageSystem, fhirPatient.getCommunicationFirstRep().getLanguage().getCodingFirstRep().getCode());
+		CVNPfITCodedplainRequired tempCode = codeableConceptMapper.map(fhirPatient.getCommunicationFirstRep().getLanguage().getCodingFirstRep().getSystem(), humanLanguageSystem, fhirPatient.getCommunicationFirstRep().getLanguage().getCodingFirstRep().getCode());
 		languagecode.setCode(tempCode.getCode());
 		languagecode.setCodeSystem(tempCode.getCodeSystem());
 		languagecode.setDisplayName(tempCode.getDisplayName());
