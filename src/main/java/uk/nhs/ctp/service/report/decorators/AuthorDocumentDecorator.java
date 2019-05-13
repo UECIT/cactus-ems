@@ -27,15 +27,15 @@ public class AuthorDocumentDecorator implements OneOneOneDecorator, AmbulanceDec
 
 	@Override
 	public void decorate(POCDMT200001GB02ClinicalDocument document, ReportRequestDTO request) {
-		document.getAuthor().add(createAuthor());
+		document.getAuthor().add(createAuthor(request));
 	}
 
 	@Override
 	public void decorate(REPCMT200001GB02AmbulanceRequest document, ReportRequestDTO request) {
-		document.getAuthor().add(createAuthor());
+		document.getAuthor().add(createAuthor(request));
 	}
 	
-	private POCDMT200001GB02Author createAuthor() {
+	private POCDMT200001GB02Author createAuthor(ReportRequestDTO request) {
 		POCDMT200001GB02Author author  = new POCDMT200001GB02Author();
 		// The HL7 attribute typeCode uses a code to describe this class as an author participation.
 		author.setTypeCode(author.getTypeCode());
@@ -65,6 +65,7 @@ public class AuthorDocumentDecorator implements OneOneOneDecorator, AmbulanceDec
 		assignedAuthor.setClassCode(assignedAuthor.getClassCode());
 		// set author Address
 		assignedAuthor.getAddr().add(null);
+		//assignedAuthor.getAddr().add(request.getReferralRequest().getRequester().getAgent());
 		// set code representing job role
 		CVNPfITCodedplainRequired authorJobRole = new CVNPfITCodedplainRequired();
 		authorJobRole.setCode("NR1690");

@@ -10,7 +10,6 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -29,8 +28,7 @@ public class AuditRecord {
 	private Date createdDate;
 	@Column(name = "closed_date")
 	private Date closedDate;
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "audit_record_id")
+	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER, orphanRemoval=true, mappedBy="auditRecord")
 	private List<AuditEntry> auditEntries;
 
 	public Long getId() {

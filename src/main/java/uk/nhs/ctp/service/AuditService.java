@@ -1,6 +1,7 @@
 package uk.nhs.ctp.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,6 +20,7 @@ import ca.uhn.fhir.parser.IParser;
 import uk.nhs.ctp.entities.AuditEntry;
 import uk.nhs.ctp.entities.AuditRecord;
 import uk.nhs.ctp.enums.AuditEntryType;
+import uk.nhs.ctp.repos.AuditEntryRepository;
 import uk.nhs.ctp.repos.AuditRecordRepository;
 import uk.nhs.ctp.service.dto.CdssRequestDTO;
 import uk.nhs.ctp.service.dto.CdssResponseDTO;
@@ -30,6 +32,9 @@ public class AuditService {
 
 	@Autowired
 	private AuditRecordRepository auditRepository;
+	
+	@Autowired
+	private AuditEntryRepository auditEntryRepository;
 
 	@Autowired
 	private ObjectMapper mapper;
@@ -101,11 +106,12 @@ public class AuditService {
 		AuditRecord currentAuditRecord = auditRepository.findByCaseId(caseId);
 		AuditEntry newAuditEntry = new AuditEntry();
 		newAuditEntry.setType(AuditEntryType.RESULT);
-		newAuditEntry.setAuditRecordId(currentAuditRecord.getId());
 		newAuditEntry.setCreatedDate(new Date());
 
 		newAuditEntry.setCdssServiceDefinitionRequest(request);
 		newAuditEntry.setCdssServiceDefinitionResponse(response);
+		
+		newAuditEntry.setAuditRecord(currentAuditRecord);
 
 		currentAuditRecord.getAuditEntries().add(newAuditEntry);
 		return auditRepository.saveAndFlush(currentAuditRecord);
@@ -120,6 +126,9 @@ public class AuditService {
 		return auditRepository.findByCaseId(caseId);
 	}
 
+	public List<AuditEntry> getAuditEntries(Long caseId, AuditEntryType... types) {
+		return auditEntryRepository.findByAuditRecord_CaseIdAndTypeInOrderById(caseId, Arrays.asList(types));
+	}
 	public Page<AuditSearchResultDTO> search(AuditSearchRequest request) {
 		return auditRepository.search(
 				request.getFrom(), request.getTo(), 

@@ -12,8 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import uk.nhs.ctp.service.HandoverService;
 import uk.nhs.ctp.service.dto.HandoverRequestDTO;
+import uk.nhs.ctp.service.handover.LocalResourceHandoverService;
+import uk.nhs.ctp.service.handover.RemoteResourceHandoverService;
 
 @CrossOrigin
 @RestController
@@ -21,13 +22,18 @@ import uk.nhs.ctp.service.dto.HandoverRequestDTO;
 public class HandoverController {
 	
 	@Autowired
-	private HandoverService handoverService;
+	private RemoteResourceHandoverService remoteResourceHandoverService;
+	
+	@Autowired
+	private LocalResourceHandoverService localResourceHandoverService;
 	
 	@PostMapping
-	public @ResponseBody String getHandoverMessage(@RequestBody HandoverRequestDTO handoverRequestDTO) 
+	public @ResponseBody String getHandoverMessage(@RequestBody HandoverRequestDTO request) 
 			throws MalformedURLException, ClassNotFoundException, JsonProcessingException {
 		
-		return handoverService.getHandoverMessage(handoverRequestDTO.getResourceUrl(), handoverRequestDTO.getCaseId());
+		return request.hasRemoteUrl() ? 
+				remoteResourceHandoverService.getHandoverMessage(request) :
+				localResourceHandoverService.getHandoverMessage(request);
 	}
 
 }

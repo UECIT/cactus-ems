@@ -4,10 +4,13 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import uk.nhs.ctp.enums.AuditEntryType;
@@ -20,8 +23,9 @@ public class AuditEntry {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	@Column(name = "audit_record_id", length = 40)
-	private Long AuditRecordId;
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "audit_record_id")
+	private AuditRecord auditRecord;
 	@Column(name = "type", length = 100)
 	private AuditEntryType type;
 	@Column(name = "created_date", length = 100)
@@ -58,12 +62,12 @@ public class AuditEntry {
 		this.id = id;
 	}
 
-	public Long getAuditRecordId() {
-		return AuditRecordId;
+	public AuditRecord getAuditRecord() {
+		return auditRecord;
 	}
 
-	public void setAuditRecordId(Long auditRecordId) {
-		AuditRecordId = auditRecordId;
+	public void setAuditRecord(AuditRecord auditRecord) {
+		this.auditRecord = auditRecord;
 	}
 
 	public AuditEntryType getType() {
