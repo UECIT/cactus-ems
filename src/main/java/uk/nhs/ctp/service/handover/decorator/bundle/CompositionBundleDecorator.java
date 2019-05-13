@@ -33,9 +33,9 @@ public class CompositionBundleDecorator extends BundleDecorator<Composition, Car
 		encounter.setStatus(EncounterStatus.FINISHED);
 		// Set the class of the encounter
 		encounter.setClass_(new Coding()
-				.setCode("unscheduled")
-				.setDisplay("unscheduled")
-				.setSystem("http://hl7.org/fhir/v3/ActCode"));
+				.setCode("VR")
+				.setDisplay("virtual")
+				.setSystem("http://terminology.hl7.org/CodeSystem/v3-ActCode"));
 		// Set the type of the priority
 		encounter.addType(new CodeableConcept().addCoding(new Coding()
 				.setCode("OKI")
@@ -66,8 +66,10 @@ public class CompositionBundleDecorator extends BundleDecorator<Composition, Car
 		period.setStart(new Date());
 		period.setEnd(new Date());
 		encounterParticipant.setPeriod(period);
-		encounterParticipant.setIndividual(patient.getGeneralPractitionerFirstRep());
+		
+		encounterParticipant.setIndividual(patient.getGeneralPractitioner().get(0));
 		encounter.addParticipant(encounterParticipant);
+		
 		// Populate the Period resource - The start and end time of the encounter
 		encounter.setPeriod(period);
 		// Populate the length resource - Quantity of time the encounter lasted (less
@@ -79,7 +81,8 @@ public class CompositionBundleDecorator extends BundleDecorator<Composition, Car
 		duration.setCode("min");
 		encounter.setLength(duration);
 		// TODO Populate the Location resource - List of locations where the patient has been
-		encounter.addLocation(new EncounterLocationComponent(new Reference(new Location())));
+		
+		encounter.addLocation(new EncounterLocationComponent(new Reference(new Location().setAddress(patient.getAddressFirstRep()).setName("Patients Address"))));
 		
 		Composition composition = new Composition();
 		composition.setStatus(CompositionStatus.FINAL);

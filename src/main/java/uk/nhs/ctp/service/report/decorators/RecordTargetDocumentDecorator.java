@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import resources.CareConnectOrganization;
 import resources.CareConnectPatient;
 import resources.CareConnectPractitioner;
 import uk.nhs.ctp.service.TerminologyService;
@@ -59,8 +58,8 @@ public class RecordTargetDocumentDecorator implements OneOneOneDecorator {
 		
 		CareConnectPatient fhirPatient = 
 				ResourceProviderUtils.getResource(request.getBundle(), CareConnectPatient.class);
-		CareConnectOrganization nominatedPharmacy =
-				ResourceProviderUtils.getResource(fhirPatient.getContained(), CareConnectOrganization.class);
+//		CareConnectOrganization nominatedPharmacy =
+//				ResourceProviderUtils.getResource(fhirPatient.getContained(), CareConnectOrganization.class);
 		CareConnectPractitioner generalPractitioner = 
 				ResourceProviderUtils.getResource(fhirPatient.getContained(), CareConnectPractitioner.class);
 		
