@@ -30,6 +30,7 @@ import uk.nhs.ctp.service.handover.decorator.referral.AuthorRequesterDecorator;
 import uk.nhs.ctp.service.handover.decorator.referral.FlagSupportingInfoDecorator;
 import uk.nhs.ctp.service.handover.decorator.referral.ProcedureRequestBasedOnDecorator;
 import uk.nhs.ctp.service.handover.decorator.referral.ProvenanceRelevantHistoryDecorator;
+import uk.nhs.ctp.service.handover.decorator.referral.SubjectDecorator;
 
 public abstract class HandoverService {
 	
@@ -45,6 +46,9 @@ public abstract class HandoverService {
 	@Autowired
 	private ProvenanceRelevantHistoryDecorator provenanceReleventHistoryDecorator;
 	
+	@Autowired
+	private SubjectDecorator subjectDecorator;
+	
 	@Autowired 
 	private FlagSupportingInfoDecorator flagSupportingInfoDecorator; 
 	
@@ -55,10 +59,10 @@ public abstract class HandoverService {
 	private DocumentBundleFactory documentBundleFactory;
 	
 	@Autowired
-	private PatientBundleDecorator patientBundleDecorator;
-	
-	@Autowired
 	private CompositionBundleDecorator compositionBundleDecorator;
+	
+	@Autowired 
+	private PatientBundleDecorator patientBundleDecorator;
 	
 	@Autowired 
 	private CarePlanBundleDecorator carePlanBundleDecorator;
@@ -82,6 +86,9 @@ public abstract class HandoverService {
 		ReferralRequest referralRequest = getResource(request, ReferralRequest.class);
 		referralRequest.setRecipient(new ArrayList<>());
 		
+		// Add patient
+		subjectDecorator.decorate(referralRequest, latestEntry);
+		
 		referralRequestDecorators.stream().forEach(decorator -> decorator.decorate(referralRequest));
 		authorRequesterDecorator.decorate(referralRequest);
 		
@@ -95,8 +102,11 @@ public abstract class HandoverService {
 					referralRequest, getResource(request, Provenance.class));
 		}
 
-		CareConnectPatient patient = patientBundleDecorator.decorate(documentBundle, latestEntry);
-		compositionBundleDecorator.decorate(documentBundle, patient);
+		
+		compositionBundleDecorator.decorate(documentBundle, (CareConnectPatient) referralRequest.getSubject().getResource());
+		
+		patientBundleDecorator.decorate(documentBundle, (CareConnectPatient) referralRequest.getSubject().getResource());
+		
 		carePlanBundleDecorator.decorate(documentBundle, request.getResourceBundle());
 		
 		auditEntries.stream().forEach(auditEntry -> {
@@ -104,7 +114,7 @@ public abstract class HandoverService {
 				decorator.decorate(documentBundle, auditEntry));
 		});
 		
-		flagSupportingInfoDecorator.decorate(referralRequest, patient);
+		flagSupportingInfoDecorator.decorate(referralRequest, (CareConnectPatient) referralRequest.getSubject().getResource());
 		referralRequest.addSupportingInfo(new Reference(documentBundle));
 
 		return fhirParser.encodeResourceToString(referralRequest);
