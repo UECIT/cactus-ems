@@ -13,6 +13,8 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import uk.nhs.ctp.enums.AuditEntryType;
 
 @Entity
@@ -25,6 +27,7 @@ public class AuditEntry {
 	private Long id;
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "audit_record_id")
+	@JsonIgnore
 	private AuditRecord auditRecord;
 	@Column(name = "type", length = 100)
 	private AuditEntryType type;
@@ -68,6 +71,10 @@ public class AuditEntry {
 
 	public void setAuditRecord(AuditRecord auditRecord) {
 		this.auditRecord = auditRecord;
+	}
+	
+	public Long getAuditRecordId() {
+		return auditRecord.getId();
 	}
 
 	public AuditEntryType getType() {
