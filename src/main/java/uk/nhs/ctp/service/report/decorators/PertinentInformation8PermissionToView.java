@@ -13,7 +13,6 @@ import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP146050GB01PermissionToView.Cod
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP146050GB01PermissionToView.TemplateId;
 import uk.nhs.ctp.service.report.org.hl7.v3.CV;
 import uk.nhs.ctp.service.report.org.hl7.v3.CsNullFlavor;
-import uk.nhs.ctp.service.report.org.hl7.v3.CsSetOperator;
 import uk.nhs.ctp.service.report.org.hl7.v3.IVLTS;
 import uk.nhs.ctp.service.report.org.hl7.v3.QTY;
 import uk.nhs.ctp.service.report.org.hl7.v3.REPCMT200001GB02AmbulanceRequest;
