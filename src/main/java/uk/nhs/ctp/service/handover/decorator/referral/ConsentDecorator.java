@@ -1,5 +1,6 @@
 package uk.nhs.ctp.service.handover.decorator.referral;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -79,7 +80,11 @@ public class ConsentDecorator implements ResourceDecorator<ReferralRequest> {
 	}
 	
 	private Period getPeriod() {
-		return new Period().setStart(new Date()).setEnd(new Date());
+		Calendar cal = Calendar.getInstance();
+		Date today = cal.getTime();
+		cal.add(Calendar.YEAR, 1); // to get previous year add -1
+		Date nextYear = cal.getTime();
+		return new Period().setStart(today).setEnd(nextYear);
 	}
 
 }
