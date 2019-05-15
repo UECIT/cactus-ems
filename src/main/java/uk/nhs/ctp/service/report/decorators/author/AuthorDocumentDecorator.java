@@ -11,7 +11,6 @@ import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.report.decorators.AmbulanceDecorator;
 import uk.nhs.ctp.service.report.decorators.OneOneOneDecorator;
 import uk.nhs.ctp.service.report.decorators.author.mapping.AuthorDataResolver;
-import uk.nhs.ctp.service.report.npfit.hl7.localisation.TemplateContent;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02Author;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02Author.FunctionCode;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02Author.Time;
@@ -39,12 +38,6 @@ public class AuthorDocumentDecorator implements OneOneOneDecorator, AmbulanceDec
 		// The HL7 attribute typeCode uses a code to describe this class as an author participation.
 		author.setTypeCode(author.getTypeCode());
 		author.getContextControlCode().add("OP");
-
-		// The HL7 (NHS localisation) attribute contentId, when valued in an instance, provides a unique forward pointing identifier for the template 
-		TemplateContent templateContent = new TemplateContent();
-		templateContent.setRoot("2.16.840.1.113883.2.1.3.2.4.18.16");
-		templateContent.setExtension("COCD_TP145200GB01#AssignedAuthor");
-		author.setContentId(templateContent);
 
 		// The HL7 attribute functionCode uses a code from the vocabulary AuthorFunctionType to describe the function of the author.
 		FunctionCode functionCode = new FunctionCode();

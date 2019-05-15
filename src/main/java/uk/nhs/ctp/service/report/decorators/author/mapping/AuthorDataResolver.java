@@ -15,19 +15,18 @@ import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02Author;
 public class AuthorDataResolver<RESOURCE extends Resource> {
 
 	@Autowired
-	private List<AuthorDataMapper<?, RESOURCE>> authorDataMappers;
+	private List<AuthorDataMapper<RESOURCE>> authorDataMappers;
 	
 	public void resolve(ReferralRequest referralRequest, POCDMT200001GB02Author author) {
 		Resource agentResource = (Resource)referralRequest.getRequester().getAgent().getResource();
 		
-		Optional<AuthorDataMapper<?, RESOURCE>> optional = authorDataMappers.stream().filter(
+		Optional<AuthorDataMapper<RESOURCE>> optional = authorDataMappers.stream().filter(
 				mapper -> mapper.getResourceClass().equals(agentResource.getClass())).findFirst();
 		
 		if (optional.isPresent()) {
-			AuthorDataMapper<?, RESOURCE> mapper = optional.get();
+			AuthorDataMapper<RESOURCE> mapper = optional.get();
 			Organization organization = (Organization)referralRequest.getRequester().getOnBehalfOf().getResource();
-			Object dataObject = mapper.map(optional.get().getResourceClass().cast(agentResource), organization);
-			mapper.mappingFunction().accept(author, dataObject);
+			mapper.map(mapper.getResourceClass().cast(agentResource), organization, author);
 		}
 	}
 }

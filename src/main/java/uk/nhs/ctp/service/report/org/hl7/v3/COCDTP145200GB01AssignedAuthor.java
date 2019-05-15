@@ -91,7 +91,7 @@ public class COCDTP145200GB01AssignedAuthor {
     @XmlElement(required = true)
     protected COCDTP145200GB01Person assignedPerson;
     @XmlElement(required = true)
-    protected COCDTP145200GB01Organization representedOrganization;
+    protected COCDTP145203GB03Organization representedOrganization;
     @XmlAttribute(name = "classCode", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String classCode;
@@ -267,7 +267,7 @@ public class COCDTP145200GB01AssignedAuthor {
      *     {@link COCDTP145200GB01Organization }
      *     
      */
-    public COCDTP145200GB01Organization getRepresentedOrganization() {
+    public COCDTP145203GB03Organization getRepresentedOrganization() {
         return representedOrganization;
     }
 
@@ -279,7 +279,7 @@ public class COCDTP145200GB01AssignedAuthor {
      *     {@link COCDTP145200GB01Organization }
      *     
      */
-    public void setRepresentedOrganization(COCDTP145200GB01Organization value) {
+    public void setRepresentedOrganization(COCDTP145203GB03Organization value) {
         this.representedOrganization = value;
     }
 

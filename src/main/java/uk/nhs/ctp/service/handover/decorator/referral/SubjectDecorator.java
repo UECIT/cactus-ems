@@ -25,6 +25,7 @@ public class SubjectDecorator {
 		
 		CareConnectPatient patient = (CareConnectPatient)ResourceProviderUtils
 				.getParameterByName(parameters.getParameter(), "patient").getResource();
+		
 		referralRequest.setSubject(new Reference(patient));
 		referralRequest.addContained(patient);
 	}

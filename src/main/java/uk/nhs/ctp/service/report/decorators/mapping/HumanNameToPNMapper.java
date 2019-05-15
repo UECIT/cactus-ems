@@ -12,7 +12,7 @@ import uk.nhs.ctp.service.report.org.hl7.v3.CsEntityNameUse;
 import uk.nhs.ctp.service.report.org.hl7.v3.PN;
 
 @Component
-public class HumanNameToPNMapper {
+public class HumanNameToPNMapper extends AbstractMapper<PN, HumanName> {
 
 	private Map<NameUse, CsEntityNameUse> nameUseToEntityNameUseMap = new HashMap<>();
 	
@@ -20,6 +20,7 @@ public class HumanNameToPNMapper {
 		nameUseToEntityNameUseMap.put(NameUse.OFFICIAL, CsEntityNameUse.L);
 	}
 	
+	@Override
 	public PN map(HumanName humanName) {
 		PN pn = new PN();
 		pn.getUse().add(CsEntityNameUse.L);

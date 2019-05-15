@@ -12,15 +12,17 @@ import uk.nhs.ctp.service.report.org.hl7.v3.AD;
 import uk.nhs.ctp.service.report.org.hl7.v3.CsPostalAddressUse;
 
 @Component
-public class AddressToADMapper {
+public class AddressToADMapper extends AbstractMapper<AD, Address> {
 
 	private Map<AddressType, CsPostalAddressUse> addressTypeToCsPostalAddressUseMap = new HashMap<>();
 	
 	public AddressToADMapper() {
 		addressTypeToCsPostalAddressUseMap.put(AddressType.POSTAL, CsPostalAddressUse.PST);
 		addressTypeToCsPostalAddressUseMap.put(AddressType.PHYSICAL, CsPostalAddressUse.PHYS);
+		addressTypeToCsPostalAddressUseMap.put(AddressType.BOTH, CsPostalAddressUse.H);
 	}
 	
+	@Override
 	public AD map(Address address) {
 		AD ad = new AD();
 		

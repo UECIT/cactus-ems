@@ -42,6 +42,10 @@ public class OrganisationRecipientDecorator implements ResourceDecorator<Referra
 		recipientOrganization.addAddress(organizationAddress);
 		recipientOrganization.setId("#recipientOrganization");
 		
+		recipientOrganization.addIdentifier()
+			.setValue("RR8")
+			.setSystem("https://fhir.nhs.uk/Id/ods-organization-code");
+		
 		referralRequest.addRecipient().setReference("#recipientOrganization");
 		referralRequest.addContained(recipientOrganization);
 	}

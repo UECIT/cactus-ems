@@ -1,6 +1,8 @@
 package uk.nhs.ctp;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -19,6 +21,7 @@ import ca.uhn.fhir.parser.IParser;
 import resources.CareConnectOrganization;
 import resources.CareConnectPatient;
 import resources.CareConnectPractitioner;
+import uk.nhs.ctp.service.report.org.hl7.v3.CDAOrganizationTypeDisplayName;
 
 @ServletComponentScan
 @SpringBootApplication
@@ -64,6 +67,17 @@ public class Application extends SpringBootServletInitializer {
 	@Bean
 	public FhirContext fhirContext() {
 		return FhirContext.forDstu3();
+	}
+	
+	@Bean
+	public Map<String, CDAOrganizationTypeDisplayName> organizationTypeMap() {
+		Map<String, CDAOrganizationTypeDisplayName> organizationTypeMap = 
+				new HashMap<String, CDAOrganizationTypeDisplayName>();
+		
+		organizationTypeMap.put("http://terminology.hl7.org/CodeSystem/organization-typeprov", 
+				CDAOrganizationTypeDisplayName.GENERAL_MEDICAL_PRACTICE);
+		
+		return organizationTypeMap;
 	}
 
 }

@@ -15,6 +15,7 @@ import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointUse;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.HumanName;
+import org.hl7.fhir.dstu3.model.HumanName.NameUse;
 import org.hl7.fhir.dstu3.model.Patient.PatientCommunicationComponent;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Reference;
@@ -37,7 +38,7 @@ public class CareConnectPatientBuilder {
 	
 	public CareConnectPatient build(Cases caseEntity) {
 		NHSNumberIdentifier nhsIdentifier = new NHSNumberIdentifier();
-		nhsIdentifier.setValue("432354345");
+		nhsIdentifier.setValue("4323543455");
 		nhsIdentifier.setSystem("https://fhir.hl7.org.uk/STU3/CodeSystem/CareConnect-NHSNumberVerificationStatus-1");
 		nhsIdentifier.setNhsNumberVerificationStatus(new CodeableConcept().addCoding(new Coding()
 			.setSystem("https://fhir.hl7.org.uk/STU3/ValueSet/CareConnect-NHSNumberVerificationStatus-1")
@@ -49,7 +50,7 @@ public class CareConnectPatientBuilder {
 			.setCode("PPN")));
 	
 		List<HumanName> names = new ArrayList<HumanName>();
-		names.add(new HumanName().setFamily(caseEntity.getLastName()).addGiven(caseEntity.getFirstName()));
+		names.add(new HumanName().setFamily(caseEntity.getLastName()).addGiven(caseEntity.getFirstName()).setUse(NameUse.OFFICIAL));
 
 		CodeableConcept language = new CodeableConcept();
 		language.addCoding().setCode("en").setDisplay("English").setSystem("http://uecdi-tom-terminology.eu-west-2.elasticbeanstalk.com/fhir/CodeSystem/languages");

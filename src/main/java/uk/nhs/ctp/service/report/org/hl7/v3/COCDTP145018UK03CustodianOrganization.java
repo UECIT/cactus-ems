@@ -10,6 +10,7 @@ package uk.nhs.ctp.service.report.org.hl7.v3;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -92,7 +93,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "name",
     "templateId"
 })
-public class COCDTP145018UK03CustodianOrganization {
+public class COCDTP145018UK03CustodianOrganization { 
 
     @XmlElement(required = true)
     protected COCDTP145018UK03CustodianOrganization.Id id;

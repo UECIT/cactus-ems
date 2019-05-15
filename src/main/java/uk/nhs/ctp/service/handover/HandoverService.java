@@ -102,7 +102,6 @@ public abstract class HandoverService {
 					referralRequest, getResource(request, Provenance.class));
 		}
 
-		
 		compositionBundleDecorator.decorate(documentBundle, (CareConnectPatient) referralRequest.getSubject().getResource());
 		
 		patientBundleDecorator.decorate(documentBundle, (CareConnectPatient) referralRequest.getSubject().getResource());

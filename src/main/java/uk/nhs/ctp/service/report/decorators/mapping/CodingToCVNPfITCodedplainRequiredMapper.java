@@ -11,7 +11,7 @@ import uk.nhs.ctp.service.TerminologyService;
 import uk.nhs.ctp.service.report.org.hl7.v3.CVNPfITCodedplainRequired;
 
 @Component
-public class CodingToCVNPfITCodedplainRequiredMapper {
+public class CodingToCVNPfITCodedplainRequiredMapper extends AbstractMapper<CVNPfITCodedplainRequired, Coding> {
 
 	@Autowired
 	private TerminologyService terminologyService;
@@ -28,6 +28,7 @@ public class CodingToCVNPfITCodedplainRequiredMapper {
 		codeMap.put("https://fhir.hl7.org.uk/STU3/CodeSystem/CareConnect-SDSJobRoleName-1R1690", callOperatorCode);
 	}
 	
+	@Override
 	public CVNPfITCodedplainRequired map(Coding coding) {
 		return codeMap.get(coding.getSystem() + coding.getCode());
 	}
