@@ -8,8 +8,9 @@ import resources.CareConnectPatient;
 @Component
 public class PatientBundleDecorator extends BundleDecorator<CareConnectPatient, CareConnectPatient> {
 	
-	public CareConnectPatient decorate(Bundle bundle, CareConnectPatient patient) {
+	@Override
+	public void decorate(Bundle bundle, CareConnectPatient patient) {
 		addToBundle(bundle, patient);
-		return patient;
 	}
+	
 }

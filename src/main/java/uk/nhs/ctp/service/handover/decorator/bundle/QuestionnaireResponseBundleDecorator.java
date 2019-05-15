@@ -9,16 +9,15 @@ import org.springframework.stereotype.Component;
 
 import ca.uhn.fhir.parser.IParser;
 import uk.nhs.ctp.entities.AuditEntry;
-import uk.nhs.ctp.service.handover.decorator.AuditDataDecorator;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
 
 @Component
-public class QuestionnaireResponseBundleDecorator extends BundleDecorator<QuestionnaireResponse, AuditEntry> implements AuditDataDecorator<QuestionnaireResponse> {
+public class QuestionnaireResponseBundleDecorator extends BundleDecorator<AuditEntry, QuestionnaireResponse> {
 
 	@Autowired
 	private IParser fhirParser;
 
-	public QuestionnaireResponse decorate(Bundle bundle, AuditEntry auditEntry) {
+	public void decorate(Bundle bundle, AuditEntry auditEntry) {
 		
 		if (auditEntry.getCdssServiceDefinitionRequest() != null) {
 			Bundle containedBundle = fhirParser.parseResource(Bundle.class, auditEntry.getCdssServiceDefinitionRequest());
@@ -29,7 +28,5 @@ public class QuestionnaireResponseBundleDecorator extends BundleDecorator<Questi
 				}
 			});
 		}
-		
-		return null;
 	}
 }

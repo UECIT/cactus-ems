@@ -8,16 +8,15 @@ import org.springframework.stereotype.Component;
 
 import ca.uhn.fhir.parser.IParser;
 import uk.nhs.ctp.entities.AuditEntry;
-import uk.nhs.ctp.service.handover.decorator.AuditDataDecorator;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
 
 @Component
-public class ObservationBundleDecorator extends BundleDecorator<Observation, AuditEntry> implements AuditDataDecorator<Observation> {
+public class ObservationBundleDecorator extends BundleDecorator<AuditEntry, Observation> {
 
 	@Autowired
 	private IParser fhirParser;
 
-	public Observation decorate(Bundle bundle, AuditEntry auditEntry)  {
+	public void decorate(Bundle bundle, AuditEntry auditEntry)  {
 		Observation observation = null;
 		
 		if (auditEntry.getContained() != null) {
@@ -28,7 +27,5 @@ public class ObservationBundleDecorator extends BundleDecorator<Observation, Aud
 				addToBundle(bundle, observation);
 			}
 		}
-		
-		return observation;
 	}
 }

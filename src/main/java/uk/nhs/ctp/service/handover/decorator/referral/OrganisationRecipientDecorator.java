@@ -3,18 +3,19 @@ package uk.nhs.ctp.service.handover.decorator.referral;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.ContactPoint;
-import org.hl7.fhir.dstu3.model.Organization;
-import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointUse;
+import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.springframework.stereotype.Component;
 
+import uk.nhs.ctp.entities.AuditEntry;
 import uk.nhs.ctp.service.handover.decorator.ResourceDecorator;
 
 @Component
-public class OrganisationRecipientDecorator implements ResourceDecorator<ReferralRequest> {
+public class OrganisationRecipientDecorator implements ResourceDecorator<ReferralRequest, AuditEntry> {
 
-	public void decorate(ReferralRequest referralRequest) {
+	public void decorate(ReferralRequest referralRequest, AuditEntry auditEntry) {
 		Organization recipientOrganization = new Organization();
 		recipientOrganization.setActive(true);
 		

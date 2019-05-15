@@ -4,13 +4,13 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Resource;
 
-public abstract class BundleDecorator<R extends Resource, V> {
+import uk.nhs.ctp.service.handover.decorator.ResourceDecorator;
 
-	protected void addToBundle(Bundle bundle, R resource) {
+public abstract class BundleDecorator<SOURCE, TARGET extends Resource> implements ResourceDecorator<Bundle, SOURCE> {
+
+	protected void addToBundle(Bundle bundle, TARGET target) {
 		BundleEntryComponent entry = new BundleEntryComponent();
-		entry.setResource(resource);
+		entry.setResource(target);
 		bundle.addEntry(entry);
 	}
-	
-	public abstract R decorate(Bundle bundle, V dataObject); 
 }

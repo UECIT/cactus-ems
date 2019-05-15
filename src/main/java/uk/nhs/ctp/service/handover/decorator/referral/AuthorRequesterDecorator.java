@@ -15,12 +15,13 @@ import org.hl7.fhir.dstu3.model.RelatedPerson;
 import org.springframework.stereotype.Component;
 
 import resources.CareConnectOrganization;
+import uk.nhs.ctp.entities.AuditEntry;
 import uk.nhs.ctp.service.handover.decorator.ResourceDecorator;
 
 @Component
-public class AuthorRequesterDecorator implements ResourceDecorator<ReferralRequest> {
+public class AuthorRequesterDecorator implements ResourceDecorator<ReferralRequest, AuditEntry> {
 
-	public void decorate(ReferralRequest referralRequest) {
+	public void decorate(ReferralRequest referralRequest, AuditEntry auditEntry) {
 		Address address = new Address()
 			.addLine("111 Handler Street")
 			.addLine("Westgate")

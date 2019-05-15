@@ -4,20 +4,21 @@ import java.util.Date;
 
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Practitioner;
-import org.hl7.fhir.dstu3.model.ReferralRequest;
-import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Practitioner.PractitionerQualificationComponent;
+import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.springframework.stereotype.Component;
 
 import uk.nhs.ctp.SystemURL;
+import uk.nhs.ctp.entities.AuditEntry;
 import uk.nhs.ctp.service.handover.decorator.ResourceDecorator;
 
 @Component
-public class PractitionerRecipientDecorator implements ResourceDecorator<ReferralRequest> {
+public class PractitionerRecipientDecorator implements ResourceDecorator<ReferralRequest, AuditEntry> {
 
-	public void decorate(ReferralRequest referralRequest) {
+	public void decorate(ReferralRequest referralRequest, AuditEntry auditEntry) {
 		Practitioner recipientPractitioner = new Practitioner();
 		HumanName name = new HumanName();
 		name.addSuffix("Dr");

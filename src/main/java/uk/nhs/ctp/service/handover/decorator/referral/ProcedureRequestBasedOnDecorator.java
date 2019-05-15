@@ -8,9 +8,11 @@ import org.springframework.stereotype.Component;
 public class ProcedureRequestBasedOnDecorator {
 
 	public void decorate(ReferralRequest referralRequest, ProcedureRequest procedureRequest) {
-		procedureRequest.setId("#procedureRequest");
-		referralRequest.getBasedOnFirstRep().setReference("#procedureRequest");
-		referralRequest.getBasedOnFirstRep().setResource(null);
-		referralRequest.addContained(procedureRequest);
+		if (referralRequest.hasBasedOn()) {
+			procedureRequest.setId("#procedureRequest");
+			referralRequest.getBasedOnFirstRep().setReference("#procedureRequest");
+			referralRequest.getBasedOnFirstRep().setResource(null);
+			referralRequest.addContained(procedureRequest);
+		}
 	}
 }

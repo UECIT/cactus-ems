@@ -8,9 +8,11 @@ import org.springframework.stereotype.Component;
 public class ProvenanceRelevantHistoryDecorator {
 
 	public void decorate(ReferralRequest referralRequest, Provenance provenance) {
-		provenance.setId("#provenance");
-		referralRequest.getRelevantHistoryFirstRep().setReference("#provenance");
-		referralRequest.getRelevantHistoryFirstRep().setResource(null);
-		referralRequest.addContained(provenance);
+		if (referralRequest.hasRelevantHistory()) {
+			provenance.setId("#provenance");
+			referralRequest.getRelevantHistoryFirstRep().setReference("#provenance");
+			referralRequest.getRelevantHistoryFirstRep().setResource(null);
+			referralRequest.addContained(provenance);
+		}
 	}
 }

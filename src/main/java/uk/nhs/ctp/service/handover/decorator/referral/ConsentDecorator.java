@@ -14,13 +14,14 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.springframework.stereotype.Component;
 
+import uk.nhs.ctp.entities.AuditEntry;
 import uk.nhs.ctp.service.handover.decorator.ResourceDecorator;
 
 @Component
-public class ConsentDecorator implements ResourceDecorator<ReferralRequest> {
+public class ConsentDecorator implements ResourceDecorator<ReferralRequest, AuditEntry> {
 
 	@Override
-	public void decorate(ReferralRequest referralRequest) {
+	public void decorate(ReferralRequest referralRequest, AuditEntry auditEntry) {
 		Consent consent = new Consent();
 		consent.setId("#consent");
 		

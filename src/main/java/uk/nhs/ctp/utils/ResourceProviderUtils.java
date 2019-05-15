@@ -10,6 +10,7 @@ import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueType;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.stereotype.Component;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -66,6 +67,10 @@ public class ResourceProviderUtils {
 		
 		return t;
 		
+	}
+	
+	public static <T extends Resource> T getResource(IBaseResource resource, Class<T> resourceClass) {
+		return getResource((Resource)resource, resourceClass);
 	}
 	
 	public static <T extends Resource> T getResource(List<Resource> resources, Class<T> resourceClass) {

@@ -7,22 +7,19 @@ import org.springframework.stereotype.Component;
 
 import ca.uhn.fhir.parser.IParser;
 import uk.nhs.ctp.entities.AuditEntry;
-import uk.nhs.ctp.service.handover.decorator.AuditDataDecorator;
 
 @Component
-public class QuestionnaireBundleDecorator extends BundleDecorator<Questionnaire, AuditEntry> implements AuditDataDecorator<Questionnaire> {
+public class QuestionnaireBundleDecorator extends BundleDecorator<AuditEntry, Questionnaire> {
 
 	@Autowired
 	private IParser fhirParser;
 
-	public Questionnaire decorate(Bundle bundle, AuditEntry auditEntry) {
+	public void decorate(Bundle bundle, AuditEntry auditEntry) {
 		Questionnaire questionnaire = null;
 		
 		if (auditEntry.getCdssQuestionnaireResponse() != null) {
 			questionnaire = (Questionnaire)fhirParser.parseResource(auditEntry.getCdssQuestionnaireResponse());
 			addToBundle(bundle, questionnaire);
 		}
-		
-		return questionnaire;
 	}
 }

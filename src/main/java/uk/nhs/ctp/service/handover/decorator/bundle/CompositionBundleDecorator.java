@@ -25,9 +25,9 @@ import resources.CareConnectPatient;
 import uk.nhs.ctp.SystemURL;
 
 @Component
-public class CompositionBundleDecorator extends BundleDecorator<Composition, CareConnectPatient> {
+public class CompositionBundleDecorator extends BundleDecorator<CareConnectPatient, Composition> {
 
-	public Composition decorate(Bundle bundle, CareConnectPatient patient) {
+	public void decorate(Bundle bundle, CareConnectPatient patient) {
 		Encounter encounter = new Encounter();
 		// Set the status of the encounter
 		encounter.setStatus(EncounterStatus.FINISHED);
@@ -98,7 +98,5 @@ public class CompositionBundleDecorator extends BundleDecorator<Composition, Car
 		composition.setConfidentiality(DocumentConfidentiality.N);
 
 		addToBundle(bundle, composition);
-		
-		return composition;
 	}
 }
