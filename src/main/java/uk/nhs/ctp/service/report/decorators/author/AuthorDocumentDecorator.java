@@ -33,7 +33,7 @@ public class AuthorDocumentDecorator implements OneOneOneDecorator, AmbulanceDec
 		document.getAuthor().add(createAuthor(request));
 	}
 	
-	private POCDMT200001GB02Author createAuthor(ReportRequestDTO request) {
+	public POCDMT200001GB02Author createAuthor(ReportRequestDTO request) {
 		POCDMT200001GB02Author author  = new POCDMT200001GB02Author();
 		// The HL7 attribute typeCode uses a code to describe this class as an author participation.
 		author.setTypeCode(author.getTypeCode());

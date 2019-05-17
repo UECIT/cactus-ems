@@ -91,7 +91,7 @@ public class COCDTP146246GB01Section1 {
     protected StrucDocText text;
     protected ST title;
     @XmlElementRef(name = "author", namespace = "urn:hl7-org:v3", type = JAXBElement.class, required = false)
-    protected JAXBElement<COCDTP146246GB01Author1> author;
+    protected JAXBElement<POCDMT200001GB02Author> author;
     @XmlElement(nillable = true)
     protected List<COCDTP146246GB01Component3> component1;
     @XmlAttribute(name = "classCode", required = true)
@@ -233,7 +233,7 @@ public class COCDTP146246GB01Section1 {
      *     {@link JAXBElement }{@code <}{@link COCDTP146246GB01Author1 }{@code >}
      *     
      */
-    public JAXBElement<COCDTP146246GB01Author1> getAuthor() {
+    public JAXBElement<POCDMT200001GB02Author> getAuthor() {
         return author;
     }
 
@@ -245,7 +245,7 @@ public class COCDTP146246GB01Section1 {
      *     {@link JAXBElement }{@code <}{@link COCDTP146246GB01Author1 }{@code >}
      *     
      */
-    public void setAuthor(JAXBElement<COCDTP146246GB01Author1> value) {
+    public void setAuthor(JAXBElement<POCDMT200001GB02Author> value) {
         this.author = value;
     }
 

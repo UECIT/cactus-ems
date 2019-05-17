@@ -87,6 +87,11 @@ public class ResourceProviderUtils {
 		return resource.isPresent() ? getResource(resource.get().getResource(), resourceClass) : null;
 	}
 	
+	public static <T extends Resource> List<T> getResources(Bundle bundle, Class<T> resourceClass) {
+		return getResources(bundle.getEntry().stream().map(entry -> 
+				entry.getResource()).collect(Collectors.toList()), resourceClass);
+	}
+	
 	public static <T extends Resource> List<T> getResources(List<Resource> resources, Class<T> resourceClass) {
 		List<T> typedResources = new ArrayList<>();
 		

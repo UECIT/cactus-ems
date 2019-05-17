@@ -35,10 +35,15 @@ public class RemoteResourceHandoverService extends HandoverService {
 		ReferralRequest referralRequest = 
 				client.read().resource(ReferralRequest.class).withUrl(request.getResourceUrl()).execute();
 		
-		return resourceClass.equals(ReferralRequest.class) ? 
-			(T)referralRequest :
-			client.read().resource(resourceClass).withUrl(
-					urlFunctions.get(resourceClass).apply(referralRequest)).execute();
+		return resourceClass.equals(ReferralRequest.class) ? (T)referralRequest :
+				 !hasResolvableUrl(resourceClass, referralRequest) ? null :
+						client.read().resource(resourceClass).withUrl(
+								urlFunctions.get(resourceClass).apply(referralRequest)).execute();
+	}
+	
+	public <T extends Resource> boolean hasResolvableUrl(Class<T> resourceClass, ReferralRequest referralRequest) {
+		return urlFunctions.containsKey(resourceClass) && 
+				urlFunctions.get(resourceClass).apply(referralRequest) != null;
 	}
 
 }
