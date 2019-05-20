@@ -57,7 +57,7 @@ import uk.nhs.ctp.service.report.npfit.hl7.localisation.TemplateContent;
     "cocdtp146092GB01ClinicalDiscriminator",
     "cocdtp146093GB01AppointmentReference"
 })
-public class POCDMT200001GB02Component2 {
+public class POCDMT200001GB02Component2 implements ContentAware {
 
     @XmlElement(namespace = "NPFIT:HL7:Localisation", required = true)
     protected TemplateContent contentId;

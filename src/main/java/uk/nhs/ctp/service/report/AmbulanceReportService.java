@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.dto.ReportType;
 import uk.nhs.ctp.service.dto.ReportsDTO;
-import uk.nhs.ctp.service.report.decorators.AmbulanceDecorator;
+import uk.nhs.ctp.service.report.decorator.AmbulanceDecorator;
 import uk.nhs.ctp.service.report.org.hl7.v3.BL;
 import uk.nhs.ctp.service.report.org.hl7.v3.CV;
 import uk.nhs.ctp.service.report.org.hl7.v3.Flag;

@@ -1,6 +1,7 @@
 package uk.nhs.ctp.utils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -9,6 +10,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueType;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.stereotype.Component;
@@ -80,6 +82,13 @@ public class ResourceProviderUtils {
 		return resource.isPresent() ? getResource(resource.get(), resourceClass) : null;
 	}
 	
+	public static <T extends Resource> T getResource(Collection<Reference> references, Class<T> resourceClass) {
+		Optional<Reference> reference = references.stream().filter(obj -> 
+				obj.getResource().getClass().equals(resourceClass)).findFirst();
+		
+		return reference.isPresent() ? getResource(reference.get().getResource(), resourceClass) : null;
+	}
+	
 	public static <T extends Resource> T getResource(Bundle bundle, Class<T> resourceClass) {
 		Optional<BundleEntryComponent> resource = bundle.getEntry().stream().filter(obj -> 
 				obj.getResource().getClass().equals(resourceClass)).findFirst();
@@ -91,6 +100,8 @@ public class ResourceProviderUtils {
 		return getResources(bundle.getEntry().stream().map(entry -> 
 				entry.getResource()).collect(Collectors.toList()), resourceClass);
 	}
+	
+
 	
 	public static <T extends Resource> List<T> getResources(List<Resource> resources, Class<T> resourceClass) {
 		List<T> typedResources = new ArrayList<>();

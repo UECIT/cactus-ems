@@ -78,7 +78,7 @@ import uk.nhs.ctp.service.report.npfit.hl7.localisation.TemplateContent;
     "cocdtp145212GB02Workgroup",
     "cocdtp145207GB01AssignedAuthorDevice"
 })
-public class POCDMT200001GB02Author {
+public class POCDMT200001GB02Author implements ContentAware {
 
     @XmlElement(namespace = "NPFIT:HL7:Localisation", required = true)
     protected TemplateContent contentId;
