@@ -106,7 +106,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "standardIndustryClassCode",
     "templateId"
 })
-public class COCDTP145203GB03Organization {
+public class COCDTP145203GB03Organization implements Entity<ON>, ClassCodeAware<COCDTP145203GB03Organization.StandardIndustryClassCode> {
 	
     @XmlElement(required = true)
     protected COCDTP145203GB03Organization.Id id;
@@ -394,8 +394,7 @@ public class COCDTP145203GB03Organization {
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "")
-    public static class StandardIndustryClassCode
-        extends CV
+    public static class StandardIndustryClassCode extends CV
     {
 
 

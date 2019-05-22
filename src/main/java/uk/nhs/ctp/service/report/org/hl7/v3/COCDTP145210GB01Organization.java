@@ -93,7 +93,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "name",
     "templateId"
 })
-public class COCDTP145210GB01Organization {
+public class COCDTP145210GB01Organization implements Entity<ON> {
 
     @XmlElement(required = true)
     protected COCDTP145210GB01Organization.Id id;

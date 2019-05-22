@@ -29,16 +29,10 @@ public class OneOneOneReportService implements Reportable {
 		POCDMT200001GB02ClinicalDocument document = 
 				objectFactory.createPOCDMT200001GB02ClinicalDocument();
 
-		document.getParticipant().add(null);
 		// This class is a related document relationship 
 		// it links the current document to a related CDA document.
 		// (CAN BE NULL)
 		document.setRelatedDocument(null);
-		// This class is a tracker participation. 
-		// A tracker is a recipient who is sent a copy of the CDA document for information only. 
-		// They are not normally required to carry out any action on recipient of the CDA document. 
-		// (CAN BE NULL)
-		document.getTracker().add(null);
 
 		decorators.stream().forEach(decorator -> decorator.decorate(document, request));
 		

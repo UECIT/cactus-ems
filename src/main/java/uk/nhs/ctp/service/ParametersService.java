@@ -46,9 +46,11 @@ import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.exception.EMSException;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.builder.CareConnectPatientBuilder;
+import uk.nhs.ctp.service.builder.RelatedPersonBuilder;
 import uk.nhs.ctp.service.dto.SettingsDTO;
 import uk.nhs.ctp.service.dto.TriageQuestion;
 import uk.nhs.ctp.utils.ErrorHandlingUtils;
+import uk.nhs.ctp.utils.ResourceProviderUtils;
 
 @Service
 public class ParametersService {
@@ -60,6 +62,9 @@ public class ParametersService {
 	
 	@Autowired
 	private CareConnectPatientBuilder careConnectPatientBuilder;
+	
+	@Autowired
+	private RelatedPersonBuilder relatedPersonBuilder;
 
 	public Parameters getEvaluateParameters(Long caseId, TriageQuestion[] questionResponse, SettingsDTO settings,
 			Boolean amending) {
@@ -306,6 +311,18 @@ public class ParametersService {
 									.setDisplay(triageQuestion.getResponse().getDisplay()));
 				}
 			}
+			
+			ParametersParameterComponent partyComponent = 
+					ResourceProviderUtils.getParameterByName(
+						ResourceProviderUtils.getParameterByName(
+							ResourceProviderUtils.getParameterAsResource(
+									parameters.getParameter(), SystemConstants.INPUT_PARAMETERS, Parameters.class)
+							.getParameter(), SystemConstants.CONTEXT)
+						.getPart(), SystemConstants.PARTY);
+					
+			questionnaireResponse.setSource(new Reference(partyComponent.getValue().primitiveValue().equals("1") ?
+					ResourceProviderUtils.getParameterAsResource(parameters.getParameter(), SystemConstants.PATIENT) :
+					relatedPersonBuilder.build()));
 
 			parameters.addParameter().setName(SystemConstants.INPUT_DATA).setResource(questionnaireResponse);
 		}

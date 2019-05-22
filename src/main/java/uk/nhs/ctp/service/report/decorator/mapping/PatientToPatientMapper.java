@@ -30,7 +30,7 @@ public class PatientToPatientMapper extends AbstractMapper<COCDTP145201GB01Patie
 		patient.setClassCode(patient.getClassCode());
 		patient.setDeterminerCode(patient.getDeterminerCode());
 		patient.getName().add(humanNameToPNMapper.map(ccPatient.getNameFirstRep()));
-		
+	
 		TS birthTime = new TS();
 		birthTime.setValue(ccPatient.getBirthDate().toString());
 		patient.setBirthTime(birthTime);

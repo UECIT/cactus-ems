@@ -8,11 +8,11 @@ import resources.CareConnectOrganization;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.report.decorator.mapping.AddressToADMapper;
 import uk.nhs.ctp.service.report.decorator.mapping.CodingToCVNPfITCodedplainRequiredMapper;
-import uk.nhs.ctp.service.report.decorator.mapping.HumanNameToPNMapper;
-import uk.nhs.ctp.service.report.decorator.mapping.OrganizationToRepresentedOrganizationMapper;
+import uk.nhs.ctp.service.report.decorator.mapping.HumanNameToCOCDTP145200GB01PersonMapper;
+import uk.nhs.ctp.service.report.decorator.mapping.OrganizationToCOCDTP145203GB03OrganizationMapper;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145200GB01AssignedAuthor;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145200GB01AssignedAuthor.TemplateId;
-import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145200GB01Person;
+import uk.nhs.ctp.utils.ResourceProviderUtils;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02Author;
 
 @Component
@@ -25,33 +25,22 @@ public class RelatedPersonToAuthorPersonUniversalTemplateMapper implements Templ
 	private CodingToCVNPfITCodedplainRequiredMapper codingMapper;
 	
 	@Autowired
-	private OrganizationToRepresentedOrganizationMapper organizationToRepresentedOrganizationMapper;
+	private OrganizationToCOCDTP145203GB03OrganizationMapper organizationToRepresentedOrganizationMapper;
 	
-	@Autowired 
-	private HumanNameToPNMapper humanNameToPNMapper;
+	@Autowired
+	private HumanNameToCOCDTP145200GB01PersonMapper humanNameToAssignedPersonMapper;
 	
 	@Override
 	public void map(RelatedPerson relatedPerson, POCDMT200001GB02Author author, ReportRequestDTO request) {
-		CareConnectOrganization organization = 
-				(CareConnectOrganization)request.getReferralRequest().getRequester().getOnBehalfOf().getResource();
+		CareConnectOrganization organization = ResourceProviderUtils.getResource(
+				request.getReferralRequest().getRequester().getOnBehalfOf().getResource(), CareConnectOrganization.class);
 		
 		COCDTP145200GB01AssignedAuthor assignedAuthor = new COCDTP145200GB01AssignedAuthor();
 		assignedAuthor.setClassCode(assignedAuthor.getClassCode());
 		assignedAuthor.getAddr().add(addressToADMapper.map(relatedPerson.getAddressFirstRep()));
 		assignedAuthor.setCode(codingMapper.map(relatedPerson.getRelationship().getCodingFirstRep()));
 		
-		// set AssignedPerson
-		COCDTP145200GB01Person assignedPerson = new COCDTP145200GB01Person();
-		assignedPerson.setClassCode(assignedPerson.getClassCode());
-		assignedPerson.setDeterminerCode(assignedPerson.getDeterminerCode());
-		assignedPerson.setName(humanNameToPNMapper.map(relatedPerson.getNameFirstRep()));
-
-		uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145200GB01Person.TemplateId assignedPersonTemplate = new uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145200GB01Person.TemplateId();
-		assignedPersonTemplate.setRoot("2.16.840.1.113883.2.1.3.2.4.18.2");
-		assignedPersonTemplate.setExtension("COCD_TP145200GB01#assignedPerson");
-		assignedPerson.setTemplateId(assignedPersonTemplate);
-		
-		assignedAuthor.setAssignedPerson(assignedPerson);
+		assignedAuthor.setAssignedPerson(humanNameToAssignedPersonMapper.map(relatedPerson.getNameFirstRep()));
 		assignedAuthor.setRepresentedOrganization(organizationToRepresentedOrganizationMapper.map(organization));
 		
 		// set templateID

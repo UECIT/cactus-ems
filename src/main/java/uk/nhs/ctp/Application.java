@@ -68,16 +68,5 @@ public class Application extends SpringBootServletInitializer {
 	public FhirContext fhirContext() {
 		return FhirContext.forDstu3();
 	}
-	
-	@Bean
-	public Map<String, CDAOrganizationTypeDisplayName> organizationTypeMap() {
-		Map<String, CDAOrganizationTypeDisplayName> organizationTypeMap = 
-				new HashMap<String, CDAOrganizationTypeDisplayName>();
-		
-		organizationTypeMap.put("http://terminology.hl7.org/CodeSystem/organization-typeprov", 
-				CDAOrganizationTypeDisplayName.GENERAL_MEDICAL_PRACTICE);
-		
-		return organizationTypeMap;
-	}
 
 }

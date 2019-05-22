@@ -8,8 +8,7 @@ import resources.CareConnectPractitioner;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.report.decorator.mapping.AddressToADMapper;
 import uk.nhs.ctp.service.report.decorator.mapping.ContactPointToTELMapper;
-import uk.nhs.ctp.service.report.decorator.mapping.OrganizationToRepresentedOrganizationMapper;
-import uk.nhs.ctp.service.report.npfit.hl7.localisation.TemplateContent;
+import uk.nhs.ctp.service.report.decorator.mapping.OrganizationToCOCDTP145203GB03OrganizationMapper;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145203GB03IntendedRecipient;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02Tracker;
 
@@ -18,7 +17,7 @@ public class PractitionerToRecipientOrganizationUniversalDataMapper
 		implements TemplateMapper<CareConnectPractitioner, POCDMT200001GB02Tracker> {
 
 	@Autowired
-	private OrganizationToRepresentedOrganizationMapper organizationToRepresentedOrganizationMapper;
+	private OrganizationToCOCDTP145203GB03OrganizationMapper organizationToRepresentedOrganizationMapper;
 	
 	@Autowired
 	private AddressToADMapper addressToADMapper;

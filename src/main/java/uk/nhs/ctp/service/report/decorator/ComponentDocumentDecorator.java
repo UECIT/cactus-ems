@@ -1,5 +1,7 @@
 package uk.nhs.ctp.service.report.decorator;
 
+import java.util.UUID;
+
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
@@ -61,21 +63,23 @@ public class ComponentDocumentDecorator implements OneOneOneDecorator {
 		classificationSection.setMoodCode(classificationSection.getMoodCode());
 		
 		IINPfITUuidMandatory sectionId = new IINPfITUuidMandatory();
-		sectionId.setRoot("1254345346434645634563456");
+		sectionId.setRoot(UUID.randomUUID().toString());
 		classificationSection.setId(sectionId);
 		
 		Bundle resourceBundle = request.getBundle();
 		
 		POCDMT200001GB02Component31 triageSectionComponent = createSectionComponent();
 		COCDTP146246GB01Section1 triageSection = bundleToSectionMapper.map(resourceBundle);
-		triageSection.setAuthor(new JAXBElement<POCDMT200001GB02Author>(
-				new QName("author"), POCDMT200001GB02Author.class, authorDocumentDecorator.createAuthor(request)));
+		JAXBElement<POCDMT200001GB02Author> authorElement = new JAXBElement<>(
+				new QName("author"), POCDMT200001GB02Author.class, authorDocumentDecorator.createAuthor(request));
+		triageSection.setAuthor(authorElement);
 		triageSectionComponent.setCOCDTP146246GB01Section1(triageSection);
 		classificationSection.getComponent().add(triageSectionComponent);
 		
 		POCDMT200001GB02Component31 noteSectionComponent = createSectionComponent();
-		noteSectionComponent.setCOCDTP146246GB01Section1(
-				referralRequestToSectionMapper.map(request.getReferralRequest()));
+		COCDTP146246GB01Section1 noteSection = referralRequestToSectionMapper.map(request.getReferralRequest());
+		noteSection.setAuthor(authorElement);
+		noteSectionComponent.setCOCDTP146246GB01Section1(noteSection);
 		classificationSection.getComponent().add(noteSectionComponent);
 		
 		ResourceProviderUtils.getResources(resourceBundle, Observation.class).stream().forEach(observation -> {

@@ -3,6 +3,7 @@ package uk.nhs.ctp.service.report.decorator;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
@@ -47,6 +48,7 @@ public class HeaderDataDocumentDecorator implements OneOneOneDecorator {
 
 		// The HL7 attribute id uses an identifier to identify each unique instance of a clinical document.
 		IINPfITUuidMandatory id = new IINPfITUuidMandatory();
+		id.setRoot(UUID.randomUUID().toString());
 		document.setId(id);
 
 		// The HL7 (NHS localisation) attribute messageType identifies the CDA document as one that complies with a certain NHS CDA profile.
@@ -54,10 +56,6 @@ public class HeaderDataDocumentDecorator implements OneOneOneDecorator {
 		messageType.setRoot("2.16.840.1.113883.2.1.3.2.4.18.17");
 		messageType.setExtension("POCD_MT200001GB02");
 		document.setMessageType(messageType);
-
-		// The HL7 attribute setId uses an identifier to identify all documents that are part of a set of documents.
-		IINPfITUuidMandatory setId = new IINPfITUuidMandatory();
-		document.setSetId(setId);
 
 		// The HL7 attribute title uses a string which is rendered as a human readable title.
 		STTitle title = new STTitle();
@@ -70,7 +68,7 @@ public class HeaderDataDocumentDecorator implements OneOneOneDecorator {
 		POCDMT200001GB02ClinicalDocumentTypeId typeId = new POCDMT200001GB02ClinicalDocumentTypeId();
 		typeId.setRoot("2.16.840.1.113883.1.3");
 		typeId.setExtension("POCD_HD000040");
-		document.setTypeId(null);
+		document.setTypeId(typeId);
 
 		// The HL7 attribute versionNumber uses an integer value to allow versioning of the CDA document.
 		VersionNumber versionNumber = new VersionNumber();

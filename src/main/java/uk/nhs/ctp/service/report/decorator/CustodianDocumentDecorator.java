@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
-import uk.nhs.ctp.service.report.decorator.mapping.OrganizationToRepresentedCustodianOrganizationMapper;
+import uk.nhs.ctp.service.report.decorator.mapping.OrganizationToCOCDTP145018UK03CustodianOrganizationMapper;
 import uk.nhs.ctp.service.report.npfit.hl7.localisation.TemplateContent;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145018UK03AssignedCustodian;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02ClinicalDocument;
@@ -15,7 +15,7 @@ import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02Custodian;
 public class CustodianDocumentDecorator implements OneOneOneDecorator {
 
 	@Autowired
-	private OrganizationToRepresentedCustodianOrganizationMapper organizationToRepresentedCustodianOrganizationMapper;
+	private OrganizationToCOCDTP145018UK03CustodianOrganizationMapper organizationToRepresentedCustodianOrganizationMapper;
 	
 	@Override
 	public void decorate(POCDMT200001GB02ClinicalDocument document, ReportRequestDTO request) {

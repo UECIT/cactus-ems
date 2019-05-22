@@ -98,7 +98,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "telecom",
     "templateId"
 })
-public class COCDTP145201GB01Organization {
+public class COCDTP145201GB01Organization implements DetailedEntity<ON>, ClassCodeAware<CV> {
 	
     protected AD addr;
     @XmlElement(required = true)

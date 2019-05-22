@@ -36,8 +36,8 @@ public class AuthorRequesterDecorator implements ResourceDecorator<ReferralReque
 		
 		CodeableConcept organizationType = new CodeableConcept().addCoding(new Coding()
 			.setSystem("http://terminology.hl7.org/CodeSystem/organization-type")
-			.setCode("prov")
-			.setDisplay("Healthcare Provider"));
+			.setCode("other")
+			.setDisplay("Other Provider"));
 	
 		RelatedPerson author = new RelatedPerson();
 		

@@ -27,7 +27,7 @@ public class PatientToPatientRoleMapper extends AbstractMapper<COCDTP145201GB01P
 	private ContactPointToTELMapper contactPointToTELMapper;
 	
 	@Autowired
-	private OrganizationToProviderOrganizationMapper organizationToProviderOrganizationMapper;
+	private OrganizationToCOCDTP145201GB01OrganizationMapper organizationToProviderOrganizationMapper;
 	
 	@Override
 	public COCDTP145201GB01PatientRole map(CareConnectPatient ccPatient) {
@@ -49,7 +49,7 @@ public class PatientToPatientRoleMapper extends AbstractMapper<COCDTP145201GB01P
 		patientRole.getTelecom().addAll(contactPointToTELMapper.map(ccPatient.getTelecom()));
 		
 		patientRole.setPatientPatient(patientToPatientMapper.map(ccPatient));
-		
+
 		Practitioner gp = (Practitioner)ccPatient.getGeneralPractitionerFirstRep().getResource();
 		Organization organization = new Organization();
 		organization.setAddress(gp.getAddress());

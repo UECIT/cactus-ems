@@ -18,6 +18,7 @@ import resources.CareConnectOrganization;
 import resources.CareConnectPatient;
 import uk.nhs.ctp.service.TerminologyService;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
+import uk.nhs.ctp.service.report.decorator.mapping.HumanNameToCOCDTP145210GB01PersonMapper;
 import uk.nhs.ctp.service.report.npfit.hl7.localisation.TemplateContent;
 import uk.nhs.ctp.service.report.org.hl7.v3.AD;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145201GB01LanguageCommunication;
@@ -27,7 +28,6 @@ import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145210GB01AssignedEntity;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145210GB01AssignedEntity.TemplateId;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145210GB01Organization;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145210GB01Organization.Id;
-import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145210GB01Person;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145222GB02HealthCareFacility;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145222GB02Place;
 import uk.nhs.ctp.service.report.org.hl7.v3.CS;
@@ -62,6 +62,8 @@ public class PertinentInformation5Encounter implements AmbulanceDecorator  {
 	@Autowired
 	private TerminologyService terminologyService;
 	
+	@Autowired
+	private HumanNameToCOCDTP145210GB01PersonMapper humanNameToPersonMapper;
 	@Value("${ems.terminology.administrative.gender.system}")
 	private String administrativeGenderSystem;
 	
@@ -141,20 +143,8 @@ public class PertinentInformation5Encounter implements AmbulanceDecorator  {
 		templateId.setRoot("2.16.840.1.113883.2.1.3.2.4.18.2");
 		templateId.setExtension("COCD_TP145210GB01#AssignedEntity");
 		assignedEntity.setTemplateId(templateId);
-		
-		// populate informant person
-		COCDTP145210GB01Person informantPerson = new COCDTP145210GB01Person();
-		informantPerson.setClassCode(informantPerson.getClassCode());
-		informantPerson.setDeterminerCode(informantPerson.getDeterminerCode());
-		PN informantName = new PN();
-		informantName.getContent().add(fhirInformant.getNameFirstRep().getNameAsSingleString());
-		informantName.getUse().add(CsEntityNameUse.L);
-		informantPerson.setName(new PN());
-		COCDTP145210GB01Person.TemplateId informantPersonTemplateId = new COCDTP145210GB01Person.TemplateId();
-		informantPersonTemplateId.setRoot("2.16.840.1.113883.2.1.3.2.4.18.2");
-		informantPersonTemplateId.setExtension("COCD_TP145210GB01#assignedPerson");
-		informantPerson.setTemplateId(informantPersonTemplateId);
-		assignedEntity.setAssignedPerson(informantPerson);
+
+		assignedEntity.setAssignedPerson(humanNameToPersonMapper.map(fhirInformant.getNameFirstRep()));
 		
 		// populate informant organization
 		COCDTP145210GB01Organization informantOrganization = new COCDTP145210GB01Organization();
