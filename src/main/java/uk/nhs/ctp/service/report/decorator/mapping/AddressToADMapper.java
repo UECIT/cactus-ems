@@ -55,8 +55,10 @@ public class AddressToADMapper extends AbstractMapper<AD, Address> {
 			valueContainer.setValue(part);
 			partContainer.setReference(valueContainer);
 			
-			targetAddress.getContent().add(new JAXBElement<T>(
-					new QName(WordUtils.uncapitalize(containerClass.getSimpleName())), containerClass, partContainer));
+			JAXBElement<T> element = new JAXBElement<>(new QName(
+					WordUtils.uncapitalize(containerClass.getSimpleName())), containerClass, partContainer);
+			
+			targetAddress.getContent().add(element);
 		}
 		
 	}

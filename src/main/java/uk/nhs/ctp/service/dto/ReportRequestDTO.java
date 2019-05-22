@@ -1,7 +1,9 @@
 package uk.nhs.ctp.service.dto;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
@@ -20,7 +22,8 @@ public class ReportRequestDTO {
 	private Long caseId;
 	private String resourceUrl;
 	private String handoverJson;
-	
+	private Set<Class<?>> templateMappingExclusions = new HashSet<>();
+
 	@JsonIgnore
 	private ReferralRequest referralRequest;
 	@JsonIgnore
@@ -44,28 +47,52 @@ public class ReportRequestDTO {
 		setReferralRequest(fhirParser.parseResource(ReferralRequest.class, this.handoverJson));
 		setBundle(ResourceProviderUtils.getResources(referralRequest.getContained(), Bundle.class).get(0));
 	}
+	
 	public Long getCaseId() {
 		return caseId;
 	}
 	public void setCaseId(Long caseId) {
 		this.caseId = caseId;
 	}
+	
 	public String getResourceUrl() {
 		return resourceUrl;
 	}
 	public void setResourceUrl(String resourceUrl) {
 		this.resourceUrl = resourceUrl;
 	}
+	
 	public ReferralRequest getReferralRequest() {
 		return referralRequest;
 	}
 	public void setReferralRequest(ReferralRequest referralRequest) {
 		this.referralRequest = referralRequest;
 	}
+	
 	public Bundle getBundle() {
 		return bundle;
 	}
 	public void setBundle(Bundle bundle) {
 		this.bundle = bundle;
 	}
+	
+	public void setTemplateMappingExclusions(Set<Class<?>> templateMappingExclusions) {
+		this.templateMappingExclusions = templateMappingExclusions;
+	}
+	
+	public boolean isExcluded(Class<?> mapperClass) {
+		return templateMappingExclusions.contains(mapperClass);
+	}
+	
+	@Override
+	public ReportRequestDTO clone() {
+		ReportRequestDTO clone = new ReportRequestDTO();
+		clone.setCaseId(caseId);
+		clone.setHandoverJson(handoverJson);
+		clone.setTemplateMappingExclusions(templateMappingExclusions);
+		clone.setResourceUrl(resourceUrl);
+		
+		return clone;
+	}
+	
 }

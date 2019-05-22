@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
-import uk.nhs.ctp.service.report.decorator.mapping.LocationToCOCDTP146232GB01LocationMapper;
 import uk.nhs.ctp.service.report.decorator.mapping.template.resolver.EncounterParticipantTemplateResolver;
 import uk.nhs.ctp.service.report.decorator.mapping.template.resolver.HealthCareFacilityChoiceTemplateResolver;
 import uk.nhs.ctp.service.report.decorator.mapping.template.resolver.ResponsiblePartyChoiceTemplateResolver;
@@ -24,7 +23,6 @@ import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP146232GB01ResponsibleParty;
 import uk.nhs.ctp.service.report.org.hl7.v3.CV;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02ClinicalDocument;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02Component;
-import uk.nhs.ctp.service.report.org.hl7.v3.XEncounterParticipant;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
 
 @Component
@@ -38,9 +36,6 @@ public class ComponentOfDocumentDecorator implements OneOneOneDecorator {
 	
 	@Autowired
 	private ResponsiblePartyChoiceTemplateResolver<? extends IBaseResource> responsiblePartyChoiceTemplateResolver;
-	
-	@Autowired
-	private LocationToCOCDTP146232GB01LocationMapper locationToLocationMapper;
 	
 	@Override
 	public void decorate(POCDMT200001GB02ClinicalDocument document, ReportRequestDTO request) {
@@ -61,64 +56,43 @@ public class ComponentOfDocumentDecorator implements OneOneOneDecorator {
 		cv.setCodeSystem("2.16.840.1.113883.2.1.3.2.4.17.326");
 		cv.setCode("NHS111Encounter");
 		encompassingEncounter.setCode(cv);
-
-		COCDTP146232GB01EncounterParticipant encounterParticipant = createEncounterParticipant();
 		
 		Bundle resourceBundle = ResourceProviderUtils.getResource(
 				request.getReferralRequest().getContained(), Bundle.class);
 		Encounter encounter = ResourceProviderUtils.getResource(ResourceProviderUtils.getResource(
 				resourceBundle, Composition.class).getEncounter().getResource(), Encounter.class);
 		
-		encounterParticipantTemplateResolver.resolve(
-				encounter.getSubject().getResource(), encounterParticipant, request);
+		COCDTP146232GB01EncounterParticipant encounterParticipant = 
+				encounterParticipantTemplateResolver.resolve(encounter.getSubject().getResource(), request);
 		
-		encompassingEncounter.getEncounterParticipant().add(encounterParticipant);
+		if (encounterParticipant != null)
+			encompassingEncounter.getEncounterParticipant().add(encounterParticipant);
 		
 		encounter.getParticipant().stream()
 				.map(component -> component.getIndividual().getResource())
 				.forEach(resource -> {
-					COCDTP146232GB01EncounterParticipant individualParticipant = createEncounterParticipant();
-					encounterParticipantTemplateResolver.resolve(resource, individualParticipant, request);
-					encompassingEncounter.getEncounterParticipant().add(individualParticipant);
+					COCDTP146232GB01EncounterParticipant individualParticipant = 
+							encounterParticipantTemplateResolver.resolve(resource, request);
+					
+					if (individualParticipant != null)
+						encompassingEncounter.getEncounterParticipant().add(individualParticipant);
 				});
 
 		Location fhirLocation = ResourceProviderUtils.getResource(
 				encounter.getLocationFirstRep().getLocation().getResource(), Location.class);
 		
-		COCDTP146232GB01Location location = locationToLocationMapper.map(fhirLocation);
-		healthCareFacilityChoiceTemplateResolver.resolve(fhirLocation, location, request);
+		COCDTP146232GB01Location location = healthCareFacilityChoiceTemplateResolver.resolve(fhirLocation, request);
 		encompassingEncounter.setLocation(location);
 		
-		COCDTP146232GB01ResponsibleParty responsibleParty = new COCDTP146232GB01ResponsibleParty();
-		responsibleParty.setTypeCode(responsibleParty.getTypeCode());
+		COCDTP146232GB01ResponsibleParty responsibleParty = responsiblePartyChoiceTemplateResolver.resolve(
+				request.getReferralRequest().getRequester().getAgent().getResource(), request);
 		
-		COCDTP146232GB01ResponsibleParty.TemplateId 
-				responsiblePartyTemplateId = new COCDTP146232GB01ResponsibleParty.TemplateId();
-		responsiblePartyTemplateId.setRoot("2.16.840.1.113883.2.1.3.2.4.18.16");
-		responsiblePartyTemplateId.setExtension("COCD_TP146232GB01#location");
-		responsibleParty.setTemplateId(responsiblePartyTemplateId);
-		
-		responsiblePartyChoiceTemplateResolver.resolve(
-				request.getReferralRequest().getRequester().getAgent().getResource(), responsibleParty, request);
-		
-		encompassingEncounter.setResponsibleParty(new JAXBElement<COCDTP146232GB01ResponsibleParty>(new QName("responsibleParty"), COCDTP146232GB01ResponsibleParty.class, responsibleParty));
+		encompassingEncounter.setResponsibleParty(new JAXBElement<COCDTP146232GB01ResponsibleParty>(
+				new QName("responsibleParty"), COCDTP146232GB01ResponsibleParty.class, responsibleParty));
 		
 		componentOf.setCOCDTP146232GB01EncompassingEncounter(encompassingEncounter);
 		
 		document.setComponentOf(componentOf);
-	}
-
-	private COCDTP146232GB01EncounterParticipant createEncounterParticipant() {
-		COCDTP146232GB01EncounterParticipant encounterParticipant = new COCDTP146232GB01EncounterParticipant();
-		encounterParticipant.setTypeCode(XEncounterParticipant.REF);
-		
-		COCDTP146232GB01EncounterParticipant.TemplateId 
-				encounterParticipantTemplateId = new COCDTP146232GB01EncounterParticipant.TemplateId();
-		encounterParticipantTemplateId.setRoot("2.16.840.1.113883.2.1.3.2.4.18.2");
-		encounterParticipantTemplateId.setExtension("COCD_TP146232GB01#encounterParticipant");
-		encounterParticipant.setTemplateId(encounterParticipantTemplateId);
-		
-		return encounterParticipant;
 	}
 
 }

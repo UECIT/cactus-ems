@@ -4,6 +4,8 @@ import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
+import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointUse;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Practitioner.PractitionerQualificationComponent;
 import org.springframework.stereotype.Component;
@@ -74,6 +76,8 @@ public class CareConnectPractitionerBuilder {
 		practitioner.addIdentifier(sdsRoleIdentifier);
 		practitioner.setNhsCommunication(communicationExtension);
 		practitioner.addQualification(practitionerQualificationComponent);
+		practitioner.addTelecom().setValue("0191 456 4521")
+				.setSystem(ContactPointSystem.PHONE).setUse(ContactPointUse.WORK);
 		
 		return practitioner;
 		

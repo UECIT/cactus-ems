@@ -344,7 +344,13 @@ export class QuestionnaireComponent implements OnInit {
     const reports = await this.reportService.getReport(this.questionnaire.caseId, this.questionnaire.referralRequest.resourceId, this.handoverMessage);
     for (let index = 0; index < reports.length; index++) {
       const report = reports[index];
-      if (report.reportType === 'ONE_ONE_ONE') {
+      if (report.reportType === 'ONE_ONE_ONE_V2') {
+        this.isloadingReport = true;
+        report.ValidationReport = await this.reportService.validate111Report(report.request);
+        this.isloadingReport = false;
+      }
+      
+      if (report.reportType === 'ONE_ONE_ONE_V3') {
         this.isloadingReport = true;
         report.ValidationReport = await this.reportService.validate111Report(report.request);
         this.isloadingReport = false;

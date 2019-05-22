@@ -18,13 +18,14 @@ public abstract class AbstractTemplateResolver<RESOURCE extends IBaseResource, C
 		this.templateMappers = templateMappers;
 	}
 	
-	public CONTAINER resolve(IBaseResource resource, CONTAINER container, ReportRequestDTO request) {
-		Optional<TemplateMapper<RESOURCE, CONTAINER>> optional = 
-				templateMappers.stream().filter(mapper -> 
-					mapper.getResourceClass().equals(resource.getClass())).findFirst();
+	public CONTAINER resolve(IBaseResource resource, ReportRequestDTO request) {
+		CONTAINER container = null;
+		TemplateMapper<RESOURCE, CONTAINER> templateMapper = getTemplateMapper(resource, request);
 		
-		if (optional.isPresent()) {
-			TemplateMapper<RESOURCE, CONTAINER> mapper = optional.get();
+		if (templateMapper != null) {
+			container = createContainer();
+			
+			TemplateMapper<RESOURCE, CONTAINER> mapper = getTemplateMapper(resource, request);
 			mapper.map(mapper.getResourceClass().cast(resource), container, request);
 			
 			TemplateContent templateContent = new TemplateContent();
@@ -34,5 +35,19 @@ public abstract class AbstractTemplateResolver<RESOURCE extends IBaseResource, C
 		}
 		
 		return container;
+	}
+	
+	public List<TemplateMapper<RESOURCE, CONTAINER>> getTemplateMappers() {
+		return templateMappers;
+	}
+	
+	protected abstract CONTAINER createContainer();
+	
+	private TemplateMapper<RESOURCE, CONTAINER> getTemplateMapper(IBaseResource resource, ReportRequestDTO request) {
+		Optional<TemplateMapper<RESOURCE, CONTAINER>> optional = 
+				templateMappers.stream().filter(mapper -> !request.isExcluded(mapper.getClass()) &&
+					mapper.getResourceClass().equals(resource.getClass())).findFirst();
+		
+		return optional.isPresent() ? optional.get() : null;
 	}
 }

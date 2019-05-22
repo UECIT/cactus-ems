@@ -83,12 +83,10 @@ public class ComponentDocumentDecorator implements OneOneOneDecorator {
 		classificationSection.getComponent().add(noteSectionComponent);
 		
 		ResourceProviderUtils.getResources(resourceBundle, Observation.class).stream().forEach(observation -> {
-			POCDMT200001GB02Component2 dataComponent = new POCDMT200001GB02Component2();
-			dataComponent.setTypeCode(dataComponent.getTypeCode());
-			
-			classificationSection.getEntry().add(codedEntryTemplateResolver.resolve(observation, dataComponent, request));
+			POCDMT200001GB02Component2 component2 = codedEntryTemplateResolver.resolve(observation, request);
+			if (component2 != null)	
+				classificationSection.getEntry().add(component2);
 		});
-		
 
 		component4.setClassificationSection(classificationSection);
 		structuredBody.setComponent(component4);

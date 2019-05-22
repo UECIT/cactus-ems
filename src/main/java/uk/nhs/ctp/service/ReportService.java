@@ -39,7 +39,7 @@ public class ReportService {
 		
 		for (Reportable service : reportServices) {
 			try {
-				reports.add(service.generate(request));
+				reports.add(service.generate(request.clone()));
 			} catch (Exception e) {
 				LOG.error(MessageFormat.format("Error creating report {0} ", 
 						service.getClass().getSimpleName().replace("Service", "")), e);

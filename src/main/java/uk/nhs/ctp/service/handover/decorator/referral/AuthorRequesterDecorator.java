@@ -2,8 +2,11 @@ package uk.nhs.ctp.service.handover.decorator.referral;
 
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.Address.AddressType;
+import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
+import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointUse;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.ContactPoint;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.HumanName.NameUse;
@@ -40,12 +43,20 @@ public class AuthorRequesterDecorator implements ResourceDecorator<ReferralReque
 			.setDisplay("Other Provider"));
 	
 		RelatedPerson author = new RelatedPerson();
+		ContactPoint contactPoint = new ContactPoint()
+			.setValue("0800 000 0000")
+			.setSystem(ContactPointSystem.PHONE)
+			.setUse(ContactPointUse.WORK);
 		
 		author.addAddress(address);
 		author.addIdentifier(new Identifier().setType(relationship));
-		author.addTelecom().setValue("0800 000 0000");
+		author.addTelecom(contactPoint);
+		
 		author.addName(new HumanName()
-				.setFamily("Smith").addGiven("Jane").addPrefix("Ms").setUse(NameUse.OFFICIAL));
+			.setFamily("Smith")
+			.addGiven("Jane")
+			.addPrefix("Ms")
+			.setUse(NameUse.OFFICIAL));
 	
 		author.setActive(true);
 		author.setGender(AdministrativeGender.FEMALE);
@@ -55,7 +66,7 @@ public class AuthorRequesterDecorator implements ResourceDecorator<ReferralReque
 		CareConnectOrganization onBehalfOf = new CareConnectOrganization();
 		
 		onBehalfOf.addAddress(address);
-		onBehalfOf.addTelecom().setValue("0800 000 0000");
+		onBehalfOf.addTelecom(contactPoint);
 		onBehalfOf.addType(organizationType);
 		
 		onBehalfOf.setActive(true);

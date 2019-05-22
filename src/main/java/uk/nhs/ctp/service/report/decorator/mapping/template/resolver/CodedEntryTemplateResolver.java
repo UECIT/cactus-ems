@@ -19,4 +19,12 @@ public class CodedEntryTemplateResolver<RESOURCE extends IBaseResource>
 		
 		super(componentDataMappers);
 	}
+
+	@Override
+	protected POCDMT200001GB02Component2 createContainer() {
+		POCDMT200001GB02Component2 component = new POCDMT200001GB02Component2();
+		component.setTypeCode(component.getTypeCode());
+		
+		return component;
+	}
 }

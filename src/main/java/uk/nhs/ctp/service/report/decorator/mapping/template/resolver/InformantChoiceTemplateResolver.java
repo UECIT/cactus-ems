@@ -19,4 +19,13 @@ public class InformantChoiceTemplateResolver<RESOURCE extends IBaseResource>
 	
 		super(templateMappers);
 	}
+
+	@Override
+	protected POCDMT200001GB02Informant createContainer() {
+		POCDMT200001GB02Informant informant = new POCDMT200001GB02Informant();
+		informant.setTypeCode(informant.getTypeCode());
+		informant.getContextControlCode().add("OP");
+		
+		return informant;
+	}
 }

@@ -104,5 +104,9 @@ public class ADXP
     public void setPartType(CsAddressPartType value) {
         this.partType = value;
     }
+    
+    public String toString() {
+    	return reference.getValue();
+    }
 
 }
