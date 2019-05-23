@@ -11,6 +11,7 @@ import uk.nhs.ctp.service.report.decorator.mapping.CodingToCVNPfITCodedplainRequ
 import uk.nhs.ctp.service.report.decorator.mapping.HumanNameToCOCDTP145200GB01PersonMapper;
 import uk.nhs.ctp.service.report.decorator.mapping.OrganizationToCOCDTP145203GB03OrganizationMapper;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145200GB01AssignedAuthor;
+import uk.nhs.ctp.service.report.org.hl7.v3.IINPfITOidRequiredAssigningAuthorityName;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145200GB01AssignedAuthor.TemplateId;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02Author;
@@ -42,6 +43,11 @@ public class RelatedPersonToAuthorPersonUniversalTemplateMapper implements Templ
 		
 		assignedAuthor.setAssignedPerson(humanNameToAssignedPersonMapper.map(relatedPerson.getNameFirstRep()));
 		assignedAuthor.setRepresentedOrganization(organizationToRepresentedOrganizationMapper.map(organization));
+		
+		IINPfITOidRequiredAssigningAuthorityName id = new IINPfITOidRequiredAssigningAuthorityName();
+		id.setRoot("1.2.826.0.1285.0.2.0.65");
+		id.setExtension("24400320");
+		assignedAuthor.getId().add(id);
 		
 		// set templateID
 		TemplateId assignedAuthorTemplate = new TemplateId();

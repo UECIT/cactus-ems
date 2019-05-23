@@ -13,6 +13,7 @@ import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145222GB02HealthCareFacility;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145222GB02HealthCareFacility.TemplateId;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145222GB02Place;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP146232GB01Location;
+import uk.nhs.ctp.service.report.org.hl7.v3.IINPfITOidRequired;
 
 @Component
 public class LocationToIncidentalHealthCareFacilityUniversalTemplateMapper 
@@ -25,6 +26,11 @@ public class LocationToIncidentalHealthCareFacilityUniversalTemplateMapper
 	public void map(Location location, COCDTP146232GB01Location container, ReportRequestDTO request) {
 		COCDTP145222GB02HealthCareFacility healthCareFacility = new COCDTP145222GB02HealthCareFacility();
 		healthCareFacility.setClassCode(healthCareFacility.getClassCode());
+		
+		IINPfITOidRequired id = new IINPfITOidRequired();
+		id.setRoot("2.16.840.1.113883.2.1.3.2.4.18.41");
+		id.setExtension("200001025758");
+		healthCareFacility.getId().add(id);
 		
 		TemplateId templateId = new TemplateId();
 		templateId.setRoot("2.16.840.1.113883.2.1.3.2.4.18.2");

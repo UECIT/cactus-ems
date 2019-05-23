@@ -7,6 +7,8 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointUse;
 import org.hl7.fhir.dstu3.model.HumanName;
+import org.hl7.fhir.dstu3.model.Address.AddressType;
+import org.hl7.fhir.dstu3.model.Address.AddressUse;
 import org.hl7.fhir.dstu3.model.Practitioner.PractitionerQualificationComponent;
 import org.springframework.stereotype.Component;
 
@@ -59,7 +61,9 @@ public class CareConnectPractitionerBuilder {
 			.addLine("Gilesgate Medical Centre")
 			.addLine("Sunderland Rd")
 			.setCity("Durham")
-			.setPostalCode("S25 4HE");
+			.setPostalCode("S25 4HE")
+			.setType(AddressType.PHYSICAL)
+			.setUse(AddressUse.WORK);
 		
 		PractitionerQualificationComponent practitionerQualificationComponent = new PractitionerQualificationComponent();
 		practitionerQualificationComponent.setCode(new CodeableConcept().addCoding(new Coding()

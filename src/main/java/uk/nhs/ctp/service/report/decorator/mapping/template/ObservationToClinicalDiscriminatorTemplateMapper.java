@@ -30,7 +30,7 @@ public class ObservationToClinicalDiscriminatorTemplateMapper implements Templat
 		
 		TemplateId templateId = new TemplateId();
 		templateId.setRoot("2.16.840.1.113883.2.1.3.2.4.18.2");
-		templateId.setExtension("COCD_TP146092GB01#ClinicalDiscriminator");
+		templateId.setExtension(getTemplateName());
 		clinicalDiscriminator.setTemplateId(templateId);
 		
 		CV observationCode = new CV();

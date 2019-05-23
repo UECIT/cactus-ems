@@ -17,6 +17,8 @@ public abstract class HumanNameToPersonMapper<PERSON extends Entity<PN>> extends
 		person.setDeterminerCode(person.getDeterminerCode());
 		person.setName(humanNameToPNMapper.map(name));
 		
+		addTemplateId(person);
+		
 		return person;
 	}
 	

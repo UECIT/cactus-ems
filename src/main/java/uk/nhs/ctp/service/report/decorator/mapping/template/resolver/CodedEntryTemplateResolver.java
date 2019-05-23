@@ -15,9 +15,9 @@ public class CodedEntryTemplateResolver<RESOURCE extends IBaseResource>
 
 	@Autowired
 	public CodedEntryTemplateResolver(
-			List<TemplateMapper<RESOURCE, POCDMT200001GB02Component2>> componentDataMappers) {
+			List<TemplateMapper<RESOURCE, POCDMT200001GB02Component2>> templateMappers) {
 		
-		super(componentDataMappers);
+		super(templateMappers);
 	}
 
 	@Override

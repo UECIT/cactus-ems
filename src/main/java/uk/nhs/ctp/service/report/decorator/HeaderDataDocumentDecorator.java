@@ -3,9 +3,11 @@ package uk.nhs.ctp.service.report.decorator;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.mifmif.common.regex.Generex;
 
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.report.npfit.hl7.localisation.MessageType;
@@ -15,12 +17,13 @@ import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02ClinicalDocument;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02ClinicalDocument.EffectiveTime;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02ClinicalDocument.VersionNumber;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02ClinicalDocumentTypeId;
-import uk.nhs.ctp.service.report.org.hl7.v3.STTitle;
-import uk.nhs.ctp.service.report.org.hl7.v3.TEL;
 
 @Component
 public class HeaderDataDocumentDecorator implements OneOneOneDecorator {
 
+	@Autowired
+	private Generex uuidGenerator;
+	
 	@Override
 	public void decorate(POCDMT200001GB02ClinicalDocument document, ReportRequestDTO request) {
 
@@ -48,7 +51,7 @@ public class HeaderDataDocumentDecorator implements OneOneOneDecorator {
 
 		// The HL7 attribute id uses an identifier to identify each unique instance of a clinical document.
 		IINPfITUuidMandatory id = new IINPfITUuidMandatory();
-		id.setRoot(UUID.randomUUID().toString());
+		id.setRoot(uuidGenerator.random());
 		document.setId(id);
 
 		// The HL7 (NHS localisation) attribute messageType identifies the CDA document as one that complies with a certain NHS CDA profile.
@@ -57,12 +60,10 @@ public class HeaderDataDocumentDecorator implements OneOneOneDecorator {
 		messageType.setExtension("POCD_MT200001GB02");
 		document.setMessageType(messageType);
 
-		// The HL7 attribute title uses a string which is rendered as a human readable title.
-		STTitle title = new STTitle();
-		TEL value = new TEL();
-		value.setValue("Integrated Urgent Care Report");
-		title.setReference(value);
-		document.setTitle(title);
+		IINPfITUuidMandatory setId = new IINPfITUuidMandatory();
+		setId.setRoot(uuidGenerator.random());
+		document.setSetId(setId);
+		document.setTitle("Integrated Urgent Care Report");
 
 		// The HL7 attribute typeId signals the imposition of constraints defined in an HL7-specified message type.
 		POCDMT200001GB02ClinicalDocumentTypeId typeId = new POCDMT200001GB02ClinicalDocumentTypeId();

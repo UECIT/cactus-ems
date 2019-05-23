@@ -1,7 +1,5 @@
 package uk.nhs.ctp.service.report.decorator;
 
-import java.util.UUID;
-
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
@@ -11,12 +9,11 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.mifmif.common.regex.Generex;
+
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
-import uk.nhs.ctp.service.report.decorator.mapping.BundleToSectionMapper;
-import uk.nhs.ctp.service.report.decorator.mapping.ReferralRequestToSectionMapper;
 import uk.nhs.ctp.service.report.decorator.mapping.template.resolver.CodedEntryTemplateResolver;
-import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP146246GB01Section1;
-import uk.nhs.ctp.service.report.org.hl7.v3.II;
+import uk.nhs.ctp.service.report.decorator.mapping.template.resolver.IntegratedUrgentCareTextSectionTemplateResolver;
 import uk.nhs.ctp.service.report.org.hl7.v3.IINPfITUuidMandatory;
 import uk.nhs.ctp.service.report.org.hl7.v3.ObjectFactory;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02Author;
@@ -38,13 +35,13 @@ public class ComponentDocumentDecorator implements OneOneOneDecorator {
 	private AuthorDocumentDecorator authorDocumentDecorator;
 	
 	@Autowired
-	private BundleToSectionMapper bundleToSectionMapper;
-	
-	@Autowired
-	private ReferralRequestToSectionMapper referralRequestToSectionMapper;
-	
-	@Autowired
 	private CodedEntryTemplateResolver<? extends IBaseResource> codedEntryTemplateResolver;
+	
+	@Autowired
+	private IntegratedUrgentCareTextSectionTemplateResolver<? extends IBaseResource> textSectionTemplateResolver;
+	
+	@Autowired
+	private Generex uuidGenerator;
 	
 	@Override
 	public void decorate(POCDMT200001GB02ClinicalDocument document, ReportRequestDTO request) {
@@ -63,23 +60,21 @@ public class ComponentDocumentDecorator implements OneOneOneDecorator {
 		classificationSection.setMoodCode(classificationSection.getMoodCode());
 		
 		IINPfITUuidMandatory sectionId = new IINPfITUuidMandatory();
-		sectionId.setRoot(UUID.randomUUID().toString());
+		sectionId.setRoot(uuidGenerator.random());
 		classificationSection.setId(sectionId);
 		
 		Bundle resourceBundle = request.getBundle();
-		
-		POCDMT200001GB02Component31 triageSectionComponent = createSectionComponent();
-		COCDTP146246GB01Section1 triageSection = bundleToSectionMapper.map(resourceBundle);
 		JAXBElement<POCDMT200001GB02Author> authorElement = new JAXBElement<>(
 				new QName("author"), POCDMT200001GB02Author.class, authorDocumentDecorator.createAuthor(request));
-		triageSection.setAuthor(authorElement);
-		triageSectionComponent.setCOCDTP146246GB01Section1(triageSection);
+		
+		POCDMT200001GB02Component31 triageSectionComponent = 
+				textSectionTemplateResolver.resolve(resourceBundle, request);
+		triageSectionComponent.getCOCDTP146246GB01Section1().setAuthor(authorElement);
 		classificationSection.getComponent().add(triageSectionComponent);
 		
-		POCDMT200001GB02Component31 noteSectionComponent = createSectionComponent();
-		COCDTP146246GB01Section1 noteSection = referralRequestToSectionMapper.map(request.getReferralRequest());
-		noteSection.setAuthor(authorElement);
-		noteSectionComponent.setCOCDTP146246GB01Section1(noteSection);
+		POCDMT200001GB02Component31 noteSectionComponent = 
+				textSectionTemplateResolver.resolve(request.getReferralRequest(), request);
+		noteSectionComponent.getCOCDTP146246GB01Section1().setAuthor(authorElement);
 		classificationSection.getComponent().add(noteSectionComponent);
 		
 		ResourceProviderUtils.getResources(resourceBundle, Observation.class).stream().forEach(observation -> {
@@ -102,18 +97,6 @@ public class ComponentDocumentDecorator implements OneOneOneDecorator {
 		structuredBody.setComponent(component4);
 
 		return structuredBody;
-	}
-	
-	private POCDMT200001GB02Component31 createSectionComponent() {
-		POCDMT200001GB02Component31 sectionComponent = new POCDMT200001GB02Component31();
-		sectionComponent.setTypeCode(sectionComponent.getTypeCode());
-		sectionComponent.setContextConductionInd(true);
-	
-		II sectionComponentId = new II();
-		sectionComponentId.setRoot("2.16.840.1.113883.2.1.3.2.4.18.16");
-		sectionComponentId.setExtension("COCD_TP146246GB01"); 
-		
-		return sectionComponent;
 	}
 	
 }

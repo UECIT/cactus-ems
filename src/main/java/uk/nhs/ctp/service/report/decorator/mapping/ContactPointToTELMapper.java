@@ -24,6 +24,12 @@ public class ContactPointToTELMapper extends AbstractMapper<TEL, ContactPoint>{
 		contactPointUseToTelecommunicationAddressUseMap.put(
 				ContactPointUse.HOME, CsTelecommunicationAddressUse.H);
 		
+		contactPointUseToTelecommunicationAddressUseMap.put(
+				ContactPointUse.MOBILE, CsTelecommunicationAddressUse.MC);
+		
+		contactPointUseToTelecommunicationAddressUseMap.put(
+				ContactPointUse.WORK, CsTelecommunicationAddressUse.WP);
+		
 		contactPointSystemToTelecommunicationPrefixMap.put(ContactPointSystem.EMAIL, "mailto:");
 		contactPointSystemToTelecommunicationPrefixMap.put(ContactPointSystem.PHONE, "tel:");
 		contactPointSystemToTelecommunicationPrefixMap.put(ContactPointSystem.FAX, "fax:");

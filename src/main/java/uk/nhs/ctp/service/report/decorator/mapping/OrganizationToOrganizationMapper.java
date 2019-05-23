@@ -22,5 +22,5 @@ public abstract class OrganizationToOrganizationMapper
 	
 	protected abstract ORGANIZATION createOrganization();
 	
-	protected abstract void addTemplateId(ORGANIZATION organization);
+	protected abstract void addIds(ORGANIZATION organization);
 }

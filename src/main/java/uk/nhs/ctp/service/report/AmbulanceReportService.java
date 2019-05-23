@@ -10,6 +10,8 @@ import org.hl7.fhir.dstu3.model.codesystems.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.mifmif.common.regex.Generex;
+
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.dto.ReportType;
 import uk.nhs.ctp.service.dto.ReportsDTO;
@@ -43,6 +45,9 @@ public class AmbulanceReportService implements Reportable {
 	@Autowired
 	private List<AmbulanceDecorator> decorators;
 	
+	@Autowired
+	private Generex uuidGenerator;
+	
 	private ObjectFactory objectFactory = new ObjectFactory();
 	
 	@Override
@@ -75,7 +80,7 @@ public class AmbulanceReportService implements Reportable {
 		
 		// The HL7 attribute id holds a unique identifier for this care provision request.
 		IINPfITUuidMandatory identifier = new IINPfITUuidMandatory();
-		identifier.setRoot("1234-1234-1234-1234");
+		identifier.setRoot(uuidGenerator.random());
 		ambulanceRequestReport.setId(identifier);
 		
 		// This class is a information recipient class - It is used for the list of recipients of the ambulance request message.

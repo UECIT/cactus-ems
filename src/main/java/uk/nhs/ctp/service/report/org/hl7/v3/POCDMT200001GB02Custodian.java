@@ -52,7 +52,7 @@ import uk.nhs.ctp.service.report.npfit.hl7.localisation.TemplateContent;
     "contentId",
     "cocdtp145018UK03AssignedCustodian"
 })
-public class POCDMT200001GB02Custodian {
+public class POCDMT200001GB02Custodian implements ContentAware {
 
     @XmlElement(namespace = "NPFIT:HL7:Localisation", required = true)
     protected TemplateContent contentId;

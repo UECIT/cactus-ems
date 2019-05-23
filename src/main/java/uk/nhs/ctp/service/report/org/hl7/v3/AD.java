@@ -916,11 +916,9 @@ public class AD {
      * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "")
     public static class StreetAddressLine
-        extends ADXP
+        
     {
-
 
     }
 

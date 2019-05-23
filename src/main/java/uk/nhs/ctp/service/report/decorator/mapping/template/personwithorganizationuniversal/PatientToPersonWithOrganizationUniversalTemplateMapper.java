@@ -7,7 +7,6 @@ import org.hl7.fhir.dstu3.model.ContactPoint;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Practitioner;
-import org.springframework.stereotype.Component;
 
 import resources.CareConnectPatient;
 import resources.CareConnectPractitioner;

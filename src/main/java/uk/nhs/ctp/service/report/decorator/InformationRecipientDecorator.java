@@ -45,6 +45,14 @@ public class InformationRecipientDecorator implements OneOneOneDecorator, Ambula
 		createInformationRecipients(informationRecipients, request);
 	}
 	
+//	private List<POCDMT200001GB02PrimaryInformationRecipient> createInformationRecipients(ReportRequestDTO request) {
+//		
+//		return request.getReferralRequest().getRecipient().stream().map(ref -> 
+//			informationRecipientChoiceTemplateResolver.resolve(
+//					ref.getResource(), request)).collect(Collectors.toList());
+//	}
+	
+	
 	private List<POCDMT200001GB02PrimaryInformationRecipient> createInformationRecipients(List<POCDMT200001GB02PrimaryInformationRecipient> informationRecipients, ReportRequestDTO request) {
 		for (Reference informationRecipient : request.getReferralRequest().getRecipient()) {
 			if(informationRecipient.getResource() instanceof CareConnectOrganization) {
@@ -122,7 +130,6 @@ public class InformationRecipientDecorator implements OneOneOneDecorator, Ambula
 		COCDTP145203GB03IntendedRecipient.TemplateId intendedRecipientTemplateId = new COCDTP145203GB03IntendedRecipient.TemplateId();
 		intendedRecipientTemplateId.setRoot("2.16.840.1.113883.2.1.3.2.4.18.2");
 		intendedRecipientTemplateId.setExtension("COCD_TP145203GB03#IntendedRecipient");
-		intendedRecipientOrganization.setTemplateId(intendedRecipientTemplateId);
 		
 		// build representedOrganization
 		COCDTP145203GB03Organization representedOrganization = new COCDTP145203GB03Organization();
@@ -160,7 +167,7 @@ public class InformationRecipientDecorator implements OneOneOneDecorator, Ambula
 		primaryInformationRecipient.setTypeCode(primaryInformationRecipient.getTypeCode());
 		TemplateContent templateContent = new TemplateContent();
 		templateContent.setRoot("2.16.840.1.113883.2.1.3.2.4.18.16");
-		templateContent.setExtension("COCD_TP145202GB02#IntendedRecipient");
+		templateContent.setExtension("COCD_TP145203GB03#IntendedRecipient");
 		primaryInformationRecipient.setContentId(templateContent);
 		
 		return primaryInformationRecipient;

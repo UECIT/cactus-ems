@@ -1,4 +1,4 @@
-package uk.nhs.ctp.service.report.decorator.mapping;
+package uk.nhs.ctp.service.report.decorator.mapping.template;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
@@ -7,20 +7,22 @@ import java.util.List;
 import org.hl7.fhir.dstu3.model.Consent;
 import org.springframework.stereotype.Component;
 
+import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.report.org.hl7.v3.CE;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP146226GB02Consent;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP146226GB02Consent.TemplateId;
 import uk.nhs.ctp.service.report.org.hl7.v3.ED;
 import uk.nhs.ctp.service.report.org.hl7.v3.II;
+import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02Authorization;
 import uk.nhs.ctp.service.report.org.hl7.v3.TEL;
 
 @Component
-public class ConsentToConsentMapper extends AbstractMapper<COCDTP146226GB02Consent, Consent>{
+public class ConsentToConsentTemplateMapper implements TemplateMapper<Consent, POCDMT200001GB02Authorization>{
 
 	private List<String> consentCodes = Arrays.asList(new String[] {"access", "use", "disclose"});
 	
 	@Override
-	public COCDTP146226GB02Consent map(Consent fhirConsent) {
+	public void map(Consent fhirConsent, POCDMT200001GB02Authorization container, ReportRequestDTO request) {
 		COCDTP146226GB02Consent consent = new COCDTP146226GB02Consent();
 		consent.setClassCode(consent.getClassCode());
 		consent.setMoodCode(consent.getMoodCode());
@@ -33,13 +35,23 @@ public class ConsentToConsentMapper extends AbstractMapper<COCDTP146226GB02Conse
 		
 		TemplateId templateId = new TemplateId();
 		templateId.setRoot("2.16.840.1.113883.2.1.3.2.4.18.2");
-		templateId.setExtension("COCD_TP146226GB02#Consent");
+		templateId.setExtension(getTemplateName());
 		consent.setTemplateId(templateId);
 	
 		consent.setCode(getConsentCode(fhirConsent.getAction().stream().anyMatch(action -> 
 				consentCodes.contains(action.getCodingFirstRep().getCode()))));
+		
+		container.setCOCDTP146226GB02Consent(consent);
+	}
 
-		return consent;
+	@Override
+	public Class<Consent> getResourceClass() {
+		return Consent.class;
+	}
+
+	@Override
+	public String getTemplateName() {
+		return "COCD_TP146226GB02#Consent";
 	}
 	
 	private CE getConsentCode(boolean consentGiven) {

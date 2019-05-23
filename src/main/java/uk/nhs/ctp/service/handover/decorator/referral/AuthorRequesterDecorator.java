@@ -2,6 +2,7 @@ package uk.nhs.ctp.service.handover.decorator.referral;
 
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.Address.AddressType;
+import org.hl7.fhir.dstu3.model.Address.AddressUse;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointUse;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -30,7 +31,8 @@ public class AuthorRequesterDecorator implements ResourceDecorator<ReferralReque
 			.addLine("Westgate")
 			.setCity("Leeds")
 			.setPostalCode("LS1 1SL")
-			.setType(AddressType.PHYSICAL);
+			.setType(AddressType.PHYSICAL)
+			.setUse(AddressUse.WORK);
 		
 		CodeableConcept relationship = new CodeableConcept().addCoding(new Coding()
 			.setSystem("https://fhir.hl7.org.uk/STU3/CodeSystem/CareConnect-SDSJobRoleName-1")

@@ -8,6 +8,7 @@
 
 package uk.nhs.ctp.service.report.org.hl7.v3;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -122,7 +123,7 @@ public class POCDMT200001GB02ClinicalDocument {
     @XmlElement(required = true)
     protected IINPfITUuidMandatory setId;
     @XmlElement(required = true)
-    protected STTitle title;
+    protected String title;
     @XmlElement(required = true)
     protected POCDMT200001GB02ClinicalDocumentTypeId typeId;
     @XmlElement(required = true)
@@ -314,7 +315,7 @@ public class POCDMT200001GB02ClinicalDocument {
      *     {@link STTitle }
      *     
      */
-    public STTitle getTitle() {
+    public String getTitle() {
         return title;
     }
 
@@ -326,7 +327,7 @@ public class POCDMT200001GB02ClinicalDocument {
      *     {@link STTitle }
      *     
      */
-    public void setTitle(STTitle value) {
+    public void setTitle(String value) {
         this.title = value;
     }
 
