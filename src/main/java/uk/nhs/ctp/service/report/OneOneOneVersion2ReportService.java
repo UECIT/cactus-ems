@@ -6,7 +6,7 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 
 import uk.nhs.ctp.service.dto.ReportType;
-import uk.nhs.ctp.service.report.decorator.mapping.template.ObservationToClinicalDiscriminatorTemplateMapper;
+import uk.nhs.ctp.service.report.decorator.mapping.template.codedentry.ObservationToClinicalDiscriminatorTemplateMapper;
 
 @Service
 public class OneOneOneVersion2ReportService extends OneOneOneReportService {

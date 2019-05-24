@@ -12,9 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
-import uk.nhs.ctp.service.report.decorator.mapping.template.resolver.EncounterParticipantTemplateResolver;
-import uk.nhs.ctp.service.report.decorator.mapping.template.resolver.HealthCareFacilityChoiceTemplateResolver;
-import uk.nhs.ctp.service.report.decorator.mapping.template.resolver.ResponsiblePartyChoiceTemplateResolver;
+import uk.nhs.ctp.service.report.decorator.mapping.template.encompassingencounter.location.HealthCareFacilityTemplateResolver;
+import uk.nhs.ctp.service.report.decorator.mapping.template.encompassingencounter.participant.ParticipantTemplateResolver;
+import uk.nhs.ctp.service.report.decorator.mapping.template.encompassingencounter.responsibleparty.ResponsiblePartyTemplateResolver;
 import uk.nhs.ctp.service.report.npfit.hl7.localisation.TemplateContent;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP146232GB01EncompassingEncounter;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP146232GB01EncounterParticipant;
@@ -29,13 +29,13 @@ import uk.nhs.ctp.utils.ResourceProviderUtils;
 public class ComponentOfDocumentDecorator implements OneOneOneDecorator {
 
 	@Autowired
-	private EncounterParticipantTemplateResolver<? extends IBaseResource> encounterParticipantTemplateResolver;
+	private ParticipantTemplateResolver<? extends IBaseResource> participantTemplateResolver;
 	
 	@Autowired
-	private HealthCareFacilityChoiceTemplateResolver<? extends IBaseResource> healthCareFacilityChoiceTemplateResolver;
+	private HealthCareFacilityTemplateResolver<? extends IBaseResource> healthCareFacilityTemplateResolver;
 	
 	@Autowired
-	private ResponsiblePartyChoiceTemplateResolver<? extends IBaseResource> responsiblePartyChoiceTemplateResolver;
+	private ResponsiblePartyTemplateResolver<? extends IBaseResource> responsiblePartyTemplateResolver;
 	
 	@Override
 	public void decorate(POCDMT200001GB02ClinicalDocument document, ReportRequestDTO request) {
@@ -63,7 +63,7 @@ public class ComponentOfDocumentDecorator implements OneOneOneDecorator {
 				resourceBundle, Composition.class).getEncounter().getResource(), Encounter.class);
 		
 		COCDTP146232GB01EncounterParticipant encounterParticipant = 
-				encounterParticipantTemplateResolver.resolve(encounter.getSubject().getResource(), request);
+				participantTemplateResolver.resolve(encounter.getSubject().getResource(), request);
 		
 		if (encounterParticipant != null)
 			encompassingEncounter.getEncounterParticipant().add(encounterParticipant);
@@ -72,7 +72,7 @@ public class ComponentOfDocumentDecorator implements OneOneOneDecorator {
 				.map(component -> component.getIndividual().getResource())
 				.forEach(resource -> {
 					COCDTP146232GB01EncounterParticipant individualParticipant = 
-							encounterParticipantTemplateResolver.resolve(resource, request);
+							participantTemplateResolver.resolve(resource, request);
 					
 					if (individualParticipant != null)
 						encompassingEncounter.getEncounterParticipant().add(individualParticipant);
@@ -81,10 +81,10 @@ public class ComponentOfDocumentDecorator implements OneOneOneDecorator {
 		Location fhirLocation = ResourceProviderUtils.getResource(
 				encounter.getLocationFirstRep().getLocation().getResource(), Location.class);
 		
-		COCDTP146232GB01Location location = healthCareFacilityChoiceTemplateResolver.resolve(fhirLocation, request);
+		COCDTP146232GB01Location location = healthCareFacilityTemplateResolver.resolve(fhirLocation, request);
 		encompassingEncounter.setLocation(location);
 		
-		COCDTP146232GB01ResponsibleParty responsibleParty = responsiblePartyChoiceTemplateResolver.resolve(
+		COCDTP146232GB01ResponsibleParty responsibleParty = responsiblePartyTemplateResolver.resolve(
 				request.getReferralRequest().getRequester().getAgent().getResource(), request);
 		
 		encompassingEncounter.setResponsibleParty(new JAXBElement<COCDTP146232GB01ResponsibleParty>(

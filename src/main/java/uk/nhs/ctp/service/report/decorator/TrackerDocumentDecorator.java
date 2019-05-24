@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import resources.CareConnectPatient;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
-import uk.nhs.ctp.service.report.decorator.mapping.template.resolver.TrackerRecipientChoiceTemplateResolver;
+import uk.nhs.ctp.service.report.decorator.mapping.template.recipient.TrackerRecipientChoiceTemplateResolver;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02ClinicalDocument;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
 

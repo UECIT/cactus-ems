@@ -7,4 +7,5 @@ public interface Flag {
 	
 	String getClassCode();
 	void setClassCode(String code);
+	
 }

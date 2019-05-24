@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 import com.mifmif.common.regex.Generex;
 
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
-import uk.nhs.ctp.service.report.decorator.mapping.template.resolver.CodedEntryTemplateResolver;
-import uk.nhs.ctp.service.report.decorator.mapping.template.resolver.IntegratedUrgentCareTextSectionTemplateResolver;
+import uk.nhs.ctp.service.report.decorator.mapping.template.codedentry.CodedEntryTemplateResolver;
+import uk.nhs.ctp.service.report.decorator.mapping.template.textsection.IntegratedUrgentCareTextSectionTemplateResolver;
 import uk.nhs.ctp.service.report.org.hl7.v3.IINPfITUuidMandatory;
 import uk.nhs.ctp.service.report.org.hl7.v3.ObjectFactory;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02Author;
