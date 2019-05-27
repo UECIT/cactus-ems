@@ -24,7 +24,6 @@ public class BundleToIntegratedUrgentCareTextSectionTemplateMapper extends Abstr
 	@Override
 	public void map(Bundle bundle, COCDTP146246GB01Section1 section) {
 		StrucDocText text = new StrucDocText();
-		text.setID(UUID.randomUUID().toString());
 		
 		List<QuestionnaireResponse> questionnaireResponses = 
 				ResourceProviderUtils.getResources(bundle, QuestionnaireResponse.class);
@@ -46,7 +45,7 @@ public class BundleToIntegratedUrgentCareTextSectionTemplateMapper extends Abstr
 		
 		response.getItem().stream().forEach(item -> {
 			paragraph.getContent().add(item.getText());
-			JAXBElement<StrucDocBr> br = new JAXBElement<>(new QName("br"), StrucDocBr.class, new StrucDocBr());
+			JAXBElement<StrucDocBr> br = new JAXBElement<>(new QName("urn:hl7-org:v3", "br"), StrucDocBr.class, new StrucDocBr());
 			paragraph.getContent().add(br);
 			Type type = item.getAnswerFirstRep().getValue();
 
@@ -54,6 +53,7 @@ public class BundleToIntegratedUrgentCareTextSectionTemplateMapper extends Abstr
 					((Coding)type).getDisplay() : type.primitiveValue());
 		});
 		
-		return new JAXBElement<StrucDocParagraph>(new QName("paragraph"), StrucDocParagraph.class, paragraph);
+		return new JAXBElement<StrucDocParagraph>(
+				new QName("urn:hl7-org:v3", "paragraph"), StrucDocParagraph.class, paragraph);
 	}
 }

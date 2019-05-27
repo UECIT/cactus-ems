@@ -9,6 +9,7 @@ import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.Practitioner.PractitionerQualificationComponent;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
+import org.hl7.fhir.dstu3.model.Address.AddressUse;
 import org.springframework.stereotype.Component;
 
 import uk.nhs.ctp.SystemURL;
@@ -34,6 +35,7 @@ public class PractitionerRecipientDecorator implements ResourceDecorator<Referra
 		gpAddress.addLine("Sunderland Rd");
 		gpAddress.setCity("Durham");
 		gpAddress.setPostalCode("S12 2L1");
+		gpAddress.setUse(AddressUse.WORK);
 		recipientPractitioner.addAddress(gpAddress);
 		
 		CodeableConcept practitionerQualification = new CodeableConcept();

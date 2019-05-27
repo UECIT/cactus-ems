@@ -9,13 +9,13 @@ import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.report.decorator.mapping.AddressToADMapper;
 import uk.nhs.ctp.service.report.decorator.mapping.CodingToCVNPfITCodedplainRequiredMapper;
 import uk.nhs.ctp.service.report.decorator.mapping.HumanNameToCOCDTP145200GB01PersonMapper;
-import uk.nhs.ctp.service.report.decorator.mapping.OrganizationToCOCDTP145203GB03OrganizationMapper;
+import uk.nhs.ctp.service.report.decorator.mapping.OrganizationToCOCDTP145200GB01OrganizationMapper;
 import uk.nhs.ctp.service.report.decorator.mapping.template.TemplateMapper;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145200GB01AssignedAuthor;
-import uk.nhs.ctp.service.report.org.hl7.v3.IINPfITOidRequiredAssigningAuthorityName;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145200GB01AssignedAuthor.TemplateId;
-import uk.nhs.ctp.utils.ResourceProviderUtils;
+import uk.nhs.ctp.service.report.org.hl7.v3.IINPfITOidRequiredAssigningAuthorityName;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02Author;
+import uk.nhs.ctp.utils.ResourceProviderUtils;
 
 @Component
 public class RelatedPersonToAuthorPersonUniversalTemplateMapper implements TemplateMapper<RelatedPerson, POCDMT200001GB02Author> {
@@ -27,7 +27,7 @@ public class RelatedPersonToAuthorPersonUniversalTemplateMapper implements Templ
 	private CodingToCVNPfITCodedplainRequiredMapper codingMapper;
 	
 	@Autowired
-	private OrganizationToCOCDTP145203GB03OrganizationMapper organizationToRepresentedOrganizationMapper;
+	private OrganizationToCOCDTP145200GB01OrganizationMapper organizationToOrganizationMapper;
 	
 	@Autowired
 	private HumanNameToCOCDTP145200GB01PersonMapper humanNameToAssignedPersonMapper;
@@ -43,19 +43,18 @@ public class RelatedPersonToAuthorPersonUniversalTemplateMapper implements Templ
 		assignedAuthor.setCode(codingMapper.map(relatedPerson.getRelationship().getCodingFirstRep()));
 		
 		assignedAuthor.setAssignedPerson(humanNameToAssignedPersonMapper.map(relatedPerson.getNameFirstRep()));
-		assignedAuthor.setRepresentedOrganization(organizationToRepresentedOrganizationMapper.map(organization));
+		assignedAuthor.setRepresentedOrganization(organizationToOrganizationMapper.map(organization));
 		
+		TemplateId assignedAuthorTemplate = new TemplateId();
+		assignedAuthorTemplate.setRoot("2.16.840.1.113883.2.1.3.2.4.18.2");
+		assignedAuthorTemplate.setExtension(getTemplateName());
+		assignedAuthor.setTemplateId(assignedAuthorTemplate);
+				
 		IINPfITOidRequiredAssigningAuthorityName id = new IINPfITOidRequiredAssigningAuthorityName();
 		id.setRoot("1.2.826.0.1285.0.2.0.65");
 		id.setExtension("24400320");
 		assignedAuthor.getId().add(id);
 		
-		// set templateID
-		TemplateId assignedAuthorTemplate = new TemplateId();
-		assignedAuthorTemplate.setRoot("2.16.840.1.113883.2.1.3.2.4.18.2");
-		assignedAuthorTemplate.setExtension(getTemplateName());
-		assignedAuthor.setTemplateId(assignedAuthorTemplate);
-
 		author.setCOCDTP145200GB01AssignedAuthor(assignedAuthor);
 	}
 

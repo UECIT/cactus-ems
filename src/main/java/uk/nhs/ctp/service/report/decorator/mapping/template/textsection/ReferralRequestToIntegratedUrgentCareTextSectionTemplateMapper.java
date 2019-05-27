@@ -21,7 +21,7 @@ public class ReferralRequestToIntegratedUrgentCareTextSectionTemplateMapper exte
 			StrucDocParagraph paragraph = new StrucDocParagraph();
 			paragraph.getContent().add(note.getText());
 			text.getContent().add(new JAXBElement<StrucDocParagraph>(
-					new QName("paragraph"), StrucDocParagraph.class, paragraph));
+					new QName("urn:hl7-org:v3", "paragraph"), StrucDocParagraph.class, paragraph));
 		});
 		
 		section.setText(text);

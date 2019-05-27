@@ -30,8 +30,6 @@ public class PatientCommunicationComponentToCOCDTP145201GB01LanguageCommunicatio
 				communicationComponent.getLanguage().getCodingFirstRep(), humanLanguageSystem);
 		
 		languageCode.setCode(code.getCode());
-		languageCode.setCodeSystem(code.getCodeSystem());
-		languageCode.setDisplayName(code.getDisplayName());
 		language.setLanguageCode(languageCode);
 		
 		BL bl = new BL();
@@ -41,6 +39,7 @@ public class PatientCommunicationComponentToCOCDTP145201GB01LanguageCommunicatio
 		TemplateId templateId = new TemplateId();
 		templateId.setRoot("2.16.840.1.113883.2.1.3.2.4.18.2");
 		templateId.setExtension("COCD_TP145201GB01#languageCommunication");
+		language.setTemplateId(templateId);
 		
 		return language;
 	}

@@ -46,7 +46,7 @@ public class AuthorRequesterDecorator implements ResourceDecorator<ReferralReque
 	
 		RelatedPerson author = new RelatedPerson();
 		ContactPoint contactPoint = new ContactPoint()
-			.setValue("0800 000 0000")
+			.setValue("08000000000")
 			.setSystem(ContactPointSystem.PHONE)
 			.setUse(ContactPointUse.WORK);
 		

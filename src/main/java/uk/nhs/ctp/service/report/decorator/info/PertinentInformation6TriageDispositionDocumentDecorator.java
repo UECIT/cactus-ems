@@ -43,7 +43,7 @@ public class PertinentInformation6TriageDispositionDocumentDecorator implements 
 		pertinentTriageDisposition.setValue(codedValue);
 		
 		triageDisposition.setPertinentTriageDisposition(pertinentTriageDisposition);
-		document.setPertinentInformation6(new JAXBElement<REPCMT200001GB02PertinentInformation7>(new QName("pertinentInformation6"), REPCMT200001GB02PertinentInformation7.class, triageDisposition));
+		document.setPertinentInformation6(new JAXBElement<REPCMT200001GB02PertinentInformation7>(new QName("urn:hl7-org:v3", "pertinentInformation6"), REPCMT200001GB02PertinentInformation7.class, triageDisposition));
 	}
 
 }

@@ -33,7 +33,7 @@ public class RelatedPersonBuilder {
 		
 		person.addTelecom()
 			.setSystem(ContactPointSystem.PHONE)
-			.setValue("01904 134 543")
+			.setValue("01904134543")
 			.setUse(ContactPointUse.HOME)
 			.setRank(1)
 			.setPeriod(new Period().setStart(new Date()).setEnd(new Date()));

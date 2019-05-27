@@ -28,18 +28,18 @@ public class LocationToIncidentalHealthCareFacilityUniversalTemplateMapper
 		COCDTP145222GB02HealthCareFacility healthCareFacility = new COCDTP145222GB02HealthCareFacility();
 		healthCareFacility.setClassCode(healthCareFacility.getClassCode());
 		
-		IINPfITOidRequired id = new IINPfITOidRequired();
-		id.setRoot("2.16.840.1.113883.2.1.3.2.4.18.41");
-		id.setExtension("200001025758");
-		healthCareFacility.getId().add(id);
-		
 		TemplateId templateId = new TemplateId();
 		templateId.setRoot("2.16.840.1.113883.2.1.3.2.4.18.2");
 		templateId.setExtension(getTemplateName());
 		healthCareFacility.setTemplateId(templateId);
 		
+		IINPfITOidRequired id = new IINPfITOidRequired();
+		id.setRoot("2.16.840.1.113883.2.1.3.2.4.18.41");
+		id.setExtension("200001025758");
+		healthCareFacility.getId().add(id);
+
 		healthCareFacility.setLocation(new JAXBElement<COCDTP145222GB02Place>(
-				new QName("location"), COCDTP145222GB02Place.class, locationToPlaceMapper.map(location)));
+				new QName("urn:hl7-org:v3", "location"), COCDTP145222GB02Place.class, locationToPlaceMapper.map(location)));
 		
 		container.setCOCDTP145222GB02HealthCareFacility(healthCareFacility);
 	}

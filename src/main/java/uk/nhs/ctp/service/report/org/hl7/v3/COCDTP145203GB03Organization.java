@@ -103,8 +103,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlType(name = "COCD_TP145203GB03.Organization", propOrder = {
     "id",
     "name",
-    "standardIndustryClassCode",
-    "templateId"
+    "templateId",
+    "standardIndustryClassCode"
 })
 public class COCDTP145203GB03Organization implements Entity<ON>, ClassCodeAware<COCDTP145203GB03Organization.StandardIndustryClassCode> {
 	

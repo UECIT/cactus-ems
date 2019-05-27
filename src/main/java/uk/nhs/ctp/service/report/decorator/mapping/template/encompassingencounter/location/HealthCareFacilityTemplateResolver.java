@@ -29,7 +29,7 @@ public class HealthCareFacilityTemplateResolver<RESOURCE extends IBaseResource>
 		location.setTypeCode(location.getTypeCode());
 		
 		TemplateId templateId = new TemplateId();
-		templateId.setRoot("2.16.840.1.113883.2.1.3.2.4.18.16");
+		templateId.setRoot("2.16.840.1.113883.2.1.3.2.4.18.2");
 		templateId.setExtension("COCD_TP146232GB01#location");
 		location.setTemplateId(templateId);
 		

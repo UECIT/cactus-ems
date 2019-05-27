@@ -42,6 +42,11 @@ public class PractitionerToRecipientOrganizationUniversalTemplateMapper<CONTAINE
 		intendedRecipient.setAddr(addressToADMapper.map(practitioner.getAddressFirstRep()));
 		intendedRecipient.getTelecom().addAll(contactPointToTELMapper.map(practitioner.getTelecom()));
 		
+		TemplateId templateId = new TemplateId();
+		templateId.setRoot("2.16.840.1.113883.2.1.3.2.4.18.2");
+		templateId.setExtension(getTemplateName());
+		intendedRecipient.setTemplateId(templateId);
+		
 		IINPfITOidRequiredAssigningAuthorityName id = new IINPfITOidRequiredAssigningAuthorityName();
 		id.setNullFlavor(CsNullFlavor.NA);
 		intendedRecipient.getId().add(id);
@@ -51,12 +56,6 @@ public class PractitionerToRecipientOrganizationUniversalTemplateMapper<CONTAINE
 		recipientRoleCode.setCode("NR0270");
 		recipientRoleCode.setDisplayName("Salaried General Practitioner");
 		intendedRecipient.setRecipientRoleCode(recipientRoleCode);
-		
-		TemplateId templateId = new TemplateId();
-		templateId.setRoot("2.16.840.1.113883.2.1.3.2.4.18.2");
-		templateId.setExtension(getTemplateName());
-		intendedRecipient.setTemplateId(templateId);
-		
 		intendedRecipient.setAssignedPerson(humanNameToPersonMapper.map(practitioner.getNameFirstRep()));
 		container.setCOCDTP145202GB02IntendedRecipient(intendedRecipient);
 	}

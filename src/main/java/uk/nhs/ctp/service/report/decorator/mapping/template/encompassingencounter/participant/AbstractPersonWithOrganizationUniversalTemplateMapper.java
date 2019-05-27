@@ -49,14 +49,14 @@ public abstract class AbstractPersonWithOrganizationUniversalTemplateMapper
 		assignedEntity.setRepresentedOrganization(
 				organizationToProviderOrganizationMapper.map(getOrganization(resource)));
 		
-		IINPfITOidRequiredAssigningAuthorityName assigningAuthorityNameId = new IINPfITOidRequiredAssigningAuthorityName();
-		assigningAuthorityNameId.setNullFlavor(CsNullFlavor.NA);
-		assignedEntity.getId().add(assigningAuthorityNameId);
-
 		TemplateId templateId = new TemplateId();
 		templateId.setRoot("2.16.840.1.113883.2.1.3.2.4.18.2");
 		templateId.setExtension("COCD_TP145210GB01#AssignedEntity");
 		assignedEntity.setTemplateId(templateId);
+		
+		IINPfITOidRequiredAssigningAuthorityName assigningAuthorityNameId = new IINPfITOidRequiredAssigningAuthorityName();
+		assigningAuthorityNameId.setNullFlavor(CsNullFlavor.NA);
+		assignedEntity.getId().add(assigningAuthorityNameId);
 		
 		container.setCOCDTP145210GB01AssignedEntity(assignedEntity);
 	}

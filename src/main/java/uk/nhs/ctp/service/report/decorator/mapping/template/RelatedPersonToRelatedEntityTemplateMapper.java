@@ -47,7 +47,7 @@ public abstract class RelatedPersonToRelatedEntityTemplateMapper<CONTAINER exten
 		relatedEntity.setTemplateId(templateId);
 		
 		relatedEntity.setRelationshipHolder(new JAXBElement<COCDTP145007UK03Person>(
-				new QName("relationshipHolder"), COCDTP145007UK03Person.class, 
+				new QName("urn:hl7-org:v3", "relationshipHolder"), COCDTP145007UK03Person.class, 
 						relatedPersonToPersonMapper.map(relatedPerson)));
 		
 		container.setCOCDTP145007UK03RelatedEntity(relatedEntity);

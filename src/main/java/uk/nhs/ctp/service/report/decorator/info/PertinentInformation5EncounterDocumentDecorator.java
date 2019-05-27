@@ -65,6 +65,10 @@ public class PertinentInformation5EncounterDocumentDecorator implements Ambulanc
 	
 	@Autowired
 	private HumanNameToCOCDTP145210GB01PersonMapper humanNameToPersonMapper;
+	
+	@Autowired
+	private SimpleDateFormat reportDateFormat;
+	
 	@Value("${ems.terminology.administrative.gender.system}")
 	private String administrativeGenderSystem;
 	
@@ -166,7 +170,7 @@ public class PertinentInformation5EncounterDocumentDecorator implements Ambulanc
 		assignedEntity.setRepresentedOrganization(informantOrganization);
 		
 		informant.setCOCDTP145210GB01AssignedEntity(assignedEntity);
-		encounterEvent.setInformant(new JAXBElement<REPCMT200001GB02Informant>(new QName("informant"), REPCMT200001GB02Informant.class, informant));
+		encounterEvent.setInformant(new JAXBElement<REPCMT200001GB02Informant>(new QName("urn:hl7-org:v3", "informant"), REPCMT200001GB02Informant.class, informant));
 		
 		// TODO populate location
 //		fhirEncounter.getLocation()
@@ -213,7 +217,7 @@ public class PertinentInformation5EncounterDocumentDecorator implements Ambulanc
 		placeTemplateId.setRoot("2.16.840.1.113883.2.1.3.2.4.18.2");
 		placeTemplateId.setExtension("COCD_TP145222GB02#HealthCareFacility");
 		place.setTemplateId(placeTemplateId);
-		healthCareFacility.setLocation(new JAXBElement<COCDTP145222GB02Place>(new QName("location"), COCDTP145222GB02Place.class, place));
+		healthCareFacility.setLocation(new JAXBElement<COCDTP145222GB02Place>(new QName("urn:hl7-org:v3", "location"), COCDTP145222GB02Place.class, place));
 		
 		location.setCOCDTP145222GB02HealthCareFacility(healthCareFacility);
 		encounterEvent.setLocation(location);
@@ -257,7 +261,7 @@ public class PertinentInformation5EncounterDocumentDecorator implements Ambulanc
 		patient.setAdministrativeGenderCode(terminologyService.getCode(
 				fhirPatient.getGender().getSystem(), administrativeGenderSystem, fhirPatient.getGender().getDefinition()));
 		TS birthTime = new TS();
-		birthTime.setValue(fhirPatient.getBirthDate().toString());
+		birthTime.setValue(reportDateFormat.format(fhirPatient.getBirthDate()));
 		patient.setBirthTime(birthTime);
 		patientRole.setPatientPatient(patient);
 		

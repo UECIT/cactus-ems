@@ -54,7 +54,7 @@ public class PatientToWorkgroupUniversalTemplateMapper
 		
 		COCDTP145212GB02Person assignedPerson = humanNameToPersonMapperMapper.map(patient.getNameFirstRep());
 		workGroup.setAssignedPerson(new JAXBElement<COCDTP145212GB02Person>(
-				new QName("assignedPerson"), COCDTP145212GB02Person.class, assignedPerson));
+				new QName("urn:hl7-org:v3", "assignedPerson"), COCDTP145212GB02Person.class, assignedPerson));
 		
 		participant.setCOCDTP145212GB02Workgroup(workGroup);
 	}

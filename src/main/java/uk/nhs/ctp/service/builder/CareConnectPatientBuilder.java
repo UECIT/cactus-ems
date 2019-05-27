@@ -1,9 +1,6 @@
 package uk.nhs.ctp.service.builder;
 
-import datatypes.NHSNumberIdentifier;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -22,9 +19,9 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import datatypes.NHSNumberIdentifier;
 import resources.CareConnectOrganization;
 import resources.CareConnectPatient;
-
 import uk.nhs.ctp.entities.Cases;
 
 @Component
@@ -56,7 +53,7 @@ public class CareConnectPatientBuilder {
 		language.addCoding().setCode("en").setDisplay("English").setSystem("http://uecdi-tom-terminology.eu-west-2.elasticbeanstalk.com/fhir/CodeSystem/languages");
 
 		CareConnectPatient patient = new CareConnectPatient();
-		patient.setIdentifier(Arrays.asList(new NHSNumberIdentifier[]{nhsIdentifier}));
+		patient.addIdentifier(nhsIdentifier);
 		patient.setName(names);
 		patient.setGender(Enumerations.AdministrativeGender.fromCode(caseEntity.getGender()));
 		patient.setBirthDate(caseEntity.getDateOfBirth());
@@ -80,14 +77,14 @@ public class CareConnectPatientBuilder {
 		
 		patient.addTelecom()
 			.setSystem(ContactPointSystem.PHONE)
-			.setValue("0123 123 1234")
+			.setValue("01231231234")
 			.setUse(ContactPointUse.HOME)
 			.setRank(1)
 			.setPeriod(new Period().setStart(new Date()).setEnd(new Date()));
 		
 		patient.addTelecom()
 			.setSystem(ContactPointSystem.PHONE)
-			.setValue("01234 567 899")
+			.setValue("01234567899")
 			.setUse(ContactPointUse.MOBILE)
 			.setRank(2)
 			.setPeriod(new Period().setStart(new Date()).setEnd(new Date()));

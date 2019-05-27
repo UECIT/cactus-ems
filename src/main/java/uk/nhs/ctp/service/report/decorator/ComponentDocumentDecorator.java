@@ -65,7 +65,7 @@ public class ComponentDocumentDecorator implements OneOneOneDecorator {
 		
 		Bundle resourceBundle = request.getBundle();
 		JAXBElement<POCDMT200001GB02Author> authorElement = new JAXBElement<>(
-				new QName("author"), POCDMT200001GB02Author.class, authorDocumentDecorator.createAuthor(request));
+				new QName("urn:hl7-org:v3", "author"), POCDMT200001GB02Author.class, authorDocumentDecorator.createAuthor(request));
 		
 		POCDMT200001GB02Component31 triageSectionComponent = 
 				textSectionTemplateResolver.resolve(resourceBundle, request);

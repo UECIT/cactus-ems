@@ -94,9 +94,9 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "addr",
     "id",
     "name",
-    "standardIndustryClassCode",
     "telecom",
-    "templateId"
+    "templateId",
+    "standardIndustryClassCode"
 })
 public class COCDTP145201GB01Organization implements DetailedEntity<ON>, ClassCodeAware<CV> {
 	

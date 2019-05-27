@@ -17,6 +17,8 @@ public abstract class OrganizationToOrganizationMapper
 		targetOrganization.setDeterminerCode(targetOrganization.getDeterminerCode());
 		targetOrganization.setName(organizationToONMapper.map(organization));
 		
+		addIds(targetOrganization);
+		
 		return targetOrganization;
 	}
 	

@@ -1,6 +1,7 @@
 package uk.nhs.ctp.service.handover.decorator.referral;
 
 import org.hl7.fhir.dstu3.model.Address;
+import org.hl7.fhir.dstu3.model.Address.AddressUse;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.ContactPoint;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
@@ -29,7 +30,7 @@ public class OrganisationRecipientDecorator implements ResourceDecorator<Referra
 		// TODO add telecom
 		ContactPoint organizationTelecom = new ContactPoint();
 		organizationTelecom.setSystem(ContactPointSystem.PHONE);
-		organizationTelecom.setValue("0123 456 7899");
+		organizationTelecom.setValue("01234567899");
 		organizationTelecom.setUse(ContactPointUse.HOME);
 		organizationTelecom.setRank(0);
 		recipientOrganization.addTelecom(organizationTelecom);
@@ -40,6 +41,7 @@ public class OrganisationRecipientDecorator implements ResourceDecorator<Referra
 		organizationAddress.addLine("Sunderland Rd");
 		organizationAddress.setCity("Durham");
 		organizationAddress.setPostalCode("S12 2L1");
+		organizationAddress.setUse(AddressUse.WORK);
 		recipientOrganization.addAddress(organizationAddress);
 		recipientOrganization.setId("#recipientOrganization");
 		

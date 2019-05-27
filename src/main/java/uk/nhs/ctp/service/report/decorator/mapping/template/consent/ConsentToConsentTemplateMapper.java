@@ -29,18 +29,19 @@ public class ConsentToConsentTemplateMapper implements TemplateMapper<Consent, P
 		consent.setMoodCode(consent.getMoodCode());
 		consent.setStatusCode(consent.getStatusCode());
 
-		II id = new II();
-		id.setRoot("2.16.840.1.113883.2.1.3.2.4.18.39");
-		id.setAssigningAuthorityName("RA9:SOUTH DEVON HEALTHCARE NHS TRUST");
-		consent.getId().add(id);
-		
 		TemplateId templateId = new TemplateId();
 		templateId.setRoot("2.16.840.1.113883.2.1.3.2.4.18.2");
 		templateId.setExtension(getTemplateName());
 		consent.setTemplateId(templateId);
-	
-		consent.setCode(getConsentCode(fhirConsent.getAction().stream().anyMatch(action -> 
-				consentCodes.contains(action.getCodingFirstRep().getCode()))));
+		
+		II id = new II();
+		id.setRoot("2.16.840.1.113883.2.1.3.2.4.18.39");
+		id.setExtension("FGHRED");
+		id.setAssigningAuthorityName("RA9:SOUTH DEVON HEALTHCARE NHS TRUST");
+		consent.getId().add(id);
+
+//		consent.setCode(getConsentCode(fhirConsent.getAction().stream().anyMatch(action -> 
+//				consentCodes.contains(action.getCodingFirstRep().getCode()))));
 		
 		container.setCOCDTP146226GB02Consent(consent);
 	}

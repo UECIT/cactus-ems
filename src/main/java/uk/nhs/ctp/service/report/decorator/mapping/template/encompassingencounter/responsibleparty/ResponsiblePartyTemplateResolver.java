@@ -28,7 +28,7 @@ public class ResponsiblePartyTemplateResolver<RESOURCE extends IBaseResource>
 		
 		COCDTP146232GB01ResponsibleParty.TemplateId 
 				responsiblePartyTemplateId = new COCDTP146232GB01ResponsibleParty.TemplateId();
-		responsiblePartyTemplateId.setRoot("2.16.840.1.113883.2.1.3.2.4.18.16");
+		responsiblePartyTemplateId.setRoot("2.16.840.1.113883.2.1.3.2.4.18.2");
 		responsiblePartyTemplateId.setExtension("COCD_TP146232GB01#location");
 		responsibleParty.setTemplateId(responsiblePartyTemplateId);
 		

@@ -1,5 +1,7 @@
 package uk.nhs.ctp.service.report.decorator.mapping;
 
+import java.text.SimpleDateFormat;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -21,6 +23,9 @@ public class PatientToPatientMapper extends AbstractMapper<COCDTP145201GB01Patie
 	@Autowired
 	private PatientCommunicationComponentToCOCDTP145201GB01LanguageCommunicationMapper patientCommunicationToLanguageCommunicationMapper;
 	
+	@Autowired
+	private SimpleDateFormat reportDateFormat;
+	
 	@Value("${ems.terminology.administrative.gender.system}")
 	private String administrativeGenderSystem;
 	
@@ -32,7 +37,7 @@ public class PatientToPatientMapper extends AbstractMapper<COCDTP145201GB01Patie
 		patient.getName().add(humanNameToPNMapper.map(ccPatient.getNameFirstRep()));
 	
 		TS birthTime = new TS();
-		birthTime.setValue(ccPatient.getBirthDate().toString());
+		birthTime.setValue(reportDateFormat.format(ccPatient.getBirthDate()));
 		patient.setBirthTime(birthTime);
 		
 		patient.setAdministrativeGenderCode(codingMapper.map(

@@ -41,7 +41,8 @@ public abstract class OrganizationToClassCodeAwareOrganizationMapper<CODE extend
 		
 		CODE classCode = createStandardIndustryClassCode();
 		classCode.setCodeSystem("2.16.840.1.113883.2.1.3.2.4.17.191");
-		classCode.setCode(code.value());
+		classCode.setCode("999"); //TODO remove hardcoding
+		classCode.setDisplayName(code.value());
 		
 		targetOrganization.setStandardIndustryClassCode(classCode);
 		

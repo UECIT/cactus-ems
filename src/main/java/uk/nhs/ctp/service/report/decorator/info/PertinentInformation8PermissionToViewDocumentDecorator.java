@@ -77,11 +77,11 @@ public class PertinentInformation8PermissionToViewDocumentDecorator implements A
 		IVLTS effectiveTime = new IVLTS();
 		TS low = new TS();
 		low.setValue(fhirConsent.getPeriod().getStart().toString());
-		effectiveTime.getRest().add(new JAXBElement<QTY>(new QName("low"), QTY.class, low));
+		effectiveTime.getRest().add(new JAXBElement<QTY>(new QName("urn:hl7-org:v3", "low"), QTY.class, low));
 		
 		TS high = new TS();
 		high.setValue(fhirConsent.getPeriod().getEnd().toString());
-		effectiveTime.getRest().add(new JAXBElement<QTY>(new QName("high"), QTY.class, high));
+		effectiveTime.getRest().add(new JAXBElement<QTY>(new QName("urn:hl7-org:v3", "high"), QTY.class, high));
 		return effectiveTime;
 	}
 

@@ -34,24 +34,24 @@ public class PatientToPatientUniversalTemplateMapper implements TemplateMapper<C
 	private ContactPointToTELMapper contactPointToTELMapper;
 	
 	@Autowired
-	private OrganizationToCOCDTP145201GB01OrganizationMapper organizationToProviderOrganizationMapper;
+	private OrganizationToCOCDTP145201GB01OrganizationMapper organizationToOrganizationMapper;
 	
 	@Override
 	public void map(CareConnectPatient ccPatient, POCDMT200001GB02RecordTarget container, ReportRequestDTO request) {
 		COCDTP145201GB01PatientRole patientRole = new COCDTP145201GB01PatientRole();
 		patientRole.setClassCode(patientRole.getClassCode());
 		
-		IINPfITOidMandatoryAssignedAuthority id = new IINPfITOidMandatoryAssignedAuthority();
-		id.setRoot("2.16.840.1.113883.2.1.4.1");
-		id.setExtension(ccPatient.getIdentifierFirstRep().getValue());
-		id.setAssigningAuthorityName("RA9:SOUTH DEVON HEALTHCARE NHS TRUST");
-		patientRole.getId().add(id);
-		
 		TemplateId templateId = new TemplateId();
 		templateId.setRoot("2.16.840.1.113883.2.1.3.2.4.18.2");
 		templateId.setExtension(getTemplateName());
 		patientRole.setTemplateId(templateId);
 		
+		IINPfITOidMandatoryAssignedAuthority id = new IINPfITOidMandatoryAssignedAuthority();
+		id.setRoot("2.16.840.1.113883.2.1.4.1");
+		id.setExtension(ccPatient.getIdentifierFirstRep().getValue());
+		id.setAssigningAuthorityName("RA9:SOUTH DEVON HEALTHCARE NHS TRUST");
+		patientRole.getId().add(id);
+
 		patientRole.getAddr().addAll(addressToADMapper.map(ccPatient.getAddress()));
 		patientRole.getTelecom().addAll(contactPointToTELMapper.map(ccPatient.getTelecom()));
 		
@@ -63,8 +63,8 @@ public class PatientToPatientUniversalTemplateMapper implements TemplateMapper<C
 		organization.setName(gp.getNameFirstRep().getNameAsSingleString());
 		
 		patientRole.setProviderOrganization(new JAXBElement<COCDTP145201GB01Organization>(
-				new QName("providerOrganization"), COCDTP145201GB01Organization.class, 
-						organizationToProviderOrganizationMapper.map(organization)));
+				new QName("urn:hl7-org:v3", "providerOrganization"), COCDTP145201GB01Organization.class, 
+				organizationToOrganizationMapper.map(organization)));
 		
 		container.setCOCDTP145201GB01PatientRole(patientRole);
 	}

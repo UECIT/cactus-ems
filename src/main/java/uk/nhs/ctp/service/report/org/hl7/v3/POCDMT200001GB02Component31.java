@@ -63,7 +63,7 @@ public class POCDMT200001GB02Component31 implements ContentAware {
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String typeCode;
     @XmlAttribute(name = "contextConductionInd", required = true)
-    protected boolean contextConductionInd;
+    protected boolean contextConductionInd = true;
     @XmlAttribute(name = "nullFlavor")
     protected List<String> nullFlavor;
     @XmlAttribute(name = "updateMode")

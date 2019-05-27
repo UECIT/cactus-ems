@@ -80,7 +80,7 @@ public class CareConnectPractitionerBuilder {
 		practitioner.addIdentifier(sdsRoleIdentifier);
 		practitioner.setNhsCommunication(communicationExtension);
 		practitioner.addQualification(practitionerQualificationComponent);
-		practitioner.addTelecom().setValue("0191 456 4521")
+		practitioner.addTelecom().setValue("01914564521")
 				.setSystem(ContactPointSystem.PHONE).setUse(ContactPointUse.WORK);
 		
 		return practitioner;

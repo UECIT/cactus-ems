@@ -1,5 +1,6 @@
 package uk.nhs.ctp;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
 import org.springframework.boot.SpringApplication;
@@ -71,6 +72,11 @@ public class Application extends SpringBootServletInitializer {
 	@Bean
 	public Generex uuidGenerator() {
 		return new Generex("[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}");
+	}
+	
+	@Bean
+	public SimpleDateFormat reportDateFormat() {
+		return new SimpleDateFormat("yyyyMMddHHmmss");
 	}
 
 }
