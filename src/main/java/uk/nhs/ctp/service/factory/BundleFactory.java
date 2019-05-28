@@ -9,6 +9,7 @@ public abstract class BundleFactory {
 		Bundle bundle = new Bundle();
 		bundle.setType(getBundleType());
 		bundle.setId(contained ? "#" : "" + id);
+		bundle.setType(BundleType.COLLECTION);
 		
 		return bundle;
 	}

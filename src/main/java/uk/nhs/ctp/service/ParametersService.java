@@ -11,6 +11,7 @@ import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ContactPoint;
+import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.DecimalType;
 import org.hl7.fhir.dstu3.model.Enumerations;
@@ -134,7 +135,7 @@ public class ParametersService {
 
 		names.add(new HumanName().setFamily(settings.getInitiatingPerson().getName().split(" ")[1])
 				.addGiven(settings.getInitiatingPerson().getName().split(" ")[0]));
-		telecom.add(new ContactPoint().setValue(settings.getInitiatingPerson().getTelecom()));
+		telecom.add(new ContactPoint().setSystem(ContactPointSystem.PHONE).setValue(settings.getInitiatingPerson().getTelecom()));
 
 		parameters.addParameter().setName(SystemConstants.INITIATINGPERSON).setResource(new Person().setName(names)
 				.setTelecom(telecom)
@@ -145,11 +146,11 @@ public class ParametersService {
 	private void setUserType(Cases caseEntity, Parameters parameters, SettingsDTO settings) {
 
 		if (caseEntity.getSkillset().getCode().equalsIgnoreCase("PA")) {
-			parameters.addParameter().setName(SystemConstants.USERTYPE).setValue(new CodeableConcept().addCoding()
+			parameters.addParameter().setName(SystemConstants.USERTYPE).setValue(new CodeableConcept().setText("Patient").addCoding()
 					.setCode("116154003").setDisplay("Patient").setSystem(SystemURL.SNOMED));
 		} else {
 			parameters.addParameter().setName(SystemConstants.USERTYPE)
-					.setValue(new CodeableConcept().addCoding().setCode(settings.getUserType().getCode())
+					.setValue(new CodeableConcept().setText(settings.getUserType().getDisplay()).addCoding().setCode(settings.getUserType().getCode())
 							.setDisplay(settings.getUserType().getDisplay()).setSystem(SystemURL.SNOMED));
 		}
 
@@ -157,14 +158,14 @@ public class ParametersService {
 
 	private void setUserLanguage(Cases caseEntity, Parameters parameters, SettingsDTO settings) {
 		parameters.addParameter().setName(SystemConstants.USERLANGUAGE)
-				.setValue(new CodeableConcept().addCoding().setCode(settings.getUserLanguage().getCode())
+				.setValue(new CodeableConcept().setText(settings.getUserLanguage().getDisplay()).addCoding().setCode(settings.getUserLanguage().getCode())
 						.setDisplay(settings.getUserLanguage().getDisplay()).setSystem(SystemURL.DATA_DICTIONARY));
 
 	}
 
 	private void setUserTaskContext(Cases caseEntity, Parameters parameters, SettingsDTO settings) {
 		parameters.addParameter().setName(SystemConstants.USERTASKCONTEXT)
-				.setValue(new CodeableConcept().addCoding().setCode(settings.getUserTaskContext().getCode())
+				.setValue(new CodeableConcept().setText(settings.getUserTaskContext().getDisplay()).addCoding().setCode(settings.getUserTaskContext().getCode())
 						.setDisplay(settings.getUserTaskContext().getDisplay()).setSystem(SystemURL.SNOMED));
 
 	}
@@ -177,7 +178,7 @@ public class ParametersService {
 
 		names.add(new HumanName().setFamily(settings.getReceivingPerson().getName().split(" ")[1])
 				.addGiven(settings.getReceivingPerson().getName().split(" ")[0]));
-		telecom.add(new ContactPoint().setValue(settings.getReceivingPerson().getTelecom()));
+		telecom.add(new ContactPoint().setSystem(ContactPointSystem.PHONE).setValue(settings.getReceivingPerson().getTelecom()));
 
 		parameters.addParameter().setName(SystemConstants.RECIEVINGPERSON).setResource(new Person().setName(names)
 				.setTelecom(telecom)
@@ -188,21 +189,21 @@ public class ParametersService {
 
 	private void setRecipientType(Cases caseEntity, Parameters parameters, SettingsDTO settings) {
 		parameters.addParameter().setName(SystemConstants.RECIPIENTTYPE)
-				.setValue(new CodeableConcept().addCoding().setCode(settings.getRecipientType().getCode())
+				.setValue(new CodeableConcept().setText(settings.getRecipientType().getDisplay()).addCoding().setCode(settings.getRecipientType().getCode())
 						.setDisplay(settings.getRecipientType().getDisplay()).setSystem(SystemURL.SNOMED));
 
 	}
 
 	private void setRecipientLanguage(Cases caseEntity, Parameters parameters, SettingsDTO settings) {
 		parameters.addParameter().setName(SystemConstants.RECIPIENTLANGUAGE)
-				.setValue(new CodeableConcept().addCoding().setCode(settings.getRecipientLanguage().getCode())
+				.setValue(new CodeableConcept().setText(settings.getRecipientLanguage().getDisplay()).addCoding().setCode(settings.getRecipientLanguage().getCode())
 						.setDisplay(settings.getRecipientLanguage().getDisplay()).setSystem(SystemURL.DATA_DICTIONARY));
 
 	}
 
 	private void setSetting(Cases caseEntity, Parameters parameters, SettingsDTO settings) {
 		parameters.addParameter().setName(SystemConstants.SETTING)
-				.setValue(new CodeableConcept().addCoding().setCode(settings.getSetting().getCode())
+				.setValue(new CodeableConcept().setText(settings.getSetting().getDisplay()).addCoding().setCode(settings.getSetting().getCode())
 						.setDisplay(settings.getSetting().getDisplay()).setSystem(SystemURL.SNOMED));
 
 	}
@@ -346,18 +347,17 @@ public class ParametersService {
 
 		Observation genderObservation = new Observation().setStatus(Observation.ObservationStatus.FINAL)
 				.setCode(new CodeableConcept().addCoding(new Coding(SystemURL.SNOMED, "263495000", "Gender")))
-				.setDataAbsentReason(new CodeableConcept().addCoding(new Coding(SystemURL.SNOMED, null, null)))
 				.setValue(new StringType(caseEntity.getGender()));
 		parameters.addParameter().setName(SystemConstants.INPUT_DATA).setResource(genderObservation);
 
 		Observation ageObservation = new Observation().setStatus(Observation.ObservationStatus.FINAL)
 				.setCode(new CodeableConcept().addCoding(new Coding(SystemURL.SNOMED, "397669002", "Age")))
-				.setDataAbsentReason(new CodeableConcept().addCoding(new Coding(SystemURL.SNOMED, null, null)))
 				.setValue(new StringType(caseEntity.getDateOfBirth().toString()));
 		parameters.addParameter().setName(SystemConstants.INPUT_DATA).setResource(ageObservation);
 	}
 
 	private void setRequestId(Long caseId, Parameters parameters) {
-		parameters.addParameter().setName(SystemConstants.REQUEST_ID).setValue(new StringType(String.valueOf(caseId)));
+		parameters.addParameter().setName(SystemConstants.REQUEST_ID).setValue(new IdType(caseId));
+//        parameters.addParameter().setName(SystemConstants.REQUEST_ID).setValue(new StringType(String.valueOf(caseId)));
 	}
 }

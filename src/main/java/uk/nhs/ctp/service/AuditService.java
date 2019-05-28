@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -137,7 +138,7 @@ public class AuditService {
 	
 	private String createContainedAudit(List<Resource> contained) {
 		return !contained.isEmpty() ? 
-				fhirParser.encodeResourceToString(new Bundle().setEntry(contained.stream().map(resource -> 
+				fhirParser.encodeResourceToString(new Bundle().setType(BundleType.COLLECTION).setEntry(contained.stream().map(resource -> 
 					new BundleEntryComponent().setResource(resource)).collect(Collectors.toList()))) : null;
 	}
 

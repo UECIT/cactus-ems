@@ -8,6 +8,7 @@ import javax.net.ssl.SSLSession;
 
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.GuidanceResponse;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Questionnaire;
@@ -72,7 +73,7 @@ public class CdssService {
 			String serviceDefinitionId, Long caseId) throws ConnectException, JsonProcessingException {
 			
 		String requestBody = fhirParser.encodeResourceToString(sendRequestAsBundle ? 
-				new Bundle().addEntry(new BundleEntryComponent().setResource(parameters)) : parameters);
+				new Bundle().setType(BundleType.COLLECTION).addEntry(new BundleEntryComponent().setResource(parameters)) : parameters);
 
 		String responseBody = sendHttpRequest(getBaseUrl(cdssSupplierId) + "/" + SystemConstants.SERVICE_DEFINITION
 				+ "/" + serviceDefinitionId + "/" + SystemConstants.EVALUATE, HttpMethod.POST,
