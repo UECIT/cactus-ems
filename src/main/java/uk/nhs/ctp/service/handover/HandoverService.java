@@ -64,7 +64,7 @@ public abstract class HandoverService {
 	
 	public String getHandoverMessage(HandoverRequestDTO request) throws MalformedURLException, JsonProcessingException {
 		List<AuditEntry> auditEntries = 
-				auditService.getAuditEntries(request.getCaseId(), AuditEntryType.INTIALREQUEST, AuditEntryType.REQUEST);
+				auditService.getAuditEntries(request.getCaseId(), AuditEntryType.INTIALREQUEST, AuditEntryType.REQUEST, AuditEntryType.RESULT);
 		
 		AuditEntry latestEntry = auditEntries.get(auditEntries.size() - 1);
 		request.setResourceBundle(fhirParser.parseResource(Bundle.class, latestEntry.getContained()));

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import uk.nhs.ctp.enums.AuditEntryType;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.dto.ReportsDTO;
 import uk.nhs.ctp.service.report.Reportable;
@@ -48,7 +49,7 @@ public class ReportService {
 		}
 		
 		auditService.createAuditEntry(
-				request.getCaseId(), mapper.writeValueAsString(request), mapper.writeValueAsString(reports));
+				request.getCaseId(), mapper.writeValueAsString(request), mapper.writeValueAsString(reports), AuditEntryType.REPORT);
 		
 		return reports;
 	}

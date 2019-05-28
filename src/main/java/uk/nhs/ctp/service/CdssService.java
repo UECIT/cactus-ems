@@ -31,6 +31,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import uk.nhs.ctp.SystemConstants;
+import uk.nhs.ctp.enums.AuditEntryType;
 import uk.nhs.ctp.exception.EMSException;
 import uk.nhs.ctp.repos.CdssSupplierRepository;
 
@@ -77,7 +78,7 @@ public class CdssService {
 				+ "/" + serviceDefinitionId + "/" + SystemConstants.EVALUATE, HttpMethod.POST,
 				new HttpEntity<>(requestBody, headers));
 
-		auditService.createAuditEntry(caseId, requestBody, responseBody);
+		auditService.createAuditEntry(caseId, requestBody, responseBody, AuditEntryType.RESULT);
 
 		return (Resource) FhirContext.forDstu3().newJsonParser().parseResource(responseBody);
 	}

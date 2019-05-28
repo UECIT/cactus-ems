@@ -102,10 +102,10 @@ public class AuditService {
 		return auditRepository.saveAndFlush(newAuditRecord);
 	}
 
-	public AuditRecord createAuditEntry(Long caseId, String request, String response) throws JsonProcessingException {
+	public AuditRecord createAuditEntry(Long caseId, String request, String response, AuditEntryType auditEntryType) throws JsonProcessingException {
 		AuditRecord currentAuditRecord = auditRepository.findByCaseId(caseId);
 		AuditEntry newAuditEntry = new AuditEntry();
-		newAuditEntry.setType(AuditEntryType.RESULT);
+		newAuditEntry.setType(auditEntryType);
 		newAuditEntry.setCreatedDate(new Date());
 
 		newAuditEntry.setCdssServiceDefinitionRequest(request);
