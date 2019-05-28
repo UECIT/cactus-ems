@@ -70,7 +70,7 @@ public class REPCMT200001GB02EncounterEvent implements Flag {
     @XmlElement(required = true)
     protected REPCMT200001GB02Location location;
     @XmlElement(required = true)
-    protected REPCMT200001GB02RecordTarget recordTarget;
+    protected POCDMT200001GB02RecordTarget recordTarget;
     @XmlAttribute(name = "classCode", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String classCode;
@@ -215,7 +215,7 @@ public class REPCMT200001GB02EncounterEvent implements Flag {
      *     {@link REPCMT200001GB02RecordTarget }
      *     
      */
-    public REPCMT200001GB02RecordTarget getRecordTarget() {
+    public POCDMT200001GB02RecordTarget getRecordTarget() {
         return recordTarget;
     }
 
@@ -227,7 +227,7 @@ public class REPCMT200001GB02EncounterEvent implements Flag {
      *     {@link REPCMT200001GB02RecordTarget }
      *     
      */
-    public void setRecordTarget(REPCMT200001GB02RecordTarget value) {
+    public void setRecordTarget(POCDMT200001GB02RecordTarget value) {
         this.recordTarget = value;
     }
 

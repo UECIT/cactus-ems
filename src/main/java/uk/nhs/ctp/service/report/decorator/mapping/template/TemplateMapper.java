@@ -11,8 +11,4 @@ public interface TemplateMapper<RESOURCE extends IBaseResource, CONTAINER> {
 	Class<RESOURCE> getResourceClass();
 	
 	String getTemplateName();
-	
-	static void hello() {
-		System.out.println("");
-	}
 }

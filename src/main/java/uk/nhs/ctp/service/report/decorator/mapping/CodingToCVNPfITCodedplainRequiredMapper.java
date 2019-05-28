@@ -17,7 +17,9 @@ public class CodingToCVNPfITCodedplainRequiredMapper extends AbstractMapper<CVNP
 	private TerminologyService terminologyService;
 	
 	// to be substituted with calls to the terminology server whenever possible
-	private Map<String, CVNPfITCodedplainRequired> codeMap = new HashMap<>();;
+	private Map<String, CVNPfITCodedplainRequired> codeMap = new HashMap<>();
+	
+	private Map<String, String> systemMap = new HashMap<>();;
 	
 	public CodingToCVNPfITCodedplainRequiredMapper() {
 		CVNPfITCodedplainRequired callOperatorCode = new CVNPfITCodedplainRequired();
@@ -26,6 +28,9 @@ public class CodingToCVNPfITCodedplainRequiredMapper extends AbstractMapper<CVNP
 		callOperatorCode.setDisplayName("Call Operator");
 		
 		codeMap.put("https://fhir.hl7.org.uk/STU3/CodeSystem/CareConnect-SDSJobRoleName-1R1690", callOperatorCode);
+			
+		systemMap.put("http://uecdi-tom-terminology.eu-west-2.elasticbeanstalk.com/fhir/ValueSet/sex", "2.16.840.1.113883.2.1.3.2.4.16.25");
+		systemMap.put("http://uecdi-tom-terminology.eu-west-2.elasticbeanstalk.com/fhir/ValueSet/human-language", "2.16.840.1.113883.2.1.3.2.4.17.70");
 	}
 	
 	@Override
@@ -38,6 +43,8 @@ public class CodingToCVNPfITCodedplainRequiredMapper extends AbstractMapper<CVNP
 	}
 	
 	public CVNPfITCodedplainRequired map(String sourceSystem, String targetSystem, String code) {
-		return terminologyService.getCode(sourceSystem, targetSystem, code);
+		CVNPfITCodedplainRequired newCode = terminologyService.getCode(sourceSystem, targetSystem, code);
+		newCode.setCodeSystem(systemMap.containsKey(targetSystem) ? systemMap.get(targetSystem): targetSystem);
+		return newCode;
 	}
 }

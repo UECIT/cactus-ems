@@ -55,7 +55,7 @@ import uk.nhs.ctp.service.report.npfit.hl7.localisation.TemplateContent;
     "cocdtp145210GB01AssignedEntity",
     "cocdtp145007UK05RelatedEntity"
 })
-public class REPCMT200001GB02Informant {
+public class REPCMT200001GB02Informant implements InformantAware, RelatedEntityAware{
 
     @XmlElement(namespace = "NPFIT:HL7:Localisation", required = true)
     protected TemplateContent contentId;

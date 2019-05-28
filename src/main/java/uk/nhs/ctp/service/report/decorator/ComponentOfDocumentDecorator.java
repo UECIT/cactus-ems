@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import com.mifmif.common.regex.Generex;
 
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
-import uk.nhs.ctp.service.report.decorator.mapping.template.encompassingencounter.location.HealthCareFacilityTemplateResolver;
+import uk.nhs.ctp.service.report.decorator.mapping.template.encompassingencounter.location.HealthCareFacilityCOCDTP146232GB01TemplateResolver;
 import uk.nhs.ctp.service.report.decorator.mapping.template.encompassingencounter.participant.ParticipantTemplateResolver;
 import uk.nhs.ctp.service.report.decorator.mapping.template.encompassingencounter.responsibleparty.ResponsiblePartyTemplateResolver;
 import uk.nhs.ctp.service.report.npfit.hl7.localisation.TemplateContent;
@@ -36,7 +36,7 @@ public class ComponentOfDocumentDecorator implements OneOneOneDecorator {
 	private ParticipantTemplateResolver<? extends IBaseResource> participantTemplateResolver;
 	
 	@Autowired
-	private HealthCareFacilityTemplateResolver<? extends IBaseResource> healthCareFacilityTemplateResolver;
+	private HealthCareFacilityCOCDTP146232GB01TemplateResolver<? extends IBaseResource> healthCareFacilityTemplateResolver;
 	
 	@Autowired
 	private ResponsiblePartyTemplateResolver<? extends IBaseResource> responsiblePartyTemplateResolver;

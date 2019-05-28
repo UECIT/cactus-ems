@@ -52,7 +52,7 @@ import uk.nhs.ctp.service.report.npfit.hl7.localisation.TemplateContent;
     "contentId",
     "cocdtp145222GB02HealthCareFacility"
 })
-public class REPCMT200001GB02Location {
+public class REPCMT200001GB02Location implements HealthCareFacilityAware {
 
     @XmlElement(namespace = "NPFIT:HL7:Localisation", required = true)
     protected TemplateContent contentId;
