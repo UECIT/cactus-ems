@@ -12,7 +12,6 @@ import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.DataRequirement;
 import org.hl7.fhir.dstu3.model.Extension;
-import org.hl7.fhir.dstu3.model.Enumerations.DataType;
 import org.hl7.fhir.dstu3.model.GuidanceResponse;
 import org.hl7.fhir.dstu3.model.GuidanceResponse.GuidanceResponseStatus;
 import org.hl7.fhir.dstu3.model.Parameters;
@@ -196,7 +195,7 @@ public abstract class AbstractResponseResolver<RESOURCE extends Resource> implem
 	private String getTrigger(GuidanceResponse guidanceResponse) {
 		String trigger = null;
 		Optional<DataRequirement> optional = guidanceResponse.getDataRequirement().stream().filter(
-				data -> data.getType().equals(DataType.TRIGGERDEFINITION.toCode())).findFirst();
+				data -> data.getType().equals("Observation")).findFirst();
 		
 		if (optional.isPresent()) {
 			for (ServiceDefinition serviceDef : serviceDefinitionRepository.findAll()) {
