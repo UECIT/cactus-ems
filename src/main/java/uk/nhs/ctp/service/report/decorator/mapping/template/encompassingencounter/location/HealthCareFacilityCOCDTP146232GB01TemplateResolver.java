@@ -2,7 +2,6 @@ package uk.nhs.ctp.service.report.decorator.mapping.template.encompassingencount
 
 import java.util.List;
 
-import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

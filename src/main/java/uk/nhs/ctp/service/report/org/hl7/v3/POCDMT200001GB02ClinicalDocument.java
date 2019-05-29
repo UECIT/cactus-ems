@@ -8,7 +8,6 @@
 
 package uk.nhs.ctp.service.report.org.hl7.v3;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 

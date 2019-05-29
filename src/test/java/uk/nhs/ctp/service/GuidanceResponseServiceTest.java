@@ -1,10 +1,8 @@
 package uk.nhs.ctp.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
-import java.util.List;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CarePlan;
@@ -23,7 +21,6 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RequestGroup;
 import org.hl7.fhir.dstu3.model.RequestGroup.RequestIntent;
 import org.hl7.fhir.dstu3.model.RequestGroup.RequestStatus;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,8 +37,6 @@ public class GuidanceResponseServiceTest {
 
 	@Autowired
 	private GuidanceResponseResolver guidanceResponseService;
-	
-	private GuidanceResponseResolver spyGuidanceResponseService;
 
 	GuidanceResponse successResponse, dataRequiredResponse, outputDataMultipleResponse, outputDataSingularResponse,
 			invalidResponse;
@@ -54,7 +49,6 @@ public class GuidanceResponseServiceTest {
 
 	@Before
 	public void setup() {
-		spyGuidanceResponseService = spy(new GuidanceResponseResolver());
 		
 		result = new RequestGroup();
 		result.setStatus(RequestStatus.ACTIVE);

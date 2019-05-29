@@ -3,7 +3,6 @@ package uk.nhs.ctp.service.report.decorator.mapping.template;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
-import org.hl7.fhir.dstu3.model.RelatedPerson;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import resources.CareConnectRelatedPerson;
