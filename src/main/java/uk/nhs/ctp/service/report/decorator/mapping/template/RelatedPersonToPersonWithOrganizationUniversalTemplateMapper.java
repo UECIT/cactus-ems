@@ -5,18 +5,18 @@ import java.util.List;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.ContactPoint;
 import org.hl7.fhir.dstu3.model.HumanName;
-import org.hl7.fhir.dstu3.model.Organization;
-import org.hl7.fhir.dstu3.model.RelatedPerson;
 
+import resources.CareConnectOrganization;
+import resources.CareConnectRelatedPerson;
 import uk.nhs.ctp.service.report.decorator.mapping.template.encompassingencounter.participant.AbstractPersonWithOrganizationUniversalTemplateMapper;
 import uk.nhs.ctp.service.report.org.hl7.v3.AssignedEntityAware;
 
 public abstract class RelatedPersonToPersonWithOrganizationUniversalTemplateMapper<CONTAINER extends AssignedEntityAware> 
-		extends AbstractPersonWithOrganizationUniversalTemplateMapper<RelatedPerson, CONTAINER> {
+		extends AbstractPersonWithOrganizationUniversalTemplateMapper<CareConnectRelatedPerson, CONTAINER> {
 
 	@Override
-	public Class<RelatedPerson> getResourceClass() {
-		return RelatedPerson.class;
+	public Class<CareConnectRelatedPerson> getResourceClass() {
+		return CareConnectRelatedPerson.class;
 	}
 	
 	@Override
@@ -25,18 +25,18 @@ public abstract class RelatedPersonToPersonWithOrganizationUniversalTemplateMapp
 	}
 	
 	@Override
-	protected HumanName getName(RelatedPerson relatedPerson) {
+	protected HumanName getName(CareConnectRelatedPerson relatedPerson) {
 		return relatedPerson.getNameFirstRep();
 	}
 
 	@Override
-	protected List<ContactPoint> getTelecom(RelatedPerson relatedPerson) {
+	protected List<ContactPoint> getTelecom(CareConnectRelatedPerson relatedPerson) {
 		return relatedPerson.getTelecom();
 	}
 
 	@Override
-	protected Organization getOrganization(RelatedPerson relatedPerson) {
-		Organization organization = new Organization();
+	protected CareConnectOrganization getOrganization(CareConnectRelatedPerson relatedPerson) {
+		CareConnectOrganization organization = new CareConnectOrganization();
 		organization.setAddress(relatedPerson.getAddress());
 		organization.setName(relatedPerson.getNameFirstRep().getNameAsSingleString());
 		
@@ -44,7 +44,7 @@ public abstract class RelatedPersonToPersonWithOrganizationUniversalTemplateMapp
 	}
 
 	@Override
-	protected Address getAddress(RelatedPerson relatedPerson) {
+	protected Address getAddress(CareConnectRelatedPerson relatedPerson) {
 		return relatedPerson.getAddressFirstRep();
 	}
 }

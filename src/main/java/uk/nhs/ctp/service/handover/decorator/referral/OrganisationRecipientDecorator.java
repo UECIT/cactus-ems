@@ -10,6 +10,7 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.springframework.stereotype.Component;
 
+import resources.CareConnectOrganization;
 import uk.nhs.ctp.entities.AuditEntry;
 import uk.nhs.ctp.service.handover.decorator.ResourceDecorator;
 
@@ -17,7 +18,7 @@ import uk.nhs.ctp.service.handover.decorator.ResourceDecorator;
 public class OrganisationRecipientDecorator implements ResourceDecorator<ReferralRequest, AuditEntry> {
 
 	public void decorate(ReferralRequest referralRequest, AuditEntry auditEntry) {
-		Organization recipientOrganization = new Organization();
+		CareConnectOrganization recipientOrganization = new CareConnectOrganization();
 		recipientOrganization.setActive(true);
 		
 		CodeableConcept organizationType = new CodeableConcept();

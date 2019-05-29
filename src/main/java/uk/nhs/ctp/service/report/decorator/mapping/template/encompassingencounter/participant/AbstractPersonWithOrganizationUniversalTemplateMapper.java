@@ -9,6 +9,7 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import resources.CareConnectOrganization;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.report.decorator.mapping.AddressToADMapper;
 import uk.nhs.ctp.service.report.decorator.mapping.ContactPointToTELMapper;
@@ -65,7 +66,7 @@ public abstract class AbstractPersonWithOrganizationUniversalTemplateMapper
 
 	protected abstract List<ContactPoint> getTelecom(RESOURCE resource);
 
-	protected abstract Organization getOrganization(RESOURCE resource);
+	protected abstract CareConnectOrganization getOrganization(RESOURCE resource);
 
 	protected abstract Address getAddress(RESOURCE resource);
 }

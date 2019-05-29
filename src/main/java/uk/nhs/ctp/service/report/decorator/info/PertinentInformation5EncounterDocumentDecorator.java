@@ -7,13 +7,14 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
 import org.hl7.fhir.dstu3.model.Composition;
-import org.hl7.fhir.dstu3.model.Encounter;
-import org.hl7.fhir.dstu3.model.RelatedPerson;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import resources.CareConnectEncounter;
+import resources.CareConnectLocation;
+import resources.CareConnectRelatedPerson;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.report.decorator.AmbulanceDecorator;
 import uk.nhs.ctp.service.report.decorator.mapping.template.encompassingencounter.location.HealthCareFacilityREPCMT200001GB02TemplateResolver;
@@ -24,7 +25,6 @@ import uk.nhs.ctp.service.report.org.hl7.v3.IVLTS;
 import uk.nhs.ctp.service.report.org.hl7.v3.REPCMT200001GB02AmbulanceRequest;
 import uk.nhs.ctp.service.report.org.hl7.v3.REPCMT200001GB02EncounterEvent;
 import uk.nhs.ctp.service.report.org.hl7.v3.REPCMT200001GB02Informant;
-import uk.nhs.ctp.service.report.org.hl7.v3.REPCMT200001GB02Location;
 import uk.nhs.ctp.service.report.org.hl7.v3.REPCMT200001GB02PertinentInformation;
 import uk.nhs.ctp.service.report.org.hl7.v3.REPCMT200001GB02PertinentInformation.SeperatableInd;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
@@ -56,8 +56,11 @@ public class PertinentInformation5EncounterDocumentDecorator implements Ambulanc
 	@Override
 	public void decorate(REPCMT200001GB02AmbulanceRequest document, ReportRequestDTO request) {
 		
-		Encounter fhirEncounter = (Encounter) ResourceProviderUtils.getResource(request.getBundle(), Composition.class).getEncounter().getResource();
-		RelatedPerson fhirInformant = (RelatedPerson) request.getReferralRequest().getRequester().getAgent().getResource();
+		Composition composition = ResourceProviderUtils.getResource(request.getBundle(), Composition.class);
+		CareConnectEncounter fhirEncounter = ResourceProviderUtils.getResource(
+				composition.getEncounter().getResource(), CareConnectEncounter.class);
+		CareConnectRelatedPerson fhirInformant = ResourceProviderUtils.getResource(
+				request.getReferralRequest().getRequester().getAgent().getResource(), CareConnectRelatedPerson.class);
 		
 		REPCMT200001GB02PertinentInformation encounter = document.getPertinentInformation5();
 		encounter.setTypeCode(encounter.getTypeCode());
@@ -85,10 +88,13 @@ public class PertinentInformation5EncounterDocumentDecorator implements Ambulanc
 		encounterEvent.getId().add(assigningAuthorityId);
 		
 		REPCMT200001GB02Informant informant = informantTemplate.resolve(fhirInformant, request);
-		encounterEvent.setInformant(new JAXBElement<REPCMT200001GB02Informant>(new QName("urn:hl7-org:v3", "informant"), REPCMT200001GB02Informant.class, informant));
 		
-		REPCMT200001GB02Location location = healthCareFacilityTemplate.resolve(fhirEncounter.getLocationFirstRep().getLocation().getResource(), request);
-		encounterEvent.setLocation(location);
+		if (informant != null)
+			encounterEvent.setInformant(new JAXBElement<REPCMT200001GB02Informant>(
+					new QName("urn:hl7-org:v3", "informant"), REPCMT200001GB02Informant.class, informant));
+		
+		encounterEvent.setLocation(healthCareFacilityTemplate.resolve(
+				ResourceProviderUtils.getResource(composition.getContained(), CareConnectLocation.class), request));
 		
 		encounterEvent.setRecordTarget(patientTemplate.resolve(fhirEncounter.getSubject().getResource(), request));
 		

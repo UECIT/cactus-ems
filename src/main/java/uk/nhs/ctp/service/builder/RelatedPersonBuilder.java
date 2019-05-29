@@ -7,14 +7,15 @@ import org.hl7.fhir.dstu3.model.Address.AddressUse;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointUse;
 import org.hl7.fhir.dstu3.model.Period;
-import org.hl7.fhir.dstu3.model.RelatedPerson;
 import org.springframework.stereotype.Component;
+
+import resources.CareConnectRelatedPerson;
 
 @Component
 public class RelatedPersonBuilder {
 
-	public RelatedPerson build() {
-		RelatedPerson person = new RelatedPerson();
+	public CareConnectRelatedPerson build() {
+		CareConnectRelatedPerson person = new CareConnectRelatedPerson();
 		person.addAddress()
 			.setUse(AddressUse.HOME)
 			.setType(AddressType.BOTH)

@@ -1,10 +1,10 @@
 package uk.nhs.ctp.service.report.decorator.mapping.template.author;
 
-import org.hl7.fhir.dstu3.model.RelatedPerson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import resources.CareConnectOrganization;
+import resources.CareConnectRelatedPerson;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.report.decorator.mapping.AddressToADMapper;
 import uk.nhs.ctp.service.report.decorator.mapping.CodingToCVNPfITCodedplainRequiredMapper;
@@ -18,7 +18,7 @@ import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02Author;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
 
 @Component
-public class RelatedPersonToAuthorPersonUniversalTemplateMapper implements TemplateMapper<RelatedPerson, POCDMT200001GB02Author> {
+public class RelatedPersonToAuthorPersonUniversalTemplateMapper implements TemplateMapper<CareConnectRelatedPerson, POCDMT200001GB02Author> {
 
 	@Autowired
 	private AddressToADMapper addressToADMapper;
@@ -33,7 +33,7 @@ public class RelatedPersonToAuthorPersonUniversalTemplateMapper implements Templ
 	private HumanNameToCOCDTP145200GB01PersonMapper humanNameToAssignedPersonMapper;
 	
 	@Override
-	public void map(RelatedPerson relatedPerson, POCDMT200001GB02Author author, ReportRequestDTO request) {
+	public void map(CareConnectRelatedPerson relatedPerson, POCDMT200001GB02Author author, ReportRequestDTO request) {
 		CareConnectOrganization organization = ResourceProviderUtils.getResource(
 				request.getReferralRequest().getRequester().getOnBehalfOf().getResource(), CareConnectOrganization.class);
 		
@@ -59,8 +59,8 @@ public class RelatedPersonToAuthorPersonUniversalTemplateMapper implements Templ
 	}
 
 	@Override
-	public Class<RelatedPerson> getResourceClass() {
-		return RelatedPerson.class;
+	public Class<CareConnectRelatedPerson> getResourceClass() {
+		return CareConnectRelatedPerson.class;
 	}
 
 	@Override

@@ -29,7 +29,6 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.enums.AuditEntryType;
@@ -81,7 +80,7 @@ public class CdssService {
 
 		auditService.createAuditEntry(caseId, requestBody, responseBody, AuditEntryType.RESULT);
 
-		return (Resource) FhirContext.forDstu3().newJsonParser().parseResource(responseBody);
+		return (Resource) fhirParser.parseResource(responseBody);
 	}
 
 	/**
@@ -96,7 +95,7 @@ public class CdssService {
 				+ SystemConstants.SERVICE_DEFINITION + "/" + serviceDefId + "/", HttpMethod.GET,
 				new HttpEntity<>(headers));
 
-		return (ServiceDefinition) FhirContext.forDstu3().newJsonParser().parseResource(responseBody);
+		return (ServiceDefinition) fhirParser.parseResource(responseBody);
 	}
 
 	private String getBaseUrl(Long cdssSupplierId) {
@@ -118,7 +117,7 @@ public class CdssService {
 
 		auditService.updateAuditEntry(caseId, getBaseUrl(cdssSupplierId) + questionnaireRef, responseBody);
 
-		return (Questionnaire) FhirContext.forDstu3().newJsonParser().parseResource(responseBody);
+		return (Questionnaire) fhirParser.parseResource(responseBody);
 	}
 
 	private String sendHttpRequest(String url, HttpMethod httpMethod, HttpEntity<String> request) {

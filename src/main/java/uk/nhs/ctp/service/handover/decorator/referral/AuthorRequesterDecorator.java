@@ -3,11 +3,11 @@ package uk.nhs.ctp.service.handover.decorator.referral;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.Address.AddressType;
 import org.hl7.fhir.dstu3.model.Address.AddressUse;
-import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
-import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointUse;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ContactPoint;
+import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
+import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointUse;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.HumanName.NameUse;
@@ -15,10 +15,10 @@ import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestRequesterComponent;
-import org.hl7.fhir.dstu3.model.RelatedPerson;
 import org.springframework.stereotype.Component;
 
 import resources.CareConnectOrganization;
+import resources.CareConnectRelatedPerson;
 import uk.nhs.ctp.entities.AuditEntry;
 import uk.nhs.ctp.service.handover.decorator.ResourceDecorator;
 
@@ -44,7 +44,7 @@ public class AuthorRequesterDecorator implements ResourceDecorator<ReferralReque
 			.setCode("other")
 			.setDisplay("Other Provider"));
 	
-		RelatedPerson author = new RelatedPerson();
+		CareConnectRelatedPerson author = new CareConnectRelatedPerson();
 		ContactPoint contactPoint = new ContactPoint()
 			.setValue("08000000000")
 			.setSystem(ContactPointSystem.PHONE)

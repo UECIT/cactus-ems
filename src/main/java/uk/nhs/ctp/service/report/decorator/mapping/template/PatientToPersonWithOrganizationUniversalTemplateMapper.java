@@ -5,9 +5,8 @@ import java.util.List;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.ContactPoint;
 import org.hl7.fhir.dstu3.model.HumanName;
-import org.hl7.fhir.dstu3.model.Organization;
-import org.hl7.fhir.dstu3.model.Practitioner;
 
+import resources.CareConnectOrganization;
 import resources.CareConnectPatient;
 import resources.CareConnectPractitioner;
 import uk.nhs.ctp.service.report.decorator.mapping.template.encompassingencounter.participant.AbstractPersonWithOrganizationUniversalTemplateMapper;
@@ -38,11 +37,11 @@ public abstract class PatientToPersonWithOrganizationUniversalTemplateMapper<CON
 	}
 
 	@Override
-	protected Organization getOrganization(CareConnectPatient patient) {
-		Practitioner gp = ResourceProviderUtils.getResource(
+	protected CareConnectOrganization getOrganization(CareConnectPatient patient) {
+		CareConnectPractitioner gp = ResourceProviderUtils.getResource(
 				patient.getGeneralPractitionerFirstRep().getResource(), CareConnectPractitioner.class);
 		
-		Organization organization = new Organization();
+		CareConnectOrganization organization = new CareConnectOrganization();
 		organization.setAddress(gp.getAddress());
 		organization.setName(gp.getNameFirstRep().getNameAsSingleString());
 		

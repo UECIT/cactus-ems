@@ -19,9 +19,15 @@ import com.mifmif.common.regex.Generex;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import resources.CareConnectCondition;
+import resources.CareConnectEncounter;
+import resources.CareConnectEpisodeOfCare;
+import resources.CareConnectLocation;
 import resources.CareConnectOrganization;
 import resources.CareConnectPatient;
 import resources.CareConnectPractitioner;
+import resources.CareConnectProcedure;
+import resources.CareConnectRelatedPerson;
 
 @ServletComponentScan
 @SpringBootApplication
@@ -59,7 +65,16 @@ public class Application extends SpringBootServletInitializer {
 	public IParser fhirParser() {
 		IParser fhirParser = fhirContext().newJsonParser();
 		fhirParser.setPreferTypes(Arrays.asList(
-				CareConnectPatient.class, CareConnectPractitioner.class, CareConnectOrganization.class));
+			CareConnectPatient.class, 
+			CareConnectPractitioner.class, 
+			CareConnectOrganization.class,
+			CareConnectCondition.class,
+			CareConnectEncounter.class,
+			CareConnectEpisodeOfCare.class,
+			CareConnectLocation.class,
+			CareConnectProcedure.class,
+			CareConnectRelatedPerson.class
+		));
 		
 		return fhirParser;
 	}

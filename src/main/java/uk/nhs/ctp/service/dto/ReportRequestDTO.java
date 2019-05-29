@@ -1,29 +1,26 @@
 package uk.nhs.ctp.service.dto;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.dstu3.model.Resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import resources.CareConnectOrganization;
-import resources.CareConnectPatient;
-import resources.CareConnectPractitioner;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
 
 public class ReportRequestDTO {
 	private Long caseId;
 	private String resourceUrl;
 	private String handoverJson;
+	
+	@JsonIgnore
 	private Set<Class<?>> templateMappingExclusions = new HashSet<>();
-
+	@JsonIgnore
+	private IParser fhirParser;
 	@JsonIgnore
 	private ReferralRequest referralRequest;
 	@JsonIgnore
@@ -35,17 +32,6 @@ public class ReportRequestDTO {
 
 	public void setHandoverJson(String handoverJson) {
 		this.handoverJson = handoverJson;
-		
-		List<Class<? extends IBaseResource>> resourceClasses = new ArrayList<>();
-		resourceClasses.add(CareConnectPatient.class);
-		resourceClasses.add(CareConnectOrganization.class);
-		resourceClasses.add(CareConnectPractitioner.class);
-		
-		IParser fhirParser = FhirContext.forDstu3().newJsonParser();
-		fhirParser.setPreferTypes(resourceClasses);
-		
-		setReferralRequest(fhirParser.parseResource(ReferralRequest.class, this.handoverJson));
-		setBundle(ResourceProviderUtils.getResources(referralRequest.getContained(), Bundle.class).get(0));
 	}
 	
 	public Long getCaseId() {
@@ -63,21 +49,25 @@ public class ReportRequestDTO {
 	}
 	
 	public ReferralRequest getReferralRequest() {
+		referralRequest = referralRequest == null ? 
+				parseResource(ReferralRequest.class) : referralRequest;
+		
 		return referralRequest;
-	}
-	public void setReferralRequest(ReferralRequest referralRequest) {
-		this.referralRequest = referralRequest;
 	}
 	
 	public Bundle getBundle() {
+		bundle = bundle == null ? 
+				ResourceProviderUtils.getResources(getReferralRequest().getContained(), Bundle.class).get(0) : bundle;
+		
 		return bundle;
-	}
-	public void setBundle(Bundle bundle) {
-		this.bundle = bundle;
 	}
 	
 	public void setTemplateMappingExclusions(Set<Class<?>> templateMappingExclusions) {
 		this.templateMappingExclusions = templateMappingExclusions;
+	}
+	
+	public void setFhirParser(IParser fhirParser) {
+		this.fhirParser = fhirParser;
 	}
 	
 	public boolean isExcluded(Class<?> mapperClass) {
@@ -87,12 +77,18 @@ public class ReportRequestDTO {
 	@Override
 	public ReportRequestDTO clone() {
 		ReportRequestDTO clone = new ReportRequestDTO();
+		clone.setFhirParser(fhirParser);
 		clone.setCaseId(caseId);
 		clone.setHandoverJson(handoverJson);
 		clone.setTemplateMappingExclusions(templateMappingExclusions);
 		clone.setResourceUrl(resourceUrl);
 		
 		return clone;
+	}
+
+	private <RESOURCE extends Resource> RESOURCE parseResource(Class<RESOURCE> resourceClass) {
+		return handoverJson == null || fhirParser == null ? 
+				null : fhirParser.parseResource(resourceClass, handoverJson);
 	}
 	
 }

@@ -1,7 +1,6 @@
 package uk.nhs.ctp.service.report.decorator.mapping.template.textsection;
 
 import java.util.List;
-import java.util.UUID;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
@@ -29,7 +28,7 @@ public class BundleToIntegratedUrgentCareTextSectionTemplateMapper extends Abstr
 				ResourceProviderUtils.getResources(bundle, QuestionnaireResponse.class);
 
 		questionnaireResponses.stream().forEach(response -> {
-			text.getContent().add(createText(response));
+			addQuestionnaireResponse(text, response);
 		});
 		
 		section.setText(text);
@@ -40,20 +39,19 @@ public class BundleToIntegratedUrgentCareTextSectionTemplateMapper extends Abstr
 		return Bundle.class;
 	}
 
-	private JAXBElement<StrucDocParagraph> createText(QuestionnaireResponse response) {
-		StrucDocParagraph paragraph = new StrucDocParagraph();
-		
+	private void addQuestionnaireResponse(StrucDocText text, QuestionnaireResponse response) {
 		response.getItem().stream().forEach(item -> {
+			StrucDocParagraph paragraph = new StrucDocParagraph();
+			
 			paragraph.getContent().add(item.getText());
 			JAXBElement<StrucDocBr> br = new JAXBElement<>(new QName("urn:hl7-org:v3", "br"), StrucDocBr.class, new StrucDocBr());
 			paragraph.getContent().add(br);
 			Type type = item.getAnswerFirstRep().getValue();
 
-			paragraph.getContent().add(type instanceof Coding ? 
-					((Coding)type).getDisplay() : type.primitiveValue());
-		});
+			paragraph.getContent().add(type instanceof Coding ? ((Coding)type).getDisplay() : type.primitiveValue());
 		
-		return new JAXBElement<StrucDocParagraph>(
-				new QName("urn:hl7-org:v3", "paragraph"), StrucDocParagraph.class, paragraph);
+			text.getContent().add(new JAXBElement<StrucDocParagraph>(
+					new QName("urn:hl7-org:v3", "paragraph"), StrucDocParagraph.class, paragraph));
+		});
 	}
 }

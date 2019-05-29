@@ -3,11 +3,11 @@ package uk.nhs.ctp.service.report.decorator.mapping.template.patient;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
-import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import resources.CareConnectOrganization;
 import resources.CareConnectPatient;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.report.decorator.mapping.AddressToADMapper;
@@ -58,7 +58,7 @@ public class PatientToPatientUniversalTemplateMapper implements TemplateMapper<C
 		patientRole.setPatientPatient(patientToPatientMapper.map(ccPatient));
 
 		Practitioner gp = (Practitioner)ccPatient.getGeneralPractitionerFirstRep().getResource();
-		Organization organization = new Organization();
+		CareConnectOrganization organization = new CareConnectOrganization();
 		organization.setAddress(gp.getAddress());
 		organization.setName(gp.getNameFirstRep().getNameAsSingleString());
 		

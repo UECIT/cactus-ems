@@ -3,9 +3,9 @@ package uk.nhs.ctp.service.report.decorator.mapping.template.encompassingencount
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
-import org.hl7.fhir.dstu3.model.Location;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import resources.CareConnectLocation;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.report.decorator.mapping.LocationToCOCDTP145222GB02PlaceMapper;
 import uk.nhs.ctp.service.report.decorator.mapping.template.TemplateMapper;
@@ -16,13 +16,13 @@ import uk.nhs.ctp.service.report.org.hl7.v3.HealthCareFacilityAware;
 import uk.nhs.ctp.service.report.org.hl7.v3.IINPfITOidRequired;
 
 public abstract class LocationToIncidentalHealthCareFacilityUniversalTemplateMapper <CONTAINER extends HealthCareFacilityAware>
-		implements TemplateMapper<Location, CONTAINER> {
+		implements TemplateMapper<CareConnectLocation, CONTAINER> {
 
 	@Autowired
 	private LocationToCOCDTP145222GB02PlaceMapper locationToPlaceMapper;
 	
 	@Override
-	public void map(Location location, HealthCareFacilityAware container, ReportRequestDTO request) {
+	public void map(CareConnectLocation location, CONTAINER container, ReportRequestDTO request) {
 		COCDTP145222GB02HealthCareFacility healthCareFacility = new COCDTP145222GB02HealthCareFacility();
 		healthCareFacility.setClassCode(healthCareFacility.getClassCode());
 		
@@ -43,8 +43,8 @@ public abstract class LocationToIncidentalHealthCareFacilityUniversalTemplateMap
 	}
 
 	@Override
-	public Class<Location> getResourceClass() {
-		return Location.class;
+	public Class<CareConnectLocation> getResourceClass() {
+		return CareConnectLocation.class;
 	}
 
 	@Override

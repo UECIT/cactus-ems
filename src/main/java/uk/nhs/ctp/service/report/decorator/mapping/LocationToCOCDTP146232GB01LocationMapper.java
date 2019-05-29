@@ -1,17 +1,17 @@
 package uk.nhs.ctp.service.report.decorator.mapping;
 
-import org.hl7.fhir.dstu3.model.Location;
 import org.springframework.stereotype.Component;
 
+import resources.CareConnectLocation;
 import uk.nhs.ctp.service.report.npfit.hl7.localisation.TemplateContent;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP146232GB01Location;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP146232GB01Location.TemplateId;
 
 @Component
-public class LocationToCOCDTP146232GB01LocationMapper extends AbstractMapper<COCDTP146232GB01Location, Location>{
+public class LocationToCOCDTP146232GB01LocationMapper extends AbstractMapper<COCDTP146232GB01Location, CareConnectLocation>{
 
 	@Override
-	public COCDTP146232GB01Location map(Location location) {
+	public COCDTP146232GB01Location map(CareConnectLocation location) {
 		COCDTP146232GB01Location targetLocation = new COCDTP146232GB01Location();
 		targetLocation.setTypeCode(targetLocation.getTypeCode());
 		

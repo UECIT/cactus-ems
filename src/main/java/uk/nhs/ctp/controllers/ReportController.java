@@ -14,9 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import ca.uhn.fhir.parser.IParser;
 import uk.nhs.ctp.service.ReportService;
-import uk.nhs.ctp.service.dto.ReportsDTO;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
+import uk.nhs.ctp.service.dto.ReportsDTO;
 
 @CrossOrigin
 @RestController
@@ -26,10 +27,14 @@ public class ReportController {
 	@Autowired
 	private ReportService reportService;
 	
+	@Autowired
+	private IParser fhirParser;
+	
 	@PostMapping
 	public @ResponseBody Collection<ReportsDTO> getReport(
 			@RequestBody ReportRequestDTO reportRequestDTO) throws JAXBException, JsonProcessingException {
 		
+		reportRequestDTO.setFhirParser(fhirParser);
 		return reportService.generateReports(reportRequestDTO);
 	}
 

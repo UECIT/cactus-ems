@@ -5,9 +5,9 @@ import java.util.List;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.ContactPoint;
 import org.hl7.fhir.dstu3.model.HumanName;
-import org.hl7.fhir.dstu3.model.Organization;
 import org.springframework.stereotype.Component;
 
+import resources.CareConnectOrganization;
 import resources.CareConnectPractitioner;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP146232GB01EncounterParticipant;
 
@@ -36,8 +36,8 @@ public class PractitionerToPersonWithOrganizationUniversalTemplateMapper
 	}
 
 	@Override
-	protected Organization getOrganization(CareConnectPractitioner practitioner) {
-		Organization organization = new Organization();
+	protected CareConnectOrganization getOrganization(CareConnectPractitioner practitioner) {
+		CareConnectOrganization organization = new CareConnectOrganization();
 		organization.setAddress(practitioner.getAddress());
 		organization.setName(practitioner.getNameFirstRep().getNameAsSingleString());
 		

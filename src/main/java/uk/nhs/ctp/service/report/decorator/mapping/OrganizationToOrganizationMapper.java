@@ -1,8 +1,8 @@
 package uk.nhs.ctp.service.report.decorator.mapping;
 
-import org.hl7.fhir.dstu3.model.Organization;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import resources.CareConnectOrganization;
 import uk.nhs.ctp.service.report.org.hl7.v3.ON;
 
 public abstract class OrganizationToOrganizationMapper 
@@ -11,7 +11,7 @@ public abstract class OrganizationToOrganizationMapper
 	@Autowired
 	private OrganizationToONMapper organizationToONMapper;
 	
-	public ORGANIZATION map(Organization organization) {
+	public ORGANIZATION map(CareConnectOrganization organization) {
 		ORGANIZATION targetOrganization = createOrganization();
 		targetOrganization.setClassCode(targetOrganization.getClassCode());
 		targetOrganization.setDeterminerCode(targetOrganization.getDeterminerCode());

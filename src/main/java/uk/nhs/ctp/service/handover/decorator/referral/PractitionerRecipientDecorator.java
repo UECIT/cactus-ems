@@ -12,6 +12,7 @@ import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.Address.AddressUse;
 import org.springframework.stereotype.Component;
 
+import resources.CareConnectPractitioner;
 import uk.nhs.ctp.SystemURL;
 import uk.nhs.ctp.entities.AuditEntry;
 import uk.nhs.ctp.service.handover.decorator.ResourceDecorator;
@@ -20,7 +21,7 @@ import uk.nhs.ctp.service.handover.decorator.ResourceDecorator;
 public class PractitionerRecipientDecorator implements ResourceDecorator<ReferralRequest, AuditEntry> {
 
 	public void decorate(ReferralRequest referralRequest, AuditEntry auditEntry) {
-		Practitioner recipientPractitioner = new Practitioner();
+		CareConnectPractitioner recipientPractitioner = new CareConnectPractitioner();
 		HumanName name = new HumanName();
 		name.addSuffix("Dr");
 		name.addGiven("John");

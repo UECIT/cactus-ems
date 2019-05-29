@@ -4,18 +4,19 @@ import org.hl7.fhir.dstu3.model.Location;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import resources.CareConnectLocation;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145222GB02Place;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145222GB02Place.TemplateId;
 import uk.nhs.ctp.service.report.org.hl7.v3.TN;
 
 @Component
-public class LocationToCOCDTP145222GB02PlaceMapper extends AbstractMapper<COCDTP145222GB02Place, Location> {
+public class LocationToCOCDTP145222GB02PlaceMapper extends AbstractMapper<COCDTP145222GB02Place, CareConnectLocation> {
 
 	@Autowired
 	private AddressToADMapper addressToADMapper;
 	
 	@Override
-	public COCDTP145222GB02Place map(Location location) {
+	public COCDTP145222GB02Place map(CareConnectLocation location) {
 		COCDTP145222GB02Place place = new COCDTP145222GB02Place();
 		place.setClassCode(place.getClassCode());
 		place.setDeterminerCode(place.getDeterminerCode());

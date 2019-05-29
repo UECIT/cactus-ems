@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.Organization;
 
+import resources.CareConnectOrganization;
 import uk.nhs.ctp.service.report.org.hl7.v3.CDAOrganizationTypeDisplayName;
 import uk.nhs.ctp.service.report.org.hl7.v3.CV;
 import uk.nhs.ctp.service.report.org.hl7.v3.ClassCodeAware;
@@ -28,7 +28,7 @@ public abstract class OrganizationToClassCodeAwareOrganizationMapper<CODE extend
 				CDAOrganizationTypeDisplayName.NHS_DIRECT);
 	}
 	
-	public ORGANIZATION map(Organization organization) {
+	public ORGANIZATION map(CareConnectOrganization organization) {
 		ORGANIZATION targetOrganization = super.map(organization);
 		CDAOrganizationTypeDisplayName code = CDAOrganizationTypeDisplayName.NOT_SPECIFIED;
 		

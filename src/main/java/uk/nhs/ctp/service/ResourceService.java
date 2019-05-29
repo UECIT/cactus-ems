@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.hl7.fhir.dstu3.model.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -12,8 +13,10 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 @Service
 public class ResourceService {
 	
+	@Autowired
+	private FhirContext ctx;
+	
 	public String getResource(String url) throws MalformedURLException, ClassNotFoundException {
-		FhirContext ctx = FhirContext.forDstu3();
 		IGenericClient client = ctx.newRestfulGenericClient(buildBaseUrl(url));
 		Resource resource = client.read().resource(getResourceType(url)).withUrl(url).execute();
 		return ctx.newJsonParser().encodeResourceToString(resource);

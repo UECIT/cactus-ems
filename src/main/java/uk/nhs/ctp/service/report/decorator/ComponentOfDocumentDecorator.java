@@ -5,14 +5,14 @@ import javax.xml.namespace.QName;
 
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Composition;
-import org.hl7.fhir.dstu3.model.Encounter;
-import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.mifmif.common.regex.Generex;
 
+import resources.CareConnectEncounter;
+import resources.CareConnectLocation;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.report.decorator.mapping.template.encompassingencounter.location.HealthCareFacilityCOCDTP146232GB01TemplateResolver;
 import uk.nhs.ctp.service.report.decorator.mapping.template.encompassingencounter.participant.ParticipantTemplateResolver;
@@ -86,8 +86,10 @@ public class ComponentOfDocumentDecorator implements OneOneOneDecorator {
 		
 		Bundle resourceBundle = ResourceProviderUtils.getResource(
 				request.getReferralRequest().getContained(), Bundle.class);
-		Encounter encounter = ResourceProviderUtils.getResource(ResourceProviderUtils.getResource(
-				resourceBundle, Composition.class).getEncounter().getResource(), Encounter.class);
+		
+		Composition composition = ResourceProviderUtils.getResource(resourceBundle, Composition.class);
+		CareConnectEncounter encounter = 
+				ResourceProviderUtils.getResource(composition.getEncounter().getResource(), CareConnectEncounter.class);
 		
 		COCDTP146232GB01EncounterParticipant encounterParticipant = 
 				participantTemplateResolver.resolve(encounter.getSubject().getResource(), request);
@@ -105,8 +107,8 @@ public class ComponentOfDocumentDecorator implements OneOneOneDecorator {
 						encompassingEncounter.getEncounterParticipant().add(individualParticipant);
 				});
 
-		Location fhirLocation = ResourceProviderUtils.getResource(
-				encounter.getLocationFirstRep().getLocation().getResource(), Location.class);
+		CareConnectLocation fhirLocation = 
+				ResourceProviderUtils.getResource(composition.getContained(), CareConnectLocation.class);
 		
 		COCDTP146232GB01Location location = healthCareFacilityTemplateResolver.resolve(fhirLocation, request);
 		encompassingEncounter.setLocation(location);

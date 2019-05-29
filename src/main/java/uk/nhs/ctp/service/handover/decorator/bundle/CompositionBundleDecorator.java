@@ -9,18 +9,18 @@ import org.hl7.fhir.dstu3.model.Composition;
 import org.hl7.fhir.dstu3.model.Composition.CompositionStatus;
 import org.hl7.fhir.dstu3.model.Composition.DocumentConfidentiality;
 import org.hl7.fhir.dstu3.model.Duration;
-import org.hl7.fhir.dstu3.model.Encounter;
-import org.hl7.fhir.dstu3.model.Encounter.EncounterLocationComponent;
-import org.hl7.fhir.dstu3.model.Encounter.EncounterParticipantComponent;
 import org.hl7.fhir.dstu3.model.Encounter.EncounterStatus;
-import org.hl7.fhir.dstu3.model.EpisodeOfCare;
 import org.hl7.fhir.dstu3.model.EpisodeOfCare.EpisodeOfCareStatus;
-import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.springframework.stereotype.Component;
 
+import resources.CareConnectEncounter;
+import resources.CareConnectEncounter.EncounterLocationComponent;
+import resources.CareConnectEncounter.EncounterParticipantComponent;
+import resources.CareConnectEpisodeOfCare;
+import resources.CareConnectLocation;
 import resources.CareConnectPatient;
 import uk.nhs.ctp.SystemURL;
 
@@ -28,7 +28,7 @@ import uk.nhs.ctp.SystemURL;
 public class CompositionBundleDecorator extends BundleDecorator<CareConnectPatient, Composition> {
 
 	public void decorate(Bundle bundle, CareConnectPatient patient) {
-		Encounter encounter = new Encounter();
+		CareConnectEncounter encounter = new CareConnectEncounter();
 		// Set the status of the encounter
 		encounter.setStatus(EncounterStatus.FINISHED);
 		// Set the class of the encounter
@@ -51,7 +51,7 @@ public class CompositionBundleDecorator extends BundleDecorator<CareConnectPatie
 
 		// Populate the EpisodeOfCare resource - Episode(s) of care that this encounter
 		// should be recorded against
-		EpisodeOfCare episodeOfCare = new EpisodeOfCare();
+		CareConnectEpisodeOfCare episodeOfCare = new CareConnectEpisodeOfCare();
 		episodeOfCare.setStatus(EpisodeOfCareStatus.ACTIVE);
 		episodeOfCare.setPatient(new Reference(patient));
 		encounter.addEpisodeOfCare(new Reference(episodeOfCare));
@@ -82,7 +82,8 @@ public class CompositionBundleDecorator extends BundleDecorator<CareConnectPatie
 		encounter.setLength(duration);
 		// TODO Populate the Location resource - List of locations where the patient has been
 		
-		encounter.addLocation(new EncounterLocationComponent(new Reference(new Location().setAddress(patient.getAddressFirstRep()).setName("Patients Address"))));
+		encounter.addLocation(new EncounterLocationComponent(new Reference(
+				new CareConnectLocation().setAddress(patient.getAddressFirstRep()).setName("Patients Address"))));
 		
 		Composition composition = new Composition();
 		composition.setStatus(CompositionStatus.FINAL);
