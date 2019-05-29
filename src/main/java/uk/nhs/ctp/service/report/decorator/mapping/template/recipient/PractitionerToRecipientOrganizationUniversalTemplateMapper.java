@@ -11,9 +11,12 @@ import uk.nhs.ctp.service.report.decorator.mapping.HumanNameToCOCDTP145202GB02Pe
 import uk.nhs.ctp.service.report.decorator.mapping.template.TemplateMapper;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145202GB02IntendedRecipient;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145202GB02IntendedRecipient.TemplateId;
+import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145202GB02Organization;
+import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145202GB02Organization.Id;
 import uk.nhs.ctp.service.report.org.hl7.v3.CV;
 import uk.nhs.ctp.service.report.org.hl7.v3.CsNullFlavor;
 import uk.nhs.ctp.service.report.org.hl7.v3.IINPfITOidRequiredAssigningAuthorityName;
+import uk.nhs.ctp.service.report.org.hl7.v3.ON;
 import uk.nhs.ctp.service.report.org.hl7.v3.RecipientAware;
 
 @Component
@@ -50,6 +53,26 @@ public class PractitionerToRecipientOrganizationUniversalTemplateMapper<CONTAINE
 		IINPfITOidRequiredAssigningAuthorityName id = new IINPfITOidRequiredAssigningAuthorityName();
 		id.setNullFlavor(CsNullFlavor.NA);
 		intendedRecipient.getId().add(id);
+        
+        COCDTP145202GB02Organization organization = new COCDTP145202GB02Organization();
+        organization.setClassCode(organization.getClassCode());
+        organization.setDeterminerCode(organization.getDeterminerCode());
+        
+        Id orgId = new Id();
+        orgId.setRoot("2.16.840.1.113883.2.1.3.2.4.19.2");
+        orgId.setExtension("K83032");
+        organization.setId(orgId);
+        
+        COCDTP145202GB02Organization.TemplateId orgTemplateId = new COCDTP145202GB02Organization.TemplateId();
+        orgTemplateId.setRoot("2.16.840.1.113883.2.1.3.2.4.18.2");
+        orgTemplateId.setExtension("COCD_TP145202GB02#representedOrganization");
+        organization.setTemplateId(orgTemplateId);
+        
+        ON name = new ON();
+        name.getContent().add(practitioner.getNameFirstRep().getNameAsSingleString());
+        organization.setName(name);
+        
+		intendedRecipient.setRepresentedOrganization(organization);
 		
 		CV recipientRoleCode = new CV();
 		recipientRoleCode.setCodeSystem("2.16.840.1.113883.2.1.3.2.4.17.124");
@@ -62,6 +85,6 @@ public class PractitionerToRecipientOrganizationUniversalTemplateMapper<CONTAINE
 
 	@Override
 	public String getTemplateName() {
-		return "COCD_TP145203GB03#IntendedRecipient";
+		return "COCD_TP145202GB02#IntendedRecipient";
 	}
 }

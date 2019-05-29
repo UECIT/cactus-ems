@@ -1,5 +1,8 @@
 package uk.nhs.ctp.service.report.decorator;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
@@ -25,6 +28,7 @@ import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP146232GB01Location;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP146232GB01ResponsibleParty;
 import uk.nhs.ctp.service.report.org.hl7.v3.CV;
 import uk.nhs.ctp.service.report.org.hl7.v3.IINPfITOidMandatoryAssignedAuthority;
+import uk.nhs.ctp.service.report.org.hl7.v3.IVLTS;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02ClinicalDocument;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02Component;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
@@ -44,6 +48,9 @@ public class ComponentOfDocumentDecorator implements OneOneOneDecorator {
 	@Autowired
 	private Generex uuidGenerator;
 	
+    @Autowired
+    private SimpleDateFormat reportDateFormat;
+	
 	@Override
 	public void decorate(POCDMT200001GB02ClinicalDocument document, ReportRequestDTO request) {
 		POCDMT200001GB02Component componentOf = new POCDMT200001GB02Component();
@@ -57,6 +64,10 @@ public class ComponentOfDocumentDecorator implements OneOneOneDecorator {
 		COCDTP146232GB01EncompassingEncounter encompassingEncounter = new COCDTP146232GB01EncompassingEncounter();
 		encompassingEncounter.setClassCode(encompassingEncounter.getClassCode());
 		encompassingEncounter.setMoodCode(encompassingEncounter.getMoodCode());
+		
+		IVLTS effectiveTime = new IVLTS();
+        effectiveTime.setValue(reportDateFormat.format(new Date()));
+        encompassingEncounter.setEffectiveTime(effectiveTime);
 		
 		CV cv1 = new CV();
 		cv1.setCodeSystem("2.16.840.1.113883.2.1.3.2.4.15");

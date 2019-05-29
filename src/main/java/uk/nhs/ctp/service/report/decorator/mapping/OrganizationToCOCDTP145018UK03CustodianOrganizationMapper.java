@@ -24,7 +24,7 @@ public class OrganizationToCOCDTP145018UK03CustodianOrganizationMapper
 		
 		TemplateId templateId = new TemplateId();
 		templateId.setRoot("2.16.840.1.113883.2.1.3.2.4.18.2");
-		templateId.setExtension("COCDTP145018UK03#custodianOrganization");
+		templateId.setExtension("COCD_TP145018UK03#representedCustodianOrganization");
 		
 		organization.setTemplateId(templateId);
 	}

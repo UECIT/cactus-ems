@@ -25,8 +25,12 @@ public class AuthorTemplateResolver<RESOURCE extends IBaseResource>
 		super(authorChoiceTemplateMappers);
 	}
 	
+	@Autowired
+	private SimpleDateFormat reportDateFormat;
+	
 	protected POCDMT200001GB02Author createContainer() {
 		POCDMT200001GB02Author author  = new POCDMT200001GB02Author();
+		
 		// The HL7 attribute typeCode uses a code to describe this class as an author participation.
 		author.setTypeCode(author.getTypeCode());
 		author.getContextControlCode().add("OP");
@@ -40,8 +44,7 @@ public class AuthorTemplateResolver<RESOURCE extends IBaseResource>
 
 		// The HL7 attribute author time is used to indicate when the person authored the CDA document.
 		Time time = new Time();
-		SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
-		time.setValue(format.format(new Date()));
+		time.setValue(reportDateFormat.format(new Date()));
 		author.setTime(time);
 		
 		return author;

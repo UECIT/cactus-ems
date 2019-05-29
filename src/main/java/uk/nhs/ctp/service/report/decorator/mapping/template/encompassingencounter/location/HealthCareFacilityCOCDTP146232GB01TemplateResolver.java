@@ -14,11 +14,11 @@ import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP146232GB01Location.TemplateId;
 
 @Component
 public class HealthCareFacilityCOCDTP146232GB01TemplateResolver<RESOURCE extends IBaseResource> 
-		extends AbstractTemplateResolver<Location, COCDTP146232GB01Location> {
+		extends AbstractTemplateResolver<RESOURCE, COCDTP146232GB01Location> {
 	
 	@Autowired
 	public HealthCareFacilityCOCDTP146232GB01TemplateResolver(
-		List<TemplateMapper<Location, COCDTP146232GB01Location>> templateMappers) {
+		List<TemplateMapper<RESOURCE, COCDTP146232GB01Location>> templateMappers) {
 	
 		super(templateMappers);
 	}
