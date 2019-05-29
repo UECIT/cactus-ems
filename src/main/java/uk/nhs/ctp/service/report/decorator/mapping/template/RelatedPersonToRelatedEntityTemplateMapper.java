@@ -6,6 +6,7 @@ import javax.xml.namespace.QName;
 import org.hl7.fhir.dstu3.model.RelatedPerson;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import resources.CareConnectRelatedPerson;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.report.decorator.mapping.AddressToADMapper;
 import uk.nhs.ctp.service.report.decorator.mapping.ContactPointToTELMapper;
@@ -17,7 +18,7 @@ import uk.nhs.ctp.service.report.org.hl7.v3.CV;
 import uk.nhs.ctp.service.report.org.hl7.v3.RelatedEntityAware;
 
 public abstract class RelatedPersonToRelatedEntityTemplateMapper<CONTAINER extends RelatedEntityAware>
-		implements TemplateMapper<RelatedPerson, CONTAINER> {
+		implements TemplateMapper<CareConnectRelatedPerson, CONTAINER> {
 
 	@Autowired
 	private AddressToADMapper addressToADMapper;
@@ -29,7 +30,7 @@ public abstract class RelatedPersonToRelatedEntityTemplateMapper<CONTAINER exten
 	private RelatedPersonToPersonMapper relatedPersonToPersonMapper;
 	
 	@Override
-	public void map(RelatedPerson relatedPerson, CONTAINER container, ReportRequestDTO request) {
+	public void map(CareConnectRelatedPerson relatedPerson, CONTAINER container, ReportRequestDTO request) {
 		COCDTP145007UK03RelatedEntity relatedEntity = new COCDTP145007UK03RelatedEntity();
 		relatedEntity.setClassCode(relatedEntity.getClassCode());
 		relatedEntity.setAddr(addressToADMapper.map(relatedPerson.getAddressFirstRep()));
@@ -54,8 +55,8 @@ public abstract class RelatedPersonToRelatedEntityTemplateMapper<CONTAINER exten
 	}
 
 	@Override
-	public Class<RelatedPerson> getResourceClass() {
-		return RelatedPerson.class;
+	public Class<CareConnectRelatedPerson> getResourceClass() {
+		return CareConnectRelatedPerson.class;
 	}
 
 	@Override
