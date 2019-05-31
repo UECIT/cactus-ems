@@ -7,6 +7,8 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.CareConnectEncounter;
+import org.hl7.fhir.dstu3.model.CareConnectLocation;
 import org.hl7.fhir.dstu3.model.Composition;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +16,6 @@ import org.springframework.stereotype.Component;
 
 import com.mifmif.common.regex.Generex;
 
-import resources.CareConnectEncounter;
-import resources.CareConnectLocation;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.report.decorator.mapping.template.encompassingencounter.location.HealthCareFacilityCOCDTP146232GB01TemplateResolver;
 import uk.nhs.ctp.service.report.decorator.mapping.template.encompassingencounter.participant.ParticipantTemplateResolver;

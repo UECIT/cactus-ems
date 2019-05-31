@@ -3,10 +3,10 @@ package uk.nhs.ctp.service.report.decorator.mapping.template.role;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
+import org.hl7.fhir.dstu3.model.CareConnectPatient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import resources.CareConnectPatient;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.report.decorator.mapping.HumanNameToCOCDTP145212GB02PersonMapper;
 import uk.nhs.ctp.service.report.decorator.mapping.template.TemplateMapper;

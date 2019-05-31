@@ -3,12 +3,12 @@ package uk.nhs.ctp.service.report.decorator.mapping.template.encompassingencount
 import java.util.List;
 
 import org.hl7.fhir.dstu3.model.Address;
+import org.hl7.fhir.dstu3.model.CareConnectOrganization;
+import org.hl7.fhir.dstu3.model.CareConnectPractitioner;
 import org.hl7.fhir.dstu3.model.ContactPoint;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.springframework.stereotype.Component;
 
-import resources.CareConnectOrganization;
-import resources.CareConnectPractitioner;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP146232GB01EncounterParticipant;
 
 @Component

@@ -2,26 +2,26 @@ package uk.nhs.ctp.service.builder;
 
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.BooleanType;
+import org.hl7.fhir.dstu3.model.CareConnectOrganization;
+import org.hl7.fhir.dstu3.model.CareConnectPractitioner;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointUse;
 import org.hl7.fhir.dstu3.model.HumanName;
+import org.hl7.fhir.dstu3.model.CareConnectIdentifier;
 import org.hl7.fhir.dstu3.model.Address.AddressType;
 import org.hl7.fhir.dstu3.model.Address.AddressUse;
 import org.hl7.fhir.dstu3.model.Practitioner.PractitionerQualificationComponent;
 import org.springframework.stereotype.Component;
 
-import datatypes.Identifier;
-import resources.CareConnectOrganization;
-import resources.CareConnectPractitioner;
 import uk.nhs.ctp.SystemURL;
 
 @Component
 public class CareConnectPractitionerBuilder {
 
 	public CareConnectPractitioner build(CareConnectOrganization assigningOrganization) {
-		Identifier sdsIdentifier = new Identifier();
+		CareConnectIdentifier sdsIdentifier = new CareConnectIdentifier();
 		sdsIdentifier.setSystem("https://fhir.nhs.uk/Id/sds-user-id");
 		sdsIdentifier.setAssignerTarget(assigningOrganization);
 		sdsIdentifier.setValue("1");
@@ -31,7 +31,7 @@ public class CareConnectPractitionerBuilder {
 			.setDisplay("SDS")
 			.setCode("SDS")));
 		
-		Identifier sdsRoleIdentifier = new Identifier();
+		CareConnectIdentifier sdsRoleIdentifier = new CareConnectIdentifier();
 		sdsRoleIdentifier.setSystem("https://fhir.nhs.uk/Id/sds-role-profile-id");
 		sdsRoleIdentifier.setAssignerTarget(assigningOrganization);
 		sdsRoleIdentifier.setValue("2");

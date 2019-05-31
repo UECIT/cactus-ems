@@ -3,7 +3,7 @@ package uk.nhs.ctp.service.report.decorator.mapping.template.codedentry;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.CareConnectObservation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +21,7 @@ import uk.nhs.ctp.service.report.org.hl7.v3.IVLTS;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02Component2;
 
 @Component
-public class ObservationToFindingTemplateMapper implements TemplateMapper<Observation, POCDMT200001GB02Component2> {
+public class ObservationToFindingTemplateMapper implements TemplateMapper<CareConnectObservation, POCDMT200001GB02Component2> {
 
 	@Autowired
     private SimpleDateFormat reportDateFormat;
@@ -30,12 +30,12 @@ public class ObservationToFindingTemplateMapper implements TemplateMapper<Observ
 	private Generex uuidGenerator;
 	
 	@Override
-	public Class<Observation> getResourceClass() {
-		return Observation.class;
+	public Class<CareConnectObservation> getResourceClass() {
+		return CareConnectObservation.class;
 	}
 
 	@Override
-	public void map(Observation observation, POCDMT200001GB02Component2 component, ReportRequestDTO request) {	
+	public void map(CareConnectObservation observation, POCDMT200001GB02Component2 component, ReportRequestDTO request) {	
 		
 		COCDTP146312GB01Finding finding = new COCDTP146312GB01Finding();
 		finding.setClassCode(finding.getClassCode());

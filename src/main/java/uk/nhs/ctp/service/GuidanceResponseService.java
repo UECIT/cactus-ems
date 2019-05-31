@@ -9,6 +9,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
+import org.hl7.fhir.dstu3.model.CareConnectCarePlan;
 import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.DataRequirement;
 import org.hl7.fhir.dstu3.model.Enumerations.DataType;
@@ -27,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.SystemURL;
@@ -53,6 +55,9 @@ public class GuidanceResponseService {
 
 	@Autowired
 	private CdssService cdssService;
+	
+	@Autowired
+	private FhirContext fhirContext;
 	
 	@Autowired
 	private IParser fhirParser;
@@ -106,7 +111,7 @@ public class GuidanceResponseService {
 				ResourceProviderUtils.getResource(guidanceResponse.getContained(), ProcedureRequest.class));
 		
 		cdssResult.setCareAdvice(
-				ResourceProviderUtils.getResources(guidanceResponse.getContained(), CarePlan.class)
+				ResourceProviderUtils.getResources(guidanceResponse.getContained(), CareConnectCarePlan.class)
 					.stream().map(plan -> new CarePlanDTO(plan)).collect(Collectors.toList()));
 		
 		// Add support for data-requested
@@ -124,14 +129,14 @@ public class GuidanceResponseService {
 			
 			RequestGroup requestGroup = new RequestGroup();
 			requestGroup = ResourceProviderUtils.getResource(guidanceResponse.getContained(), RequestGroup.class);
-			requestGroup = requestGroup == null ? ResourceProviderUtils.getResource(
+			requestGroup = requestGroup == null ? ResourceProviderUtils.getResource(fhirContext,
 					baseUrl, RequestGroup.class, guidanceResponse.getResult().getReference()) : requestGroup;
 			
 			try {
 				requestGroup.getAction().stream().forEach(child -> {
 					String reference = child.getResource().getReference();
 					Class<? extends Resource> resourceClass = ResourceProviderUtils.getResourceType(reference);
-					Resource resource = ResourceProviderUtils.getResource(baseUrl, resourceClass, reference);
+					Resource resource = ResourceProviderUtils.getResource(fhirContext, baseUrl, resourceClass, reference);
 					
 					guidanceResponse.addContained(resource);
 
@@ -140,7 +145,7 @@ public class GuidanceResponseService {
 						childReferences.stream().forEach(childReference -> {
 							if (childReference != null) {
 								guidanceResponse.addContained(
-										ResourceProviderUtils.getResource(baseUrl, ResourceProviderUtils.getResourceType(childReference), childReference));
+										ResourceProviderUtils.getResource(fhirContext, baseUrl, ResourceProviderUtils.getResourceType(childReference), childReference));
 							}
 						});
 					}
@@ -153,7 +158,7 @@ public class GuidanceResponseService {
 		
 		if(guidanceResponse.hasOutputParameters()) {
 			try {
-				Parameters parameters = (Parameters) ResourceProviderUtils.getResource(baseUrl, Parameters.class, guidanceResponse.getOutputParameters().getReference());
+				Parameters parameters = (Parameters) ResourceProviderUtils.getResource(fhirContext, baseUrl, Parameters.class, guidanceResponse.getOutputParameters().getReference());
 				guidanceResponse.addContained(parameters);
 			} catch (Exception e) {
 				// TODO: handle exception
@@ -265,7 +270,7 @@ public class GuidanceResponseService {
 					requestGroup.addAction().setResource(new Reference(referralRequest));
 				}
 				if (resource instanceof CarePlan) {
-					CarePlan carePlan = ResourceProviderUtils.castToType(resource, CarePlan.class);
+					CarePlan carePlan = ResourceProviderUtils.castToType(resource, CareConnectCarePlan.class);
 					requestGroup.addAction().setResource(new Reference(carePlan));
 				}
 			}

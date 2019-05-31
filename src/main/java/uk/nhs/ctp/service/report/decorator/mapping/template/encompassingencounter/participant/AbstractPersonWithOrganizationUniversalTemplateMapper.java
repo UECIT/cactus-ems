@@ -3,12 +3,12 @@ package uk.nhs.ctp.service.report.decorator.mapping.template.encompassingencount
 import java.util.List;
 
 import org.hl7.fhir.dstu3.model.Address;
+import org.hl7.fhir.dstu3.model.CareConnectOrganization;
 import org.hl7.fhir.dstu3.model.ContactPoint;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import resources.CareConnectOrganization;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.report.decorator.mapping.AddressToADMapper;
 import uk.nhs.ctp.service.report.decorator.mapping.ContactPointToTELMapper;

@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.BooleanType;
+import org.hl7.fhir.dstu3.model.CareConnectObservation;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ContactPoint;
@@ -238,7 +239,7 @@ public class ParametersService {
 	private void addObservationInputData(Cases caseEntity, Parameters parameters) {
 		if (!caseEntity.getObservations().isEmpty()) {
 			for (CaseObservation observationEntity : caseEntity.getObservations()) {
-				Observation observation = new Observation().setStatus(Observation.ObservationStatus.FINAL)
+				Observation observation = new CareConnectObservation().setStatus(Observation.ObservationStatus.FINAL)
 						.setCode(new CodeableConcept().addCoding(new Coding(SystemURL.SNOMED,
 								observationEntity.getCode(), observationEntity.getDisplay())))
 						.setValue(new BooleanType(observationEntity.getValue()));
@@ -345,12 +346,12 @@ public class ParametersService {
 
 	private void setObservations(Cases caseEntity, Parameters parameters) throws FHIRException {
 
-		Observation genderObservation = new Observation().setStatus(Observation.ObservationStatus.FINAL)
+		Observation genderObservation = new CareConnectObservation().setStatus(Observation.ObservationStatus.FINAL)
 				.setCode(new CodeableConcept().addCoding(new Coding(SystemURL.SNOMED, "263495000", "Gender")))
 				.setValue(new StringType(caseEntity.getGender()));
 		parameters.addParameter().setName(SystemConstants.INPUT_DATA).setResource(genderObservation);
 
-		Observation ageObservation = new Observation().setStatus(Observation.ObservationStatus.FINAL)
+		Observation ageObservation = new CareConnectObservation().setStatus(Observation.ObservationStatus.FINAL)
 				.setCode(new CodeableConcept().addCoding(new Coding(SystemURL.SNOMED, "397669002", "Age")))
 				.setValue(new StringType(caseEntity.getDateOfBirth().toString()));
 		parameters.addParameter().setName(SystemConstants.INPUT_DATA).setResource(ageObservation);

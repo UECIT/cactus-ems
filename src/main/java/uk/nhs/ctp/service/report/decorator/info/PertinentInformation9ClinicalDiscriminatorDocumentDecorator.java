@@ -2,7 +2,7 @@ package uk.nhs.ctp.service.report.decorator.info;
 
 import java.util.List;
 
-import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.CareConnectObservation;
 import org.springframework.stereotype.Component;
 
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
@@ -56,7 +56,7 @@ public class PertinentInformation9ClinicalDiscriminatorDocumentDecorator impleme
 		CV codedValue = new CV();
 		
 		try {
-			Observation observation = (Observation) request.getReferralRequest().getReasonReferenceFirstRep().getResource();
+			CareConnectObservation observation = (CareConnectObservation) request.getReferralRequest().getReasonReferenceFirstRep().getResource();
 			codedValue.setCode(observation.getCode().getCodingFirstRep().getCode());
 			codedValue.setDisplayName(observation.getCode().getCodingFirstRep().getDisplay());
 			codedValue.setCodeSystem("2.16.840.1.113.883.2.1.3.2.4.24");

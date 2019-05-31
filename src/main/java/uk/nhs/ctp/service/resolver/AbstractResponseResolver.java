@@ -9,6 +9,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
+import org.hl7.fhir.dstu3.model.CareConnectCarePlan;
 import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.DataRequirement;
 import org.hl7.fhir.dstu3.model.Extension;
@@ -24,6 +25,7 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.SystemURL;
@@ -46,6 +48,9 @@ public abstract class AbstractResponseResolver<RESOURCE extends Resource> implem
 	
 	@Autowired
 	private IParser fhirParser;
+	
+	@Autowired
+	private FhirContext fhirContext;
 	
 	private Map<Class<? extends Resource>, Function<Resource, List<String>>> referenceFunctions;
 	
@@ -90,7 +95,7 @@ public abstract class AbstractResponseResolver<RESOURCE extends Resource> implem
 				ResourceProviderUtils.getResource(guidanceResponse.getContained(), ProcedureRequest.class));
 		
 		cdssResult.setCareAdvice(
-				ResourceProviderUtils.getResources(guidanceResponse.getContained(), CarePlan.class)
+				ResourceProviderUtils.getResources(guidanceResponse.getContained(), CareConnectCarePlan.class)
 					.stream().map(plan -> new CarePlanDTO(plan)).collect(Collectors.toList()));
 		
 		// Add support for data-requested
@@ -109,7 +114,7 @@ public abstract class AbstractResponseResolver<RESOURCE extends Resource> implem
 				List<String> childReferences = referenceFunctions.get(resource.getClass()).apply(resource);
 				childReferences.stream().forEach(childReference -> {
 					if (childReference != null) {
-						guidanceResponse.addContained(ResourceProviderUtils.getResource(
+						guidanceResponse.addContained(ResourceProviderUtils.getResource(fhirContext,
 								cdssSupplier.getBaseUrl(), ResourceProviderUtils.getResourceType(childReference), childReference));
 					}
 				});

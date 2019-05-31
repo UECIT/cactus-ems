@@ -125,8 +125,7 @@ public class ResourceProviderUtils {
 		return typedResources;
 	}
 	
-	public static <T extends Resource> T getResource (String baseUrl, Class<T> resourceClass, String resourceUrl) {
-		FhirContext ctx = FhirContext.forDstu3();
+	public static <T extends Resource> T getResource (FhirContext ctx, String baseUrl, Class<T> resourceClass, String resourceUrl) {
 		IGenericClient client = ctx.newRestfulGenericClient(baseUrl);
 		T resource = client.read().resource(resourceClass).withUrl(resourceUrl).execute();
 		

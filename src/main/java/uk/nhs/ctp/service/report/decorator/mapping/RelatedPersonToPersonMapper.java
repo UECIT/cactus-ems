@@ -1,6 +1,6 @@
 package uk.nhs.ctp.service.report.decorator.mapping;
 
-import org.hl7.fhir.dstu3.model.RelatedPerson;
+import org.hl7.fhir.dstu3.model.CareConnectRelatedPerson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -8,13 +8,13 @@ import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145007UK03Person;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145007UK03Person.TemplateId;
 
 @Component
-public class RelatedPersonToPersonMapper extends AbstractMapper<COCDTP145007UK03Person, RelatedPerson>{
+public class RelatedPersonToPersonMapper extends AbstractMapper<COCDTP145007UK03Person, CareConnectRelatedPerson>{
 
 	@Autowired
 	private HumanNameToPNMapper humanNameToPNMapper;
 	
 	@Override
-	public COCDTP145007UK03Person map(RelatedPerson relatedPerson) {
+	public COCDTP145007UK03Person map(CareConnectRelatedPerson relatedPerson) {
 		COCDTP145007UK03Person person = new COCDTP145007UK03Person();
 		person.setClassCode(person.getClassCode());
 		person.setDeterminerCode(person.getDeterminerCode());

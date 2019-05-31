@@ -1,9 +1,9 @@
 package uk.nhs.ctp.service.report.decorator.mapping.template.recipient;
 
+import org.hl7.fhir.dstu3.model.CareConnectOrganization;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import resources.CareConnectOrganization;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.report.decorator.mapping.AddressToADMapper;
 import uk.nhs.ctp.service.report.decorator.mapping.ContactPointToTELMapper;

@@ -1,8 +1,8 @@
 package uk.nhs.ctp.service.report.decorator.mapping;
 
+import org.hl7.fhir.dstu3.model.CareConnectOrganization;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import resources.CareConnectOrganization;
 import uk.nhs.ctp.service.report.org.hl7.v3.CV;
 import uk.nhs.ctp.service.report.org.hl7.v3.ClassCodeAware;
 import uk.nhs.ctp.service.report.org.hl7.v3.DetailedEntity;

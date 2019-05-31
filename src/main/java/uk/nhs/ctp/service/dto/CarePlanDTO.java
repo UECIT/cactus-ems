@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import org.hl7.fhir.dstu3.model.Annotation;
 import org.hl7.fhir.dstu3.model.CarePlan;
-import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.CarePlan.CarePlanActivityComponent;
+import org.hl7.fhir.dstu3.model.Reference;
 
 public class CarePlanDTO {
 	private String title;

@@ -1,14 +1,14 @@
 package uk.nhs.ctp.service.handover.decorator.bundle;
 
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.CarePlan;
+import org.hl7.fhir.dstu3.model.CareConnectCarePlan;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CarePlanBundleDecorator extends BundleDecorator<CarePlan, CarePlan> {
+public class CarePlanBundleDecorator extends BundleDecorator<CareConnectCarePlan, CareConnectCarePlan> {
 
 	@Override
-	public void decorate(Bundle documentBundle, CarePlan carePlan) {
+	public void decorate(Bundle documentBundle, CareConnectCarePlan carePlan) {
 		addToBundle(documentBundle, carePlan);
 		
 		addToBundle(documentBundle, buildCareAdvice(
@@ -19,7 +19,7 @@ public class CarePlanBundleDecorator extends BundleDecorator<CarePlan, CarePlan>
 				"What you can do in the meantime", "Call 999 if you're symptoms are getting worse."));
 	}
 
-	private CarePlan buildCareAdvice(String title, String description) {
-		return new CarePlan().setTitle(title).setDescription(description);
+	private CareConnectCarePlan buildCareAdvice(String title, String description) {
+		return (CareConnectCarePlan)new CareConnectCarePlan().setTitle(title).setDescription(description);
 	}
 }

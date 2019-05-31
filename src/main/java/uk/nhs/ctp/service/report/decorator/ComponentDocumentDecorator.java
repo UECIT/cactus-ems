@@ -4,7 +4,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.CareConnectObservation;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -77,7 +77,7 @@ public class ComponentDocumentDecorator implements OneOneOneDecorator {
 		noteSectionComponent.getCOCDTP146246GB01Section1().setAuthor(authorElement);
 		classificationSection.getComponent().add(noteSectionComponent);
 		
-		ResourceProviderUtils.getResources(resourceBundle, Observation.class).stream().forEach(observation -> {
+		ResourceProviderUtils.getResources(resourceBundle, CareConnectObservation.class).stream().forEach(observation -> {
 			POCDMT200001GB02Component2 component2 = codedEntryTemplateResolver.resolve(observation, request);
 			if (component2 != null)	
 				classificationSection.getEntry().add(component2);

@@ -3,9 +3,9 @@ package uk.nhs.ctp.service.report.decorator.mapping.template;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
+import org.hl7.fhir.dstu3.model.CareConnectRelatedPerson;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import resources.CareConnectRelatedPerson;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.report.decorator.mapping.AddressToADMapper;
 import uk.nhs.ctp.service.report.decorator.mapping.ContactPointToTELMapper;

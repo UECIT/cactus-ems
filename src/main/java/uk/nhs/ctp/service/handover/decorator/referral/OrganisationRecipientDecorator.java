@@ -1,6 +1,7 @@
 package uk.nhs.ctp.service.handover.decorator.referral;
 
 import org.hl7.fhir.dstu3.model.Address;
+import org.hl7.fhir.dstu3.model.CareConnectOrganization;
 import org.hl7.fhir.dstu3.model.Address.AddressUse;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.ContactPoint;
@@ -9,7 +10,6 @@ import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointUse;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.springframework.stereotype.Component;
 
-import resources.CareConnectOrganization;
 import uk.nhs.ctp.entities.AuditEntry;
 import uk.nhs.ctp.service.handover.decorator.ResourceDecorator;
 

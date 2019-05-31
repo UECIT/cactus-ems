@@ -3,9 +3,9 @@ package uk.nhs.ctp.service.report.decorator.mapping;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.hl7.fhir.dstu3.model.CareConnectOrganization;
 import org.hl7.fhir.dstu3.model.Coding;
 
-import resources.CareConnectOrganization;
 import uk.nhs.ctp.service.report.org.hl7.v3.CDAOrganizationTypeDisplayName;
 import uk.nhs.ctp.service.report.org.hl7.v3.CV;
 import uk.nhs.ctp.service.report.org.hl7.v3.ClassCodeAware;

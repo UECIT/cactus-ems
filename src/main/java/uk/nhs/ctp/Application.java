@@ -3,6 +3,22 @@ package uk.nhs.ctp;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
+import org.hl7.fhir.dstu3.model.CareConnectCarePlan;
+import org.hl7.fhir.dstu3.model.CareConnectCareTeam;
+import org.hl7.fhir.dstu3.model.CareConnectCondition;
+import org.hl7.fhir.dstu3.model.CareConnectEncounter;
+import org.hl7.fhir.dstu3.model.CareConnectEpisodeOfCare;
+import org.hl7.fhir.dstu3.model.CareConnectHealthcareService;
+import org.hl7.fhir.dstu3.model.CareConnectLocation;
+import org.hl7.fhir.dstu3.model.CareConnectMedication;
+import org.hl7.fhir.dstu3.model.CareConnectObservation;
+import org.hl7.fhir.dstu3.model.CareConnectOrganization;
+import org.hl7.fhir.dstu3.model.CareConnectPatient;
+import org.hl7.fhir.dstu3.model.CareConnectPractitioner;
+import org.hl7.fhir.dstu3.model.CareConnectProcedure;
+import org.hl7.fhir.dstu3.model.CareConnectProcedureRequest;
+import org.hl7.fhir.dstu3.model.CareConnectRelatedPerson;
+import org.hl7.fhir.dstu3.model.CareConnectSpecimen;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -19,15 +35,6 @@ import com.mifmif.common.regex.Generex;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import resources.CareConnectCondition;
-import resources.CareConnectEncounter;
-import resources.CareConnectEpisodeOfCare;
-import resources.CareConnectLocation;
-import resources.CareConnectOrganization;
-import resources.CareConnectPatient;
-import resources.CareConnectPractitioner;
-import resources.CareConnectProcedure;
-import resources.CareConnectRelatedPerson;
 
 @ServletComponentScan
 @SpringBootApplication
@@ -65,15 +72,22 @@ public class Application extends SpringBootServletInitializer {
 	public IParser fhirParser() {
 		IParser fhirParser = fhirContext().newJsonParser();
 		fhirParser.setPreferTypes(Arrays.asList(
-			CareConnectPatient.class, 
-			CareConnectPractitioner.class, 
-			CareConnectOrganization.class,
+			CareConnectCarePlan.class,
+			CareConnectCareTeam.class,
 			CareConnectCondition.class,
 			CareConnectEncounter.class,
 			CareConnectEpisodeOfCare.class,
+			CareConnectHealthcareService.class,
 			CareConnectLocation.class,
+			CareConnectMedication.class,
+			CareConnectObservation.class,
+			CareConnectOrganization.class,
+			CareConnectPatient.class, 
+			CareConnectPractitioner.class, 
 			CareConnectProcedure.class,
-			CareConnectRelatedPerson.class
+			CareConnectProcedureRequest.class,
+			CareConnectRelatedPerson.class,
+			CareConnectSpecimen.class
 		));
 		
 		return fhirParser;

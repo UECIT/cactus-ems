@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.CarePlan;
+import org.hl7.fhir.dstu3.model.CareConnectCarePlan;
+import org.hl7.fhir.dstu3.model.CareConnectPatient;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.dstu3.model.Provenance;
 import org.hl7.fhir.dstu3.model.Reference;
@@ -16,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import ca.uhn.fhir.parser.IParser;
-import resources.CareConnectPatient;
 import uk.nhs.ctp.entities.AuditEntry;
 import uk.nhs.ctp.enums.AuditEntryType;
 import uk.nhs.ctp.service.AuditService;
@@ -58,7 +58,7 @@ public abstract class HandoverService {
 	private List<ResourceDecorator<Bundle, CareConnectPatient>> bundlePatientDecorators;
 	
 	@Autowired
-	private List<ResourceDecorator<Bundle, CarePlan>> bundleCarePlanDecorators;
+	private List<ResourceDecorator<Bundle, CareConnectCarePlan>> bundleCarePlanDecorators;
 
 	public abstract <T extends Resource> T getResource(HandoverRequestDTO request, Class<T> resourceClass);
 	
@@ -83,7 +83,7 @@ public abstract class HandoverService {
 				ResourceProviderUtils.getResource(referralRequest.getSubject().getResource(), CareConnectPatient.class)));
 		
 		bundleCarePlanDecorators.stream().forEach(decorator -> decorator.decorate(documentBundle, 
-				ResourceProviderUtils.getResource(request.getResourceBundle(), CarePlan.class)));
+				ResourceProviderUtils.getResource(request.getResourceBundle(), CareConnectCarePlan.class)));
 		
 		auditEntries.stream().forEach(auditEntry -> {
 			bundleAuditDecorators.stream().forEach(decorator -> decorator.decorate(documentBundle, auditEntry));

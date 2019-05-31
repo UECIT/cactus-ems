@@ -6,12 +6,15 @@ import java.util.List;
 
 import org.hl7.fhir.dstu3.model.Address.AddressType;
 import org.hl7.fhir.dstu3.model.Address.AddressUse;
+import org.hl7.fhir.dstu3.model.CareConnectOrganization;
+import org.hl7.fhir.dstu3.model.CareConnectPatient;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointUse;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.HumanName;
+import org.hl7.fhir.dstu3.model.NHSNumberIdentifier;
 import org.hl7.fhir.dstu3.model.HumanName.NameUse;
 import org.hl7.fhir.dstu3.model.Patient.PatientCommunicationComponent;
 import org.hl7.fhir.dstu3.model.Period;
@@ -19,9 +22,6 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import datatypes.NHSNumberIdentifier;
-import resources.CareConnectOrganization;
-import resources.CareConnectPatient;
 import uk.nhs.ctp.entities.Cases;
 
 @Component

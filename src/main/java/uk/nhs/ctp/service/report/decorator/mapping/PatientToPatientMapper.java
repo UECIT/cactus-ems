@@ -2,11 +2,11 @@ package uk.nhs.ctp.service.report.decorator.mapping;
 
 import java.text.SimpleDateFormat;
 
+import org.hl7.fhir.dstu3.model.CareConnectPatient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import resources.CareConnectPatient;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145201GB01Patient;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145201GB01Patient.TemplateId;
 import uk.nhs.ctp.service.report.org.hl7.v3.TS;

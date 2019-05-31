@@ -3,9 +3,9 @@ package uk.nhs.ctp.service.report.decorator.mapping.template.encompassingencount
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
+import org.hl7.fhir.dstu3.model.CareConnectLocation;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import resources.CareConnectLocation;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.report.decorator.mapping.LocationToCOCDTP145222GB02PlaceMapper;
 import uk.nhs.ctp.service.report.decorator.mapping.template.TemplateMapper;

@@ -3,6 +3,10 @@ package uk.nhs.ctp.service.handover.decorator.bundle;
 import java.util.Date;
 
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.CareConnectEncounter;
+import org.hl7.fhir.dstu3.model.CareConnectEpisodeOfCare;
+import org.hl7.fhir.dstu3.model.CareConnectLocation;
+import org.hl7.fhir.dstu3.model.CareConnectPatient;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Composition;
@@ -14,14 +18,10 @@ import org.hl7.fhir.dstu3.model.EpisodeOfCare.EpisodeOfCareStatus;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.CareConnectEncounter.EncounterLocationComponent;
+import org.hl7.fhir.dstu3.model.CareConnectEncounter.EncounterParticipantComponent;
 import org.springframework.stereotype.Component;
 
-import resources.CareConnectEncounter;
-import resources.CareConnectEncounter.EncounterLocationComponent;
-import resources.CareConnectEncounter.EncounterParticipantComponent;
-import resources.CareConnectEpisodeOfCare;
-import resources.CareConnectLocation;
-import resources.CareConnectPatient;
 import uk.nhs.ctp.SystemURL;
 
 @Component

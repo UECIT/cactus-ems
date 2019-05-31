@@ -3,11 +3,11 @@ package uk.nhs.ctp.service.report.decorator.mapping.template;
 import java.util.List;
 
 import org.hl7.fhir.dstu3.model.Address;
+import org.hl7.fhir.dstu3.model.CareConnectOrganization;
+import org.hl7.fhir.dstu3.model.CareConnectRelatedPerson;
 import org.hl7.fhir.dstu3.model.ContactPoint;
 import org.hl7.fhir.dstu3.model.HumanName;
 
-import resources.CareConnectOrganization;
-import resources.CareConnectRelatedPerson;
 import uk.nhs.ctp.service.report.decorator.mapping.template.encompassingencounter.participant.AbstractPersonWithOrganizationUniversalTemplateMapper;
 import uk.nhs.ctp.service.report.org.hl7.v3.AssignedEntityAware;
 

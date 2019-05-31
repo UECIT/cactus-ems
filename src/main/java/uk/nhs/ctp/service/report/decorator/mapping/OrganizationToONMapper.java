@@ -1,8 +1,8 @@
 package uk.nhs.ctp.service.report.decorator.mapping;
 
+import org.hl7.fhir.dstu3.model.CareConnectOrganization;
 import org.springframework.stereotype.Component;
 
-import resources.CareConnectOrganization;
 import uk.nhs.ctp.service.report.org.hl7.v3.CsEntityNameUse;
 import uk.nhs.ctp.service.report.org.hl7.v3.ON;
 

@@ -1,5 +1,6 @@
 package uk.nhs.ctp.service.handover.decorator.referral;
 
+import org.hl7.fhir.dstu3.model.CareConnectPatient;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Flag;
 import org.hl7.fhir.dstu3.model.Flag.FlagStatus;
@@ -8,7 +9,6 @@ import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import resources.CareConnectPatient;
 import uk.nhs.ctp.config.FlagProperties;
 
 @Component

@@ -1,9 +1,9 @@
 package uk.nhs.ctp.service.report.decorator.mapping;
 
+import org.hl7.fhir.dstu3.model.CareConnectLocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import resources.CareConnectLocation;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145222GB02Place;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145222GB02Place.TemplateId;
 import uk.nhs.ctp.service.report.org.hl7.v3.TN;

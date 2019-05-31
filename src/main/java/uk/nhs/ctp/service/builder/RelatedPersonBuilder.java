@@ -6,10 +6,9 @@ import org.hl7.fhir.dstu3.model.Address.AddressType;
 import org.hl7.fhir.dstu3.model.Address.AddressUse;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointUse;
+import org.hl7.fhir.dstu3.model.CareConnectRelatedPerson;
 import org.hl7.fhir.dstu3.model.Period;
 import org.springframework.stereotype.Component;
-
-import resources.CareConnectRelatedPerson;
 
 @Component
 public class RelatedPersonBuilder {
