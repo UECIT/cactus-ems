@@ -105,7 +105,10 @@ import uk.nhs.ctp.service.report.npfit.hl7.localisation.MessageType;
     "participant",
     "recordTarget",
     "relatedDocument",
-    "tracker"
+    "tracker",
+    
+    "dataEnterer",
+    "authenticator"
 })
 public class POCDMT200001GB02ClinicalDocument {
 
@@ -161,6 +164,11 @@ public class POCDMT200001GB02ClinicalDocument {
     protected List<String> nullFlavor;
     @XmlAttribute(name = "updateMode")
     protected CsUpdateMode updateMode;
+    
+    @XmlElement(name = "dataEnterer", required = false)
+    protected POCDMT030001UK01DataEnterer dataEnterer;
+    @XmlElement(name = "authenticator", required = false)
+    protected POCDMT030001UK01Authenticator authenticator;
 
     /**
      * Gets the value of the code property.
@@ -809,7 +817,54 @@ public class POCDMT200001GB02ClinicalDocument {
     public void setUpdateMode(CsUpdateMode value) {
         this.updateMode = value;
     }
+    
+    /**
+     * Gets the value of the dataEnterer property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link JAXBElement }{@code <}{@link POCDMT030001UK01DataEnterer }{@code >}
+     *     
+     */
+    public POCDMT030001UK01DataEnterer getDataEnterer() {
+        return dataEnterer;
+    }
 
+    /**
+     * Sets the value of the dataEnterer property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link JAXBElement }{@code <}{@link POCDMT030001UK01DataEnterer }{@code >}
+     *     
+     */
+    public void setDataEnterer(POCDMT030001UK01DataEnterer value) {
+        this.dataEnterer = value;
+    }
+
+    /**
+     * Gets the value of the authenticator property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link JAXBElement }{@code <}{@link POCDMT030001UK01Authenticator }{@code >}
+     *     
+     */
+    public POCDMT030001UK01Authenticator getAuthenticator() {
+        return authenticator;
+    }
+
+    /**
+     * Sets the value of the authenticator property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link JAXBElement }{@code <}{@link POCDMT030001UK01Authenticator }{@code >}
+     *     
+     */
+    public void setAuthenticator(POCDMT030001UK01Authenticator value) {
+        this.authenticator = value;
+    }
 
     /**
      * <p>Java class for anonymous complex type.

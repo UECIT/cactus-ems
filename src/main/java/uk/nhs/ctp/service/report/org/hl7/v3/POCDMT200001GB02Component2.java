@@ -55,7 +55,8 @@ import uk.nhs.ctp.service.report.npfit.hl7.localisation.TemplateContent;
     "cocdtp146050GB01PermissionToView",
     "cocdtp146091GB01IntegratedUrgentCareHistory",
     "cocdtp146092GB01ClinicalDiscriminator",
-    "cocdtp146093GB01AppointmentReference"
+    "cocdtp146093GB01AppointmentReference",
+    "cocdtp146093GB01Finding"
 })
 public class POCDMT200001GB02Component2 implements ContentAware {
 
@@ -71,6 +72,10 @@ public class POCDMT200001GB02Component2 implements ContentAware {
     protected COCDTP146092GB01ClinicalDiscriminator cocdtp146092GB01ClinicalDiscriminator;
     @XmlElement(name = "COCD_TP146093GB01.AppointmentReference")
     protected COCDTP146093GB01AppointmentReference cocdtp146093GB01AppointmentReference;
+    
+    @XmlElement(name = "COCD_TP146093GB01.Finding")
+    protected COCDTP146312GB01Finding cocdtp146093GB01Finding;
+    
     @XmlAttribute(name = "typeCode", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String typeCode;
@@ -224,6 +229,33 @@ public class POCDMT200001GB02Component2 implements ContentAware {
     public void setCOCDTP146093GB01AppointmentReference(COCDTP146093GB01AppointmentReference value) {
         this.cocdtp146093GB01AppointmentReference = value;
     }
+    
+    
+    /**
+     * Gets the value of the cocdtp146093GB01Finding property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link COCDTP146312GB01Finding }
+     *     
+     */
+    public COCDTP146312GB01Finding getCOCDTP146312GB01Finding() {
+        return cocdtp146093GB01Finding;
+    }
+
+    /**
+     * Sets the value of the cocdtp146093GB01Finding property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link COCDTP146312GB01Finding }
+     *     
+     */
+    public void setCOCDTP146312GB01Finding(COCDTP146312GB01Finding value) {
+        this.cocdtp146093GB01Finding = value;
+    }
+    
+    
 
     /**
      * Gets the value of the typeCode property.

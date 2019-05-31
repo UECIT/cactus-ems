@@ -339,9 +339,9 @@ export class QuestionnaireComponent implements OnInit {
   }
 
   async get111Report() {
-    // tslint:disable-next-line: max-line-length
     this.isloadingReport = true;
-    const reports = await this.reportService.getReport(this.questionnaire.caseId, this.questionnaire.referralRequest.resourceId, this.handoverMessage);
+    const reports = await this.reportService
+      .getReport(this.questionnaire.caseId, this.questionnaire.referralRequest.resourceId, this.handoverMessage);
     for (let index = 0; index < reports.length; index++) {
       const report = reports[index];
       if (report.reportType === 'ONE_ONE_ONE_V2') {
@@ -349,14 +349,20 @@ export class QuestionnaireComponent implements OnInit {
         report.ValidationReport = await this.reportService.validate111Report(report.request);
         this.isloadingReport = false;
       }
-      
+
       if (report.reportType === 'ONE_ONE_ONE_V3') {
         this.isloadingReport = true;
         report.ValidationReport = await this.reportService.validate111Report(report.request);
         this.isloadingReport = false;
       }
 
-      if (report.reportType === 'AMBULANCE') {
+      if (report.reportType === 'AMBULANCE_V2') {
+        this.isloadingReport = true;
+        report.ValidationReport = await this.reportService.validate111Report(report.request);
+        this.isloadingReport = false;
+      }
+
+      if (report.reportType === 'AMBULANCE_V3') {
         this.isloadingReport = true;
         report.ValidationReport = await this.reportService.validateAmbulanceRequest(report.request);
         this.isloadingReport = false;

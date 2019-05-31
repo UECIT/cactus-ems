@@ -54,7 +54,7 @@ public class AmbulanceReportService implements Reportable {
 	public ReportsDTO generate(ReportRequestDTO request) throws JAXBException {
 		return new ReportsDTO(ConversionUtil.convertToXml(
 				objectFactory.createAmbulanceRequest(generateAmbulanceReport(request)), 
-				"uk.nhs.ctp.service.report.org.hl7.v3"), null, ReportType.AMBULANCE, ContentType.XML);
+				"uk.nhs.ctp.service.report.org.hl7.v3"), null, ReportType.AMBULANCE_V3, ContentType.XML);
 	}
 	
 	private REPCMT200001GB02AmbulanceRequest generateAmbulanceReport(ReportRequestDTO request) {

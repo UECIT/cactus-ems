@@ -41,6 +41,9 @@ public class PertinentInformation5EncounterDocumentDecorator implements Ambulanc
 	@Autowired
 	private PatientTemplateResolver <? extends IBaseResource> patientTemplate;
 	
+	@Autowired
+    private SimpleDateFormat reportDateFormat;
+	
 	@Value("${ems.terminology.administrative.gender.system}")
 	private String administrativeGenderSystem;
 	
@@ -71,10 +74,9 @@ public class PertinentInformation5EncounterDocumentDecorator implements Ambulanc
 		REPCMT200001GB02EncounterEvent encounterEvent = new REPCMT200001GB02EncounterEvent();
 		encounterEvent.setClassCode(encounterEvent.getClassCode());
 		encounterEvent.setMoodCode(encounterEvent.getMoodCode());
-		
+
 		IVLTS effectiveTime = new IVLTS();
-		SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
-		effectiveTime.setValue(format.format(new Date()));
+        effectiveTime.setValue(reportDateFormat.format(new Date()));
 		encounterEvent.setEffectiveTime(effectiveTime);
 		
 		II id = new II();
