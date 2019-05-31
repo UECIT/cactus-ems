@@ -13,7 +13,6 @@ import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP146050GB01PermissionToView;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP146050GB01PermissionToView.Code;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP146050GB01PermissionToView.TemplateId;
 import uk.nhs.ctp.service.report.org.hl7.v3.CV;
-import uk.nhs.ctp.service.report.org.hl7.v3.CsNullFlavor;
 import uk.nhs.ctp.service.report.org.hl7.v3.IVLTS;
 import uk.nhs.ctp.service.report.org.hl7.v3.QTY;
 import uk.nhs.ctp.service.report.org.hl7.v3.REPCMT200001GB02AmbulanceRequest;
@@ -38,8 +37,13 @@ public class PertinentInformation8PermissionToViewDocumentDecorator implements A
 		permissionToView.setSeperatableInd(permissionToViewSeperatableInd);
 		
 		TemplateContent permissionToViewTemplateContent = new TemplateContent();
-		permissionToViewTemplateContent.setNullFlavor(CsNullFlavor.NA);
+		permissionToViewTemplateContent.setRoot("2.16.840.1.113883.2.1.3.2.4.18.16");
+		permissionToViewTemplateContent.setExtension("COCD_TP146050GB01#PermissionToView");
 		permissionToView.setContentId(permissionToViewTemplateContent);
+		
+		SeperatableInd seperatableInd = new SeperatableInd();
+		seperatableInd.setValue(false);
+		permissionToView.setSeperatableInd(seperatableInd);
 		
 		permissionToView.setCOCDTP146050GB01PermissionToView(createPermissionToViewContent(fhirConsent));
 		

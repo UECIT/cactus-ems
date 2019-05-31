@@ -30,7 +30,7 @@ public class BundleToServiceEventTemplateMapper implements TemplateMapper<Bundle
 		id.setAssigningAuthorityName("RA9:SOUTH DEVON HEALTHCARE NHS TRUST\"");
 		id.setRoot("2.16.840.1.113883.2.1.3.2.4.18.40");
 		id.setExtension("KA901");
-		serviceEvent.getId().add(new II());
+		serviceEvent.getId().add(id);
 		
 		TemplateId templateId = new TemplateId();
 		templateId.setRoot("2.16.840.1.113883.2.1.3.2.4.18.2");

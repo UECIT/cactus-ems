@@ -11,6 +11,7 @@ import com.mifmif.common.regex.Generex;
 
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.report.decorator.mapping.template.TemplateMapper;
+import uk.nhs.ctp.service.report.org.hl7.v3.CDNPfITCDAUrl;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP146312GB01Finding;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP146312GB01Finding.StatusCode;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP146312GB01Finding.TemplateId;
@@ -19,6 +20,7 @@ import uk.nhs.ctp.service.report.org.hl7.v3.CV;
 import uk.nhs.ctp.service.report.org.hl7.v3.IINPfITUuidMandatory;
 import uk.nhs.ctp.service.report.org.hl7.v3.IVLTS;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02Component2;
+import uk.nhs.ctp.service.report.org.hl7.v3.XActMoodDocumentObservation;
 
 @Component
 public class ObservationToFindingTemplateMapper implements TemplateMapper<CareConnectObservation, POCDMT200001GB02Component2> {
@@ -39,7 +41,13 @@ public class ObservationToFindingTemplateMapper implements TemplateMapper<CareCo
 		
 		COCDTP146312GB01Finding finding = new COCDTP146312GB01Finding();
 		finding.setClassCode(finding.getClassCode());
-		finding.setMoodCode(finding.getMoodCode());
+		finding.setMoodCode(XActMoodDocumentObservation.DEF);
+		
+		CDNPfITCDAUrl code = new CDNPfITCDAUrl();
+        code.setCode("163131000000108 ");
+        code.setCodeSystem("2.16.840.1.113883.6.96");
+        code.setDisplayName("Clinical observations and findings ");
+        finding.setCode(code);
 		
 		IVLTS effectiveTime = new IVLTS();
         effectiveTime.setValue(reportDateFormat.format(new Date()));

@@ -33,7 +33,6 @@ import uk.nhs.ctp.service.report.org.hl7.v3.REPCMT200001GB02PertinentInformation
 import uk.nhs.ctp.service.report.org.hl7.v3.REPCMT200001GB02PertinentInformation5;
 import uk.nhs.ctp.service.report.org.hl7.v3.REPCMT200001GB02PertinentInformation6;
 import uk.nhs.ctp.service.report.org.hl7.v3.REPCMT200001GB02PoliceFlag;
-import uk.nhs.ctp.service.report.org.hl7.v3.REPCMT200001GB02Reason;
 import uk.nhs.ctp.service.report.org.hl7.v3.REPCMT200001GB02SceneSafeFlag;
 import uk.nhs.ctp.service.report.org.hl7.v3.REPCMT200001GB02TrappedFlag;
 import uk.nhs.ctp.service.report.org.hl7.v3.REPCMT200001GB02TraumaFlag;
@@ -69,7 +68,7 @@ public class AmbulanceReportService implements Reportable {
 		CV code = new CV();
 		code.setCodeSystem("2.16.840.1.113883.2.1.3.2.4.15");
 		code.setCode("828801000000101");
-		ambulanceRequestReport.setCode(new CV());
+		ambulanceRequestReport.setCode(code);
 		
 		// The HL7 attribute effectiveTime is used to define when the request for an ambulance was made.
 		EffectiveTime effectiveTime = new EffectiveTime();
@@ -83,22 +82,12 @@ public class AmbulanceReportService implements Reportable {
 		identifier.setRoot(uuidGenerator.random());
 		ambulanceRequestReport.setId(identifier);
 		
-		// This class is a information recipient class - It is used for the list of recipients of the ambulance request message.
-//		REPCMT200001GB02PrimaryInformationRecipient primaryInformationRecipient = new REPCMT200001GB02PrimaryInformationRecipient();
-//		primaryInformationRecipient.setTypeCode(primaryInformationRecipient.getTypeCode());
-//		ambulanceRequestReport.getInformationRecipient().add(primaryInformationRecipient);
-		
 		// setup PertinentInformation objects and populate fixed data.
 		setupPertinentInformation(ambulanceRequestReport);
 		
 		for (AmbulanceDecorator decorator : decorators) {
 			decorator.decorate(ambulanceRequestReport, request);	
 		}
-		
-		// This class is act relationship of reason. - This class indicates the triage outcome is the reason for the ambulance request.
-		REPCMT200001GB02Reason reason = new REPCMT200001GB02Reason();
-		reason.setTypeCode(reason.getTypeCode());
-		ambulanceRequestReport.setReason(reason);
 		
 		// This class is a replacement relationship class. - It is used when the ambulance request message is being replaced by an updated version. CAN BE NULL
 		ambulanceRequestReport.setReplacementOf(null);

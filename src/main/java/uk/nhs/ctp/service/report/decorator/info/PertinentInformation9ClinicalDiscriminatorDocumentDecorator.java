@@ -33,7 +33,6 @@ public class PertinentInformation9ClinicalDiscriminatorDocumentDecorator impleme
 		
 		clinicalDiscriminators.add(clinicalDiscriminator);
 		
-		document.getPertinentInformation9().addAll(clinicalDiscriminators);
 	}
 
 	private REPCMT200001GB02ClinicalDiscriminator createPertinentClinicalDiscriminator(ReportRequestDTO request) {
