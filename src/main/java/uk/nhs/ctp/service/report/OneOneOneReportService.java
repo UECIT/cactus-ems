@@ -3,7 +3,9 @@ package uk.nhs.ctp.service.report;
 import java.util.Collection;
 import java.util.Set;
 
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import javax.xml.transform.TransformerException;
 
 import org.hl7.fhir.dstu3.model.codesystems.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,18 +16,20 @@ import uk.nhs.ctp.service.dto.ReportsDTO;
 import uk.nhs.ctp.service.report.decorator.OneOneOneDecorator;
 import uk.nhs.ctp.service.report.org.hl7.v3.ObjectFactory;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02ClinicalDocument;
-import uk.nhs.ctp.utils.ConversionUtil;
+import uk.nhs.ctp.utils.DocumentGenerator;
 
 public abstract class OneOneOneReportService implements Reportable {
-
+	
 	@Autowired
 	private Collection<OneOneOneDecorator> decorators;
+	
+	@Autowired
+	private DocumentGenerator documentGenerator;
 	
 	private ObjectFactory objectFactory = new ObjectFactory();
 	
 	public ReportsDTO generate(ReportRequestDTO request) throws JAXBException {
 		request.setTemplateMappingExclusions(getTemplateMappingExclusions());
-		// convert ReferralRequest to ClinicalDocument
 		POCDMT200001GB02ClinicalDocument document = 
 				objectFactory.createPOCDMT200001GB02ClinicalDocument();
 
@@ -33,11 +37,19 @@ public abstract class OneOneOneReportService implements Reportable {
 		// it links the current document to a related CDA document.
 		// (CAN BE NULL)
 		document.setRelatedDocument(null);
-
 		decorators.stream().forEach(decorator -> decorator.decorate(document, request));
+
+		JAXBElement<POCDMT200001GB02ClinicalDocument> rootElement = objectFactory.createClinicalDocument(document);
 		
-		return new ReportsDTO(ConversionUtil.convertToXml(objectFactory.createClinicalDocument(document), 
-				"uk.nhs.ctp.service.report.org.hl7.v3"), null, getReportType(), ContentType.XML);
+		String htmlDocumentId = null;
+		
+        try {
+        	htmlDocumentId = documentGenerator.generateHtml(rootElement);
+		} catch (TransformerException e) {
+		}
+        
+		return new ReportsDTO(
+				documentGenerator.generateXml(rootElement), getReportType(), ContentType.XML, htmlDocumentId);
 	}
 
 	protected abstract Set<Class<?>> getTemplateMappingExclusions();

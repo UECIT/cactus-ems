@@ -24,6 +24,7 @@ public class ReferralRequestToIntegratedUrgentCareTextSectionTemplateMapper exte
 					new QName("urn:hl7-org:v3", "paragraph"), StrucDocParagraph.class, paragraph));
 		});
 		
+		section.setTitle("Notes");
 		section.setText(text);
 	}
 

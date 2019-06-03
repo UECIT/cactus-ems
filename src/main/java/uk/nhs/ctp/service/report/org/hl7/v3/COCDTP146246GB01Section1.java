@@ -89,7 +89,8 @@ public class COCDTP146246GB01Section1 {
     @XmlElement(required = true)
     protected COCDTP146246GB01Section1 .TemplateId templateId;
     protected StrucDocText text;
-    protected ST title;
+    @XmlElement
+    protected String title;
     @XmlElementRef(name = "author", namespace = "urn:hl7-org:v3", type = JAXBElement.class, required = false)
     protected JAXBElement<POCDMT200001GB02Author> author;
     @XmlElement(nillable = true)
@@ -209,7 +210,7 @@ public class COCDTP146246GB01Section1 {
      *     {@link ST }
      *     
      */
-    public ST getTitle() {
+    public String getTitle() {
         return title;
     }
 
@@ -221,7 +222,7 @@ public class COCDTP146246GB01Section1 {
      *     {@link ST }
      *     
      */
-    public void setTitle(ST value) {
+    public void setTitle(String value) {
         this.title = value;
     }
 

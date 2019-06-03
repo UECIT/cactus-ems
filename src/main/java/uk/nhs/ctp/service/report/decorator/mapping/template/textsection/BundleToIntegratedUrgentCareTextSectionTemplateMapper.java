@@ -31,6 +31,7 @@ public class BundleToIntegratedUrgentCareTextSectionTemplateMapper extends Abstr
 			addQuestionnaireResponse(text, response);
 		});
 		
+		section.setTitle("Q & A");
 		section.setText(text);
 	}
 	

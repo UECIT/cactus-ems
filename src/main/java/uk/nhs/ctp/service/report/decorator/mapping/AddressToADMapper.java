@@ -48,7 +48,7 @@ public class AddressToADMapper extends AbstractMapper<AD, Address> {
 	
 	private void addAddressPart(String part, Class<?> containerClass, AD targetAddress) {
 		if (part != null) {
-			targetAddress.getContent().add(new JAXBElement<>(new QName("urn:hl7-org:v3",
+			targetAddress.getContent().add(new JAXBElement<String>(new QName("urn:hl7-org:v3",
 					WordUtils.uncapitalize(containerClass.getSimpleName())), String.class, part));
 		}
 		

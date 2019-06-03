@@ -4,7 +4,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import javax.xml.transform.TransformerException;
 
 import org.hl7.fhir.dstu3.model.codesystems.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +38,7 @@ import uk.nhs.ctp.service.report.org.hl7.v3.REPCMT200001GB02PoliceFlag;
 import uk.nhs.ctp.service.report.org.hl7.v3.REPCMT200001GB02SceneSafeFlag;
 import uk.nhs.ctp.service.report.org.hl7.v3.REPCMT200001GB02TrappedFlag;
 import uk.nhs.ctp.service.report.org.hl7.v3.REPCMT200001GB02TraumaFlag;
-import uk.nhs.ctp.utils.ConversionUtil;
+import uk.nhs.ctp.utils.DocumentGenerator;
 
 @Service
 public class AmbulanceReportService implements Reportable {
@@ -47,93 +49,83 @@ public class AmbulanceReportService implements Reportable {
 	@Autowired
 	private Generex uuidGenerator;
 	
+	@Autowired
+	private DocumentGenerator documentGenerator;
+	
+	@Autowired
+	private SimpleDateFormat reportDateFormat;
+	
 	private ObjectFactory objectFactory = new ObjectFactory();
 	
 	@Override
 	public ReportsDTO generate(ReportRequestDTO request) throws JAXBException {
-		return new ReportsDTO(ConversionUtil.convertToXml(
-				objectFactory.createAmbulanceRequest(generateAmbulanceReport(request)), 
-				"uk.nhs.ctp.service.report.org.hl7.v3"), null, ReportType.AMBULANCE_V3, ContentType.XML);
-	}
-	
-	private REPCMT200001GB02AmbulanceRequest generateAmbulanceReport(ReportRequestDTO request) {
+		REPCMT200001GB02AmbulanceRequest ambulanceRequest = objectFactory.createREPCMT200001GB02AmbulanceRequest();
 		
-		REPCMT200001GB02AmbulanceRequest ambulanceRequestReport = objectFactory.createREPCMT200001GB02AmbulanceRequest();
-		// TODO populate an Ambulance Request Report.
+		ambulanceRequest.setClassCode(ambulanceRequest.getClassCode());
+		ambulanceRequest.setMoodCode(ambulanceRequest.getMoodCode());
 		
-		ambulanceRequestReport.setClassCode(ambulanceRequestReport.getClassCode());
-		ambulanceRequestReport.setMoodCode(ambulanceRequestReport.getMoodCode());
-		
-		// The HL7 attribute code uses a code from the AmbulanceRequestTypeSnCT to describe the type of request message.
 		CV code = new CV();
 		code.setCodeSystem("2.16.840.1.113883.2.1.3.2.4.15");
 		code.setCode("828801000000101");
-		ambulanceRequestReport.setCode(code);
+		ambulanceRequest.setCode(code);
 		
-		// The HL7 attribute effectiveTime is used to define when the request for an ambulance was made.
 		EffectiveTime effectiveTime = new EffectiveTime();
+
+		effectiveTime.setValue(reportDateFormat.format(new Date()));
+		ambulanceRequest.setEffectiveTime(effectiveTime);
 		
-		SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
-		effectiveTime.setValue(format.format(new Date()));
-		ambulanceRequestReport.setEffectiveTime(effectiveTime);
-		
-		// The HL7 attribute id holds a unique identifier for this care provision request.
 		IINPfITUuidMandatory identifier = new IINPfITUuidMandatory();
 		identifier.setRoot(uuidGenerator.random());
-		ambulanceRequestReport.setId(identifier);
+		ambulanceRequest.setId(identifier);
 		
-		// setup PertinentInformation objects and populate fixed data.
-		setupPertinentInformation(ambulanceRequestReport);
+		setupPertinentInformation(ambulanceRequest);
 		
 		for (AmbulanceDecorator decorator : decorators) {
-			decorator.decorate(ambulanceRequestReport, request);	
+			decorator.decorate(ambulanceRequest, request);	
 		}
 		
-		// This class is a replacement relationship class. - It is used when the ambulance request message is being replaced by an updated version. CAN BE NULL
-		ambulanceRequestReport.setReplacementOf(null);
+		ambulanceRequest.setReplacementOf(null);
 		
-		return ambulanceRequestReport;
+		JAXBElement<REPCMT200001GB02AmbulanceRequest> rootElement = 
+				objectFactory.createAmbulanceRequest(ambulanceRequest);
+		
+		try {
+			documentGenerator.generateHtml(rootElement);
+		} catch (TransformerException e) {
+		}
+		
+		return new ReportsDTO(documentGenerator.generateXml(
+				rootElement), ReportType.AMBULANCE_V3, ContentType.XML, "");
 	}
 
 	private void setupPertinentInformation(REPCMT200001GB02AmbulanceRequest ambulanceRequestReport) {
-		// This class is a relationship of pertinent information. - It is used to indicate information about whether the patient has suffered trauma pertinent to the ambulance request.
 		ambulanceRequestReport.setPertinentInformation((REPCMT200001GB02PertinentInformation2) 
 				createPertinentInformation(new REPCMT200001GB02PertinentInformation2(), 
 						new REPCMT200001GB02TraumaFlag(), new REPCMT200001GB02PertinentInformation2.SeperatableInd()));
 		
-		// This class is a relationship of pertinent information. - It is used to indicate information about whether there is a risk of fire at the incident scene pertinent to the ambulance request.
 		ambulanceRequestReport.setPertinentInformation1((REPCMT200001GB02PertinentInformation3) 
 				createPertinentInformation(new REPCMT200001GB02PertinentInformation3(), 
 						new REPCMT200001GB02FireFlag(), new REPCMT200001GB02PertinentInformation3.SeperatableInd()));
 		
-		// This class is a relationship of pertinent information. - It is used to indicate information about whether the scene is safe pertinent to the ambulance request.
 		ambulanceRequestReport.setPertinentInformation2((REPCMT200001GB02PertinentInformation4) 
 				createPertinentInformation(new REPCMT200001GB02PertinentInformation4(), 
 						new REPCMT200001GB02SceneSafeFlag(), new REPCMT200001GB02PertinentInformation4.SeperatableInd()));
 		
-		// This class is a relationship of pertinent information. - It is used to indicate information about whether police are in attendance at the incident scen e pertinent to the ambulance request.
 		ambulanceRequestReport.setPertinentInformation3((REPCMT200001GB02PertinentInformation5) 
 				createPertinentInformation(new REPCMT200001GB02PertinentInformation5(), 
 						new REPCMT200001GB02PoliceFlag(), new REPCMT200001GB02PertinentInformation5.SeperatableInd()));
 		
-		// This class is a relationship of pertinent information. - It is used to indicate information about whether the patient is trapped pertinent to the ambulance request.
 		ambulanceRequestReport.setPertinentInformation4((REPCMT200001GB02PertinentInformation6) 
 				createPertinentInformation(new REPCMT200001GB02PertinentInformation6(), 
 						new REPCMT200001GB02TrappedFlag(), new REPCMT200001GB02PertinentInformation6.SeperatableInd()));
 		
-		// This class is a relationship of pertinent information. - It is used to indicate information the NHS111 encounter pertinent to the ambulance request.
-		// possible from referral request encounter
 		ambulanceRequestReport.setPertinentInformation5((REPCMT200001GB02PertinentInformation) 
 				createPertinentInformation(new REPCMT200001GB02PertinentInformation(), 
 						new REPCMT200001GB02EncounterEvent(), new REPCMT200001GB02PertinentInformation.SeperatableInd()));
 		
-		// This class is a relationship of pertinent information. - It is used to carry additional notes pertinent to the ambulance request. CAN BE NULL
 		ambulanceRequestReport.getPertinentInformation7().add(null); // referral request note
 		
-		// This class is a relationship of pertinent information. - It is used to carry the Permission To View outcome. CAN BE NULL
 		ambulanceRequestReport.setPertinentInformation8(null);
-		
-		// ambulanceRequestReport.setPertinentInformation9(null); // referral request clinical discriminator (reason reference) 
 	}
 	
 	private <B extends BL, F extends Flag> PertinentInformation<B, F> createPertinentInformation(PertinentInformation<B, F> info, F flag, B b) {
