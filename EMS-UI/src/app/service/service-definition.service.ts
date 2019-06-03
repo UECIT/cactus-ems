@@ -44,10 +44,13 @@ export class ServiceDefinitionService {
     experimental: boolean,
     effectiveTo: string,
     effectiveFrom: string,
-    useContextParty: string,
-    useContextSkillset: string,
+    useContextCode: string,
+    useContextValueConcept: string,
     jurisdiction: string,
-    trigger: string) {
+    triggerType: string,
+    triggerEventDataType: string,
+    triggerEventDataProfile: string,
+    triggerEventDataValueCoding: string) {
     if (this.sessionStorage['auth_token'] != null) {
       httpOptions.headers = httpOptions.headers.set(
         'Authorization',
@@ -60,20 +63,26 @@ export class ServiceDefinitionService {
     // &experimental=false
     // &effective=ge{{TODAY}}
     // &effective=le{{TODAY}}
-    // &useContext:=https://www.hl7.org/fhir/party.html|3
-    // &useContext:=https://www.hl7.org/fhir/skillset.html|111CH
+    // &useContext-code=gender  NEW
+    // &useContext-valueconcept=http://hl7.org/fhir/administrative-gender|female NEW
     // &jurisdiction=urn:iso:std:iso:3166|ENG
-    // &trigger=https://www.hl7.org/fhir/triggerdefinition.html|240091000000105
+    // &trigger-type=data-added
+    // &trigger-eventdata-type=Observation
+    // &trigger-eventdata-profile=[profile name]
+    // &trigger-eventdata-valuecoding=[code]
 
     const url = cdssUrl +
     'status=' + status +
     '&experimental=' + experimental +
     '&effective=ge' + effectiveTo +
     '&effective=le' + effectiveFrom +
-    '&useContext:=https://www.hl7.org/fhir/party.html|' + useContextParty +
-    '&useContext:=https://www.hl7.org/fhir/skillset.html|' + useContextSkillset +
+    '&useContext-code=' + useContextCode +
+    '&useContext-valueconcept=https://www.hl7.org/fhir/party.html|' + useContextValueConcept +
     '&jurisdiction=urn:iso:std:iso:3166|' + jurisdiction +
-    '&trigger=https://www.hl7.org/fhir/triggerdefinition.html|' + trigger;
+    '&trigger-type=' + triggerType +
+    '&trigger-eventdata-type=' + triggerEventDataType +
+    '&trigger-eventdata-profile=' + triggerEventDataProfile +
+    '&trigger-eventdata-valuecoding=' + triggerEventDataValueCoding;
 
     return this.http.get<any>(encodeURI(url), httpOptions);
   }

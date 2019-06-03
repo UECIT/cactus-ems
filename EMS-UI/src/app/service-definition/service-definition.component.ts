@@ -67,22 +67,27 @@ export class ServiceDefinitionComponent implements OnInit, OnChanges {
     // &experimental=false
     // &effective=ge{{TODAY}}
     // &effective=le{{TODAY}}
-    // &useContext:=https://www.hl7.org/fhir/party.html|3
-    // &useContext:=https://www.hl7.org/fhir/skillset.html|111CH
+    // &useContext-code=gender  NEW
+    // &useContext-valueconcept=http://hl7.org/fhir/administrative-gender|female NEW
     // &jurisdiction=urn:iso:std:iso:3166|ENG
-    // &trigger=https://www.hl7.org/fhir/triggerdefinition.html|240091000000105
+    // &trigger-type=data-added
+    // &trigger-eventdata-type=Observation
+    // &trigger-eventdata-profile=[profile name]
+    // &trigger-eventdata-valuecoding=[code]
     if (this.tempSelectedQueryType.includes('attributes') && this.tempSelectedServiceDefinition !== undefined) {
-
-      this.serviceDefinitionService
+        this.serviceDefinitionService
         .getServiceDefinitionByQuery(
           this.CdssUrl + 'ServiceDefinition?',
           'ACTIVE',
           false,
           '2019-04-12',
           '2019-04-12',
+          'party',
           this.getPartyCode(this.tempSelectedServiceDefinition),
-          this.getSkillsetCode(this.tempSelectedServiceDefinition),
           'ENG',
+          'data-added',
+          'Observation',
+          'https://www.hl7.org/fhir/triggerdefinition.html',
           this.getTriggers(this.tempSelectedServiceDefinition)
         )
         .subscribe(
@@ -90,7 +95,6 @@ export class ServiceDefinitionComponent implements OnInit, OnChanges {
         );
     }
   }
-
 
   getPartyCode(serviceDefinitionId) {
     switch (serviceDefinitionId) {
