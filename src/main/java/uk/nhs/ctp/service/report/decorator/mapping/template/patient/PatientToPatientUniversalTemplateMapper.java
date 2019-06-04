@@ -9,6 +9,8 @@ import org.hl7.fhir.dstu3.model.CareConnectPractitioner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.mifmif.common.regex.Generex;
+
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.report.decorator.mapping.AddressToADMapper;
 import uk.nhs.ctp.service.report.decorator.mapping.ContactPointToTELMapper;
@@ -36,6 +38,9 @@ public class PatientToPatientUniversalTemplateMapper implements TemplateMapper<C
 	@Autowired
 	private OrganizationToCOCDTP145201GB01OrganizationMapper organizationToOrganizationMapper;
 	
+	@Autowired
+	private Generex uuidGenerator;
+	
 	@Override
 	public void map(CareConnectPatient ccPatient, POCDMT200001GB02RecordTarget container, ReportRequestDTO request) {
 		COCDTP145201GB01PatientRole patientRole = new COCDTP145201GB01PatientRole();
@@ -48,7 +53,7 @@ public class PatientToPatientUniversalTemplateMapper implements TemplateMapper<C
 		
 		IINPfITOidMandatoryAssignedAuthority id = new IINPfITOidMandatoryAssignedAuthority();
 		id.setRoot("2.16.840.1.113883.2.1.4.1");
-		id.setExtension(ccPatient.getIdentifierFirstRep().getValue());
+		id.setExtension(uuidGenerator.random());
 		id.setAssigningAuthorityName("RA9:SOUTH DEVON HEALTHCARE NHS TRUST");
 		patientRole.getId().add(id);
 

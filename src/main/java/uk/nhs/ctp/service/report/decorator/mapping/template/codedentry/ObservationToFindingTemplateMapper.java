@@ -44,9 +44,9 @@ public class ObservationToFindingTemplateMapper implements TemplateMapper<CareCo
 		finding.setMoodCode(XActMoodDocumentObservation.DEF);
 		
 		CDNPfITCDAUrl code = new CDNPfITCDAUrl();
-        code.setCode("163131000000108 ");
+        code.setCode("163131000000108");
         code.setCodeSystem("2.16.840.1.113883.6.96");
-        code.setDisplayName("Clinical observations and findings ");
+        code.setDisplayName("Clinical observations and findings");
         finding.setCode(code);
 		
 		IVLTS effectiveTime = new IVLTS();
@@ -75,7 +75,7 @@ public class ObservationToFindingTemplateMapper implements TemplateMapper<CareCo
 		finding.setTemplateId(templateId);
 		
 		CV observationCode = new CV();
-		observationCode.setCodeSystem(observation.getCode().getCodingFirstRep().getSystem());
+		observationCode.setCodeSystem("2.16.840.1.113883.6.96");
 		observationCode.setCode(observation.getCode().getCodingFirstRep().getCode());
 		observationCode.setDisplayName(observation.getCode().getCodingFirstRep().getDisplay() + " (" + observation.getValueBooleanType() + ")");
 		finding.setValue(observationCode);

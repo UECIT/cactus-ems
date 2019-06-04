@@ -6,7 +6,9 @@ import org.springframework.stereotype.Component;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.report.decorator.mapping.template.TemplateMapper;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145210GB01AssignedEntity;
+import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145210GB01AssignedEntity.TemplateId;
 import uk.nhs.ctp.service.report.org.hl7.v3.CVNPfITCodedplain;
+import uk.nhs.ctp.service.report.org.hl7.v3.IINPfITOidRequiredAssigningAuthorityName;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT030001UK01Authenticator;
 
 @Component
@@ -23,6 +25,16 @@ public class BundleToAuthenticatorAssignedEntityTemplateMapper implements Templa
 		code.setCodeSystem("test");
 		code.setDisplayName("test");
 		assignedEntity.setCode(code);
+		
+		IINPfITOidRequiredAssigningAuthorityName id = new IINPfITOidRequiredAssigningAuthorityName();
+		id.setRoot("1.2.826.0.1285.0.2.0.65");
+		id.setExtension("K9684");
+		assignedEntity.getId().add(id);
+		
+		TemplateId templateId = new TemplateId();
+		templateId.setRoot("2.16.840.1.113883.2.1.3.2.4.18.2");
+		templateId.setExtension(getTemplateName());
+		assignedEntity.setTemplateId(templateId);
 		
 		container.setCOCDTP145205GB01AssignedEntity(assignedEntity);
 	}
