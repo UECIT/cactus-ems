@@ -222,7 +222,7 @@ public abstract class AbstractResponseResolver<RESOURCE extends Resource> implem
 	public String getQuestionnaireReference(GuidanceResponse guidanceResponse) {
 		if (guidanceResponse.hasDataRequirement()) {
 			try {
-				return guidanceResponse.getDataRequirementFirstRep().getCodeFilterFirstRep().getValueCode().get(0).getValueAsString();
+				return guidanceResponse.getDataRequirementFirstRep().getCodeFilterFirstRep().getValueSetStringType().getValueAsString();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
