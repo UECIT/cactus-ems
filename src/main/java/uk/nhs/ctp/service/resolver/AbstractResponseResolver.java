@@ -12,7 +12,6 @@ import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.CareConnectCarePlan;
 import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.DataRequirement;
-import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.GuidanceResponse;
 import org.hl7.fhir.dstu3.model.GuidanceResponse.GuidanceResponseStatus;
 import org.hl7.fhir.dstu3.model.Parameters;
@@ -28,7 +27,6 @@ import org.springframework.http.HttpStatus;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import uk.nhs.ctp.SystemConstants;
-import uk.nhs.ctp.SystemURL;
 import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.entities.ServiceDefinition;
 import uk.nhs.ctp.exception.EMSException;
@@ -223,13 +221,12 @@ public abstract class AbstractResponseResolver<RESOURCE extends Resource> implem
 	
 	public String getQuestionnaireReference(GuidanceResponse guidanceResponse) {
 		if (guidanceResponse.hasDataRequirement()) {
-			List<Extension> questionnaireExtensions = guidanceResponse.getDataRequirementFirstRep()
-					.getExtensionsByUrl(SystemURL.QUESTIONNAIRE);
-			if (questionnaireExtensions != null && !questionnaireExtensions.isEmpty()) {
-				Reference questionnaireRef = ResourceProviderUtils.castToType(questionnaireExtensions.get(0).getValue(),
-						Reference.class);
-				return questionnaireRef.getReference();
+			try {
+				return guidanceResponse.getDataRequirementFirstRep().getCodeFilterFirstRep().getValueCode().get(0).getValueAsString();
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
+
 		} else if (guidanceResponse.getStatus().equals(GuidanceResponseStatus.DATAREQUIRED)) {
 			throw new EMSException(HttpStatus.INTERNAL_SERVER_ERROR, 
 					"Invalid guidance response: " + fhirParser.encodeResourceToString(guidanceResponse));
