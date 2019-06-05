@@ -36,7 +36,7 @@
                   Request:
                 </mat-panel-title>
                 <mat-panel-description>
-                  The request generated from the handover message. <a target="_blank" href="{{emsUrl}}/document?id={{ report.documentId }}">View Template</a>
+                  The request generated from the handover message. <a *ngIf="report.documentId" target="_blank" href="{{emsUrl}}/document?id={{ report.documentId }}">View Template</a>
                 </mat-panel-description>
               </mat-expansion-panel-header>
               <pre *ngIf="report.contentType == 'XML'"><code [highlight]="report.request"></code></pre>
