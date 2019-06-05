@@ -17,8 +17,10 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 import org.springframework.xml.transform.StringResult;
 
@@ -32,6 +34,9 @@ public class DocumentGenerator {
 	private JAXBContext context;
 	
 	private Transformer transformer;
+	
+	@Autowired
+	ResourceLoader resourceLoader;
 	
 	@Value("classpath:cda.xsl")
 	Resource templateResource;
@@ -56,12 +61,12 @@ public class DocumentGenerator {
 	}
 	
 	public String generateHtml(JAXBElement<?> document) throws JAXBException, TransformerException {
-		String documentId = UUID.randomUUID().toString();
+		String documentId = UUID.randomUUID().toString();		
 		StreamResult result = new StreamResult(new File("src/main/resources/templates/" + documentId + ".html"));
 		JAXBSource source = new JAXBSource(context, document);
 		
 		transformer.transform(source, result);
-		
+
 		return documentId;
 	}
 }

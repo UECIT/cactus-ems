@@ -92,7 +92,7 @@ public class AmbulanceReportService implements Reportable {
 		try {
 			documentGenerator.generateHtml(rootElement);
 		} catch (TransformerException e) {
-		}
+		} 
 		
 		return new ReportsDTO(documentGenerator.generateXml(
 				rootElement), ReportType.AMBULANCE_V3, ContentType.XML, "");

@@ -1,5 +1,6 @@
 package uk.nhs.ctp;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
@@ -47,6 +48,13 @@ public class Application extends SpringBootServletInitializer {
 	}
 
 	public static void main(String[] args) {
+		File file = new File("src/main/resources/templates/");
+		
+		if (!file.exists()) {
+			file.mkdirs();
+			file.setReadable(true, false);
+		}
+		
 		SpringApplication.run(Application.class, args);
 	}
 

@@ -16,8 +16,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-	   <thymeleaf.version>3.0.6.RELEASE</thymeleaf.version>
-	   <thymeleaf-layout-dialect.version>2.2.1</thymeleaf-layout-dialect.version>
+	   	<thymeleaf.version>3.0.6.RELEASE</thymeleaf.version>
+	   	<thymeleaf-layout-dialect.version>2.2.1</thymeleaf-layout-dialect.version>
 
         <fhir.version>3.0.0</fhir.version>
     </properties>

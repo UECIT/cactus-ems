@@ -1,5 +1,6 @@
 package uk.nhs.ctp.service.report;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Set;
 
@@ -46,7 +47,7 @@ public abstract class OneOneOneReportService implements Reportable {
         try {
         	htmlDocumentId = documentGenerator.generateHtml(rootElement);
 		} catch (TransformerException e) {
-		}
+		} 
         
 		return new ReportsDTO(
 				documentGenerator.generateXml(rootElement), getReportType(), ContentType.XML, htmlDocumentId);
