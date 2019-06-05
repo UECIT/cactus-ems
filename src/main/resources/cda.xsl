@@ -27,20 +27,26 @@
 					<xsl:value-of select="$title"/>
 				</title>
 				<style type="text/css">
-						body { color: #000000; font-size: 10pt; line-height: normal; font-family: Verdana, Arial, sans-serif; margin: 10px; }
+						body { background-color:#f0f4f5; color: #000000; font-size: 10pt; line-height: normal; font-family: Verdana, Arial, sans-serif; margin: 0; }
 						a { color: #0099ff; text-decoration: none }
 						.input { color: #003366; font-size: 10pt; font-family: Verdana, Arial, sans-serif; background-color: #ffffff; border: solid 1px }
 						div.titlebar { background-color: #eeeeff; border: 1px solid #000000; padding: 3px; margin-bottom: 20px;}
-						div.doctitle { font-size: 14pt; font-weight: bold; margin-bottom: 10px;}
+						div.doctitle { font-size: 14pt; margin-bottom: 10px; color:#FFFFFF; background-color:#005eb8; height:70px}
+						div.mainContainer { margin-left:18%; margin-right:18%; height: 100%}
+						div.logo { width:80px; float:left; margin-top:20px; margin-right:20px; }
+						div.vCentred { margin:auto; padding-top:25px; padding-bottom:20px; }
 						div.header { font-size: 8pt; margin-bottom: 30px; border: 1px solid #000000; background-color: #ffffee;}
-						div.footer { font-size: 8pt; margin-top: 30px; border: 1px solid #000000; background-color: #ffffee;}
+						div.footer { font-size: 8pt; color:#425563; background-color:#d8dde0; height:100px}
+						.content { font-size: 14pt; margin-bottom: 10px; margin-top:30px; }
+						.footerContent { font-size: 14pt; margin-bottom: 10px; margin-top:30px; }
 						p {margin-top: 2px; margin-bottom: 6px;}
-						h1 { font-size: 14pt; font-weight: bold; color: #000000; margin-top: 20px; margin-bottom: 10px; border-bottom: 1px solid #CCCCCC;}
-						h2 { font-size: 12pt; font-weight: bold; color: #000000; margin-top: 20px; margin-bottom: 6px; }
+						h1 { display:inline; font-weight:normal; font-size: 30pt; color: #000000; }
+						h2 { display:inline; font-size: 12pt; font-weight: normal; color: #000000; margin-top: 20px; margin-bottom: 6px; }
 						h3 { font-size: 10pt; font-weight: bold; color: #000000; margin-top: 15px; margin-bottom: 6px; }
 						h4 { font-size: 10pt; font-weight: bold; text-decoration: underline; color: #000000; margin-top: 6px; margin-bottom: 6px; }
 						h5 { font-size: 10pt; font-weight: normal; text-decoration: underline;  color: #000000; margin-top: 4px; margin-bottom: 4px; }
 						h6 { font-size: 10pt; font-weight: normal; color: #000000; margin-top: 2px; margin-bottom: 2px; }
+						span { padding-right:20px; font-weight:normal }
 						table { border: 1px solid #000000; }
 						th.default {padding: 3px; color: #000000; background-color: #dddddd; text-align: left;}
 						th {padding: 3px; color: #000000; background-color: #dddddd;}
@@ -62,12 +68,17 @@
 						.Lrule {border-left: 1px solid black;}
 						.Toprule {border-top: 1px solid black;}
 						.Botrule {border-right: 1px solid black;}
+						.flex {display:flex; margin-bottom:10px;}
 						/*Banner styles*/
 						div.banner { font-size: 8pt; margin-bottom: 30px; border: 1px solid #000000; background-color: #ffffee;}
 						div.banner TABLE { border: 0px; background-color: #ffffee; font-weight: bold; }
 						div.banner TD { background-color: #ffffee; vertical-align: top; padding-right: 1em;}
 						div.banner TABLE P {margin: 0;}
-						.label {font-style:italic; font-weight: normal;}
+						.label {height:100%; float:left; font-style:italic; font-weight: normal; min-width:260px;}
+				
+						.list {color: #555; font-size: 22px; padding: 0 !important; width: 500px; font-family: courier, monospace; border: 1px solid #dedede;}
+						.list li {list-style: none; border-bottom: 1px dotted #ccc; text-indent: 25px; height: auto; padding: 10px; text-transform: capitalize;}
+
 				</style>
 			</head>
 			<xsl:comment>Derived from HL7 Finland R2 Tyylitiedosto: Tyyli_R2_B3_01.xslt</xsl:comment>
@@ -83,23 +94,37 @@
 			<body>
 				<!--moved title to here daba-->
 				<div class="doctitle">
-					<xsl:value-of select="$title"/>
+					<div class="mainContainer">
+						<div class="logo">
+							<svg class="nhsuk-logo nhsuk-logo--white" xmlns="http://www.w3.org/2000/svg" role="presentation" focusable="false" viewBox="0 0 40 16">
+								  <path fill="#fff" d="M0 0h40v16H0z"></path>
+								  <path fill="#005eb8" d="M3.9 1.5h4.4l2.6 9h.1l1.8-9h3.3l-2.8 13H9l-2.7-9h-.1l-1.8 9H1.1M17.3 1.5h3.6l-1 4.9h4L25 1.5h3.5l-2.7 13h-3.5l1.1-5.6h-4.1l-1.2 5.6h-3.4M37.7 4.4c-.7-.3-1.6-.6-2.9-.6-1.4 0-2.5.2-2.5 1.3 0 1.8 5.1 1.2 5.1 5.1 0 3.6-3.3 4.5-6.4 4.5-1.3 0-2.9-.3-4-.7l.8-2.7c.7.4 2.1.7 3.2.7s2.8-.2 2.8-1.5c0-2.1-5.1-1.3-5.1-5 0-3.4 2.9-4.4 5.8-4.4 1.6 0 3.1.2 4 .6"></path>
+									<image src="https://assets.nhs.uk/images/nhs-logo.png"></image>
+							</svg>
+						</div>
+						<div class="vCentred">
+							<xsl:value-of select="$title"/>	
+						</div>
+					</div>
 				</div>
-				<xsl:call-template name="patientBanner"/>
-				<!--moved this up to here - daba-->
-				<xsl:apply-templates select="n1:component/n1:structuredBody|n1:component/n1:nonXMLBody"/>
-				<xsl:call-template name="header"/>
-				<xsl:if test="/n1:ClinicalDocument/n1:informant/n1:COCD_TP145007UK03.RelatedEntity/n1:relatedPerson/n1:name">
-					<xsl:call-template name="informantBanner"/>
-					<!--PRTR1 This banner should apperas if informant is present-->
-				</xsl:if>
-				<xsl:call-template name="titlebar"/>
-				<xsl:if test="/n1:ClinicalDocument/n1:participant">
-					<xsl:call-template name="participantBanner"/>
-					<!--PRTR1 This banner should apperas if participant is present-->
-				</xsl:if>
-
-				<xsl:call-template name="footer"/>
+				<div class="mainContainer content">
+					<xsl:call-template name="patientBanner"/>
+					<!--moved this up to here - daba-->
+					<xsl:apply-templates select="n1:component/n1:structuredBody|n1:component/n1:nonXMLBody"/>
+					<xsl:call-template name="header"/>
+					<xsl:if test="/n1:ClinicalDocument/n1:informant/n1:COCD_TP145007UK03.RelatedEntity/n1:relatedPerson/n1:name">
+						<xsl:call-template name="informantBanner"/>
+						<!--PRTR1 This banner should apperas if informant is present-->
+					</xsl:if>
+					<xsl:call-template name="titlebar"/>
+					<xsl:if test="/n1:ClinicalDocument/n1:participant">
+						<xsl:call-template name="participantBanner"/>
+						<!--PRTR1 This banner should apperas if participant is present-->
+					</xsl:if>
+				</div>
+				<div class="footer">
+					<xsl:call-template name="footer"/>
+				</div>
 			</body>
 		</html>
 	</xsl:template>
@@ -234,69 +259,112 @@
 	<xsl:template match="n1:component/n1:classificationSection">
 		<xsl:apply-templates select="n1:component/n1:COCD_TP146246GB01.Section1"/>
 		<xsl:if test="$debug='yes'">
-			<hr/>
-			<h1>Coded Entries</h1>
+			<div class="content">
+				<span><h1>Coded Entries</h1></span>
+			</div>
 			<xsl:apply-templates select="n1:entry"/>
 		</xsl:if>
 	</xsl:template>
 	<!-- Component/Section -->
 	<xsl:template match="n1:component/n1:COCD_TP146246GB01.Section1">
-		<xsl:if test="n1:title != ''">
-			<xsl:apply-templates select="n1:title"/>
-		</xsl:if>
-		<xsl:apply-templates select="n1:text"/>
-		<xsl:apply-templates select="n1:component/n1:section"/>
+		<div class="content">
+			<xsl:if test="n1:title != ''">
+				<h1>
+					<span>
+						<xsl:apply-templates select="n1:title"/>
+					</span>
+				</h1>
+			</xsl:if>
+		</div>
+		<div class="content">
+			<xsl:apply-templates select="n1:text"/>
+			<xsl:apply-templates select="n1:component/n1:section"/>
+		</div>
 	</xsl:template>
 	<xsl:template match="n1:entry">
 		<xsl:variable name="v_codedentry" select="child::node()[child::n1:templateId[contains(@extension,'COCD_TP146092GB01#ClinicalDiscriminator')]]"/>
-		<p>
-			<xsl:value-of select="substring-after($v_codedentry/n1:templateId/@extension,'#')"/> - <xsl:value-of select="substring-before($v_codedentry/n1:templateId/@extension,'#')"/>
-		</p>
-		<p>Code : <xsl:value-of select="$v_codedentry/n1:code/@code"/>
-		</p>
-		<p>Displayname : <xsl:value-of select="$v_codedentry/n1:code/@displayName"/>
-		</p>
-		<xsl:for-each select="$v_codedentry/n1:code/n1:qualifier">
-			<p>qualifier</p>
-			<p>name code=&quot;<xsl:value-of select="n1:name/@code"/>&quot; displayName=&quot;<xsl:value-of select="n1:name/@displayName"/>&quot;</p>
-			<p>value code=&quot;<xsl:value-of select="n1:value/@code"/>&quot; displayName=&quot;<xsl:value-of select="n1:value/@displayName"/>&quot;</p>
-		</xsl:for-each>
-		<xsl:if test="$v_codedentry/n1:code/n1:originalText/n1:reference">
-			<p>Reference : 
-				<xsl:choose>
-					<xsl:when test="contains($v_codedentry/n1:code/n1:originalText/n1:reference/@value,'#')">
-						<a>
-							<xsl:attribute name="id"><xsl:value-of select="substring-after($v_codedentry/n1:code/n1:originalText/n1:reference/@value,'#')"/></xsl:attribute>
-							<xsl:value-of select="$v_codedentry/n1:code/n1:originalText/n1:reference/@value"/>
-						</a>
-					</xsl:when>
-					<xsl:otherwise>
-						<xsl:value-of select="$v_codedentry/n1:code/n1:originalText/n1:reference/@value"/>
-					</xsl:otherwise>
-				</xsl:choose>
-			</p>
-		</xsl:if>
-		<p>Status: <xsl:value-of select="$v_codedentry/n1:value/@code"/> - <xsl:value-of select="$v_codedentry/n1:value/@displayName"/> 
-		</p>
-		<p>Time:
-		<xsl:if test="$v_codedentry/n1:effectiveTime/n1:low/@value">
-				<xsl:call-template name="formatDate">
-					<xsl:with-param name="date" select="$v_codedentry/n1:effectiveTime/n1:low/@value"/>
-				</xsl:call-template>
+		<div class="content">
+			<div class="flex">
+				<div class="label">
+					<xsl:value-of select="substring-after($v_codedentry/n1:templateId/@extension,'#')"/>:
+				</div>
+				<div>
+					<xsl:value-of select="substring-before($v_codedentry/n1:templateId/@extension,'#')"/>
+				</div>
+			</div>
+			<div class="flex">
+				<div class="label">
+					Code: 
+				</div>
+				<div>
+					<xsl:value-of select="$v_codedentry/n1:code/@code"/>
+				</div>
+			</div>
+			<div class="flex">
+				<div class="label">
+					Displayname: 
+				</div>
+				<div>
+					<xsl:value-of select="$v_codedentry/n1:code/@displayName"/>
+				</div>
+			</div>
+			<xsl:for-each select="$v_codedentry/n1:code/n1:qualifier">
+				<p>qualifier</p>
+				<p>name code=&quot;<xsl:value-of select="n1:name/@code"/>&quot; displayName=&quot;<xsl:value-of select="n1:name/@displayName"/>&quot;</p>
+				<p>value code=&quot;<xsl:value-of select="n1:value/@code"/>&quot; displayName=&quot;<xsl:value-of select="n1:value/@displayName"/>&quot;</p>
+			</xsl:for-each>
+			<xsl:if test="$v_codedentry/n1:code/n1:originalText/n1:reference">
+				<div class="flex">
+					<div class="label">
+						Reference :
+					</div>
+					<div> 
+						<xsl:choose>
+							<xsl:when test="contains($v_codedentry/n1:code/n1:originalText/n1:reference/@value,'#')">
+								<a>
+									<xsl:attribute name="id"><xsl:value-of select="substring-after($v_codedentry/n1:code/n1:originalText/n1:reference/@value,'#')"/></xsl:attribute>
+									<xsl:value-of select="$v_codedentry/n1:code/n1:originalText/n1:reference/@value"/>
+								</a>
+							</xsl:when>
+							<xsl:otherwise>
+								<xsl:value-of select="$v_codedentry/n1:code/n1:originalText/n1:reference/@value"/>
+							</xsl:otherwise>
+						</xsl:choose>
+					</div>
+				</div>
 			</xsl:if>
-			<xsl:if test="$v_codedentry/n1:effectiveTime/n1:high/@value">
-				<xsl:text> to </xsl:text>
-				<xsl:call-template name="formatDate">
-					<xsl:with-param name="date" select="$v_codedentry/n1:effectiveTime/n1:high/@value"/>
-				</xsl:call-template>
-			</xsl:if>
-			<xsl:if test="$v_codedentry//n1:effectiveTime/n1:center/@value">
-				<xsl:call-template name="formatDate">
-					<xsl:with-param name="date" select="$v_codedentry/n1:effectiveTime/n1:center/@value"/>
-				</xsl:call-template>
-			</xsl:if>
-		</p>
-		<hr/>
+			<div class="flex">
+				<div class="label">
+					Status:
+				</div>
+				<div>
+					<xsl:value-of select="$v_codedentry/n1:value/@code"/> - <xsl:value-of select="$v_codedentry/n1:value/@displayName"/> 
+				</div>
+			</div>
+			<div class="flex">
+				<div class="label">
+					Time:
+				</div>
+				<div>
+					<xsl:if test="$v_codedentry/n1:effectiveTime/n1:low/@value">
+						<xsl:call-template name="formatDate">
+							<xsl:with-param name="date" select="$v_codedentry/n1:effectiveTime/n1:low/@value"/>
+						</xsl:call-template>
+					</xsl:if>
+					<xsl:if test="$v_codedentry/n1:effectiveTime/n1:high/@value">
+						<xsl:text> to </xsl:text>
+						<xsl:call-template name="formatDate">
+							<xsl:with-param name="date" select="$v_codedentry/n1:effectiveTime/n1:high/@value"/>
+						</xsl:call-template>
+					</xsl:if>
+					<xsl:if test="$v_codedentry//n1:effectiveTime/n1:center/@value">
+						<xsl:call-template name="formatDate">
+							<xsl:with-param name="date" select="$v_codedentry/n1:effectiveTime/n1:center/@value"/>
+						</xsl:call-template>
+					</xsl:if>
+				</div>
+			</div>
+		</div>
 	</xsl:template>
 	<xsl:template name="RenderSectionCode">
 		<xsl:param name="p_title"/>
@@ -625,171 +693,175 @@
 	</xsl:template>
 	<!-- Patient Banner as per CUI guidelines -->
 	<xsl:template name="patientBanner">
-		<div id="patientBanner" class="banner">
-			<table>
-				<tbody>
-					<tr>
-						<xsl:if test="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:patientPatient/n1:name">
-							<td>
-								<xsl:call-template name="cuiName">
-									<xsl:with-param name="name" select="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:patientPatient/n1:name"/>
-								</xsl:call-template>
-							</td>
-						</xsl:if>
-						<xsl:if test="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:patientPatientPatient/n1:birthTime">
-							<td align="right">
-								<span class="label"> Born </span>
-								<xsl:call-template name="formatDate">
-									<xsl:with-param name="date" select="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:patientPatient/n1:birthTime/@value"/>
-								</xsl:call-template>
-							</td>
-						</xsl:if>
-						<xsl:if test="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:patientPatient/n1:administrativeGenderCode">
-							<td align="right">
-								<span class="label"> Gender </span>
-								<xsl:value-of select="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:patientPatient/n1:administrativeGenderCode/@displayName"/>
-							</td>
-						</xsl:if>
-						<td>
-							<xsl:if test="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:id/@root='2.16.840.1.113883.2.1.4.1'">
-								<!-- Verified NHS Number -->
-								<span class="label"> NHS No. </span>
-								<xsl:call-template name="cuiNHSNo">
-									<xsl:with-param name="nhsNo" select="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:id[@root='2.16.840.1.113883.2.1.4.1']/@extension"/>
-								</xsl:call-template>
-								<br/>
-							</xsl:if>
-							<xsl:if test="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:id/@root='2.16.840.1.113883.2.1.3.2.4.18.23'">
-								<!-- Unverified NHS Number -->
-								<span class="label"> Unverified NHS No. </span>
-								<xsl:call-template name="cuiNHSNo">
-									<xsl:with-param name="nhsNo" select="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:id[@root='2.16.840.1.113883.2.1.3.2.4.18.23']/@extension"/>
-								</xsl:call-template>
-								<br/>
-							</xsl:if>
-							<xsl:for-each select="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:id[@root='2.16.840.1.113883.2.1.3.2.4.18.24']">
-								<!-- Local ID -->
-								<span class="label"> Local Patient ID </span>
-								<xsl:value-of select="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:id[@root='2.16.840.1.113883.2.1.3.2.4.18.24']/@extension"/>
-								<br/>
-							</xsl:for-each>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-			<table class="header">
-				<tbody>
-					<tr>
-						<xsl:for-each select="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:addr">
-							<td>
-								<p class="label">
-									<xsl:choose>
-										<xsl:when test="@use='TMP'">Temporary Address</xsl:when>
-										<xsl:when test="@use='H'">Home Address</xsl:when>
-										<xsl:when test="@use='WP'">Work Address</xsl:when>
-										<xsl:when test="@use='PST'">Postal Address</xsl:when>
-										<xsl:when test="@use='HP'">Primary Home Address</xsl:when>
-										<xsl:when test="@use='HV'">Holiday Home Address</xsl:when>
-										<xsl:when test="@use='DIR'">Direct Address</xsl:when>
-										<xsl:when test="@use='PUB'">Public Address</xsl:when>
-										<xsl:when test="@use='BAD'">Bad Address</xsl:when>
-										<xsl:when test="@use='PHYS'">Visit Address</xsl:when>
-										<xsl:otherwise>Address</xsl:otherwise>
-									</xsl:choose>
-								</p>
-								<p>
-									<xsl:for-each select="n1:*">
-										<xsl:value-of select="."/>
-										<xsl:if test="not(position() = last())">
-											<br/>
-										</xsl:if>
-									</xsl:for-each>
-								</p>
-							</td>
+		<div id="patientBanner" class="content">
+			<xsl:if test="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:patientPatient/n1:name">
+				<h1>
+					<span>
+						<xsl:call-template name="cuiName">
+							<xsl:with-param name="name" select="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:patientPatient/n1:name"/>
+						</xsl:call-template>
+					</span>
+				</h1>
+			</xsl:if>
+			<xsl:if test="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:patientPatientPatient/n1:birthTime">
+				<h2>
+					<span>
+						<xsl:call-template name="formatDate">
+							<xsl:with-param name="date" select="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:patientPatient/n1:birthTime/@value"/>
+						</xsl:call-template>
+					</span>
+				</h2>
+			</xsl:if>
+			<xsl:if test="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:patientPatient/n1:administrativeGenderCode">
+				<h2>
+					<span>
+						<xsl:value-of select="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:patientPatient/n1:administrativeGenderCode/@displayName"/>
+					</span>
+				</h2>
+			</xsl:if>
+		</div>
+		<div class="content">
+			<xsl:if test="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:id/@root='2.16.840.1.113883.2.1.4.1'">
+				<div class="flex">
+					<!-- Verified NHS Number -->
+					<div class="label">NHS No.</div>
+					<div>
+						<xsl:call-template name="cuiNHSNo">
+						
+							<xsl:with-param name="nhsNo" select="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:id[@root='2.16.840.1.113883.2.1.4.1']/@extension"/>
+						</xsl:call-template>
+					</div>
+				</div>
+			</xsl:if>
+			<xsl:if test="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:id/@root='2.16.840.1.113883.2.1.3.2.4.18.23'">
+				<div class="flex">
+				<!-- Unverified NHS Number -->
+					<div class="label">Unverified NHS No.</div>
+					<div>
+						<xsl:call-template name="cuiNHSNo">
+							<xsl:with-param name="nhsNo" select="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:id[@root='2.16.840.1.113883.2.1.3.2.4.18.23']/@extension"/>
+						</xsl:call-template>
+					</div>
+				</div>
+			</xsl:if>
+			<xsl:for-each select="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:id[@root='2.16.840.1.113883.2.1.3.2.4.18.24']">
+				<!-- Local ID -->
+				<div class="flex">
+					<div class="label">Local Patient ID</div>
+					<div>
+						<xsl:value-of select="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:id[@root='2.16.840.1.113883.2.1.3.2.4.18.24']/@extension"/>
+					</div>
+				</div>
+			</xsl:for-each>
+		</div>
+		<div class="content">
+			<xsl:for-each select="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:addr">
+				<div class="flex">
+					<div class="label">
+						<xsl:choose>
+							<xsl:when test="@use='TMP'">Temporary Address</xsl:when>
+							<xsl:when test="@use='H'">Home Address</xsl:when>
+							<xsl:when test="@use='WP'">Work Address</xsl:when>
+							<xsl:when test="@use='PST'">Postal Address</xsl:when>
+							<xsl:when test="@use='HP'">Primary Home Address</xsl:when>
+							<xsl:when test="@use='HV'">Holiday Home Address</xsl:when>
+							<xsl:when test="@use='DIR'">Direct Address</xsl:when>
+							<xsl:when test="@use='PUB'">Public Address</xsl:when>
+							<xsl:when test="@use='BAD'">Bad Address</xsl:when>
+							<xsl:when test="@use='PHYS'">Visit Address</xsl:when>
+							<xsl:otherwise>Address</xsl:otherwise>
+						</xsl:choose>
+					</div>
+					<div>
+						<xsl:for-each select="n1:*">
+							<xsl:value-of select="."/>
+							<br/>
 						</xsl:for-each>
-						<td>
-							<xsl:for-each select="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:telecom">
-								<span class="label">
-									<xsl:choose>
-										<xsl:when test="@use='H'">Home </xsl:when>
-										<xsl:when test="@use='HP'">Home </xsl:when>
-										<xsl:when test="@use='HV'">Vacation/Temporary </xsl:when>
-										<xsl:when test="@use='WP'">Work </xsl:when>
-										<xsl:when test="@use='DIR'">Direct </xsl:when>
-										<xsl:when test="@use='PUB'">Switchboard/Office </xsl:when>
-										<xsl:when test="@use='BAD'">Bad </xsl:when>
-										<xsl:when test="@use='TMP'">Temporary </xsl:when>
-										<xsl:when test="@use='AS'">Answer </xsl:when>
-										<xsl:when test="@use='EC'">Emergency </xsl:when>
-										<xsl:when test="@use='MC'">Mobile </xsl:when>
-										<xsl:when test="@use='PG'">Pager </xsl:when>
-										<xsl:otherwise/>
-									</xsl:choose>
-									<xsl:choose>
-										<xsl:when test="contains(@value, 'mailto')">Email </xsl:when>
-										<xsl:when test="contains(@value, 'tel')">Phone </xsl:when>
-										<xsl:when test="contains(@value, 'fax')">Fax </xsl:when>
-										<xsl:when test="contains(@value, 'tty')">Textphone </xsl:when>
-										<xsl:when test="contains(@value, 'sms')">SMS </xsl:when>
-										<xsl:when test="contains(@value, 'voice')">Voice </xsl:when>
-										<xsl:otherwise/>
-									</xsl:choose>
-								</span>
-								<xsl:choose>
-									<!-- don't display 'tel:' part of value -->
-									<xsl:when test="contains(@value, ':')">
-										<xsl:value-of select="substring-after(@value, ':')"/>
-									</xsl:when>
-									<xsl:otherwise>
-										<xsl:value-of select="@value"/>
-									</xsl:otherwise>
-								</xsl:choose>
-								<xsl:if test="not(position() = last())">
-									<br/>
-								</xsl:if>
-							</xsl:for-each>
-						</td>
-						<xsl:if test="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:providerOrganization">
-							<td>
-								<p class="label">
-									<xsl:value-of select="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:providerOrganization/n1:standardIndustryClassCode/@displayName"/>
-								</p>
-								<p>
-									<xsl:value-of select="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:providerOrganization/n1:name"/>
-									<xsl:for-each select="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:providerOrganization/n1:addr/n1:*">
-										<br/>
-										<xsl:value-of select="."/>
-									</xsl:for-each>
-								</p>
-								<xsl:for-each select="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:providerOrganization/n1:telecom">
-									<p>
-										<span class="label">
-											<xsl:choose>
-												<xsl:when test="contains(@value, 'mailto')">Email </xsl:when>
-												<xsl:when test="contains(@value, 'tel')">Phone </xsl:when>
-												<xsl:when test="contains(@value, 'fax')">Fax </xsl:when>
-												<xsl:when test="contains(@value, 'tty')">Textphone </xsl:when>
-												<xsl:when test="contains(@value, 'sms')">SMS </xsl:when>
-												<xsl:when test="contains(@value, 'voice')">Voice </xsl:when>
-												<xsl:otherwise/>
-											</xsl:choose>
-										</span>
-										<xsl:choose>
-											<!-- don't display 'tel:' part of value -->
-											<xsl:when test="contains(@value, ':')">
-												<xsl:value-of select="substring-after(@value, ':')"/>
-											</xsl:when>
-											<xsl:otherwise>
-												<xsl:value-of select="@value"/>
-											</xsl:otherwise>
-										</xsl:choose>
-									</p>
-								</xsl:for-each>
-							</td>
-						</xsl:if>
-					</tr>
-				</tbody>
-			</table>
+					</div>
+				</div>
+			</xsl:for-each>
+			<xsl:for-each select="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:telecom">
+				<div class="flex">
+					<div class="label">
+						<xsl:choose>
+							<xsl:when test="@use='H'">Home </xsl:when>
+							<xsl:when test="@use='HP'">Home </xsl:when>
+							<xsl:when test="@use='HV'">Vacation/Temporary </xsl:when>
+							<xsl:when test="@use='WP'">Work </xsl:when>
+							<xsl:when test="@use='DIR'">Direct </xsl:when>
+							<xsl:when test="@use='PUB'">Switchboard/Office </xsl:when>
+							<xsl:when test="@use='BAD'">Bad </xsl:when>
+							<xsl:when test="@use='TMP'">Temporary </xsl:when>
+							<xsl:when test="@use='AS'">Answer </xsl:when>
+							<xsl:when test="@use='EC'">Emergency </xsl:when>
+							<xsl:when test="@use='MC'">Mobile </xsl:when>
+							<xsl:when test="@use='PG'">Pager </xsl:when>
+							<xsl:otherwise/>
+						</xsl:choose>
+						<xsl:choose>
+							<xsl:when test="contains(@value, 'mailto')">Email </xsl:when>
+							<xsl:when test="contains(@value, 'tel')">Phone </xsl:when>
+							<xsl:when test="contains(@value, 'fax')">Fax </xsl:when>
+							<xsl:when test="contains(@value, 'tty')">Textphone </xsl:when>
+							<xsl:when test="contains(@value, 'sms')">SMS </xsl:when>
+							<xsl:when test="contains(@value, 'voice')">Voice </xsl:when>
+							<xsl:otherwise/>
+						</xsl:choose>
+					</div>
+					<div>
+						<xsl:choose>
+							<!-- don't display 'tel:' part of value -->
+							<xsl:when test="contains(@value, ':')">
+								<xsl:value-of select="substring-after(@value, ':')"/>
+							</xsl:when>
+							<xsl:otherwise>
+								<xsl:value-of select="@value"/>
+							</xsl:otherwise>
+						</xsl:choose>
+					</div>
+				</div>
+			</xsl:for-each>
+			<xsl:if test="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:providerOrganization">
+				<div class="flex">	
+					<div class="label">
+						<xsl:value-of select="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:providerOrganization/n1:standardIndustryClassCode/@displayName"/>
+					</div>
+					<div>
+						<xsl:value-of select="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:providerOrganization/n1:name"/>
+						<br/>
+						<xsl:for-each select="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:providerOrganization/n1:addr/n1:*">
+							<xsl:value-of select="."/>
+							<br/>
+						</xsl:for-each>
+					</div>
+				</div>
+				<xsl:for-each select="/n1:ClinicalDocument/n1:recordTarget/n1:COCD_TP145201GB01.PatientRole/n1:providerOrganization/n1:telecom">
+					<div class="flex">
+						<div class="label">
+							<xsl:choose>
+								<xsl:when test="contains(@value, 'mailto')">Email </xsl:when>
+								<xsl:when test="contains(@value, 'tel')">Phone </xsl:when>
+								<xsl:when test="contains(@value, 'fax')">Fax </xsl:when>
+								<xsl:when test="contains(@value, 'tty')">Textphone </xsl:when>
+								<xsl:when test="contains(@value, 'sms')">SMS </xsl:when>
+								<xsl:when test="contains(@value, 'voice')">Voice </xsl:when>
+								<xsl:otherwise/>
+							</xsl:choose>
+						</div>
+						<div>
+							<xsl:choose>
+								<!-- don't display 'tel:' part of value -->
+								<xsl:when test="contains(@value, ':')">
+									<xsl:value-of select="substring-after(@value, ':')"/>
+								</xsl:when>
+								<xsl:otherwise>
+									<xsl:value-of select="@value"/>
+								</xsl:otherwise>
+							</xsl:choose>
+						</div>
+					</div>
+				</xsl:for-each>
+			</xsl:if>
 		</div>
 	</xsl:template>
 	<!-- Informant Banner-->
@@ -895,388 +967,231 @@
 	</xsl:template>
 	<!--  Header  -->
 	<xsl:template name="header">
-		<div class="header">
-			<table class="header">
-				<tr>
-					<th class="header">
-						<xsl:text>Document Created</xsl:text>
-					</th>
-					<td class="header">
-						<xsl:call-template name="formatDate">
-							<xsl:with-param name="date" select="/n1:ClinicalDocument/n1:effectiveTime/@value"/>
-						</xsl:call-template>
-					</td>
-				</tr>
-				<tr>
-					<th class="header">
-						<xsl:text>Document Owner</xsl:text>
-					</th>
-					<td class="header">
-						<xsl:value-of select="/n1:ClinicalDocument/n1:custodian/n1:COCD_TP145018UK03.AssignedCustodian/n1:representedCustodianOrganization/n1:name"/>
-					</td>
-				</tr>
-				<xsl:for-each select="/n1:ClinicalDocument/n1:author">
-					<tr>
-						<th class="header">
-							<xsl:text>Authored by</xsl:text>
-						</th>
-						<td class="header">
-							<xsl:choose>
-								<xsl:when test="n1:COCD_TP145200GB01.AssignedAuthor/n1:assignedPerson/n1:name">
-									<xsl:call-template name="getName">
-										<xsl:with-param name="name" select="n1:COCD_TP145200GB01.AssignedAuthor/n1:assignedPerson/n1:name"/>
-									</xsl:call-template>
-									<xsl:text> - </xsl:text>
-									<xsl:value-of select="n1:COCD_TP145200GB01.AssignedAuthor/n1:code/@displayName"/>
-									<xsl:text>, </xsl:text>
-									<xsl:value-of select="n1:COCD_TP145200GB01.AssignedAuthor/n1:representedOrganization/n1:name"/>
-								</xsl:when>
-								<xsl:when test="n1:COCD_TP145200GB01.AssignedAuthor/n1:assignedAuthoringDevice/n1:manufacturerModelName">
-									<xsl:value-of select="n1:COCD_TP145200GB01.AssignedAuthor/n1:assignedAuthoringDCOCD_TP145200GB01.AssignedAuthoracturerModelName"/>
-									<xsl:if test="n1:COCD_TP145200GB01.AssignedAuthor/n1:representedOrganization/n1:name">
-										<xsl:text> at </xsl:text>
-										<xsl:value-of select="n1:COCD_TP145200GB01.AssignedAuthor/n1:representedOrganization/n1:name"/>
-									</xsl:if>
-								</xsl:when>
-								<xsl:when test="n1:COCD_TP145200GB01.AssignedAuthor/n1:representedOrganization/n1:name">
-									<xsl:value-of select="n1:COCD_TP145200GB01.AssignedAuthor/n1:representedOrganization/n1:name"/>
-								</xsl:when>
-								<xsl:otherwise>
-									<xsl:text>Unknown</xsl:text>
-								</xsl:otherwise>
-							</xsl:choose>
-							<xsl:text> on </xsl:text>
-							<xsl:call-template name="formatDate">
-								<xsl:with-param name="date" select="n1:time/@value"/>
-							</xsl:call-template>
-						</td>
-					</tr>
-				</xsl:for-each>
-				<xsl:for-each select="/n1:ClinicalDocument/n1:authenticator">
-					<tr>
-						<th class="header">
-							<xsl:text>Authenticated by</xsl:text>
-						</th>
-						<td class="header">
-							<xsl:if test="n1:assignedEntity/n1:assignedPerson/n1:name">
-								<xsl:call-template name="getName">
-									<xsl:with-param name="name" select="n1:assignedEntity/n1:assignedPerson/n1:name"/>
-								</xsl:call-template>
-								<xsl:text> - </xsl:text>
-								<xsl:value-of select="n1:assignedEntity/n1:code/@displayName"/>
-							</xsl:if>
-							<xsl:text> on </xsl:text>
-							<xsl:call-template name="formatDate">
-								<xsl:with-param name="date" select="n1:time/@value"/>
-							</xsl:call-template>
-						</td>
-					</tr>
-				</xsl:for-each>
-				<xsl:for-each select="/n1:ClinicalDocument/n1:dataEnterer">
-					<tr>
-						<th class="header">
-							<xsl:text>Entered by</xsl:text>
-						</th>
-						<td class="header">
-							<xsl:if test="n1:assignedEntity/n1:assignedPerson/n1:name">
-								<xsl:call-template name="getName">
-									<xsl:with-param name="name" select="n1:assignedEntity/n1:assignedPerson/n1:name"/>
-								</xsl:call-template>
-								<!--<xsl:text> - </xsl:text>
-								<xsl:value-of select="n1:assignedEntity/n1:code/@displayName"/>-->
-							</xsl:if>
-							<xsl:if test="n1:assignedEntity/n1:code">
-								<xsl:text> - </xsl:text>
-								<xsl:value-of select="n1:assignedEntity/n1:code/@displayName"/>
-							</xsl:if>
-							<xsl:if test="n1:assignedEntity/n1:representedOrganization/n1:name">
-								<xsl:text> , </xsl:text>
-								<xsl:value-of select="n1:assignedEntity/n1:representedOrganization/n1:name"/>
-							</xsl:if>
-							<xsl:if test="n1:time">
-								<xsl:text> on </xsl:text>
-								<xsl:call-template name="formatDate">
-									<xsl:with-param name="date" select="n1:time/@value"/>
-								</xsl:call-template>
-							</xsl:if>
-						</td>
-					</tr>
-				</xsl:for-each>
-				<xsl:call-template name="performer"/>
-				<!--PRTR1 Get consent here-->
-				<xsl:for-each select="/n1:ClinicalDocument/n1:authorization">
-					<xsl:sort select="@typeCode"/>
-					<tr>
-						<th class="header" valign="top">
-							<xsl:choose>
-								<xsl:when test="@typeCode='AUTH' and not(preceding-sibling::*/@typeCode='AUTH')">
-									<xsl:choose>
-										<xsl:when test="count(following-sibling::*[@typeCode='AUTH'])=0">
-											<xsl:text>Consent Status</xsl:text>
-										</xsl:when>
-										<xsl:otherwise>
-											<xsl:text>Consent Statuses</xsl:text>
-										</xsl:otherwise>
-									</xsl:choose>
-								</xsl:when>
-								<xsl:otherwise>
-									<xsl:text/>
-								</xsl:otherwise>
-							</xsl:choose>
-						</th>
-						<td class="header">
-								<xsl:value-of select="n1:COCD_TP146226GB02.Consent/n1:code/@displayName"/>
-						</td>
-					</tr>
-				</xsl:for-each>				
-			</table>
-			<!--<xsl:call-template name="performer"/>-->
-		</div>
 	</xsl:template>
 	<!--  Title Bar  -->
 	<xsl:template name="titlebar">
-		<div class="titlebar">
-			<table class="titlebar">
-				<xsl:for-each select="/n1:ClinicalDocument/n1:componentOf">
-					<xsl:if test="n1:COCD_TP146232GB01.EncompassingEncounter">
-						<tr>
-							<th class="titlebar">Encounter Type</th>
-							<td class="titlebar">
-								<xsl:value-of select="n1:COCD_TP146232GB01.EncompassingEncounter/n1:code/@displayName"/>
-							</td>
-						</tr>
-						<tr>
-							<th class="titlebar">Encounter Time</th>
-							<td class="titlebar">
-								<xsl:choose>
-									<xsl:when test="//n1:COCD_TP146232GB01.EncompassingEncounter/n1:effectiveTime/n1:low/@value and //n1:encompassingEncounter/n1:effectiveTime/n1:high/@value">
-										<xsl:call-template name="formatDate">
-											<xsl:with-param name="date" select="n1:COCD_TP146232GB01.EncompassingEncounter/n1:effectiveTime/n1:low/@value"/>
-										</xsl:call-template>
-										<xsl:text> to </xsl:text>
-										<xsl:call-template name="formatDate">
-											<xsl:with-param name="date" select="n1:COCD_TP146232GB01.EncompassingEncounter/n1:effectiveTime/n1:high/@value"/>
-										</xsl:call-template>
-									</xsl:when>
-									<xsl:when test="//n1:COCD_TP146232GB01.EncompassingEncounter/n1:effectiveTime/n1:low/@value and not(n1:encompassingEncounter/n1:effectiveTime/n1:high/@value)">
-										<xsl:text> From </xsl:text>
-										<xsl:call-template name="formatDate">
-											<xsl:with-param name="date" select="n1:COCD_TP146232GB01.EncompassingEncounter/n1:effectiveTime/n1:low/@value"/>
-										</xsl:call-template>
-									</xsl:when>
-									<xsl:when test="//n1:COCD_TP146232GB01.EncompassingEncounter/n1:effectiveTime/n1:high/@value and not(n1:encompassingEncounter/n1:effectiveTime/n1:low/@value)">
-										<xsl:text> Up To </xsl:text>
-										<xsl:call-template name="formatDate">
-											<xsl:with-param name="date" select="n1:COCD_TP146232GB01.EncompassingEncounter/n1:effectiveTime/n1:high/@value"/>
-										</xsl:call-template>
-									</xsl:when>
-									<xsl:when test="//n1:COCD_TP146232GB01.EncompassingEncounter/n1:effectiveTime/n1:center/@value">
-										<xsl:call-template name="formatDate">
-											<xsl:with-param name="date" select="//n1:COCD_TP146232GB01.EncompassingEncounter/n1:effectiveTime/n1:center/@value"/>
-										</xsl:call-template>
-									</xsl:when>
-								</xsl:choose>
-							</td>
-						</tr>
-						<!--PRTR1 Encounter identifier check for NHS 111 specific oids-->
-						<xsl:for-each select="/n1:ClinicalDocument/n1:componentOf/n1:COCD_TP146232GB01.EncompassingEncounter/n1:id">
+		<div class="content">
+			<span><h1>Encounter Details</h1></span>
+		</div>
+		<div class="content">
+			<xsl:for-each select="/n1:ClinicalDocument/n1:componentOf">
+				<xsl:if test="n1:COCD_TP146232GB01.EncompassingEncounter">
+					<div class="flex">
+						<div class="label">
+							Encounter Type
+						</div>
+						<div>
+							<xsl:value-of select="n1:COCD_TP146232GB01.EncompassingEncounter/n1:code/@displayName"/>
+						</div>
+					</div>
+					<div class="flex">
+						<div class="label">
+							Encounter Time
+						</div>
+						<div>
+							<xsl:choose>
+								<xsl:when test="//n1:COCD_TP146232GB01.EncompassingEncounter/n1:effectiveTime/n1:low/@value and //n1:encompassingEncounter/n1:effectiveTime/n1:high/@value">
+									<xsl:call-template name="formatDate">
+										<xsl:with-param name="date" select="n1:COCD_TP146232GB01.EncompassingEncounter/n1:effectiveTime/n1:low/@value"/>
+									</xsl:call-template>
+									<xsl:text> to </xsl:text>
+									<xsl:call-template name="formatDate">
+										<xsl:with-param name="date" select="n1:COCD_TP146232GB01.EncompassingEncounter/n1:effectiveTime/n1:high/@value"/>
+									</xsl:call-template>
+								</xsl:when>
+								<xsl:when test="//n1:COCD_TP146232GB01.EncompassingEncounter/n1:effectiveTime/n1:low/@value and not(n1:encompassingEncounter/n1:effectiveTime/n1:high/@value)">
+									<xsl:text> From </xsl:text>
+									<xsl:call-template name="formatDate">
+										<xsl:with-param name="date" select="n1:COCD_TP146232GB01.EncompassingEncounter/n1:effectiveTime/n1:low/@value"/>
+									</xsl:call-template>
+								</xsl:when>
+								<xsl:when test="//n1:COCD_TP146232GB01.EncompassingEncounter/n1:effectiveTime/n1:high/@value and not(n1:encompassingEncounter/n1:effectiveTime/n1:low/@value)">
+									<xsl:text> Up To </xsl:text>
+									<xsl:call-template name="formatDate">
+										<xsl:with-param name="date" select="n1:COCD_TP146232GB01.EncompassingEncounter/n1:effectiveTime/n1:high/@value"/>
+									</xsl:call-template>
+								</xsl:when>
+								<xsl:when test="//n1:COCD_TP146232GB01.EncompassingEncounter/n1:effectiveTime/n1:center/@value">
+									<xsl:call-template name="formatDate">
+										<xsl:with-param name="date" select="//n1:COCD_TP146232GB01.EncompassingEncounter/n1:effectiveTime/n1:center/@value"/>
+									</xsl:call-template>
+								</xsl:when>
+							</xsl:choose>
+						</div>
+					</div>
+					<!--PRTR1 Encounter identifier check for NHS 111 specific oids-->
+					<xsl:for-each select="/n1:ClinicalDocument/n1:componentOf/n1:COCD_TP146232GB01.EncompassingEncounter/n1:id">
+						<div class="flex">
 							<xsl:choose>
 								<xsl:when test="./@root = '2.16.840.1.113883.2.1.3.2.4.18.34'">
-									<tr>
-										<th class="titlebar">Case Reference</th>
-										<td class="titlebar">
-											<xsl:value-of select="./@extension"/>
-										</td>
-									</tr>
+									<div class="label">
+										Case Reference
+									</div>
+									<div>
+										<xsl:value-of select="./@extension"/>
+									</div>
 								</xsl:when>
 								<xsl:when test="./@root = '2.16.840.1.113883.2.1.3.2.4.18.35'">
-									<tr>
-										<th class="titlebar">Case ID</th>
-										<td class="titlebar">
-											<xsl:value-of select="./@extension"/>
-										</td>
-									</tr>
+									<div class="label">
+										Case ID
+									</div>
+									<div>
+										<xsl:value-of select="./@extension"/>
+									</div>
 								</xsl:when>
-								<!--<xsl:when test="./@root = 'UUID'">
-									<xsl:text>This is UUID and should not be shown</xsl:text>
-								</xsl:when>-->
 								<xsl:otherwise>
 									<xsl:if test="./@extension">
-										<tr>
-											<th class="titlebar">Encounter Identifier</th>
-											<td class="titlebar">
-												<xsl:value-of select="./@extension"/>
-											</td>
-										</tr>
+										<div class="label">
+											Encounter Identifier
+										</div>
+										<div>
+											<xsl:value-of select="./@extension"/>
+										</div>
 									</xsl:if>	
 								</xsl:otherwise>								
 							</xsl:choose>	
-						</xsl:for-each>
-						<!--PRTR1 encounter disposition-->
-						<xsl:if test="n1:COCD_TP146232GB01.EncompassingEncounter/n1:dischargeDispositionCode/@displayName">
-							<tr>
-								<th class="titlebar">Encounter Disposition</th>
-								<td class="titlebar">
-									<xsl:value-of select="n1:COCD_TP146232GB01.EncompassingEncounter/n1:dischargeDispositionCode/@displayName"/>
-								</td>
-							</tr>
-						</xsl:if>						
-						<xsl:if test="n1:COCD_TP146232GB01.EncompassingEncounter/n1:location/n1:COCD_TP145222GB02.HealthCareFacility/n1:serviceProviderOrganization/n1:name">
-							<tr>
-								<th class="titlebar">Care Setting Organisation</th>
-								<td class="titlebar">
-									<xsl:value-of select="n1:encompassingEncounter/n1:location/n1:healthCareFacility/n1:serviceProviderOrganization/n1:name"/>
-								</td>
-							</tr>
-						</xsl:if>
-						<xsl:if test="n1:COCD_TP146232GB01.EncompassingEncounter/n1:location/n1:COCD_TP145222GB02.HealthCareFacility/n1:location/n1:name">
-							<tr>
-								<th class="titlebar">Care Setting Location</th>
-								<td class="titlebar">
-									<xsl:value-of select="n1:COCD_TP146232GB01.EncompassingEncounter/n1:location/n1:COCD_TP145222GB02.HealthCareFacility/n1:location/n1:name"/>
-								</td>
-							</tr>
-						</xsl:if>
-						<xsl:if test="n1:COCD_TP146232GB01.EncompassingEncounter/n1:location/n1:COCD_TP145222GB02.HealthCareFacility/n1:location/n1:addr">
-							<tr>
-								<th class="titlebar">Care Setting Address</th>
-								<td class="titlebar">
-									<xsl:for-each select="n1:COCD_TP146232GB01.EncompassingEncounter/n1:location/n1:COCD_TP145222GB02.HealthCareFacility/n1:location/n1:addr">
-										<p class="label">
-											<xsl:choose>
-												<xsl:when test="@use='TMP'">Temporary Address</xsl:when>
-												<xsl:when test="@use='H'">Home Address</xsl:when>
-												<xsl:when test="@use='WP'">Work Address</xsl:when>
-												<xsl:when test="@use='PST'">Postal Address</xsl:when>
-												<xsl:when test="@use='HP'">Primary Home Address</xsl:when>
-												<xsl:when test="@use='HV'">Holiday Home Address</xsl:when>
-												<xsl:when test="@use='DIR'">Direct Address</xsl:when>
-												<xsl:when test="@use='PUB'">Public Address</xsl:when>
-												<xsl:when test="@use='BAD'">Bad Address</xsl:when>
-												<xsl:when test="@use='PHYS'">Visit Address</xsl:when>
-												<xsl:when test="@nullFlavor='NA'">Not Applicable</xsl:when>
-												<xsl:when test="@nullFlavor='NI'">No Information</xsl:when>
-												<xsl:when test="@nullFlavor='UNK'">Unknown</xsl:when>
-												<xsl:when test="@nullFlavor='ASKU'">Asked but Unknownn</xsl:when>
-												<xsl:when test="@nullFlavor='NAV'">Temporarily Unavailable</xsl:when>
-												<xsl:when test="@nullFlavor='NASK'">Not Asked</xsl:when>
-												<xsl:when test="@nullFlavor='MSK'">Masked</xsl:when>
-												<xsl:when test="@nullFlavor='NP'">Not Present</xsl:when>
-												<xsl:otherwise>Address</xsl:otherwise>
-											</xsl:choose>
-										</p>
-										<p>
-											<xsl:for-each select="n1:*">
-												<xsl:value-of select="."/>
-												<xsl:if test="not(position() = last())">
-													<br/>
-												</xsl:if>
-											</xsl:for-each>
-										</p>
-									</xsl:for-each>
-									<!--PRTR1-->
-								</td>
-							</tr>
-						</xsl:if>
-						<tr>
-							<th class="titlebar">Care Setting Type</th>
-							<td class="titlebar">
-								<xsl:value-of select="n1:COCD_TP146232GB01.EncompassingEncounter/n1:location/n1:COCD_TP145222GB02.HealthCareFacility/n1:code/@displayName"/>
-							</td>
-						</tr>
-						<xsl:for-each select="n1:COCD_TP146232GB01.EncompassingEncounter/n1:responsibleParty">
-							<tr>
-								<th class="titlebar">
-									<xsl:text>Responsible Party</xsl:text>
-								</th>
-								<td class="titlebar">
-									<xsl:if test="n1:COCD_TP145210GB01.AssignedEntity/n1:assignedPerson/n1:name">
-										<xsl:call-template name="getName">
-											<xsl:with-param name="name" select="n1:COCD_TP145210GB01.AssignedEntity/n1:assignedPerson/n1:name"/>
-										</xsl:call-template>
-										<xsl:if test="n1:COCD_TP145210GB01.AssignedEntity/n1:code/@displayName">
-											<xsl:text> - </xsl:text>
-											<xsl:value-of select="n1:COCD_TP145210GB01.AssignedEntity/n1:code/@displayName"/>
-										</xsl:if>
-										<xsl:if test="n1:COCD_TP145210GB01.AssignedEntity/n1:representedOrganization/n1:name"> <!--PRTR1 code added to get the org name rendered-->
-											<xsl:text>, </xsl:text>
-											<xsl:call-template name="getName">
-												<xsl:with-param name="name" select="n1:COCD_TP145210GB01.AssignedEntity/n1:representedOrganization/n1:name"/>
-											</xsl:call-template>
-										<br/>
-										</xsl:if>										
-									</xsl:if>
-								</td>
-							</tr>
-						</xsl:for-each>
-						<xsl:for-each select="n1:COCD_TP146232GB01.EncompassingEncounter/n1:encounterParticipant">
-							<tr>
-								<th class="titlebar">
-									<xsl:choose>
-										<xsl:when test="@typeCode='REF'">
-											<xsl:text>Referrer</xsl:text>
-										</xsl:when>
-										<xsl:when test="@typeCode='ADM'">
-											<xsl:text>Admitter</xsl:text>
-										</xsl:when>
-										<xsl:when test="@typeCode='CON'">
-											<xsl:text>Consultant</xsl:text>
-										</xsl:when>
-										<xsl:when test="@typeCode='DIS'">
-											<xsl:text>Discharger</xsl:text>
-										</xsl:when>
-										<xsl:when test="@typeCode='ATND'">
-											<xsl:text>Attender</xsl:text>
-										</xsl:when>
-									</xsl:choose>
-								</th>
-								<td class="titlebar">
-									<xsl:if test="n1:COCD_TP145210GB01.AssignedEntity/n1:assignedPerson/n1:name">
-										<xsl:call-template name="getName">
-											<xsl:with-param name="name" select="n1:COCD_TP145210GB01.AssignedEntity/n1:assignedPerson/n1:name"/>
-										</xsl:call-template>
-										<xsl:if test="n1:COCD_TP145210GB01.AssignedEntity/n1:code/@displayName">
-											<xsl:text> - </xsl:text>
-											<xsl:value-of select="n1:COCD_TP145210GB01.AssignedEntity/n1:code/@displayName"/>
-										</xsl:if>
-									</xsl:if>
-								</td>
-							</tr>
-						</xsl:for-each>
+						</div>
+					</xsl:for-each>
+					<!--PRTR1 encounter disposition-->
+					<xsl:if test="n1:COCD_TP146232GB01.EncompassingEncounter/n1:dischargeDispositionCode/@displayName">
+						<div class="flex">
+							<div class="label">
+								Encounter Disposition
+							</div>
+							<div>
+								<xsl:value-of select="n1:COCD_TP146232GB01.EncompassingEncounter/n1:dischargeDispositionCode/@displayName"/>
+							</div>
+						</div>
+					</xsl:if>						
+					<xsl:if test="n1:COCD_TP146232GB01.EncompassingEncounter/n1:location/n1:COCD_TP145222GB02.HealthCareFacility/n1:serviceProviderOrganization/n1:name">
+						<div class="flex">
+							<div class="label">
+								Care Setting Organisation
+							</div>
+							<div>
+								<xsl:value-of select="n1:encompassingEncounter/n1:location/n1:healthCareFacility/n1:serviceProviderOrganization/n1:name"/>
+							</div>
+						</div>
 					</xsl:if>
-				</xsl:for-each>
-				<!--PRTR1 code commented to take all participants under new banner-->
-				<!--				<xsl:for-each select="//n1:ClinicalDocument/n1:participant[@typeCode='REFB']"> 
-					<tr>
-						<th class="titlebar">
-							<xsl:text>Referrer</xsl:text>
-						</th>
-						<td class="titlebar">
-							<xsl:if test="n1:associatedEntity/n1:associatedPerson/n1:name">
-								<xsl:call-template name="getName">
-									<xsl:with-param name="name" select="n1:associatedEntity/n1:associatedPerson/n1:name"/>
-								</xsl:call-template>
-								<xsl:if test="n1:associatedEntity/n1:code/@displayName">
-									<xsl:text> - </xsl:text>
-									<xsl:value-of select="n1:associatedEntity/n1:code/@displayName"/>
+					<xsl:if test="n1:COCD_TP146232GB01.EncompassingEncounter/n1:location/n1:COCD_TP145222GB02.HealthCareFacility/n1:location/n1:name">
+						<div class="flex">
+							<div class="label">
+								Care Setting Location
+							</div>
+							<div>
+								<xsl:value-of select="n1:COCD_TP146232GB01.EncompassingEncounter/n1:location/n1:COCD_TP145222GB02.HealthCareFacility/n1:location/n1:name"/>
+							</div>
+						</div>
+					</xsl:if>
+					<xsl:if test="n1:COCD_TP146232GB01.EncompassingEncounter/n1:location/n1:COCD_TP145222GB02.HealthCareFacility/n1:location/n1:addr">
+						<div class="flex">
+							<div class="label">
+								Care Setting Address
+							</div>
+							<div>
+								<xsl:for-each select="n1:COCD_TP146232GB01.EncompassingEncounter/n1:location/n1:COCD_TP145222GB02.HealthCareFacility/n1:location/n1:addr">
+									<xsl:choose>
+										<xsl:when test="@use='TMP'">Temporary Address</xsl:when>
+										<xsl:when test="@use='H'">Home Address</xsl:when>
+										<xsl:when test="@use='WP'">Work Address</xsl:when>
+										<xsl:when test="@use='PST'">Postal Address</xsl:when>
+										<xsl:when test="@use='HP'">Primary Home Address</xsl:when>
+										<xsl:when test="@use='HV'">Holiday Home Address</xsl:when>
+										<xsl:when test="@use='DIR'">Direct Address</xsl:when>
+										<xsl:when test="@use='PUB'">Public Address</xsl:when>
+										<xsl:when test="@use='BAD'">Bad Address</xsl:when>
+										<xsl:when test="@use='PHYS'">Visit Address</xsl:when>
+										<xsl:when test="@nullFlavor='NA'">Not Applicable</xsl:when>
+										<xsl:when test="@nullFlavor='NI'">No Information</xsl:when>
+										<xsl:when test="@nullFlavor='UNK'">Unknown</xsl:when>
+										<xsl:when test="@nullFlavor='ASKU'">Asked but Unknownn</xsl:when>
+										<xsl:when test="@nullFlavor='NAV'">Temporarily Unavailable</xsl:when>
+										<xsl:when test="@nullFlavor='NASK'">Not Asked</xsl:when>
+										<xsl:when test="@nullFlavor='MSK'">Masked</xsl:when>
+										<xsl:when test="@nullFlavor='NP'">Not Present</xsl:when>
+										<xsl:otherwise>Address</xsl:otherwise>
+									</xsl:choose>
+									<br/>
+									<xsl:for-each select="n1:*">
+										<xsl:value-of select="."/>
+										<xsl:if test="not(position() = last())">
+											<br/>
+										</xsl:if>
+									</xsl:for-each>
+								</xsl:for-each>
+								<!--PRTR1-->
+							</div>
+						</div>
+					</xsl:if>
+					<div class="flex">
+						<div class="label">
+							Care Setting Type
+						</div>
+						<div>
+							<xsl:value-of select="n1:COCD_TP146232GB01.EncompassingEncounter/n1:location/n1:COCD_TP145222GB02.HealthCareFacility/n1:code/@displayName"/>
+						</div>
+					</div>
+					<xsl:for-each select="n1:COCD_TP146232GB01.EncompassingEncounter/n1:responsibleParty">
+						<div class="flex">
+							<div class="label">
+								Responsible Party
+							</div>
+							<div>
+								<xsl:if test="n1:COCD_TP145210GB01.AssignedEntity/n1:assignedPerson/n1:name">
+									<xsl:call-template name="getName">
+										<xsl:with-param name="name" select="n1:COCD_TP145210GB01.AssignedEntity/n1:assignedPerson/n1:name"/>
+									</xsl:call-template>
+									<xsl:if test="n1:COCD_TP145210GB01.AssignedEntity/n1:code/@displayName">
+										<xsl:text> - </xsl:text>
+										<xsl:value-of select="n1:COCD_TP145210GB01.AssignedEntity/n1:code/@displayName"/>
+									</xsl:if>
+									<xsl:if test="n1:COCD_TP145210GB01.AssignedEntity/n1:representedOrganization/n1:name"> <!--PRTR1 code added to get the org name rendered-->
+										<xsl:text>, </xsl:text>
+										<xsl:call-template name="getName">
+											<xsl:with-param name="name" select="n1:COCD_TP145210GB01.AssignedEntity/n1:representedOrganization/n1:name"/>
+										</xsl:call-template>
+									<br/>
+									</xsl:if>										
 								</xsl:if>
-							</xsl:if>
-						</td>
-					</tr>
-					<tr>
-						<th class="titlebar">
-							<xsl:text>Referrering Organization</xsl:text>
-						</th>
-						<td class="titlebar">
-							<xsl:if test="n1:associatedEntity/n1:scopingOrganization/n1:name">
-								<xsl:call-template name="getName">
-									<xsl:with-param name="name" select="n1:associatedEntity/n1:scopingOrganization/n1:name"/>
-								</xsl:call-template>
-							</xsl:if>
-						</td>
-					</tr>
-				</xsl:for-each>-->
-			</table>
+							</div>
+						</div>
+					</xsl:for-each>
+					<xsl:for-each select="n1:COCD_TP146232GB01.EncompassingEncounter/n1:encounterParticipant">
+						<div class="flex">
+							<div class="label">
+								<xsl:choose>
+									<xsl:when test="@typeCode='REF'">
+										<xsl:text>Referrer</xsl:text>
+									</xsl:when>
+									<xsl:when test="@typeCode='ADM'">
+										<xsl:text>Admitter</xsl:text>
+									</xsl:when>
+									<xsl:when test="@typeCode='CON'">
+										<xsl:text>Consultant</xsl:text>
+									</xsl:when>
+									<xsl:when test="@typeCode='DIS'">
+										<xsl:text>Discharger</xsl:text>
+									</xsl:when>
+									<xsl:when test="@typeCode='ATND'">
+										<xsl:text>Attender</xsl:text>
+									</xsl:when>
+								</xsl:choose>
+							</div>
+							<div>
+								<xsl:if test="n1:COCD_TP145210GB01.AssignedEntity/n1:assignedPerson/n1:name">
+									<xsl:call-template name="getName">
+										<xsl:with-param name="name" select="n1:COCD_TP145210GB01.AssignedEntity/n1:assignedPerson/n1:name"/>
+									</xsl:call-template>
+									<xsl:if test="n1:COCD_TP145210GB01.AssignedEntity/n1:code/@displayName">
+										<xsl:text> - </xsl:text>
+										<xsl:value-of select="n1:COCD_TP145210GB01.AssignedEntity/n1:code/@displayName"/>
+									</xsl:if>
+								</xsl:if>
+							</div>
+						</div>
+					</xsl:for-each>
+				</xsl:if>
+			</xsl:for-each>
 		</div>
 	</xsl:template>
 	<!--PRTR1 Adding Participants starts here-->
@@ -1908,95 +1823,120 @@
 <!--PRTR1 Participants ends here-->
 	<!--  Footer  -->
 	<xsl:template name="footer">
-		<div class="footer">
-			<table class="header">
-				<tr>
-					<th class="header">
-						<xsl:text>Document ID</xsl:text>
-					</th>
-					<td class="header">
-						<xsl:value-of select="/n1:ClinicalDocument/n1:id/@root"/>
-					</td>
-					<th class="header">
-						<xsl:text>Version</xsl:text>
-					</th>
-					<td class="header">
-						<xsl:value-of select="/n1:ClinicalDocument/n1:versionNumber/@value"/>
-					</td>
-				</tr>
-				<!--PRTR1 get replacement of (related document) here-->
-					<xsl:if test="/n1:ClinicalDocument/n1:relatedDocument/@typeCode='RPLC'">
-						<tr>
-							<th class="header">
-								<xsl:text>Replacement of</xsl:text>
-							</th>
-							<td class="header">
-								<xsl:value-of select="/n1:ClinicalDocument/n1:relatedDocument/n1:parentDocument/n1:id/@root"/>
-							</td>
-							<th class="header">
-								<xsl:text>Version</xsl:text>
-							</th>
-							<td class="header">
-								<xsl:value-of select="/n1:ClinicalDocument/n1:relatedDocument/n1:parentDocument/n1:versionNumber/@value"/>
-							</td>
-						</tr>	
-					</xsl:if>
-					<!--PRTR1 get addendum to (related document) here-->
-					<xsl:if test="/n1:ClinicalDocument/n1:relatedDocument/@typeCode='APND'">
-						<tr>
-							<th class="header">
-								<xsl:text>Addendum to</xsl:text>
-							</th>
-							<td class="header">
-								<xsl:value-of select="/n1:ClinicalDocument/n1:relatedDocument/n1:parentDocument/n1:id/@root"/>
-							</td>
-							<th class="header">
-								<xsl:text>Version</xsl:text>
-							</th>
-							<td class="header">
-								<xsl:value-of select="/n1:ClinicalDocument/n1:relatedDocument/n1:parentDocument/n1:versionNumber/@value"/>
-							</td>
-						</tr>	
-					</xsl:if>
-					<!--PRTR1 get transformation of  (related document) here-->	
-					<xsl:if test="/n1:ClinicalDocument/n1:relatedDocument/@typeCode='XFRM'">
-						<tr>
-							<th class="header">
-								<xsl:text>Transformation of </xsl:text>
-							</th>
-							<td class="header">
-								<xsl:value-of select="/n1:ClinicalDocument/n1:relatedDocument/n1:parentDocument/n1:id/@root"/>
-							</td>
-							<th class="header">
-								<xsl:text>Version</xsl:text>
-							</th>
-							<td class="header">
-								<xsl:value-of select="/n1:ClinicalDocument/n1:relatedDocument/n1:parentDocument/n1:versionNumber/@value"/>
-							</td>
-						</tr>	
-					</xsl:if>														
-				<xsl:for-each select="n1:informationRecipient">
-					<xsl:sort select="@typeCode"/>
-					<tr>
-						<th class="header" valign="top">
+		<div class="content">
+			<div class="flex">
+				<div class="label">
+					<xsl:text>Document Created</xsl:text>
+				</div>
+				<div>
+					<xsl:call-template name="formatDate">
+						<xsl:with-param name="date" select="/n1:ClinicalDocument/n1:effectiveTime/@value"/>
+					</xsl:call-template>
+				</div>
+			</div>
+			<div class="flex">
+				<div class="label">		
+					<xsl:text>Document Owner</xsl:text>
+				</div>
+				<div>
+					<xsl:value-of select="/n1:ClinicalDocument/n1:custodian/n1:COCD_TP145018UK03.AssignedCustodian/n1:representedCustodianOrganization/n1:name"/>
+				</div>
+			</div>
+		</div>
+
+						
+
+				<xsl:for-each select="/n1:ClinicalDocument/n1:author">
+					
+							<xsl:text>Authored by</xsl:text>
+			
 							<xsl:choose>
-								<xsl:when test="@typeCode='PRCP'and not(preceding-sibling::*/@typeCode='PRCP')">
-									<xsl:choose>
-										<xsl:when test="count(following-sibling::*[@typeCode='PRCP'])=0">
-											<xsl:text>Primary Recipient</xsl:text>
-										</xsl:when>
-										<xsl:otherwise>
-											<xsl:text>Primary Recipients</xsl:text>
-										</xsl:otherwise>
-									</xsl:choose>
+								<xsl:when test="n1:COCD_TP145200GB01.AssignedAuthor/n1:assignedPerson/n1:name">
+									<xsl:call-template name="getName">
+										<xsl:with-param name="name" select="n1:COCD_TP145200GB01.AssignedAuthor/n1:assignedPerson/n1:name"/>
+									</xsl:call-template>
+									<xsl:text> - </xsl:text>
+									<xsl:value-of select="n1:COCD_TP145200GB01.AssignedAuthor/n1:code/@displayName"/>
+									<xsl:text>, </xsl:text>
+									<xsl:value-of select="n1:COCD_TP145200GB01.AssignedAuthor/n1:representedOrganization/n1:name"/>
 								</xsl:when>
-								<xsl:when test="@typeCode='TRC'and not(preceding-sibling::*/@typeCode='TRC')">
+								<xsl:when test="n1:COCD_TP145200GB01.AssignedAuthor/n1:assignedAuthoringDevice/n1:manufacturerModelName">
+									<xsl:value-of select="n1:COCD_TP145200GB01.AssignedAuthor/n1:assignedAuthoringDCOCD_TP145200GB01.AssignedAuthoracturerModelName"/>
+									<xsl:if test="n1:COCD_TP145200GB01.AssignedAuthor/n1:representedOrganization/n1:name">
+										<xsl:text> at </xsl:text>
+										<xsl:value-of select="n1:COCD_TP145200GB01.AssignedAuthor/n1:representedOrganization/n1:name"/>
+									</xsl:if>
+								</xsl:when>
+								<xsl:when test="n1:COCD_TP145200GB01.AssignedAuthor/n1:representedOrganization/n1:name">
+									<xsl:value-of select="n1:COCD_TP145200GB01.AssignedAuthor/n1:representedOrganization/n1:name"/>
+								</xsl:when>
+								<xsl:otherwise>
+									<xsl:text>Unknown</xsl:text>
+								</xsl:otherwise>
+							</xsl:choose>
+							<xsl:text> on </xsl:text>
+							<xsl:call-template name="formatDate">
+								<xsl:with-param name="date" select="n1:time/@value"/>
+							</xsl:call-template>
+
+				</xsl:for-each>
+				<xsl:for-each select="/n1:ClinicalDocument/n1:authenticator">
+				
+							<xsl:text>Authenticated by</xsl:text>
+			
+							<xsl:if test="n1:assignedEntity/n1:assignedPerson/n1:name">
+								<xsl:call-template name="getName">
+									<xsl:with-param name="name" select="n1:assignedEntity/n1:assignedPerson/n1:name"/>
+								</xsl:call-template>
+								<xsl:text> - </xsl:text>
+								<xsl:value-of select="n1:assignedEntity/n1:code/@displayName"/>
+							</xsl:if>
+							<xsl:text> on </xsl:text>
+							<xsl:call-template name="formatDate">
+								<xsl:with-param name="date" select="n1:time/@value"/>
+							</xsl:call-template>
+
+				</xsl:for-each>
+				<xsl:for-each select="/n1:ClinicalDocument/n1:dataEnterer">
+
+							<xsl:text>Entered by</xsl:text>
+
+							<xsl:if test="n1:assignedEntity/n1:assignedPerson/n1:name">
+								<xsl:call-template name="getName">
+									<xsl:with-param name="name" select="n1:assignedEntity/n1:assignedPerson/n1:name"/>
+								</xsl:call-template>
+								<!--<xsl:text> - </xsl:text>
+								<xsl:value-of select="n1:assignedEntity/n1:code/@displayName"/>-->
+							</xsl:if>
+							<xsl:if test="n1:assignedEntity/n1:code">
+								<xsl:text> - </xsl:text>
+								<xsl:value-of select="n1:assignedEntity/n1:code/@displayName"/>
+							</xsl:if>
+							<xsl:if test="n1:assignedEntity/n1:representedOrganization/n1:name">
+								<xsl:text> , </xsl:text>
+								<xsl:value-of select="n1:assignedEntity/n1:representedOrganization/n1:name"/>
+							</xsl:if>
+							<xsl:if test="n1:time">
+								<xsl:text> on </xsl:text>
+								<xsl:call-template name="formatDate">
+									<xsl:with-param name="date" select="n1:time/@value"/>
+								</xsl:call-template>
+							</xsl:if>
+
+				</xsl:for-each>
+				<xsl:call-template name="performer"/>
+				<!--PRTR1 Get consent here-->
+				<xsl:for-each select="/n1:ClinicalDocument/n1:authorization">
+					<xsl:sort select="@typeCode"/>
+
+							<xsl:choose>
+								<xsl:when test="@typeCode='AUTH' and not(preceding-sibling::*/@typeCode='AUTH')">
 									<xsl:choose>
-										<xsl:when test="count(following-sibling::*[@typeCode='TRC'])=0">
-											<xsl:text>Copy Recipient</xsl:text>
+										<xsl:when test="count(following-sibling::*[@typeCode='AUTH'])=0">
+											<xsl:text>Consent Status</xsl:text>
 										</xsl:when>
 										<xsl:otherwise>
-											<xsl:text>Copy Recipients</xsl:text>
+											<xsl:text>Consent Statuses</xsl:text>
 										</xsl:otherwise>
 									</xsl:choose>
 								</xsl:when>
@@ -2004,47 +1944,82 @@
 									<xsl:text/>
 								</xsl:otherwise>
 							</xsl:choose>
-						</th>
-						<td class="header">
-							<xsl:if test="n1:COCD_TP145202GB02.IntendedRecipient/n1:assignedPerson/n1:name">
-								<xsl:call-template name="getName">
-									<xsl:with-param name="name" select="n1:COCD_TP145202GB02.IntendedRecipient/n1:assignedPerson/n1:name"/>
-								</xsl:call-template>
-							</xsl:if>
-							<xsl:if test="n1:COCD_TP145202GB02.IntendedRecipient/npfitlc:recipientRoleCode/@displayName">
-								<xsl:if test="n1:COCD_TP145202GB02.IntendedRecipient/n1:assignedPerson/n1:name">
-									<xsl:text> - </xsl:text>
-								</xsl:if>
-								<xsl:value-of select="n1:COCD_TP145202GB02.IntendedRecipient/n2:recipientRoleCode/@displayName"/>
-							</xsl:if>
-							<xsl:if test="n1:COCD_TP145202GB02.IntendedRecipient/n1:representedOrganization/n1:name">
-								<xsl:if test="n1:COCD_TP145202GB02.IntendedRecipient/n1:assignedPerson/n1:name or n1:COCD_TP145202GB02.IntendedRecipient/n2:recipientRoleCode/@displayName">
-									<xsl:text>, </xsl:text>
-								</xsl:if>
-								<xsl:call-template name="getName">
-									<xsl:with-param name="name" select="n1:COCD_TP145202GB02.IntendedRecipient/n1:representedOrganization/n1:name"/>
-								</xsl:call-template>
-								<br/>
-							</xsl:if>
-						</td>
-						<th class="header">
-							<xsl:if test="n1:COCD_TP145202GB02.IntendedRecipient/n1:telecom">
-								<xsl:choose>
-									<xsl:when test="contains(n1:COCD_TP145202GB02.IntendedRecipient/n1:telecom/@value, 'mailto')">Email</xsl:when>
-									<xsl:when test="contains(n1:COCD_TP145202GB02.IntendedRecipient/n1:telecom/@value, 'tel')">Phone</xsl:when>
-								</xsl:choose>
-							</xsl:if>
-						</th>
-						<td class="header">
-							<xsl:value-of select="substring-after(n1:COCD_TP145202GB02.IntendedRecipient/n1:telecom/@value,':')"/>
-						</td>
-					</tr>
-				</xsl:for-each>
-			</table>
-		</div>
+
+								<xsl:value-of select="n1:COCD_TP146226GB02.Consent/n1:code/@displayName"/>
+
+				</xsl:for-each>				
+
+			
+			<xsl:text>Document ID</xsl:text>
+			<xsl:value-of select="/n1:ClinicalDocument/n1:id/@root"/>
+
+			<xsl:text>Version</xsl:text>
+			<xsl:value-of select="/n1:ClinicalDocument/n1:versionNumber/@value"/>
+
+												
+			<xsl:for-each select="n1:informationRecipient">
+				<xsl:sort select="@typeCode"/>
+				<xsl:choose>
+					<xsl:when test="@typeCode='PRCP'and not(preceding-sibling::*/@typeCode='PRCP')">
+						<xsl:choose>
+							<xsl:when test="count(following-sibling::*[@typeCode='PRCP'])=0">
+								<xsl:text>Primary Recipient</xsl:text>
+							</xsl:when>
+							<xsl:otherwise>
+								<xsl:text>Primary Recipients</xsl:text>
+							</xsl:otherwise>
+						</xsl:choose>
+					</xsl:when>
+					<xsl:when test="@typeCode='TRC'and not(preceding-sibling::*/@typeCode='TRC')">
+						<xsl:choose>
+							<xsl:when test="count(following-sibling::*[@typeCode='TRC'])=0">
+								<xsl:text>Copy Recipient</xsl:text>
+							</xsl:when>
+							<xsl:otherwise>
+								<xsl:text>Copy Recipients</xsl:text>
+							</xsl:otherwise>
+						</xsl:choose>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:text/>
+					</xsl:otherwise>
+				</xsl:choose>
+				
+				
+				<xsl:if test="n1:COCD_TP145202GB02.IntendedRecipient/n1:assignedPerson/n1:name">
+					<xsl:call-template name="getName">
+						<xsl:with-param name="name" select="n1:COCD_TP145202GB02.IntendedRecipient/n1:assignedPerson/n1:name"/>
+					</xsl:call-template>
+				</xsl:if>
+				<xsl:if test="n1:COCD_TP145202GB02.IntendedRecipient/npfitlc:recipientRoleCode/@displayName">
+					<xsl:if test="n1:COCD_TP145202GB02.IntendedRecipient/n1:assignedPerson/n1:name">
+						<xsl:text> - </xsl:text>
+					</xsl:if>
+					<xsl:value-of select="n1:COCD_TP145202GB02.IntendedRecipient/n2:recipientRoleCode/@displayName"/>
+				</xsl:if>
+				<xsl:if test="n1:COCD_TP145202GB02.IntendedRecipient/n1:representedOrganization/n1:name">
+					<xsl:if test="n1:COCD_TP145202GB02.IntendedRecipient/n1:assignedPerson/n1:name or n1:COCD_TP145202GB02.IntendedRecipient/n2:recipientRoleCode/@displayName">
+						<xsl:text>, </xsl:text>
+					</xsl:if>
+					<xsl:call-template name="getName">
+						<xsl:with-param name="name" select="n1:COCD_TP145202GB02.IntendedRecipient/n1:representedOrganization/n1:name"/>
+					</xsl:call-template>
+					<br/>
+				</xsl:if>
+
+				<xsl:if test="n1:COCD_TP145202GB02.IntendedRecipient/n1:telecom">
+					<xsl:choose>
+						<xsl:when test="contains(n1:COCD_TP145202GB02.IntendedRecipient/n1:telecom/@value, 'mailto')">Email</xsl:when>
+						<xsl:when test="contains(n1:COCD_TP145202GB02.IntendedRecipient/n1:telecom/@value, 'tel')">Phone</xsl:when>
+					</xsl:choose>
+				</xsl:if>
+
+				<xsl:value-of select="substring-after(n1:COCD_TP145202GB02.IntendedRecipient/n1:telecom/@value,':')"/>
+
+			</xsl:for-each>
+
 	</xsl:template>
-	<!-- 
-  -->
+
 	<xsl:template name="translateCode">
 		<xsl:param name="code"/>
 		<!--xsl:value-of select="document('voc.xml')/systems/system[@root=$code/@codeSystem]/code[@value=$code/@code]/@displayName"/-->
