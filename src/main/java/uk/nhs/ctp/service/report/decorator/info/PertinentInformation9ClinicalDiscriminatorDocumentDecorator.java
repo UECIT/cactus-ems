@@ -58,7 +58,7 @@ public class PertinentInformation9ClinicalDiscriminatorDocumentDecorator impleme
 			CareConnectObservation observation = (CareConnectObservation) request.getReferralRequest().getReasonReferenceFirstRep().getResource();
 			codedValue.setCode(observation.getCode().getCodingFirstRep().getCode());
 			codedValue.setDisplayName(observation.getCode().getCodingFirstRep().getDisplay());
-			codedValue.setCodeSystem("2.16.840.1.113.883.2.1.3.2.4.24");
+			codedValue.setCodeSystem("2.16.840.1.113883.6.96");
 		} catch (Exception e) {
 			// TODO: handle exception
 		}

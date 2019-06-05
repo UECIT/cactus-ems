@@ -35,7 +35,7 @@ public class ObservationToClinicalDiscriminatorTemplateMapper implements Templat
 		clinicalDiscriminator.setTemplateId(templateId);
 		
 		CV observationCode = new CV();
-		observationCode.setCodeSystem(observation.getCode().getCodingFirstRep().getSystem());
+		observationCode.setCodeSystem("2.16.840.1.113883.6.96");
 		observationCode.setCode(observation.getCode().getCodingFirstRep().getCode());
 		observationCode.setDisplayName(observation.getCode().getCodingFirstRep().getDisplay() + " (" + observation.getValueBooleanType() + ")");
 		clinicalDiscriminator.setValue(observationCode);

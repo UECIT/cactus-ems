@@ -60,13 +60,10 @@ public class ObservationToFindingTemplateMapper implements TemplateMapper<CareCo
 		CS interpretationCode = new CS();
 		interpretationCode.setCode("N");
 		interpretationCode.setCodeSystem("2.16.840.1.113883.5.83");
-		interpretationCode.setDisplayName("Normal");
 		finding.setInterpretationCode(interpretationCode);
 		
 		StatusCode statusCode = new StatusCode();
 		statusCode.setCode("completed");
-		statusCode.setCodeSystem("2.16.840.1.113883.5.14");
-		statusCode.setDisplayName("completed");
 		finding.setStatusCode(statusCode);
 		
 		TemplateId templateId = new TemplateId();
