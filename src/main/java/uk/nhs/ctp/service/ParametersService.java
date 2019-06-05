@@ -145,29 +145,55 @@ public class ParametersService {
 	}
 
 	private void setUserType(Cases caseEntity, Parameters parameters, SettingsDTO settings) {
-
+		CodeableConcept codeableConcept = new CodeableConcept();
+		
 		if (caseEntity.getSkillset().getCode().equalsIgnoreCase("PA")) {
-			parameters.addParameter().setName(SystemConstants.USERTYPE).setValue(new CodeableConcept().setText("Patient").addCoding()
-					.setCode("116154003").setDisplay("Patient").setSystem(SystemURL.SNOMED));
+			codeableConcept.setText("Patient")
+				.addCoding()
+					.setCode("116154003")
+					.setDisplay("Patient")
+					.setSystem(SystemURL.SNOMED);
 		} else {
-			parameters.addParameter().setName(SystemConstants.USERTYPE)
-					.setValue(new CodeableConcept().setText(settings.getUserType().getDisplay()).addCoding().setCode(settings.getUserType().getCode())
-							.setDisplay(settings.getUserType().getDisplay()).setSystem(SystemURL.SNOMED));
+			codeableConcept.setText(settings.getUserType().getDisplay())
+				.addCoding()
+					.setCode(settings.getUserType().getCode())
+					.setDisplay(settings.getUserType().getDisplay())
+					.setSystem(SystemURL.SNOMED);
 		}
+		
+		parameters.addParameter()
+		.setName(SystemConstants.USERTYPE)
+			.setValue(codeableConcept);
 
 	}
 
 	private void setUserLanguage(Cases caseEntity, Parameters parameters, SettingsDTO settings) {
-		parameters.addParameter().setName(SystemConstants.USERLANGUAGE)
-				.setValue(new CodeableConcept().setText(settings.getUserLanguage().getDisplay()).addCoding().setCode(settings.getUserLanguage().getCode())
-						.setDisplay(settings.getUserLanguage().getDisplay()).setSystem(SystemURL.DATA_DICTIONARY));
+		CodeableConcept codeableConcept = new CodeableConcept();
+		
+		codeableConcept.setText(settings.getUserLanguage().getDisplay())
+			.addCoding()
+				.setCode(settings.getUserLanguage().getCode())
+				.setDisplay(settings.getUserLanguage().getDisplay())
+				.setSystem(SystemURL.DATA_DICTIONARY);
+		
+		parameters.addParameter()
+		.setName(SystemConstants.USERLANGUAGE)
+			.setValue(codeableConcept);
 
 	}
 
 	private void setUserTaskContext(Cases caseEntity, Parameters parameters, SettingsDTO settings) {
-		parameters.addParameter().setName(SystemConstants.USERTASKCONTEXT)
-				.setValue(new CodeableConcept().setText(settings.getUserTaskContext().getDisplay()).addCoding().setCode(settings.getUserTaskContext().getCode())
-						.setDisplay(settings.getUserTaskContext().getDisplay()).setSystem(SystemURL.SNOMED));
+		CodeableConcept codeableConcept = new CodeableConcept();
+		
+		codeableConcept.setText(settings.getUserTaskContext().getDisplay())
+			.addCoding()
+				.setCode(settings.getUserTaskContext().getCode())
+				.setDisplay(settings.getUserTaskContext().getDisplay())
+				.setSystem(SystemURL.SNOMED);
+		
+		parameters.addParameter()
+		.setName(SystemConstants.USERTASKCONTEXT)
+			.setValue(codeableConcept);
 
 	}
 
@@ -189,23 +215,47 @@ public class ParametersService {
 	}
 
 	private void setRecipientType(Cases caseEntity, Parameters parameters, SettingsDTO settings) {
-		parameters.addParameter().setName(SystemConstants.RECIPIENTTYPE)
-				.setValue(new CodeableConcept().setText(settings.getRecipientType().getDisplay()).addCoding().setCode(settings.getRecipientType().getCode())
-						.setDisplay(settings.getRecipientType().getDisplay()).setSystem(SystemURL.SNOMED));
+		CodeableConcept codeableConcept = new CodeableConcept();
+		
+		codeableConcept.setText(settings.getRecipientType().getDisplay())
+			.addCoding()
+				.setCode(settings.getRecipientType().getCode())
+				.setDisplay(settings.getRecipientType().getDisplay())
+				.setSystem(SystemURL.SNOMED);
+		
+		parameters.addParameter()
+		.setName(SystemConstants.RECIPIENTTYPE)
+			.setValue(codeableConcept);
 
 	}
 
 	private void setRecipientLanguage(Cases caseEntity, Parameters parameters, SettingsDTO settings) {
-		parameters.addParameter().setName(SystemConstants.RECIPIENTLANGUAGE)
-				.setValue(new CodeableConcept().setText(settings.getRecipientLanguage().getDisplay()).addCoding().setCode(settings.getRecipientLanguage().getCode())
-						.setDisplay(settings.getRecipientLanguage().getDisplay()).setSystem(SystemURL.DATA_DICTIONARY));
+		CodeableConcept codeableConcept = new CodeableConcept();
+		
+		codeableConcept.setText(settings.getRecipientLanguage().getDisplay())
+			.addCoding()
+				.setCode(settings.getRecipientLanguage().getCode())
+				.setDisplay(settings.getRecipientLanguage().getDisplay())
+				.setSystem(SystemURL.DATA_DICTIONARY);
+		
+		parameters.addParameter()
+		.setName(SystemConstants.RECIPIENTLANGUAGE)
+			.setValue(codeableConcept);
 
 	}
 
 	private void setSetting(Cases caseEntity, Parameters parameters, SettingsDTO settings) {
-		parameters.addParameter().setName(SystemConstants.SETTING)
-				.setValue(new CodeableConcept().setText(settings.getSetting().getDisplay()).addCoding().setCode(settings.getSetting().getCode())
-						.setDisplay(settings.getSetting().getDisplay()).setSystem(SystemURL.SNOMED));
+		CodeableConcept codeableConcept = new CodeableConcept();
+		
+		codeableConcept.setText(settings.getSetting().getDisplay())
+			.addCoding()
+				.setCode(settings.getSetting().getCode())
+				.setDisplay(settings.getSetting().getDisplay())
+				.setSystem(SystemURL.SNOMED);
+		
+		parameters.addParameter()
+		.setName(SystemConstants.SETTING)
+			.setValue(codeableConcept);
 
 	}
 
