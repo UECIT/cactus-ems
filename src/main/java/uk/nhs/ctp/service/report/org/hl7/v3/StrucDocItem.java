@@ -95,6 +95,15 @@ public class StrucDocItem {
     @XmlSchemaType(name = "NMTOKENS")
     protected List<String> styleCode;
 
+    public StrucDocItem() {
+    	this(null);
+    }
+
+    public StrucDocItem(Serializable content) {
+    	if (content != null) {
+    		getContent().add(content);
+    	}
+    }
     /**
      * Gets the value of the content property.
      * 

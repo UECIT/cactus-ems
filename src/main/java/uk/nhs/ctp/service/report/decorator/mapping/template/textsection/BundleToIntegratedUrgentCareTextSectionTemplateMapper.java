@@ -1,7 +1,6 @@
 package uk.nhs.ctp.service.report.decorator.mapping.template.textsection;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
@@ -14,8 +13,8 @@ import org.hl7.fhir.dstu3.model.Type;
 import org.springframework.stereotype.Component;
 
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP146246GB01Section1;
-import uk.nhs.ctp.service.report.org.hl7.v3.StrucDocBr;
-import uk.nhs.ctp.service.report.org.hl7.v3.StrucDocParagraph;
+import uk.nhs.ctp.service.report.org.hl7.v3.StrucDocItem;
+import uk.nhs.ctp.service.report.org.hl7.v3.StrucDocList;
 import uk.nhs.ctp.service.report.org.hl7.v3.StrucDocText;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
 
@@ -32,21 +31,19 @@ public class BundleToIntegratedUrgentCareTextSectionTemplateMapper extends Abstr
 		List<CareConnectCarePlan> carePlans = 
 				ResourceProviderUtils.getResources(bundle, CareConnectCarePlan.class);
 		
-		StrucDocParagraph questionnaireHeading = new StrucDocParagraph();
-		questionnaireHeading.getContent().add("Information");
-		text.getContent().add(new JAXBElement<StrucDocParagraph>(
-				new QName("urn:hl7-org:v3", "paragraph"), StrucDocParagraph.class, questionnaireHeading));
-		
-		questionnaireResponses.stream().forEach(response ->
-			addQuestionnaireResponse(text, response));
-		
-		StrucDocParagraph carePlanHeading = new StrucDocParagraph();
-		carePlanHeading.getContent().add("Care Advice");
-		text.getContent().add(new JAXBElement<StrucDocParagraph>(
-				new QName("urn:hl7-org:v3", "paragraph"), StrucDocParagraph.class, carePlanHeading));
-		
-		carePlans.stream().forEach(plan -> addCarePlan(text, plan));
+		StrucDocList list = new StrucDocList();
+		list.getItem().add(new StrucDocItem("The following interview..."));
 
+		questionnaireResponses.stream().forEach(response ->
+			addQuestionnaireResponse(list, response));
+		
+		list.getItem().add(new StrucDocItem("Resulted in the following care advice..."));
+
+		carePlans.stream().forEach(plan -> addCarePlan(list, plan));
+
+		text.getContent().add(new JAXBElement<StrucDocList>(
+				new QName("urn:hl7-org:v3", "list"), StrucDocList.class, list));
+		
 		section.setTitle("Triage Notes");
 		section.setText(text);
 	}
@@ -56,32 +53,23 @@ public class BundleToIntegratedUrgentCareTextSectionTemplateMapper extends Abstr
 		return Bundle.class;
 	}
 
-	private void addQuestionnaireResponse(StrucDocText text, QuestionnaireResponse response) {
+	private void addQuestionnaireResponse(StrucDocList list, QuestionnaireResponse response) {
 		response.getItem().stream().forEach(item -> {
-			StrucDocParagraph paragraph = new StrucDocParagraph();
-			
-			paragraph.getContent().add(item.getText());
-			JAXBElement<StrucDocBr> br = new JAXBElement<>(new QName("urn:hl7-org:v3", "br"), StrucDocBr.class, new StrucDocBr());
-			paragraph.getContent().add(br);
+			StrucDocItem listItem = new StrucDocItem();
 			Type type = item.getAnswerFirstRep().getValue();
+			
+			listItem.getContent().add(item.getText() + " -> " + 
+					(type instanceof Coding ? ((Coding)type).getDisplay() : type.primitiveValue()));
 
-			paragraph.getContent().add(type instanceof Coding ? ((Coding)type).getDisplay() : type.primitiveValue());
-		
-			text.getContent().add(new JAXBElement<StrucDocParagraph>(
-					new QName("urn:hl7-org:v3", "paragraph"), StrucDocParagraph.class, paragraph));
+			list.getItem().add(listItem);
 		});
 	}
 	
-	private void addCarePlan(StrucDocText text, CareConnectCarePlan carePlan) {
-		StrucDocParagraph paragraph = new StrucDocParagraph();
-		
-		paragraph.getContent().addAll(carePlan.getActivity().stream().map(activity -> 
-				activity.getDetail().getDescription()).collect(Collectors.toList()));
-		
-		paragraph.getContent().addAll(carePlan.getNote().stream().map(note -> 
-				note.getText()).collect(Collectors.toList()));
-		
-		text.getContent().add(new JAXBElement<StrucDocParagraph>(
-				new QName("urn:hl7-org:v3", "paragraph"), StrucDocParagraph.class, paragraph));
+	private void addCarePlan(StrucDocList list, CareConnectCarePlan carePlan) {
+		carePlan.getActivity().stream().forEach(activity -> 
+				list.getItem().add(new StrucDocItem(activity.getDetail().getDescription())));
+
+		carePlan.getNote().stream().forEach(
+				note -> list.getItem().add(new StrucDocItem(note.getText())));
 	}
 }

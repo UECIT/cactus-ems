@@ -7,7 +7,8 @@ import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.springframework.stereotype.Component;
 
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP146246GB01Section1;
-import uk.nhs.ctp.service.report.org.hl7.v3.StrucDocParagraph;
+import uk.nhs.ctp.service.report.org.hl7.v3.StrucDocItem;
+import uk.nhs.ctp.service.report.org.hl7.v3.StrucDocList;
 import uk.nhs.ctp.service.report.org.hl7.v3.StrucDocText;
 
 @Component
@@ -18,13 +19,16 @@ public class ReferralRequestToIntegratedUrgentCareTextSectionTemplateMapper exte
 		StrucDocText text = new StrucDocText();
 		
 		referralRequest.getNote().stream().forEach(note -> {
-			StrucDocParagraph paragraph = new StrucDocParagraph();
-			paragraph.getContent().add(note.getText());
-			text.getContent().add(new JAXBElement<StrucDocParagraph>(
-					new QName("urn:hl7-org:v3", "paragraph"), StrucDocParagraph.class, paragraph));
+			StrucDocList list = new StrucDocList();
+			StrucDocItem item = new StrucDocItem();
+			item.getContent().add(note.getText());
+			list.getItem().add(item);
+
+			text.getContent().add(new JAXBElement<StrucDocList>(
+					new QName("urn:hl7-org:v3", "list"), StrucDocList.class, list));
 		});
 		
-		section.setTitle("Notes");
+		section.setTitle("Other Notes");
 		section.setText(text);
 	}
 
