@@ -51,7 +51,7 @@ export class ReportService {
     }
   }
 
-  validate111Report(oneOneOneReportXml: any) {
+  validate111ReportV2(oneOneOneReportXml: any) {
     let httpOptions = {
       headers: new HttpHeaders(),
       responseType: 'text' as 'json'
@@ -60,11 +60,11 @@ export class ReportService {
       'Content-Type',
       'application/xml'
     );
-    const url = `${environment.UECDI_VALIDATE_API}/validate/111`;
+    const url = `${environment.UECDI_VALIDATE_API}/validate/111v2`;
     return this.http.post<any>(url, oneOneOneReportXml, httpOptions).toPromise();
   }
 
-  validateAmbulanceRequest(ambulanceRequestXml: any) {
+  validate111ReportV3(oneOneOneReportXml: any) {
     let httpOptions = {
       headers: new HttpHeaders(),
       responseType: 'text' as 'json'
@@ -73,7 +73,33 @@ export class ReportService {
       'Content-Type',
       'application/xml'
     );
-    const url = `${environment.UECDI_VALIDATE_API}/validate/ambulance`;
+    const url = `${environment.UECDI_VALIDATE_API}/validate/111v3`;
+    return this.http.post<any>(url, oneOneOneReportXml, httpOptions).toPromise();
+  }
+
+  validateAmbulanceRequestV2(oneOneOneReportXml: any) {
+    let httpOptions = {
+      headers: new HttpHeaders(),
+      responseType: 'text' as 'json'
+    };
+    httpOptions.headers = httpOptions.headers.set(
+      'Content-Type',
+      'application/xml'
+    );
+    const url = `${environment.UECDI_VALIDATE_API}/validate/ambulancev2`;
+    return this.http.post<any>(url, oneOneOneReportXml, httpOptions).toPromise();
+  }
+
+  validateAmbulanceRequestV3(ambulanceRequestXml: any) {
+    let httpOptions = {
+      headers: new HttpHeaders(),
+      responseType: 'text' as 'json'
+    };
+    httpOptions.headers = httpOptions.headers.set(
+      'Content-Type',
+      'application/xml'
+    );
+    const url = `${environment.UECDI_VALIDATE_API}/validate/ambulancev3`;
     return this.http.post<any>(url, ambulanceRequestXml, httpOptions).toPromise();
 
   }

@@ -342,31 +342,35 @@ export class QuestionnaireComponent implements OnInit {
     this.isloadingReport = true;
     const reports = await this.reportService
       .getReport(this.questionnaire.caseId, this.questionnaire.referralRequest.resourceId, this.handoverMessage);
+
+      reports.forEach(async report => {
+        if (report.reportType === 'ONE_ONE_ONE_V2') {
+          this.isloadingReport = true;
+          report.ValidationReport = await this.reportService.validate111ReportV2(report.request);
+          this.isloadingReport = false;
+        }
+  
+        if (report.reportType === 'ONE_ONE_ONE_V3') {
+          this.isloadingReport = true;
+          report.ValidationReport = await this.reportService.validate111ReportV3(report.request);
+          this.isloadingReport = false;
+        }
+  
+        if (report.reportType === 'AMBULANCE_V2') {
+          this.isloadingReport = true;
+          report.ValidationReport = await this.reportService.validateAmbulanceRequestV2(report.request);
+          this.isloadingReport = false;
+        }
+  
+        if (report.reportType === 'AMBULANCE_V3') {
+          this.isloadingReport = true;
+          report.ValidationReport = await this.reportService.validateAmbulanceRequestV3(report.request);
+          this.isloadingReport = false;
+        }
+      });
+
     for (let index = 0; index < reports.length; index++) {
       const report = reports[index];
-      if (report.reportType === 'ONE_ONE_ONE_V2') {
-        this.isloadingReport = true;
-        report.ValidationReport = await this.reportService.validate111Report(report.request);
-        this.isloadingReport = false;
-      }
-
-      if (report.reportType === 'ONE_ONE_ONE_V3') {
-        this.isloadingReport = true;
-        report.ValidationReport = await this.reportService.validate111Report(report.request);
-        this.isloadingReport = false;
-      }
-
-      if (report.reportType === 'AMBULANCE_V2') {
-        this.isloadingReport = true;
-        report.ValidationReport = await this.reportService.validate111Report(report.request);
-        this.isloadingReport = false;
-      }
-
-      if (report.reportType === 'AMBULANCE_V3') {
-        this.isloadingReport = true;
-        report.ValidationReport = await this.reportService.validateAmbulanceRequest(report.request);
-        this.isloadingReport = false;
-      }
 
       if (report.contentType === 'XML') {
         if (report.request) {
