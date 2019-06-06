@@ -780,9 +780,9 @@
 				</div>
 				
 				<div class="flex">
-					<div class="label"><xsl:value-of select="/n1:AmbulanceRequest/n1:pertinentInformation8/COCD_TP146050GB01.PermissionToView/value/@value"/>: </div>
+					<div class="label"><xsl:value-of select="/n1:AmbulanceRequest/n1:pertinentInformation8/n1:COCD_TP146050GB01.PermissionToView/n1:value/@displayName"/>: </div>
 					<div>
-						<xsl:value-of select="/n1:AmbulanceRequest/n1:pertinentInformation8/COCD_TP146050GB01.PermissionToView/value/@code"/>
+						<xsl:value-of select="/n1:AmbulanceRequest/n1:pertinentInformation8/n1:COCD_TP146050GB01.PermissionToView/n1:value/@code"/>
 					</div>
 				</div>
 				
@@ -791,17 +791,36 @@
 	<!-- pertinentInformation9 -->
 	<xsl:template name="pertinentInformation9">
 		<xsl:if test="/n1:AmbulanceRequest/n1:pertinentInformation9">
-				<div class="content">
-					<span><h1>pertinentInformation9</h1></span>
+			<div class="content">
+				<span><h1>pertinentInformation9 - Clinical Discriminator</h1></span>
+			</div>
+			
+			<div class="flex">
+				<div class="label"><xsl:value-of select="/n1:AmbulanceRequest/n1:pertinentInformation9/n1:pertinentClinicalDiscriminator/n1:code/@displayName"/>: </div>
+				<div>
+					<xsl:value-of select="/n1:AmbulanceRequest/n1:pertinentInformation9/n1:pertinentClinicalDiscriminator/n1:code/@code"/>
 				</div>
+			</div>
 		</xsl:if>
 	</xsl:template>
 	<!-- Reason -->
 	<xsl:template name="reason">
 		<xsl:if test="/n1:AmbulanceRequest/n1:reason">
-				<div class="content">
-					<span><h1>Reason</h1></span>
+			<div class="content">
+				<span><h1>Reason</h1></span>
+			</div>
+			<div class="flex">
+				<div class="label">code: </div>
+				<div>
+					<xsl:value-of select="/n1:AmbulanceRequest/n1:reason/n1:justifyingTriageOutcome/n1:code/@code"/>
 				</div>
+			</div>
+			<div class="flex">
+				<div class="label"><xsl:value-of select="/n1:AmbulanceRequest/n1:reason/n1:justifyingTriageOutcome/n1:value/@displayName"/>: </div>
+				<div>
+					<xsl:value-of select="/n1:AmbulanceRequest/n1:reason/n1:justifyingTriageOutcome/n1:value/@code"/>
+				</div>
+			</div>
 		</xsl:if>
 	</xsl:template>
 	<!-- Get a Name  -->
