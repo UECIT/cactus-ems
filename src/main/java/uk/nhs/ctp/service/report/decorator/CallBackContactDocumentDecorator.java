@@ -30,7 +30,7 @@ public class CallBackContactDocumentDecorator implements AmbulanceDecorator {
 						ResourceProviderUtils.getResource(request.getBundle(), CareConnectPatient.class), request);
 		
 		return new JAXBElement<POCDMT200001GB02Participant>(
-				new QName("callBackContact"), POCDMT200001GB02Participant.class, callBackContact);
+				new QName("urn:hl7-org:v3", "callBackContact"), POCDMT200001GB02Participant.class, callBackContact);
 	}
 
 }

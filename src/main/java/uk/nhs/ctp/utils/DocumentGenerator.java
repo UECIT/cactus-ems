@@ -2,6 +2,7 @@ package uk.nhs.ctp.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.xml.transform.StringResult;
 
@@ -38,8 +40,8 @@ public class DocumentGenerator {
 	@Autowired
 	ResourceLoader resourceLoader;
 	
-	@Value("classpath:cda.xsl")
-	Resource templateResource;
+	@Value("${clear.folder.timer}")
+	Integer clearFolderTimer;
 	
 	@PostConstruct
 	public void initialise() throws JAXBException, IOException, TransformerConfigurationException {
@@ -47,10 +49,6 @@ public class DocumentGenerator {
 		
 		marshaller = context.createMarshaller();
 		marshaller.setProperty("com.sun.xml.bind.xmlDeclaration", Boolean.FALSE);
-		
-		TransformerFactory tf = TransformerFactory.newInstance();
-        StreamSource streamSource = new StreamSource(templateResource.getInputStream());
-        transformer = tf.newTransformer(streamSource);
 	}
 	
 	public String generateXml(JAXBElement<?> document) throws JAXBException {
@@ -60,12 +58,29 @@ public class DocumentGenerator {
 		return result.getWriter().toString();
 	}
 	
-	public String generateHtml(JAXBElement<?> document) throws JAXBException, TransformerException {
+	@Async
+	public void clearFolder() {
+		File file = new File("src/main/resources/templates/");
+		Arrays.asList(file.listFiles()).stream().forEach(item -> {
+			if (item.lastModified() < System.currentTimeMillis() - clearFolderTimer) {
+				item.delete();
+			}
+		});
+	}
+	
+	public String generateHtml(JAXBElement<?> document, Resource templateResource) throws JAXBException, TransformerException, IOException {
+		
+		TransformerFactory tf = TransformerFactory.newInstance();
+        StreamSource streamSource = new StreamSource(templateResource.getInputStream());
+        transformer = tf.newTransformer(streamSource);
+        
 		String documentId = UUID.randomUUID().toString();		
 		StreamResult result = new StreamResult(new File("src/main/resources/templates/" + documentId + ".html"));
 		JAXBSource source = new JAXBSource(context, document);
 		
 		transformer.transform(source, result);
+		
+		clearFolder();
 
 		return documentId;
 	}

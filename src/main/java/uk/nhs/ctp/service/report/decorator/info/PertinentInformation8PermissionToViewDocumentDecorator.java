@@ -47,7 +47,7 @@ public class PertinentInformation8PermissionToViewDocumentDecorator implements A
 		
 		permissionToView.setCOCDTP146050GB01PermissionToView(createPermissionToViewContent(fhirConsent));
 		
-		document.setPertinentInformation8(new JAXBElement<REPCMT200001GB02PertinentInformation9>(new QName("pertinentInformation8"), REPCMT200001GB02PertinentInformation9.class, permissionToView));
+		document.setPertinentInformation8(new JAXBElement<REPCMT200001GB02PertinentInformation9>(new QName("urn:hl7-org:v3", "pertinentInformation8"), REPCMT200001GB02PertinentInformation9.class, permissionToView));
 	}
 
 	private COCDTP146050GB01PermissionToView createPermissionToViewContent(Consent fhirConsent) {

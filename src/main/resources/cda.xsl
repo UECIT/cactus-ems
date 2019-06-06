@@ -279,7 +279,7 @@
 		</div>
 	</xsl:template>
 	<xsl:template match="n1:entry">
-		<xsl:variable name="v_codedentry" select="child::node()[child::n1:templateId[contains(@extension,'COCD_TP146092GB01#ClinicalDiscriminator')]]"/>
+		<xsl:variable name="v_codedentry" select="child::node()[child::n1:templateId[contains(@extension,'COCD_TP146')]]"/>
 		<div class="content">
 			<div class="flex">
 				<div class="label">

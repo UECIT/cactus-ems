@@ -1,5 +1,6 @@
 package uk.nhs.ctp.service.report;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -10,6 +11,8 @@ import javax.xml.transform.TransformerException;
 
 import org.hl7.fhir.dstu3.model.codesystems.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import com.mifmif.common.regex.Generex;
@@ -55,6 +58,9 @@ public class AmbulanceReportService implements Reportable {
 	@Autowired
 	private SimpleDateFormat reportDateFormat;
 	
+	@Value("classpath:cdaAmbulance.xsl")
+	Resource templateResource;
+	
 	private ObjectFactory objectFactory = new ObjectFactory();
 	
 	@Override
@@ -89,13 +95,15 @@ public class AmbulanceReportService implements Reportable {
 		JAXBElement<REPCMT200001GB02AmbulanceRequest> rootElement = 
 				objectFactory.createAmbulanceRequest(ambulanceRequest);
 		
+		String htmlDocumentId = null;
+		
 		try {
-			documentGenerator.generateHtml(rootElement);
-		} catch (TransformerException e) {
+			htmlDocumentId = documentGenerator.generateHtml(rootElement, templateResource);
+		} catch (TransformerException | IOException e) {
 		} 
 		
 		return new ReportsDTO(documentGenerator.generateXml(
-				rootElement), ReportType.AMBULANCE_V3, ContentType.XML, "");
+				rootElement), ReportType.AMBULANCE_V3, ContentType.XML, htmlDocumentId);
 	}
 
 	private void setupPertinentInformation(REPCMT200001GB02AmbulanceRequest ambulanceRequestReport) {

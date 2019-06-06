@@ -28,6 +28,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
@@ -38,6 +39,7 @@ import com.mifmif.common.regex.Generex;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 
+@EnableAsync
 @ServletComponentScan
 @SpringBootApplication
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)

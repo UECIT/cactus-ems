@@ -10,6 +10,8 @@ import javax.xml.transform.TransformerException;
 
 import org.hl7.fhir.dstu3.model.codesystems.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.dto.ReportType;
@@ -26,6 +28,9 @@ public abstract class OneOneOneReportService implements Reportable {
 	
 	@Autowired
 	private DocumentGenerator documentGenerator;
+	
+	@Value("classpath:cda.xsl")
+	Resource templateResource;
 	
 	private ObjectFactory objectFactory = new ObjectFactory();
 	
@@ -45,8 +50,8 @@ public abstract class OneOneOneReportService implements Reportable {
 		String htmlDocumentId = null;
 		
         try {
-        	htmlDocumentId = documentGenerator.generateHtml(rootElement);
-		} catch (TransformerException e) {
+        	htmlDocumentId = documentGenerator.generateHtml(rootElement, templateResource);
+		} catch (TransformerException | IOException e) {
 		} 
         
 		return new ReportsDTO(
