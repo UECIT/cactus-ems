@@ -95,16 +95,21 @@ public class TriageService {
 		AuditRecord auditRecord = auditService.createNewAudit(requestDetails.getCaseId());
 
 		CdssResult cdssResult = updateCaseUsingCdss(requestDetails);
+		
+		CdssResponseDTO cdssResponse = buildResponseDtoFromResult(cdssResult, requestDetails.getCaseId(),
+				requestDetails.getCdssSupplierId());
+		
+		auditService.updateAuditEntry(auditRecord, requestDetails, cdssResponse, cdssResult.getContained());
 
 		if (cdssResult.isInProgress()) {
 			requestDetails.setQuestionResponse(null);
 			cdssResult = updateCaseUsingCdss(requestDetails);
+			
+			// Add Audit Record
+			cdssResponse = buildResponseDtoFromResult(cdssResult, requestDetails.getCaseId(),
+					requestDetails.getCdssSupplierId());
+			auditService.updateAuditEntry(auditRecord, requestDetails, cdssResponse, cdssResult.getContained());
 		}
-
-		// Add Audit Record
-		CdssResponseDTO cdssResponse = buildResponseDtoFromResult(cdssResult, requestDetails.getCaseId(),
-				requestDetails.getCdssSupplierId());
-		auditService.updateAuditEntry(auditRecord, requestDetails, cdssResponse, cdssResult.getContained());
 
 		return cdssResponse;
 	}

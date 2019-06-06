@@ -67,6 +67,7 @@ public abstract class AbstractResponseResolver<RESOURCE extends Resource> implem
 			references.add(((ReferralRequest)resource).getRelevantHistoryFirstRep().getReference());
 			return references;
 		});
+
 	}
 	
 	public CdssResult resolve(Resource resource, CdssSupplier cdssSupplier) {
@@ -221,8 +222,10 @@ public abstract class AbstractResponseResolver<RESOURCE extends Resource> implem
 	
 	public String getQuestionnaireReference(GuidanceResponse guidanceResponse) {
 		if (guidanceResponse.hasDataRequirement()) {
+			// TODO Type could be in contained or a reference
 			try {
-				return guidanceResponse.getDataRequirementFirstRep().getCodeFilterFirstRep().getValueSetStringType().getValueAsString();
+				return guidanceResponse.getDataRequirementFirstRep()
+						.getCodeFilterFirstRep().getValueSetStringType().getValueAsString();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
