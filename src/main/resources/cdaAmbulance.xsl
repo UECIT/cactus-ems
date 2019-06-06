@@ -164,11 +164,34 @@
 	</xsl:template>
 	<!-- CallBackContact -->
 	<xsl:template name="callBackContact">
-		<xsl:text>test</xsl:text>
 		<xsl:if test="/n1:AmbulanceRequest/n1:callBackContact">
-				<div class="content">
-					<span><h1>CallBackContact</h1></span>
+			<div class="content">
+				<span><h1>CallBackContact</h1></span>
+			</div>
+			<div id="patientBanner" class="content">
+			<xsl:if test="/n1:AmbulanceRequest/n1:callBackContact/n1:COCD_TP145212GB02.Workgroup/n1:assignedPerson/n1:name">
+				<div class="flex">
+					<!-- assignedPerson -->
+					<div class="label">assignedPerson: </div>
+					<div>
+						<xsl:call-template name="cuiName">
+							<xsl:with-param name="name" select="/n1:AmbulanceRequest/n1:callBackContact/n1:COCD_TP145212GB02.Workgroup/n1:assignedPerson/n1:name"/>
+						</xsl:call-template>
+					</div>
 				</div>
+			</xsl:if>
+			<xsl:if test="/n1:AmbulanceRequest/n1:callBackContact/n1:COCD_TP145212GB02.Workgroup/n1:representedOrganization/n1:name">
+				<div class="flex">
+					<!-- representedOrganization -->
+					<div class="label">representedOrganization: </div>
+					<div>
+						<xsl:call-template name="cuiName">
+							<xsl:with-param name="name" select="/n1:AmbulanceRequest/n1:callBackContact/n1:COCD_TP145212GB02.Workgroup/n1:representedOrganization/n1:name"/>
+						</xsl:call-template>
+					</div>
+				</div>
+			</xsl:if>
+		</div>
 		</xsl:if>
 	</xsl:template>
 	<!-- InformationRecipient -->
@@ -796,9 +819,23 @@
 			</div>
 			
 			<div class="flex">
-				<div class="label"><xsl:value-of select="/n1:AmbulanceRequest/n1:pertinentInformation9/n1:pertinentClinicalDiscriminator/n1:code/@displayName"/>: </div>
+				<div class="label">code: </div>
 				<div>
 					<xsl:value-of select="/n1:AmbulanceRequest/n1:pertinentInformation9/n1:pertinentClinicalDiscriminator/n1:code/@code"/>
+				</div>
+			</div>
+			
+			<div class="flex">
+				<div class="label">codeSystem: </div>
+				<div>
+					<xsl:value-of select="/n1:AmbulanceRequest/n1:pertinentInformation9/n1:pertinentClinicalDiscriminator/n1:code/@codeSystem"/>
+				</div>
+			</div>
+			
+			<div class="flex">
+				<div class="label">displayName: </div>
+				<div>
+					<xsl:value-of select="/n1:AmbulanceRequest/n1:pertinentInformation9/n1:pertinentClinicalDiscriminator/n1:code/@displayName"/>
 				</div>
 			</div>
 		</xsl:if>
@@ -816,9 +853,34 @@
 				</div>
 			</div>
 			<div class="flex">
-				<div class="label"><xsl:value-of select="/n1:AmbulanceRequest/n1:reason/n1:justifyingTriageOutcome/n1:value/@displayName"/>: </div>
+				<div class="label">codeSystem: </div>
+				<div>
+					<xsl:value-of select="/n1:AmbulanceRequest/n1:reason/n1:justifyingTriageOutcome/n1:code/@codeSystem"/>
+				</div>
+			</div>
+			<div class="flex">
+				<div class="label">displayName: </div>
+				<div>
+					<xsl:value-of select="/n1:AmbulanceRequest/n1:reason/n1:justifyingTriageOutcome/n1:code/@displayName"/>
+				</div>
+			</div>
+			
+			<div class="flex">
+				<div class="label">code: </div>
 				<div>
 					<xsl:value-of select="/n1:AmbulanceRequest/n1:reason/n1:justifyingTriageOutcome/n1:value/@code"/>
+				</div>
+			</div>
+			<div class="flex">
+				<div class="label">codeSystem: </div>
+				<div>
+					<xsl:value-of select="/n1:AmbulanceRequest/n1:reason/n1:justifyingTriageOutcome/n1:value/@codeSystem"/>
+				</div>
+			</div>
+			<div class="flex">
+				<div class="label">displayName: </div>
+				<div>
+					<xsl:value-of select="/n1:AmbulanceRequest/n1:reason/n1:justifyingTriageOutcome/n1:value/@displayName"/>
 				</div>
 			</div>
 		</xsl:if>
