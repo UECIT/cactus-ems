@@ -12,6 +12,7 @@ import org.hl7.fhir.dstu3.model.CareConnectEpisodeOfCare;
 import org.hl7.fhir.dstu3.model.CareConnectHealthcareService;
 import org.hl7.fhir.dstu3.model.CareConnectLocation;
 import org.hl7.fhir.dstu3.model.CareConnectMedication;
+import org.hl7.fhir.dstu3.model.CareConnectMedicationRequest;
 import org.hl7.fhir.dstu3.model.CareConnectObservation;
 import org.hl7.fhir.dstu3.model.CareConnectOrganization;
 import org.hl7.fhir.dstu3.model.CareConnectPatient;
@@ -88,6 +89,7 @@ public class Application extends SpringBootServletInitializer {
 			CareConnectHealthcareService.class,
 			CareConnectLocation.class,
 			CareConnectMedication.class,
+			CareConnectMedicationRequest.class,
 			CareConnectObservation.class,
 			CareConnectOrganization.class,
 			CareConnectPatient.class, 
@@ -103,7 +105,76 @@ public class Application extends SpringBootServletInitializer {
 	
 	@Bean
 	public FhirContext fhirContext() {
-		return FhirContext.forDstu3();
+		FhirContext fhirContext = FhirContext.forDstu3();
+		fhirContext.setDefaultTypeForProfile(
+				"https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-CarePlan-1", 
+				CareConnectCarePlan.class);
+		
+		fhirContext.setDefaultTypeForProfile(
+				"https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-CareTeam-1", 
+				CareConnectCareTeam.class);
+		
+		fhirContext.setDefaultTypeForProfile(
+				"https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-Condition-1", 
+				CareConnectCondition.class);
+		
+		fhirContext.setDefaultTypeForProfile(
+				"https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-Encounter-1", 
+				CareConnectEncounter.class);
+		
+		fhirContext.setDefaultTypeForProfile(
+				"https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-EpisodeOfCare-1", 
+				CareConnectEpisodeOfCare.class);
+		
+		fhirContext.setDefaultTypeForProfile(
+				"https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-HealthcareService-1", 
+				CareConnectHealthcareService.class);
+		
+		fhirContext.setDefaultTypeForProfile(
+				"https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-Location-1", 
+				CareConnectLocation.class);
+		
+		fhirContext.setDefaultTypeForProfile(
+				"https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-Medication-1", 
+				CareConnectMedication.class);
+		
+		fhirContext.setDefaultTypeForProfile(
+				"https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-MedicationRequest-1", 
+				CareConnectMedicationRequest.class);
+		
+		fhirContext.setDefaultTypeForProfile(
+				"https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-Observation-1", 
+				CareConnectObservation.class);
+		
+		fhirContext.setDefaultTypeForProfile(
+				"https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-Organization-1", 
+				CareConnectOrganization.class);
+		
+		fhirContext.setDefaultTypeForProfile(
+				"https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-Patient-1", 
+				CareConnectPatient.class);
+		
+		fhirContext.setDefaultTypeForProfile(
+				"https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-Practitioner-1", 
+				CareConnectPractitioner.class);
+		
+		fhirContext.setDefaultTypeForProfile(
+				"https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-Procedure-1", 
+				CareConnectProcedure.class);
+		
+		fhirContext.setDefaultTypeForProfile(
+				"https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-ProcedureRequest-1", 
+				CareConnectProcedureRequest.class);
+		
+		fhirContext.setDefaultTypeForProfile(
+				"https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-RelatedPerson-1", 
+				CareConnectRelatedPerson.class);
+		
+		fhirContext.setDefaultTypeForProfile(
+				"https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-Specimen-1", 
+				CareConnectSpecimen.class);
+		
+		return fhirContext;
 	}
 	
 	@Bean
