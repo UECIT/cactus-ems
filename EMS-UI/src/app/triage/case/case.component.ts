@@ -14,6 +14,7 @@ import { SwitchSupplierDialogComponent } from 'src/app/switch-supplier-dialog/sw
 import { CdssSupplier } from 'src/app/model/cdssSupplier';
 import { Router } from '@angular/router';
 import { SessionStorage } from 'h5webstorage';
+import { ToastrService } from 'ngx-toastr';
 
 export interface DialogData {
   cdssSupplier: CdssSupplier;
@@ -42,7 +43,7 @@ export class CaseComponent implements OnInit {
   cdssSupplier: CdssSupplier;
   serviceDefinition: string;
 
-  constructor(public dialog: MatDialog, public router: Router, private sessionStorage: SessionStorage) {}
+  constructor(public dialog: MatDialog, public router: Router, private sessionStorage: SessionStorage, private toastr: ToastrService) {}
 
   openDialog(): void {
     const dialogRef = this.dialog.open(SwitchSupplierDialogComponent, {

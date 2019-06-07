@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { Token } from '../model/token';
 import { SessionStorage } from 'h5webstorage';
+import { ToastrService } from 'ngx-toastr';
 
 const httpOptions = {
   headers: new HttpHeaders()
@@ -14,7 +15,7 @@ const httpOptions = {
 export class ServiceDefinitionService {
   tokenInfo: Token;
 
-  constructor(private http: HttpClient, private sessionStorage: SessionStorage) {}
+  constructor(private http: HttpClient, private sessionStorage: SessionStorage, private toastr: ToastrService) {}
 
   async getCdssSupplierUrl(cdssId: Number) {
     if (this.sessionStorage['auth_token'] != null) {
@@ -23,7 +24,12 @@ export class ServiceDefinitionService {
         this.sessionStorage['auth_token']
       );
       const url = `${environment.EMS_API}/cdss/${cdssId}`;
-      const CdssUrl = await this.http.get<any>(url, httpOptions).toPromise();
+      const CdssUrl = await this.http.get<any>(url, httpOptions).toPromise()
+      .catch(err => {
+        this.toastr.error(
+          err.error.target.__zone_symbol__xhrURL + ' - ' +
+          err.message);
+      });
       return CdssUrl.baseUrl;
     }
   }

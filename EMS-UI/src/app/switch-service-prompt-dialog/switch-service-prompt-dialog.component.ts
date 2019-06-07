@@ -2,6 +2,7 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 import { DialogData } from '../triage/triage.component';
 import { ServiceDefinitionService } from '../service/service-definition.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-switch-service-prompt-dialog',
@@ -15,23 +16,34 @@ export class SwitchServicePromptDialogComponent implements OnInit {
   constructor(
     public dialogRef: MatDialogRef<SwitchServicePromptDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: DialogData,
-    private serviceDefintionService: ServiceDefinitionService
+    private serviceDefintionService: ServiceDefinitionService,
+    private toastr: ToastrService
   ) {}
 
   async ngOnInit() {
     const CdssUrl = await this.serviceDefintionService.getCdssSupplierUrl(
       this.data.cdssSupplierId
-    );
+    ).catch(err => {
+      this.toastr.error(
+        err.error.target.__zone_symbol__xhrURL + ' - ' +
+        err.message);
+    });
     this.oldServiceDefinition = await this.serviceDefintionService
       .getServiceDefinition(
         CdssUrl + 'ServiceDefinition/' + this.data.oldServiceDefinition
-      )
-      .toPromise();
+      ).toPromise().catch(err => {
+        this.toastr.error(
+          err.error.target.__zone_symbol__xhrURL + ' - ' +
+          err.message);
+      });
     this.newServiceDefinition = await this.serviceDefintionService
       .getServiceDefinition(
         CdssUrl + 'ServiceDefinition/' + this.data.newServiceDefinition
-      )
-      .toPromise();
+      ).toPromise().catch(err => {
+        this.toastr.error(
+          err.error.target.__zone_symbol__xhrURL + ' - ' +
+          err.message);
+      });
   }
 
   onNoClick(): void {

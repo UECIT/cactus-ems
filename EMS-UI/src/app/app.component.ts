@@ -3,6 +3,7 @@ import { environment } from '../environments/environment';
 import { Settings, Person } from './model/settings';
 import { Code } from './model/case';
 import { SessionStorage } from 'h5webstorage';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-root',
@@ -15,7 +16,7 @@ export class AppComponent  implements OnInit {
 
   settings: Settings = new Settings();
 
-  constructor(private sessionStorage: SessionStorage) { }
+  constructor(private sessionStorage: SessionStorage, private toastr: ToastrService) { }
 
   ngOnInit() {
     this.updateSettings();

@@ -57,6 +57,7 @@ import { ReportService } from './service/report.service';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { HighlightModule } from 'ngx-highlightjs';
 import xml from 'highlight.js/lib/languages/xml';
+import { ToastrModule } from 'ngx-toastr';
 
 export function hljsLanguages() {
   return [
@@ -110,6 +111,7 @@ export function hljsLanguages() {
     ReactiveFormsModule,
     HttpClientModule,
     BrowserAnimationsModule,
+    ToastrModule.forRoot(),
     MaterialModule,
     NgxJsonViewerModule,
     WebStorageModule.forRoot(),

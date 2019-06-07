@@ -4,6 +4,7 @@ import {
   Input
 } from '@angular/core';
 import { AuditService } from '../service/audit.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-audit-display',
@@ -15,7 +16,7 @@ export class AuditDisplayComponent implements OnInit {
   auditString: string;
   _caseId: number;
 
-  constructor(private auditService: AuditService) {}
+  constructor(private auditService: AuditService, private toastr: ToastrService) {}
 
   @Input()
   set caseId(caseId: number) {
@@ -26,7 +27,12 @@ export class AuditDisplayComponent implements OnInit {
   }
 
   async updateAudit(caseId: number) {
-    this.audit = await this.auditService.getAudit(caseId);
+    this.audit = await this.auditService.getAudit(caseId)
+    .catch(err => {
+      this.toastr.error(
+        err.error.target.__zone_symbol__xhrURL + ' - ' +
+        err.message);
+    });
     this.auditString = JSON.stringify(this.audit);
   }
 

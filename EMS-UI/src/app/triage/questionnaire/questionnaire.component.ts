@@ -11,6 +11,7 @@ import { MatDialog } from '@angular/material';
 import { ReportService } from 'src/app/service/report.service';
 import beautify from 'xml-beautifier';
 import { environment } from 'src/environments/environment';
+import { ToastrService } from 'ngx-toastr';
 
 export interface DialogData {
   handoverMessage: any;
@@ -36,7 +37,7 @@ export class QuestionnaireComponent implements OnInit {
   reports: any;
   isloadingReport: boolean;
 
-  constructor(public dialog: MatDialog, private reportService: ReportService) { }
+  constructor(public dialog: MatDialog, private reportService: ReportService, private toastr: ToastrService) { }
 
   openDialog(): void {
     const dialogRef = this.dialog.open(HandoverMessageDialogComponent, {
@@ -108,8 +109,16 @@ export class QuestionnaireComponent implements OnInit {
 
     // check for result and build the handoverMessage and corresponding reports.
     if (this.questionnaire.referralRequest != null) {
-      await this.getHandoverMessage();
-      await this.get111Report();
+      await this.getHandoverMessage().catch(err => {
+        this.toastr.error(
+          err.error.target.__zone_symbol__xhrURL + ' - ' +
+          err.message);
+      });
+      await this.get111Report().catch(err => {
+        this.toastr.error(
+          err.error.target.__zone_symbol__xhrURL + ' - ' +
+          err.message);
+      });
     }
   }
 
@@ -331,7 +340,11 @@ export class QuestionnaireComponent implements OnInit {
 
   async getHandoverMessage() {
     this.handoverMessage = await this.reportService.getHandover(this.questionnaire.caseId, this.questionnaire.referralRequest.resourceId);
-    await this.reportService.postHandoverTemplate(this.handoverMessage);
+    await this.reportService.postHandoverTemplate(this.handoverMessage).catch(err => {
+      this.toastr.error(
+        err.error.target.__zone_symbol__xhrURL + ' - ' +
+        err.message);
+    });
   }
 
   getPostCallInformationTemplateURL() {
@@ -346,25 +359,49 @@ export class QuestionnaireComponent implements OnInit {
       reports.forEach(async report => {
         if (report.reportType === 'ONE_ONE_ONE_V2') {
           this.isloadingReport = true;
-          report.ValidationReport = await this.reportService.validate111ReportV2(report.request);
+          report.ValidationReport = await this.reportService.validate111ReportV2(report.request)
+          .catch(err => {
+            this.toastr.error(
+              err.error.target.__zone_symbol__xhrURL + ' - ' +
+              err.message);
+            this.isloadingReport = false;
+          });
           this.isloadingReport = false;
         }
   
         if (report.reportType === 'ONE_ONE_ONE_V3') {
           this.isloadingReport = true;
-          report.ValidationReport = await this.reportService.validate111ReportV3(report.request);
+          report.ValidationReport = await this.reportService.validate111ReportV3(report.request)
+          .catch(err => {
+            this.toastr.error(
+              err.error.target.__zone_symbol__xhrURL + ' - ' +
+              err.message);
+            this.isloadingReport = false;
+          });
           this.isloadingReport = false;
         }
   
         if (report.reportType === 'AMBULANCE_V2') {
           this.isloadingReport = true;
-          report.ValidationReport = await this.reportService.validateAmbulanceRequestV2(report.request);
+          report.ValidationReport = await this.reportService.validateAmbulanceRequestV2(report.request)
+          .catch(err => {
+            this.toastr.error(
+              err.error.target.__zone_symbol__xhrURL + ' - ' +
+              err.message);
+            this.isloadingReport = false;
+          });
           this.isloadingReport = false;
         }
   
         if (report.reportType === 'AMBULANCE_V3') {
           this.isloadingReport = true;
-          report.ValidationReport = await this.reportService.validateAmbulanceRequestV3(report.request);
+          report.ValidationReport = await this.reportService.validateAmbulanceRequestV3(report.request)
+          .catch(err => {
+            this.toastr.error(
+              err.error.target.__zone_symbol__xhrURL + ' - ' +
+              err.message);
+            this.isloadingReport = false;
+          });
           this.isloadingReport = false;
         }
       });

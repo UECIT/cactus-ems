@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { LoginService } from 'src/app/service/login.service';
 import { CdssService } from 'src/app/service/cdss.service';
 import { CdssSupplier } from 'src/app/model/cdssSupplier';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-delete-cdss-supplier',
@@ -25,7 +26,8 @@ export class DeleteCdssSupplierComponent implements OnInit, OnDestroy {
     private cdssService: CdssService,
     private route: ActivatedRoute,
     private router: Router,
-    private loginService: LoginService
+    private loginService: LoginService,
+    private toastr: ToastrService
   ) {}
 
   ngOnInit() {
@@ -40,7 +42,7 @@ export class DeleteCdssSupplierComponent implements OnInit, OnDestroy {
   }
 
   async getSupplier(supplierId: string) {
-    this.supplier = this.supplier = await this.cdssService.getCdssSupplier(
+    this.supplier = await this.cdssService.getCdssSupplier(
       supplierId
     );
     this.loaded = true;

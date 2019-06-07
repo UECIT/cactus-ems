@@ -18,6 +18,7 @@ import 'rxjs/add/operator/finally';
 import { MatDialog } from '@angular/material';
 import { SwitchServicePromptDialogComponent } from '../switch-service-prompt-dialog/switch-service-prompt-dialog.component';
 import { SessionStorage } from 'h5webstorage';
+import { ToastrService } from 'ngx-toastr';
 
 export interface DialogData {
   cdssSupplierId: number;
@@ -54,7 +55,8 @@ export class TriageComponent implements OnInit {
     private store: Store<AppState>,
     private caseService: CaseService,
     public dialog: MatDialog,
-    private sessionStorage: SessionStorage
+    private sessionStorage: SessionStorage,
+    private toastr: ToastrService
   ) {
     this.state = this.store.select('patient');
     this.state.subscribe(res => {
@@ -64,7 +66,11 @@ export class TriageComponent implements OnInit {
 
   async ngOnInit() {
     if (this.patientId) {
-      await this.getQuestionnaire();
+      await this.getQuestionnaire().catch(err => {
+        this.toastr.error(
+          err.error.target.__zone_symbol__xhrURL + ' - ' +
+          err.message);
+      });
     } else {
       this.router.navigate(['/main']);
     }

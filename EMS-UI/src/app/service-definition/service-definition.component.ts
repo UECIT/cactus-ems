@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { CdssSupplier } from '../model/cdssSupplier';
 import { ServiceDefinitionService } from '../service/service-definition.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-service-definition',
@@ -24,7 +25,7 @@ export class ServiceDefinitionComponent implements OnInit, OnChanges {
   tempSelectedServiceDefinition: any;
   tempSelectedQueryType: any;
 
-  constructor(private serviceDefinitionService: ServiceDefinitionService) {}
+  constructor(private serviceDefinitionService: ServiceDefinitionService, private toastr: ToastrService) {}
 
   ngOnInit() {}
 
@@ -35,7 +36,11 @@ export class ServiceDefinitionComponent implements OnInit, OnChanges {
       if (changes.selectedSupplier.currentValue !== undefined) {
         this.CdssUrl = await this.serviceDefinitionService.getCdssSupplierUrl(
           changes.selectedSupplier.currentValue.id
-        );
+        ).catch(err => {
+          this.toastr.error(
+            err.error.target.__zone_symbol__xhrURL + ' - ' +
+            err.message);
+        });
       }
     }
 

@@ -5,6 +5,7 @@ import { LoginService } from 'src/app/service/login.service';
 import { User } from 'src/app/model/user';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { ServiceDefinition } from 'src/app/model/cdssSupplier';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-update-cdss-supplier',
@@ -28,7 +29,8 @@ export class UpdateCdssSupplierComponent implements OnInit {
     private cdssService: CdssService,
     private route: ActivatedRoute,
     private router: Router,
-    private loginService: LoginService
+    private loginService: LoginService,
+    private toastr: ToastrService
   ) {}
 
   ngOnInit() {
@@ -63,7 +65,12 @@ export class UpdateCdssSupplierComponent implements OnInit {
   }
 
   async getSupplier(supplierId: string) {
-    this.supplier = await this.cdssService.getCdssSupplier(supplierId);
+    this.supplier = await this.cdssService.getCdssSupplier(supplierId)
+    .catch(err => {
+      this.toastr.error(
+        err.error.target.__zone_symbol__xhrURL + ' - ' +
+        err.message);
+    });
     this.setFormData();
     this.loaded = true;
   }
