@@ -229,6 +229,13 @@ public abstract class AbstractResponseResolver<RESOURCE extends Resource> implem
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			
+			try {
+				return guidanceResponse.getDataRequirementFirstRep()
+						.getCodeFilterFirstRep().getValueSetReference().getReference();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 
 		} else if (guidanceResponse.getStatus().equals(GuidanceResponseStatus.DATAREQUIRED)) {
 			throw new EMSException(HttpStatus.INTERNAL_SERVER_ERROR, 

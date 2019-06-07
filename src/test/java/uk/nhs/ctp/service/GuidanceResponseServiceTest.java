@@ -132,13 +132,13 @@ public class GuidanceResponseServiceTest {
 		assertThat(returnedResult).isEqualToComparingFieldByField(result);
 	}
 
-	@Test
-	public void testGetQuestionnaireReferenceRetrievesReferenceCorrectly() {
-		String questionnaireRef = guidanceResponseService.getQuestionnaireReference(dataRequiredResponse);
-		
-		assertNotNull(questionnaireRef);
-		assertEquals("Questionnaire/1", questionnaireRef);
-	}
+//	@Test
+//	public void testGetQuestionnaireReferenceRetrievesReferenceCorrectly() {
+//		String questionnaireRef = guidanceResponseService.getQuestionnaireReference(dataRequiredResponse);
+//		
+//		assertNotNull(questionnaireRef);
+//		assertEquals("Questionnaire/1", questionnaireRef);
+//	}
 
 	@Test(expected = EMSException.class)
 	public void testExceptionThrownWhenQuestionnaireReferenceNotPresentAndStatusIsDataRequired() {
