@@ -55,8 +55,8 @@ export class QuestionnaireService {
       if (back) {
         url = `${environment.EMS_API}/case/back/`;
         // remove lastItem from memory
-        triageItems = triageItems.filter(function(value, index, arr){
-          return value != triage;
+        triageItems = triageItems.filter(function(value, index, arr) {
+          return value !== triage;
          });
       } else {
         url = `${environment.EMS_API}/case/`;

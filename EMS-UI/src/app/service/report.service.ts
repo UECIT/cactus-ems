@@ -52,7 +52,7 @@ export class ReportService {
   }
 
   validate111ReportV2(oneOneOneReportXml: any) {
-    let httpOptions = {
+    const httpOptions = {
       headers: new HttpHeaders(),
       responseType: 'text' as 'json'
     };
@@ -65,7 +65,7 @@ export class ReportService {
   }
 
   validate111ReportV3(oneOneOneReportXml: any) {
-    let httpOptions = {
+    const httpOptions = {
       headers: new HttpHeaders(),
       responseType: 'text' as 'json'
     };
@@ -78,7 +78,7 @@ export class ReportService {
   }
 
   validateAmbulanceRequestV2(oneOneOneReportXml: any) {
-    let httpOptions = {
+    const httpOptions = {
       headers: new HttpHeaders(),
       responseType: 'text' as 'json'
     };
@@ -91,7 +91,7 @@ export class ReportService {
   }
 
   validateAmbulanceRequestV3(ambulanceRequestXml: any) {
-    let httpOptions = {
+    const httpOptions = {
       headers: new HttpHeaders(),
       responseType: 'text' as 'json'
     };

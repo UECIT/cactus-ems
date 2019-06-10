@@ -368,7 +368,7 @@ export class QuestionnaireComponent implements OnInit {
           });
           this.isloadingReport = false;
         }
-  
+
         if (report.reportType === 'ONE_ONE_ONE_V3') {
           this.isloadingReport = true;
           report.ValidationReport = await this.reportService.validate111ReportV3(report.request)
@@ -380,7 +380,7 @@ export class QuestionnaireComponent implements OnInit {
           });
           this.isloadingReport = false;
         }
-  
+
         if (report.reportType === 'AMBULANCE_V2') {
           this.isloadingReport = true;
           report.ValidationReport = await this.reportService.validateAmbulanceRequestV2(report.request)
@@ -392,7 +392,7 @@ export class QuestionnaireComponent implements OnInit {
           });
           this.isloadingReport = false;
         }
-  
+
         if (report.reportType === 'AMBULANCE_V3') {
           this.isloadingReport = true;
           report.ValidationReport = await this.reportService.validateAmbulanceRequestV3(report.request)

@@ -1,7 +1,6 @@
 package uk.nhs.ctp.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.hl7.fhir.dstu3.model.BooleanType;

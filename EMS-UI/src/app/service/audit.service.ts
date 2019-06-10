@@ -27,7 +27,7 @@ export class AuditService {
   }
 
   searchAudits(fromDate: any, toDate: any, pageNumber: any, pageSize: any, includeClosed: boolean, includeIncomplete: boolean) {
-    let searchParams = {
+    const searchParams = {
       from: '2019-03-02T00:00:00.474Z',
       includeClosed: true,
       includeIncomplete: true,
@@ -49,7 +49,7 @@ export class AuditService {
      searchParams.from = fromDate;
      searchParams.to = toDate;
      searchParams.pageNumber = pageNumber;
-     if(pageSize > 10) {
+     if (pageSize > 10) {
       searchParams.pageSize = pageSize;
      } else {
       searchParams.pageSize = 10;

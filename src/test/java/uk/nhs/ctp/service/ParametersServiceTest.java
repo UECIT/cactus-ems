@@ -441,7 +441,6 @@ public class ParametersServiceTest {
 		//Get inputParameters
 		Parameters inputParamsResource = (Parameters) inputParams.get(0).getResource();
 		
-		
 		List<ParametersParameterComponent> inputParamComponents = inputParamsResource.getParameter();
 		
 		//Check inputParameters has 1 parameter - "context"

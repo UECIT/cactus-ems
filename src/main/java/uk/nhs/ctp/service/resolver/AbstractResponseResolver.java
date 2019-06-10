@@ -222,7 +222,7 @@ public abstract class AbstractResponseResolver<RESOURCE extends Resource> implem
 	
 	public String getQuestionnaireReference(GuidanceResponse guidanceResponse) {
 		if (guidanceResponse.hasDataRequirement()) {
-			// TODO Type could be in contained or a reference
+			
 			try {
 				return guidanceResponse.getDataRequirementFirstRep()
 						.getCodeFilterFirstRep().getValueSetStringType().getValueAsString();

@@ -75,29 +75,38 @@ export class ServiceDefinitionComponent implements OnInit, OnChanges {
     // &useContext-code=gender  NEW
     // &useContext-valueconcept=http://hl7.org/fhir/administrative-gender|female NEW
     // &jurisdiction=urn:iso:std:iso:3166|ENG
-    // &trigger-type=data-added
-    // &trigger-eventdata-type=Observation
-    // &trigger-eventdata-profile=[profile name]
-    // &trigger-eventdata-valuecoding=[code]
+    // &trigger-eventdata-id={{data_req_id}}
     if (this.tempSelectedQueryType.includes('attributes') && this.tempSelectedServiceDefinition !== undefined) {
-        this.serviceDefinitionService
-        .getServiceDefinitionByQuery(
-          this.CdssUrl + 'ServiceDefinition?',
-          'ACTIVE',
-          false,
-          '2019-04-12',
-          '2019-04-12',
-          'party',
-          this.getPartyCode(this.tempSelectedServiceDefinition),
-          'ENG',
-          'data-added',
-          'Observation',
-          'https://www.hl7.org/fhir/triggerdefinition.html',
-          this.getTriggers(this.tempSelectedServiceDefinition)
-        )
-        .subscribe(
-          serviceDefinition => (this.serviceDefinition = serviceDefinition.entry[0])
-        );
+
+    if (this.tempSelectedServiceDefinition == 107257) {
+      this.serviceDefinitionService
+      .getServiceDefinitionByQuery2(
+        this.CdssUrl + 'ServiceDefinition?',
+        'ACTIVE',
+        false,
+        '2017-04-12',
+        '2020-04-12'
+      )
+      .subscribe(
+        serviceDefinition => (this.serviceDefinition = serviceDefinition.entry[0])
+      );
+    } else {
+      this.serviceDefinitionService
+      .getServiceDefinitionByQuery(
+        this.CdssUrl + 'ServiceDefinition?',
+        'ACTIVE',
+        false,
+        '2019-04-12',
+        '2019-04-12',
+        'party',
+        this.getPartyCode(this.tempSelectedServiceDefinition),
+        'ENG',
+        this.getTriggers(this.tempSelectedServiceDefinition)
+      )
+      .subscribe(
+        serviceDefinition => (this.serviceDefinition = serviceDefinition.entry[0])
+      );
+    }
     }
   }
 
@@ -174,33 +183,33 @@ export class ServiceDefinitionComponent implements OnInit, OnChanges {
   getTriggers(serviceDefinitionId) {
     switch (serviceDefinitionId) {
       case '1':
-        return '240091000000105';
+        return '4';
       case '2':
-        return '271594007';
+        return '15';
       case '3':
-        return '250087009';
+        return '24';
       case '4':
-        return '309521004';
+        return '28';
       case '5':
-        return '45326000';
+        return '31';
       case '6':
-        return '57676002';
+        return '23';
       case '7':
-        return '248062006';
+        return '37';
       case '8':
-       return '288959006';
+       return '46';
       case '9':
-        return '35489007';
+        return '49';
       case '10':
-        return '49727002';
+        return '51';
       case '11':
-        return '240091000000105';
+        return '4';
       case '12':
-        return '271594007';
+        return '15';
       case '13':
-        return '250087009';
+        return '24';
       case '14':
-        return '309521004';
+        return '28';
       default:
         break;
     }

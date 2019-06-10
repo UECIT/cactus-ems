@@ -61,10 +61,10 @@ public class ParametersService {
 
 	@Autowired
 	private CaseRepository caseRepository;
-	
+
 	@Autowired
 	private CareConnectPatientBuilder careConnectPatientBuilder;
-	
+
 	@Autowired
 	private RelatedPersonBuilder relatedPersonBuilder;
 
@@ -80,7 +80,8 @@ public class ParametersService {
 		setRequestId(caseId, parameters);
 
 		try {
-			parameters.addParameter().setName(SystemConstants.PATIENT).setResource(careConnectPatientBuilder.build(caseEntity));
+			parameters.addParameter().setName(SystemConstants.PATIENT)
+					.setResource(careConnectPatientBuilder.build(caseEntity));
 		} catch (FHIRException e) {
 			LOG.error("Cannot parse gender code", e);
 			throw new EMSException(HttpStatus.INTERNAL_SERVER_ERROR, "Cannot parse patient gender code", e);
@@ -92,7 +93,7 @@ public class ParametersService {
 		addObservationInputData(caseEntity, parameters);
 		addImmunizationInputData(caseEntity, parameters);
 		addMedicationInputData(caseEntity, parameters);
-		
+
 		// Add extra parameters
 		addParameterInputData(caseEntity, parameters);
 
@@ -136,7 +137,8 @@ public class ParametersService {
 
 		names.add(new HumanName().setFamily(settings.getInitiatingPerson().getName().split(" ")[1])
 				.addGiven(settings.getInitiatingPerson().getName().split(" ")[0]));
-		telecom.add(new ContactPoint().setSystem(ContactPointSystem.PHONE).setValue(settings.getInitiatingPerson().getTelecom()));
+		telecom.add(new ContactPoint().setSystem(ContactPointSystem.PHONE)
+				.setValue(settings.getInitiatingPerson().getTelecom()));
 
 		parameters.addParameter().setName(SystemConstants.INITIATINGPERSON).setResource(new Person().setName(names)
 				.setTelecom(telecom)
@@ -146,54 +148,39 @@ public class ParametersService {
 
 	private void setUserType(Cases caseEntity, Parameters parameters, SettingsDTO settings) {
 		CodeableConcept codeableConcept = new CodeableConcept();
-		
+
 		if (caseEntity.getSkillset().getCode().equalsIgnoreCase("PA")) {
-			codeableConcept.setText("Patient")
-				.addCoding()
-					.setCode("116154003")
-					.setDisplay("Patient")
+			codeableConcept.setText("Patient").addCoding().setCode("116154003").setDisplay("Patient")
 					.setSystem(SystemURL.SNOMED);
 		} else {
-			codeableConcept.setText(settings.getUserType().getDisplay())
-				.addCoding()
-					.setCode(settings.getUserType().getCode())
-					.setDisplay(settings.getUserType().getDisplay())
+			codeableConcept.setText(settings.getUserType().getDisplay()).addCoding()
+					.setCode(settings.getUserType().getCode()).setDisplay(settings.getUserType().getDisplay())
 					.setSystem(SystemURL.SNOMED);
 		}
-		
-		parameters.addParameter()
-		.setName(SystemConstants.USERTYPE)
-			.setValue(codeableConcept);
+
+		parameters.addParameter().setName(SystemConstants.USERTYPE).setValue(codeableConcept);
 
 	}
 
 	private void setUserLanguage(Cases caseEntity, Parameters parameters, SettingsDTO settings) {
 		CodeableConcept codeableConcept = new CodeableConcept();
-		
-		codeableConcept.setText(settings.getUserLanguage().getDisplay())
-			.addCoding()
-				.setCode(settings.getUserLanguage().getCode())
-				.setDisplay(settings.getUserLanguage().getDisplay())
+
+		codeableConcept.setText(settings.getUserLanguage().getDisplay()).addCoding()
+				.setCode(settings.getUserLanguage().getCode()).setDisplay(settings.getUserLanguage().getDisplay())
 				.setSystem(SystemURL.DATA_DICTIONARY);
-		
-		parameters.addParameter()
-		.setName(SystemConstants.USERLANGUAGE)
-			.setValue(codeableConcept);
+
+		parameters.addParameter().setName(SystemConstants.USERLANGUAGE).setValue(codeableConcept);
 
 	}
 
 	private void setUserTaskContext(Cases caseEntity, Parameters parameters, SettingsDTO settings) {
 		CodeableConcept codeableConcept = new CodeableConcept();
-		
-		codeableConcept.setText(settings.getUserTaskContext().getDisplay())
-			.addCoding()
-				.setCode(settings.getUserTaskContext().getCode())
-				.setDisplay(settings.getUserTaskContext().getDisplay())
+
+		codeableConcept.setText(settings.getUserTaskContext().getDisplay()).addCoding()
+				.setCode(settings.getUserTaskContext().getCode()).setDisplay(settings.getUserTaskContext().getDisplay())
 				.setSystem(SystemURL.SNOMED);
-		
-		parameters.addParameter()
-		.setName(SystemConstants.USERTASKCONTEXT)
-			.setValue(codeableConcept);
+
+		parameters.addParameter().setName(SystemConstants.USERTASKCONTEXT).setValue(codeableConcept);
 
 	}
 
@@ -205,7 +192,8 @@ public class ParametersService {
 
 		names.add(new HumanName().setFamily(settings.getReceivingPerson().getName().split(" ")[1])
 				.addGiven(settings.getReceivingPerson().getName().split(" ")[0]));
-		telecom.add(new ContactPoint().setSystem(ContactPointSystem.PHONE).setValue(settings.getReceivingPerson().getTelecom()));
+		telecom.add(new ContactPoint().setSystem(ContactPointSystem.PHONE)
+				.setValue(settings.getReceivingPerson().getTelecom()));
 
 		parameters.addParameter().setName(SystemConstants.RECIEVINGPERSON).setResource(new Person().setName(names)
 				.setTelecom(telecom)
@@ -216,46 +204,33 @@ public class ParametersService {
 
 	private void setRecipientType(Cases caseEntity, Parameters parameters, SettingsDTO settings) {
 		CodeableConcept codeableConcept = new CodeableConcept();
-		
-		codeableConcept.setText(settings.getRecipientType().getDisplay())
-			.addCoding()
-				.setCode(settings.getRecipientType().getCode())
-				.setDisplay(settings.getRecipientType().getDisplay())
+
+		codeableConcept.setText(settings.getRecipientType().getDisplay()).addCoding()
+				.setCode(settings.getRecipientType().getCode()).setDisplay(settings.getRecipientType().getDisplay())
 				.setSystem(SystemURL.SNOMED);
-		
-		parameters.addParameter()
-		.setName(SystemConstants.RECIPIENTTYPE)
-			.setValue(codeableConcept);
+
+		parameters.addParameter().setName(SystemConstants.RECIPIENTTYPE).setValue(codeableConcept);
 
 	}
 
 	private void setRecipientLanguage(Cases caseEntity, Parameters parameters, SettingsDTO settings) {
 		CodeableConcept codeableConcept = new CodeableConcept();
-		
-		codeableConcept.setText(settings.getRecipientLanguage().getDisplay())
-			.addCoding()
+
+		codeableConcept.setText(settings.getRecipientLanguage().getDisplay()).addCoding()
 				.setCode(settings.getRecipientLanguage().getCode())
-				.setDisplay(settings.getRecipientLanguage().getDisplay())
-				.setSystem(SystemURL.DATA_DICTIONARY);
-		
-		parameters.addParameter()
-		.setName(SystemConstants.RECIPIENTLANGUAGE)
-			.setValue(codeableConcept);
+				.setDisplay(settings.getRecipientLanguage().getDisplay()).setSystem(SystemURL.DATA_DICTIONARY);
+
+		parameters.addParameter().setName(SystemConstants.RECIPIENTLANGUAGE).setValue(codeableConcept);
 
 	}
 
 	private void setSetting(Cases caseEntity, Parameters parameters, SettingsDTO settings) {
 		CodeableConcept codeableConcept = new CodeableConcept();
-		
-		codeableConcept.setText(settings.getSetting().getDisplay())
-			.addCoding()
-				.setCode(settings.getSetting().getCode())
-				.setDisplay(settings.getSetting().getDisplay())
-				.setSystem(SystemURL.SNOMED);
-		
-		parameters.addParameter()
-		.setName(SystemConstants.SETTING)
-			.setValue(codeableConcept);
+
+		codeableConcept.setText(settings.getSetting().getDisplay()).addCoding().setCode(settings.getSetting().getCode())
+				.setDisplay(settings.getSetting().getDisplay()).setSystem(SystemURL.SNOMED);
+
+		parameters.addParameter().setName(SystemConstants.SETTING).setValue(codeableConcept);
 
 	}
 
@@ -304,9 +279,9 @@ public class ParametersService {
 			}
 		}
 	}
-	
+
 	private void addParameterInputData(Cases caseEntity, Parameters parameters) {
-		if(!caseEntity.getParameters().isEmpty()) {
+		if (!caseEntity.getParameters().isEmpty()) {
 			for (CaseParameter parameterEntity : caseEntity.getParameters()) {
 				ParametersParameterComponent parameter = new ParametersParameterComponent();
 				parameter.setName(parameterEntity.getName());
@@ -318,9 +293,9 @@ public class ParametersService {
 
 	private void setQuestionnaireResponse(TriageQuestion[] questionResponse, Parameters parameters, Boolean amending) {
 		if (questionResponse != null) {
-
-			QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse().setQuestionnaire(
-					new Reference(new IdType(SystemConstants.QUESTIONNAIRE, questionResponse[0].getQuestionnaireId().replace("#", ""))));
+			QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse()
+					.setQuestionnaire(new Reference(new IdType(SystemConstants.QUESTIONNAIRE,
+							questionResponse[0].getQuestionnaireId().replace("#", ""))));
 			if (amending) {
 				questionnaireResponse.setStatus(QuestionnaireResponseStatus.AMENDED);
 			} else {
@@ -363,18 +338,16 @@ public class ParametersService {
 									.setDisplay(triageQuestion.getResponse().getDisplay()));
 				}
 			}
-			
-			ParametersParameterComponent partyComponent = 
-					ResourceProviderUtils.getParameterByName(
-						ResourceProviderUtils.getParameterByName(
-							ResourceProviderUtils.getParameterAsResource(
-									parameters.getParameter(), SystemConstants.INPUT_PARAMETERS, Parameters.class)
-							.getParameter(), SystemConstants.CONTEXT)
-						.getPart(), SystemConstants.PARTY);
-					
-			questionnaireResponse.setSource(new Reference(partyComponent.getValue().primitiveValue().equals("1") ?
-					ResourceProviderUtils.getParameterAsResource(parameters.getParameter(), SystemConstants.PATIENT) :
-					relatedPersonBuilder.build()));
+
+			ParametersParameterComponent partyComponent = ResourceProviderUtils
+					.getParameterByName(ResourceProviderUtils.getParameterByName(
+							ResourceProviderUtils.getParameterAsResource(parameters.getParameter(),
+									SystemConstants.INPUT_PARAMETERS, Parameters.class).getParameter(),
+							SystemConstants.CONTEXT).getPart(), SystemConstants.PARTY);
+
+			questionnaireResponse.setSource(new Reference(partyComponent.getValue().primitiveValue().equals("1")
+					? ResourceProviderUtils.getParameterAsResource(parameters.getParameter(), SystemConstants.PATIENT)
+					: relatedPersonBuilder.build()));
 
 			parameters.addParameter().setName(SystemConstants.INPUT_DATA).setResource(questionnaireResponse);
 		}
@@ -409,6 +382,7 @@ public class ParametersService {
 
 	private void setRequestId(Long caseId, Parameters parameters) {
 		parameters.addParameter().setName(SystemConstants.REQUEST_ID).setValue(new IdType(caseId));
-//        parameters.addParameter().setName(SystemConstants.REQUEST_ID).setValue(new StringType(String.valueOf(caseId)));
+		// parameters.addParameter().setName(SystemConstants.REQUEST_ID).setValue(new
+		// StringType(String.valueOf(caseId)));
 	}
 }

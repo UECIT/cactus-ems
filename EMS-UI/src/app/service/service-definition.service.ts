@@ -53,10 +53,7 @@ export class ServiceDefinitionService {
     useContextCode: string,
     useContextValueConcept: string,
     jurisdiction: string,
-    triggerType: string,
-    triggerEventDataType: string,
-    triggerEventDataProfile: string,
-    triggerEventDataValueCoding: string) {
+    triggerId: string) {
     if (this.sessionStorage['auth_token'] != null) {
       httpOptions.headers = httpOptions.headers.set(
         'Authorization',
@@ -72,11 +69,7 @@ export class ServiceDefinitionService {
     // &useContext-code=gender  NEW
     // &useContext-valueconcept=http://hl7.org/fhir/administrative-gender|female NEW
     // &jurisdiction=urn:iso:std:iso:3166|ENG
-    // &trigger-type=data-added
-    // &trigger-eventdata-type=Observation
-    // &trigger-eventdata-profile=[profile name]
-    // &trigger-eventdata-valuecoding=[code]
-
+    // &trigger-eventdata-id={{data_req_id}}
     const url = cdssUrl +
     'status=' + status +
     '&experimental=' + experimental +
@@ -85,10 +78,34 @@ export class ServiceDefinitionService {
     '&useContext-code=' + useContextCode +
     '&useContext-valueconcept=https://www.hl7.org/fhir/party.html|' + useContextValueConcept +
     '&jurisdiction=urn:iso:std:iso:3166|' + jurisdiction +
-    '&trigger-type=' + triggerType +
-    '&trigger-eventdata-type=' + triggerEventDataType +
-    '&trigger-eventdata-profile=' + triggerEventDataProfile +
-    '&trigger-eventdata-valuecoding=' + triggerEventDataValueCoding;
+    '&trigger-eventdata-id=' + triggerId;
+
+    return this.http.get<any>(encodeURI(url), httpOptions);
+  }
+
+  getServiceDefinitionByQuery2(
+    cdssUrl: string,
+    status: string,
+    experimental: boolean,
+    effectiveTo: string,
+    effectiveFrom: string) {
+    if (this.sessionStorage['auth_token'] != null) {
+      httpOptions.headers = httpOptions.headers.set(
+        'Authorization',
+        this.sessionStorage['auth_token']
+      );
+    }
+
+    // {{BASE_URL}}
+    // status=active
+    // &experimental=false
+    // &effective=ge{{TODAY}}
+    // &effective=le{{TODAY}}
+    const url = cdssUrl +
+    'status=' + status +
+    '&experimental=' + experimental +
+    '&effective=ge' + effectiveTo +
+    '&effective=le' + effectiveFrom;
 
     return this.http.get<any>(encodeURI(url), httpOptions);
   }
