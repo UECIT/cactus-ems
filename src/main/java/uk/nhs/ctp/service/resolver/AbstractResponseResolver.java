@@ -199,7 +199,7 @@ public abstract class AbstractResponseResolver<RESOURCE extends Resource> implem
 	private String getTrigger(GuidanceResponse guidanceResponse) {
 		String trigger = null;
 		Optional<DataRequirement> optional = guidanceResponse.getDataRequirement().stream().filter(
-				data -> data.getType().equals("Observation")).findFirst();
+				data -> data.getType().equals("CareConnectObservation")).findFirst();
 		
 		if (optional.isPresent()) {
 			for (ServiceDefinition serviceDef : serviceDefinitionRepository.findAll()) {

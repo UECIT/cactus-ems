@@ -348,7 +348,9 @@ export class QuestionnaireComponent implements OnInit {
   }
 
   getPostCallInformationTemplateURL() {
-    return `${environment.UECDI_API}/handover/${this.handoverMessage.id}`;
+    if (this.handoverMessage != undefined) {
+      return `${environment.UECDI_API}/handover/${this.handoverMessage.id}`;
+    }
   }
 
   async get111Report() {
