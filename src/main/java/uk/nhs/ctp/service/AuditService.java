@@ -10,6 +10,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -109,6 +110,17 @@ public class AuditService {
 		newAuditEntry.setType(auditEntryType);
 		newAuditEntry.setCreatedDate(new Date());
 
+		try {
+			Resource resource = (Resource)fhirParser.parseResource(request);
+			if (resource.getResourceType().equals(ResourceType.Parameters)) {
+				Bundle bundle = new Bundle();
+				bundle.addEntry().setResource(resource);
+				request = fhirParser.encodeResourceToString(bundle);
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
 		newAuditEntry.setCdssServiceDefinitionRequest(request);
 		newAuditEntry.setCdssServiceDefinitionResponse(response);
 		
