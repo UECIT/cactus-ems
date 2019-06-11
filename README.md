@@ -26,8 +26,8 @@ To generate a new component `ng generate component <component-name>`
 ## Config
 All configuration is found in the resources/application.properties file, properties of note include...
 
-*clear.folder.timer - the minimum number of milliseconds the application must retain any generated HTML reports.
-*ems.request.bundle - setting to true indicates that all 'evaluate' requests to CDSS suppliers will take the form of a FHIR bundle resource, false indicates they will be sent as the usual FHIR parameters resource.
+* clear.folder.timer - the minimum number of milliseconds the application must retain any generated HTML reports.
+* ems.request.bundle - setting to true indicates that all 'evaluate' requests to CDSS suppliers will take the form of a FHIR bundle resource, false indicates they will be sent as the usual FHIR parameters resource.
 
 ## Backend setup
 
