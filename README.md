@@ -37,7 +37,7 @@ Update the `src/main/resources/application.properties` file to point to the data
 
 To run the application:
 *  Run the spring boot app from within your chosen IDE or
-*  run `mvn clean install` to generate a war file and deploy to your chosen container i.e. Tomcat etc.
+*  run `mvn clean package` to generate a war file and deploy to your chosen container i.e. Tomcat etc.
 
 ## Licence
 
