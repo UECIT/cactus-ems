@@ -35,6 +35,10 @@ Create a MySql database and run the sql scripts under `src/main/resources/sql`
 
 Update the `src/main/resources/application.properties` file to point to the database.
 
+To run the application:
+*  Run the spring boot app from within your chosen IDE or
+*  run `mvn clean install` to generate a war file and deploy to your chosen container i.e. Tomcat etc.
+
 ## Licence
 
 Unless stated otherwise, the codebase is released under [the MIT License][mit].
