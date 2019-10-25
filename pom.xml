@@ -22,6 +22,17 @@
         <fhir.version>3.0.0</fhir.version>
     </properties>
 
+    <repositories>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-ems-test-harness-EMS-Test-Harness</id>
+            <name>bintray</name>
+            <url>https://dl.bintray.com/ems-test-harness/EMS-Test-Harness</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <!-- Spring Dependencies -->
         <dependency>
@@ -110,7 +121,7 @@
 		<dependency>
 			<groupId>uk.nhs.ctp</groupId>
 			<artifactId>EMCI-Fhir-Profiles</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.0.1</version>
 		</dependency>
 
         <dependency>
@@ -192,7 +203,7 @@
         	<artifactId>spring-boot-configuration-processor</artifactId>
         	<optional>true</optional>
         </dependency>
-
+        
     </dependencies>
 
     <build>
@@ -233,7 +244,16 @@
                     </schemas>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.2.3</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
         </plugins>
+		<finalName>${project.artifactId}</finalName>
     </build>
     <packaging>war</packaging>
 </project>
