@@ -3,6 +3,7 @@ package uk.nhs.ctp.service;
 import java.util.Date;
 import java.util.List;
 
+import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Immunization;
 import org.hl7.fhir.dstu3.model.MedicationAdministration;
@@ -95,7 +96,7 @@ public class CaseService {
 			if (resource instanceof Observation) {
 				boolean amended = false;
 				Observation currentObs = (Observation) resource;
-				if (currentObs.getValue().hasType("boolean")) {
+				if (currentObs.getValue() != null && currentObs.getValue().hasType("boolean")) {
 					for (CaseObservation observation : triageCase.getObservations()) {
 						if (observation.getCode().equalsIgnoreCase(currentObs.getCode().getCoding().get(0).getCode())) {
 							LOG.info("Amending Observation for case " + triageCase.getId());
@@ -240,7 +241,9 @@ public class CaseService {
 		caseObservation.setCode(coding.getCode());
 		caseObservation.setDisplay(coding.getDisplay());
 		try {
-			caseObservation.setValue(observation.getValueBooleanType().booleanValue());
+			if (observation.getValue() instanceof BooleanType) {
+				caseObservation.setValue(observation.getValueBooleanType().booleanValue());
+			}
 		} catch (FHIRException e) {
 			LOG.error("Unable to get boolean type", e);
 		}

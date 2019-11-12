@@ -5,7 +5,7 @@
 export const environment = {
   production: false,
 
-  EMS_API: 'http://localhost:8081',
+  EMS_API: 'http://localhost:8083',
   UECDI_API: 'http://localhost:5000',
   version: 'v1.0.0'
 };
