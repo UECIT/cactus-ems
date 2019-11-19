@@ -38,11 +38,13 @@ public class GuidanceResponseResolver extends AbstractResponseResolver<GuidanceR
 			requestGroup = requestGroup == null ? ResourceProviderUtils.getResource(fhirContext,
 					baseUrl, RequestGroup.class, guidanceResponse.getResult().getReference()) : requestGroup;
 
+			final String requestBaseUrl = requestGroup.getIdElement().getBaseUrl();
+
 			requestGroup.getAction().stream().forEach(child -> {
 				try {
 					String reference = child.getResource().getReference();
 					Class<? extends Resource> resourceClass = ResourceProviderUtils.getResourceType(reference);
-					Resource resource = ResourceProviderUtils.getResource(fhirContext, baseUrl, resourceClass, reference);
+					Resource resource = ResourceProviderUtils.getResource(fhirContext, requestBaseUrl, resourceClass, reference);
 					resources.add(resource);
 				} catch (Exception e) {
 				}
