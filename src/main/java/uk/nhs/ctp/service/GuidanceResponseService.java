@@ -180,7 +180,7 @@ public class GuidanceResponseService {
 			for (ServiceDefinition serviceDef : serviceDefRepo.findAll()) {
 				org.hl7.fhir.dstu3.model.ServiceDefinition serviceDefinition = 
 						cdssService.getServiceDefinition(
-								serviceDef.getServiceDefinitionId(), serviceDef.getCdssSupplierId());
+								serviceDef.getServiceDefinitionId(), serviceDef.getCdssSupplierId().toString());
 				
 				DataRequirement triggerData = serviceDefinition.getTrigger().get(0).getEventData();
 

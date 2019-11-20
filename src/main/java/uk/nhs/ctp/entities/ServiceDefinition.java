@@ -11,7 +11,7 @@ public class ServiceDefinition {
 	private Long id;
 
 	@Column(name = "cdss_supplier_id", nullable = true)
-	private String cdssSupplierId;
+	private Long cdssSupplierId;
 
 	@Column(name = "service_definition_id")
 	private String serviceDefinitionId;
@@ -43,11 +43,11 @@ public class ServiceDefinition {
 		this.description = description;
 	}
 
-	public String getCdssSupplierId() {
+	public Long getCdssSupplierId() {
 		return cdssSupplierId;
 	}
 
-	public void setCdssSupplierId(String cdssSupplierId) {
+	public void setCdssSupplierId(Long cdssSupplierId) {
 		this.cdssSupplierId = cdssSupplierId;
 	}
 }
