@@ -1,0 +1,67 @@
+# This file is a template, and might need editing before it works on your project.
+# Official docker image.
+image: docker:latest
+
+services:
+  - docker:dind
+
+front-master:
+  image: node:10
+  stage: build
+  script:
+    - apt-get update && apt install zip
+    - cd EMS-UI
+    - npm install -g @angular/cli
+    - npm install
+    - cp src/environments/environment.prod.ts src/environments/environment.ts
+    - ng build
+    - cd dist && zip -r ../../$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-eb.zip cdss-ui
+    - cd ../../eb && zip -r ../$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-eb.zip * .ebextensions
+  only:
+    - develop
+  artifacts:
+    paths:
+      - "*-eb.zip"
+
+back-master:
+  stage: build
+  script:
+    - apk add zip
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - docker build --pull -t "$CI_REGISTRY_IMAGE" .
+    - docker push "$CI_REGISTRY_IMAGE"
+  only:
+    - develop
+
+build-tags:
+  stage: build
+  script:
+    - apk add zip
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - docker build --pull -t $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+    - cd eb && zip -r ../$CI_PROJECT_NAME-$CI_COMMIT_REF_SLUG-eb.zip * .ebextensions
+  only:
+    - tags
+  artifacts:
+    paths:
+      - "*-eb.zip"
+
+build-branches:
+  stage: build
+  script:
+    - apk add zip
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - docker pull $CI_REGISTRY_IMAGE:deps || true
+    - docker build --cache-from $CI_REGISTRY_IMAGE:deps -t $CI_REGISTRY_IMAGE:deps --target deps .
+    - docker build --pull --cache-from $CI_REGISTRY_IMAGE:deps -t $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG .
+    - docker push $CI_REGISTRY_IMAGE:deps
+    - cd eb && zip -r ../$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-eb.zip * .ebextensions
+  only:
+    - branches
+  except:
+    - master
+    - develop
+  artifacts:
+    paths:
+      - "*-eb.zip"
