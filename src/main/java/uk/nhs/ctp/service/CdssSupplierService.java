@@ -98,7 +98,7 @@ public class CdssSupplierService {
 			ServiceDefinition newServiceDefinition = new ServiceDefinition();
 			newServiceDefinition.setDescription(serviceDefinitionDTO.getDescription());
 			newServiceDefinition.setServiceDefinitionId(serviceDefinitionDTO.getServiceDefinitionId());
-			newServiceDefinition.setCdssSupplierId(cdssSupplier.getId().toString());
+			newServiceDefinition.setCdssSupplierId(cdssSupplier.getId());
 			// call service definition repository and save the service definition.
 			serviceDefinitionRepository.save(newServiceDefinition);
 		}
@@ -110,7 +110,7 @@ public class CdssSupplierService {
 
 		// save new/update service definitions
 		for (ServiceDefinition serviceDefinition : cdssSupplier.getServiceDefinitions()) {
-			serviceDefinition.setCdssSupplierId(cdssSupplier.getId().toString());
+			serviceDefinition.setCdssSupplierId(cdssSupplier.getId());
 		}
 
 		cdssSupplierRepository.saveAndFlush(cdssSupplier);
