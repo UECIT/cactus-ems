@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import uk.nhs.ctp.enums.ReferencingType;
 
 @Entity
 @Table(name = "cdss_supplier")
@@ -26,6 +27,9 @@ public class CdssSupplier {
 
 	@Column(name = "base_url")
 	private String baseUrl;
+
+	@Column(name = "referencing_type")
+	private ReferencingType referencingType;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "cdss_supplier_id")
@@ -61,5 +65,13 @@ public class CdssSupplier {
 
 	public void setServiceDefinitions(List<ServiceDefinition> serviceDefinitions) {
 		this.serviceDefinitions = serviceDefinitions;
+	}
+
+	public ReferencingType getReferencingType() {
+		return referencingType;
+	}
+
+	public void setReferencingType(ReferencingType referencingType) {
+		this.referencingType = referencingType;
 	}
 }

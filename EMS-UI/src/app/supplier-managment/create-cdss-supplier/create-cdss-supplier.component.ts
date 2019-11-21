@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import {
   NewCdssSupplier,
-  ServiceDefinition
+  ServiceDefinition,
+  ReferencingType,
+  ReferencingTypes
 } from '../../model/cdssSupplier';
 import { ManageUsersService } from 'src/app/service/manage-users.service';
 import { CdssService } from 'src/app/service/cdss.service';
@@ -21,6 +23,7 @@ export class CreateCdssSupplierComponent implements OnInit {
   formData: FormGroup = new FormGroup({ password: new FormControl() });
   loaded = false;
   serviceDefinitions: ServiceDefinition[] = [];
+  referencingType: ReferencingType = ReferencingTypes.contained;
   warning: boolean;
   warningMessage: string;
   error: boolean;
@@ -87,6 +90,7 @@ export class CreateCdssSupplierComponent implements OnInit {
       id: data.id,
       name: data.name,
       baseUrl: data.baseUrl,
+      referencingType: this.referencingType,
       serviceDefinitions: []
     };
     this.serviceDefinitions.forEach(serviceDefinition => {
