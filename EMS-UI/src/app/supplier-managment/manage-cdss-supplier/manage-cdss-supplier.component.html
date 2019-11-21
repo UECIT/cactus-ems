@@ -13,6 +13,7 @@
               <th scope="col">Name</th>
               <th scope="col">BaseUrl</th>
               <th scope="col">Service Descriptions</th>
+              <th scope="col">Referencing</th>
               <th scope="col"></th>
             </tr>
           </thead>
@@ -24,6 +25,11 @@
                 <ul>
                   <li *ngFor="let serviceDefinition of supplier.serviceDefinitions">{{ serviceDefinition.description }}</li>
                 </ul>
+              </td>
+              <td [ngSwitch]="supplier.referencingType">
+                <p *ngSwitchCase="'ServerReferences'">External</p>
+                <p *ngSwitchCase="'ContainedReferences'">Contained</p>
+                <p *ngSwitchCase="'BundledReferences'">Bundled</p>
               </td>
               <td>
                 <div class="actions">

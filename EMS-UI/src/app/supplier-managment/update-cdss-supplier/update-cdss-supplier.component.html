@@ -48,6 +48,17 @@
         <span class="actionButton" (click)="addSeviceDefinition(formData.value)">Add Service Definition</span>
       </div>
 
+      <div>
+        <p title="Defines how referenced resources will be defined in the $evaluate request">
+          Reference types:
+        </p>
+        <mat-button-toggle-group [(ngModel)]="supplier.referencingType" [ngModelOptions]="{standalone: true}">
+          <mat-button-toggle value="ServerReferences">External</mat-button-toggle>
+          <mat-button-toggle value="ContainedReferences">Contained</mat-button-toggle>
+          <mat-button-toggle value="BundledReferences">Bundled</mat-button-toggle>
+        </mat-button-toggle-group>
+      </div>
+
       <div class="buttons">
         <button [disabled]="!formData.valid" type="submit" class="actionButton">Update</button>
         <span class="cancelButton" [routerLink]="['/suppliers']">Cancel</span>

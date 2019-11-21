@@ -157,6 +157,7 @@ CREATE TABLE cdss_decoupling.cdss_supplier (
   id BIGINT NOT NULL AUTO_INCREMENT,
   name VARCHAR(250) NOT NULL,
   base_url VARCHAR(255) NOT NULL,
+  referencing_type TINYINT UNSIGNED NOT NULL DEFAULT 1,
   PRIMARY KEY (id)
 );
 
