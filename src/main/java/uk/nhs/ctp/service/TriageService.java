@@ -24,6 +24,7 @@ import uk.nhs.ctp.service.dto.CdssResult;
 import uk.nhs.ctp.service.dto.TriageLaunchDTO;
 import uk.nhs.ctp.service.dto.TriageQuestion;
 import uk.nhs.ctp.service.resolver.ResponseResolver;
+import uk.nhs.ctp.service.factory.ReferencingContextFactory;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
 
 @Service
@@ -47,6 +48,9 @@ public class TriageService {
 	
 	@Autowired
 	private CdssSupplierService cdssSupplierService;
+
+	@Autowired
+	private ReferencingContextFactory referencingContextFactory;
 	
 	private Map<Class<?>, ResponseResolver<? extends Resource>> responseResolverMap = new HashMap<>();
 
@@ -168,14 +172,21 @@ public class TriageService {
 	 */
 	protected CdssResult amendCaseUsingCdss(CdssRequestDTO requestDetails)
 			throws ConnectException, JsonProcessingException {
+		var referencingContext = referencingContextFactory.load(requestDetails.getCdssSupplierId());
 
-		Parameters parameters = parametersService.getEvaluateParameters(requestDetails.getCaseId(),
-				requestDetails.getQuestionResponse(), requestDetails.getSettings(),
-				requestDetails.isAmendingPrevious());
+		Parameters parameters = parametersService.getEvaluateParameters(
+				requestDetails.getCaseId(),
+				requestDetails.getQuestionResponse(),
+				requestDetails.getSettings(),
+				requestDetails.isAmendingPrevious(),
+				referencingContext);
 
 		Resource resource = cdssService.evaluateServiceDefinition(
-				parameters, requestDetails.getCdssSupplierId(), 
-				requestDetails.getServiceDefinitionId(), requestDetails.getCaseId());
+				parameters,
+				requestDetails.getCdssSupplierId(),
+				requestDetails.getServiceDefinitionId(),
+				requestDetails.getCaseId(),
+				referencingContext);
 
 		CdssResult cdssResult = responseResolverMap.get(resource.getClass())
 				.resolve(resource, cdssSupplierService.getCdssSupplier(requestDetails.getCdssSupplierId()));
@@ -210,7 +221,7 @@ public class TriageService {
 	 * 
 	 * @param cdssResult       {@link CdssResult}
 	 * @param caseId           {@link Long}
-	 * @param previousQuestion
+	 * @param previousQuestions
 	 * @return {@link CdssRequestDTO}
 	 * @throws JsonProcessingException
 	 */

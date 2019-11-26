@@ -28,8 +28,8 @@
               </td>
               <td [ngSwitch]="supplier.referencingType">
                 <p *ngSwitchCase="'ServerReferences'">External</p>
-                <p *ngSwitchCase="'ContainedReferences'">Contained</p>
                 <p *ngSwitchCase="'BundledReferences'">Bundled</p>
+                <p *ngSwitchCase="'ContainedReferences'">Contained</p>
               </td>
               <td>
                 <div class="actions">

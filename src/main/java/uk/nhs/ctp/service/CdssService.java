@@ -2,6 +2,7 @@ package uk.nhs.ctp.service;
 
 import java.net.ConnectException;
 
+import java.util.stream.Stream;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
@@ -14,10 +15,10 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ServiceDefinition;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -38,9 +39,6 @@ import uk.nhs.ctp.repos.CdssSupplierRepository;
 @Service
 public class CdssService {
 	private static final Logger LOG = LoggerFactory.getLogger(CdssService.class);
-
-	@Value("${ems.request.bundle:false}")
-	private boolean sendRequestAsBundle;
 	
 	@Autowired
 	private CdssSupplierRepository cdssSupplierRepository;
@@ -68,12 +66,23 @@ public class CdssService {
 	 * @return {@link GuidanceResponse}
 	 * @throws JsonProcessingException
 	 */
-	public Resource evaluateServiceDefinition(Parameters parameters, Long cdssSupplierId,
-			String serviceDefinitionId, Long caseId) throws ConnectException, JsonProcessingException {
-			
-		String requestBody = fhirParser.encodeResourceToString(sendRequestAsBundle ? 
-				new Bundle().setType(BundleType.COLLECTION).addEntry(new BundleEntryComponent().setResource(parameters)) : parameters);
+	public Resource evaluateServiceDefinition(
+			Parameters parameters,
+			Long cdssSupplierId,
+			String serviceDefinitionId,
+			Long caseId,
+			ReferencingContext referencingContext) throws ConnectException, JsonProcessingException {
 
+		IBaseResource requestResource = parameters;
+		if (referencingContext.shouldBundle()) {
+			var bundle = new Bundle().setType(BundleType.COLLECTION);
+			Stream.concat(Stream.of(parameters), referencingContext.getReferencedResources().stream())
+				.map(resource -> new BundleEntryComponent().setResource(resource))
+				.forEach(bundle::addEntry);
+			requestResource = bundle;
+		}
+
+		String requestBody = fhirParser.encodeResourceToString(requestResource);
 		String responseBody = sendHttpRequest(getBaseUrl(cdssSupplierId) + "/" + SystemConstants.SERVICE_DEFINITION
 				+ "/" + serviceDefinitionId + "/" + SystemConstants.EVALUATE, HttpMethod.POST,
 				new HttpEntity<>(requestBody, headers));

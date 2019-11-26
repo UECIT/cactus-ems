@@ -43,6 +43,7 @@ import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.Party;
 import uk.nhs.ctp.entities.Skillset;
+import uk.nhs.ctp.enums.ReferencingType;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.dto.CodeDTO;
 import uk.nhs.ctp.service.dto.PersonDTO;
@@ -61,20 +62,21 @@ public class ParametersServiceTest {
 	@Mock
 	private CaseRepository mockCaseRepository;
 	
-	Cases caseWithNoData, caseWithObservation, caseWithImmunization, caseWithMedication, caseWithData;
-	CaseObservation caseObservation;
-	CaseImmunization caseImmunization;
-	CaseMedication caseMedication;
-	Calendar calendar;
-	TriageQuestion[] questionResponses;
-	SettingsDTO settings;
+	private Cases caseWithNoData, caseWithObservation, caseWithImmunization, caseWithMedication, caseWithData;
+	private CaseObservation caseObservation;
+	private CaseImmunization caseImmunization;
+	private CaseMedication caseMedication;
+	private Calendar calendar;
+	private TriageQuestion[] questionResponses;
+	private SettingsDTO settings;
+	private ReferencingContext referencingContext;
 	
 	@Before
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
 		
 		calendar = Calendar.getInstance();
-		calendar.set(2018, 05, 03);
+		calendar.set(2018, Calendar.JUNE, 3);
 		
 		caseObservation = new CaseObservation();
 		caseObservation.setId(1L);
@@ -114,7 +116,7 @@ public class ParametersServiceTest {
 		caseWithData.addObservation(caseObservation);
 		
 		
-		ArrayList<TriageQuestion> questionResponsesTemp = new ArrayList<TriageQuestion>();
+		var questionResponsesTemp = new ArrayList<TriageQuestion>();
 		
 		TriageQuestion questionResponse = new TriageQuestion();
 		questionResponse.setQuestion("Test question");
@@ -128,7 +130,7 @@ public class ParametersServiceTest {
 		
 		questionResponsesTemp.add(questionResponse);
 		
-		questionResponses = questionResponsesTemp.toArray(new TriageQuestion[questionResponsesTemp.size()]);
+		questionResponses = questionResponsesTemp.toArray(new TriageQuestion[0]);
 		
 		PersonDTO personDto = new PersonDTO();
 		personDto.setBirthDate("2011-09-07");
@@ -148,20 +150,26 @@ public class ParametersServiceTest {
 		settings.setRecipientType(codeDto);
 		settings.setRecipientLanguage(codeDto);
 		settings.setSetting(codeDto);
-		
+
+		referencingContext = new ReferencingContext(ReferencingType.ContainedReferences);
 	}
 
 
 	@Test
 	public void testParametersCreatedCorrectlyWithNoCaseDataStored() {
 		when(mockCaseRepository.findOne(1L)).thenReturn(caseWithNoData);
-		
-		Parameters parameters = parametersService.getEvaluateParameters(1L, null, settings, false);
+
+		Parameters parameters = parametersService.getEvaluateParameters(
+				1L,
+				null,
+				settings,
+				false,
+				referencingContext);
 		
 		assertNotNull(parameters);
 		
 		List<ParametersParameterComponent> parameterComponents = parameters.getParameter();
-		assertTrue(parameterComponents.size() == 13);
+		assertEquals(13, parameterComponents.size());
 		
 		testRequestIdParamIsCorrect(parameterComponents);
 		testPatientParamIsCorrect(parameterComponents);
@@ -173,13 +181,18 @@ public class ParametersServiceTest {
 	public void testParametersCreatedCorrectlyWithNoCaseDataStoredAndQuestionAnswered() throws FHIRException {
 		when(mockCaseRepository.findOne(1L)).thenReturn(caseWithNoData);
 		
-		Parameters parameters = parametersService.getEvaluateParameters(1L, questionResponses, settings, false);
+		Parameters parameters = parametersService.getEvaluateParameters(
+				1L,
+				questionResponses,
+				settings,
+				false,
+				referencingContext);
 
 		assertNotNull(parameters);
 		
 		List<ParametersParameterComponent> parameterComponents = parameters.getParameter();
-		
-		assertTrue(parameterComponents.size() == 14);
+
+		assertEquals(14, parameterComponents.size());
 		
 		testRequestIdParamIsCorrect(parameterComponents);
 		testPatientParamIsCorrect(parameterComponents);
@@ -190,8 +203,7 @@ public class ParametersServiceTest {
 				.filter(param -> param.getName().equals("inputData"))
 				.collect(Collectors.toList());
 		
-		//Check there are 4 input data parameters
-		assertTrue(inputDataParameters.size() == 3);
+		assertEquals(3, inputDataParameters.size());
 		
 		testQuestionnaireResponseIsCorrect(inputDataParameters);
 
@@ -201,13 +213,18 @@ public class ParametersServiceTest {
 	public void testParametersCreatedCorrectlyWithCaseImmunizationStored() {
 		when(mockCaseRepository.findOne(1L)).thenReturn(caseWithImmunization);
 
-		Parameters parameters = parametersService.getEvaluateParameters(1L, null, settings, false);
+		Parameters parameters = parametersService.getEvaluateParameters(
+				1L,
+				null,
+				settings,
+				false,
+				referencingContext);
 
 		assertNotNull(parameters);
 		
 		List<ParametersParameterComponent> parameterComponents = parameters.getParameter();
-		
-		assertTrue(parameterComponents.size() == 14);
+
+		assertEquals(14, parameterComponents.size());
 		
 		testRequestIdParamIsCorrect(parameterComponents);
 		testPatientParamIsCorrect(parameterComponents);
@@ -218,8 +235,7 @@ public class ParametersServiceTest {
 				.filter(param -> param.getName().equals("inputData"))
 				.collect(Collectors.toList());
 		
-		//Check there is 1 input data parameter
-		assertTrue(inputDataParameters.size() == 3);
+		assertEquals(3, inputDataParameters.size());
 		
 		testImmunizationIsCorrect(inputDataParameters);
 
@@ -229,13 +245,18 @@ public class ParametersServiceTest {
 	public void testParametersCreatedCorrectlyWithCaseMedicationStored() throws FHIRException {
 		when(mockCaseRepository.findOne(1L)).thenReturn(caseWithMedication);
 
-		Parameters parameters = parametersService.getEvaluateParameters(1L, null, settings, false);
+		Parameters parameters = parametersService.getEvaluateParameters(
+				1L,
+				null,
+				settings,
+				false,
+				referencingContext);
 
 		assertNotNull(parameters);
 		
 		List<ParametersParameterComponent> parameterComponents = parameters.getParameter();
-		
-		assertTrue(parameterComponents.size() == 14);
+
+		assertEquals(14, parameterComponents.size());
 		
 		testRequestIdParamIsCorrect(parameterComponents);
 		testPatientParamIsCorrect(parameterComponents);
@@ -246,8 +267,7 @@ public class ParametersServiceTest {
 				.filter(param -> param.getName().equals("inputData"))
 				.collect(Collectors.toList());
 		
-		//Check there is 1 input data parameter
-		assertTrue(inputDataParameters.size() == 3);
+		assertEquals(3, inputDataParameters.size());
 		
 		testMedicationIsCorrect(inputDataParameters);
 
@@ -257,13 +277,18 @@ public class ParametersServiceTest {
 	public void testParametersCreatedCorrectlyWithCaseObservationStored() throws FHIRException {
 		when(mockCaseRepository.findOne(1L)).thenReturn(caseWithObservation);
 
-		Parameters parameters = parametersService.getEvaluateParameters(1L, null, settings, false);
+		Parameters parameters = parametersService.getEvaluateParameters(
+				1L,
+				null,
+				settings,
+				false,
+				referencingContext);
 
 		assertNotNull(parameters);
 		
 		List<ParametersParameterComponent> parameterComponents = parameters.getParameter();
-		
-		assertTrue(parameterComponents.size() == 14);
+
+		assertEquals(14, parameterComponents.size());
 		
 		testRequestIdParamIsCorrect(parameterComponents);
 		testPatientParamIsCorrect(parameterComponents);
@@ -274,8 +299,7 @@ public class ParametersServiceTest {
 				.filter(param -> param.getName().equals("inputData"))
 				.collect(Collectors.toList());
 		
-		//Check there is 1 input data parameter
-		assertTrue(inputDataParameters.size() == 3);
+		assertEquals(3, inputDataParameters.size());
 		
 		testObservationIsCorrect(inputDataParameters);
 
@@ -285,13 +309,18 @@ public class ParametersServiceTest {
 	public void testParametersCreatedCorrectlyWithCaseDataStoredAndQuestionAnswered() throws FHIRException {
 		when(mockCaseRepository.findOne(1L)).thenReturn(caseWithData);
 
-		Parameters parameters = parametersService.getEvaluateParameters(1L, questionResponses, settings, false);
+		Parameters parameters = parametersService.getEvaluateParameters(
+				1L,
+				questionResponses,
+				settings,
+				false,
+				referencingContext);
 
 		assertNotNull(parameters);
 		
 		List<ParametersParameterComponent> parameterComponents = parameters.getParameter();
-		
-		assertTrue(parameterComponents.size() == 17);
+
+		assertEquals(17, parameterComponents.size());
 		
 		testRequestIdParamIsCorrect(parameterComponents);
 		testPatientParamIsCorrect(parameterComponents);
@@ -302,8 +331,7 @@ public class ParametersServiceTest {
 				.filter(param -> param.getName().equals("inputData"))
 				.collect(Collectors.toList());
 		
-		//Check there are 4 input data parameters
-		assertTrue(inputDataParameters.size() == 6);
+		assertEquals(6, inputDataParameters.size());
 		
 		testQuestionnaireResponseIsCorrect(inputDataParameters);
 		testObservationIsCorrect(inputDataParameters);
@@ -320,8 +348,8 @@ public class ParametersServiceTest {
 			.filter(param -> param.getResource() instanceof MedicationAdministration)
 			.map(param -> (MedicationAdministration) param.getResource())
 			.collect(Collectors.toList());
-		
-		assertTrue(medications.size() == 1);
+
+		assertEquals(1, medications.size());
 		
 		MedicationAdministration medication = medications.get(0);
 		
@@ -329,7 +357,7 @@ public class ParametersServiceTest {
 		assertEquals(MedicationAdministrationStatus.COMPLETED, medication.getStatus());
 		assertNull(medication.getId());
 		assertNotNull(medication.getMedicationCodeableConcept());
-		assertTrue(medication.getMedicationCodeableConcept().getCoding().size() == 1);
+		assertEquals(1, medication.getMedicationCodeableConcept().getCoding().size());
 		assertEquals("123456", medication.getMedicationCodeableConcept().getCodingFirstRep().getCode());
 		assertEquals("Test Medication", medication.getMedicationCodeableConcept().getCodingFirstRep().getDisplay());
 		assertFalse(medication.getNotGiven());
@@ -342,8 +370,8 @@ public class ParametersServiceTest {
 			.filter(param -> param.getResource() instanceof Immunization)
 			.map(param -> (Immunization) param.getResource())
 			.collect(Collectors.toList());
-		
-		assertTrue(immunizations.size() == 1);
+
+		assertEquals(1, immunizations.size());
 		
 		Immunization immunization = immunizations.get(0);
 		
@@ -351,7 +379,7 @@ public class ParametersServiceTest {
 		assertEquals(ImmunizationStatus.COMPLETED, immunization.getStatus());
 		assertNull(immunization.getId());
 		assertNotNull(immunization.getVaccineCode());
-		assertTrue(immunization.getVaccineCode().getCoding().size() == 1);
+		assertEquals(1, immunization.getVaccineCode().getCoding().size());
 		assertEquals("123456", immunization.getVaccineCode().getCodingFirstRep().getCode());
 		assertEquals("Test Immunization", immunization.getVaccineCode().getCodingFirstRep().getDisplay());
 		assertTrue(immunization.getNotGiven());
@@ -365,8 +393,8 @@ public class ParametersServiceTest {
 			.filter(param -> param.getResource() instanceof Observation)
 			.map(param -> (Observation) param.getResource())
 			.collect(Collectors.toList());
-		
-		assertTrue(observations.size() == 3);
+
+		assertEquals(3, observations.size());
 		
 		Observation observation = observations.get(2);
 		
@@ -374,7 +402,7 @@ public class ParametersServiceTest {
 		assertEquals(ObservationStatus.FINAL, observation.getStatus());
 		assertNull(observation.getId());
 		assertNotNull(observation.getCode());
-		assertTrue(observation.getCode().getCoding().size() == 1);
+		assertEquals(1, observation.getCode().getCoding().size());
 		assertEquals("123456", observation.getCode().getCodingFirstRep().getCode());
 		assertEquals("Test Observation", observation.getCode().getCodingFirstRep().getDisplay());
 		assertTrue(observation.getValueBooleanType().booleanValue());
@@ -388,8 +416,8 @@ public class ParametersServiceTest {
 			.filter(param -> param.getResource() instanceof QuestionnaireResponse)
 			.map(param -> (QuestionnaireResponse) param.getResource())
 			.collect(Collectors.toList());
-		
-		assertTrue(questionnaireResponses.size() == 1);
+
+		assertEquals(1, questionnaireResponses.size());
 		
 		QuestionnaireResponse questionnaireResponse = questionnaireResponses.get(0);
 		
@@ -397,16 +425,16 @@ public class ParametersServiceTest {
 		assertNotNull(questionnaireResponse.getQuestionnaire());
 		assertEquals("Questionnaire/1", questionnaireResponse.getQuestionnaire().getReference());
 		assertEquals(QuestionnaireResponseStatus.COMPLETED, questionnaireResponse.getStatus());
-		
-		assertTrue(questionnaireResponse.getItem().size() == 1);
+
+		assertEquals(1, questionnaireResponse.getItem().size());
 		
 		QuestionnaireResponseItemComponent item = questionnaireResponse.getItemFirstRep();
 		
 		assertNotNull(item);
 		assertEquals("1", item.getLinkId());
 		assertEquals("Test question", item.getText());
-		
-		assertTrue(item.getAnswer().size() == 1);
+
+		assertEquals(1, item.getAnswer().size());
 		
 		QuestionnaireResponseItemAnswerComponent answer = item.getAnswerFirstRep();
 		
@@ -421,8 +449,8 @@ public class ParametersServiceTest {
 		List<ParametersParameterComponent> requestIdParams = parameterComponents.stream()
 				.filter(param -> param.getName().equals("requestId"))
 				.collect(Collectors.toList());
-		
-		assertTrue(requestIdParams.size() == 1);
+
+		assertEquals(1, requestIdParams.size());
 		assertNotNull(requestIdParams.get(0).getValue());
 		assertEquals("1", requestIdParams.get(0).getValue().primitiveValue());
 	}
@@ -435,7 +463,7 @@ public class ParametersServiceTest {
 				.collect(Collectors.toList());
 		
 		//Check not null and has resource
-		assertTrue(inputParams.size() == 1);
+		assertEquals(1, inputParams.size());
 		assertNotNull(inputParams.get(0).getResource());
 		
 		//Get inputParameters
@@ -444,19 +472,19 @@ public class ParametersServiceTest {
 		List<ParametersParameterComponent> inputParamComponents = inputParamsResource.getParameter();
 		
 		//Check inputParameters has 1 parameter - "context"
-		assertTrue(inputParamComponents.size() == 1);
+		assertEquals(1, inputParamComponents.size());
 		assertEquals("context", inputParamComponents.get(0).getName());
 		
 		List<ParametersParameterComponent> contextParams = inputParamComponents.get(0).getPart();
 				
 		//Check context parameters has two parameters
-		assertTrue(contextParams.size() == 2);
+		assertEquals(2, contextParams.size());
 		
 		List<ParametersParameterComponent> skillsetParams = contextParams.stream()
 				.filter(param -> param.getName().equals("skillset"))
 				.collect(Collectors.toList());
-		
-		assertTrue(skillsetParams.size() == 1);
+
+		assertEquals(1, skillsetParams.size());
 		assertNotNull(skillsetParams.get(0).getValue());
 		
 		//Check skillset parameter is correct
@@ -465,8 +493,8 @@ public class ParametersServiceTest {
 		List<ParametersParameterComponent> partyParams = contextParams.stream()
 				.filter(param -> param.getName().equals("party"))
 				.collect(Collectors.toList());
-		
-		assertTrue(partyParams.size() == 1);
+
+		assertEquals(1, partyParams.size());
 		assertNotNull(partyParams.get(0).getValue());
 		
 		//Check party parameter is correct
@@ -477,8 +505,8 @@ public class ParametersServiceTest {
 		List<ParametersParameterComponent> patientParams = parameterComponents.stream()
 				.filter(param -> param.getName().equals("patient"))
 				.collect(Collectors.toList());
-		
-		assertTrue(patientParams.size() == 1);
+
+		assertEquals(1, patientParams.size());
 		assertNotNull(patientParams.get(0).getResource());
 		
 		Patient patient = (Patient) patientParams.get(0).getResource();

@@ -22,7 +22,7 @@ public final class SystemConstants {
 	public static final String USERTYPE = "userType";
 	public static final String USERLANGUAGE = "userLanguage";
 	public static final String USERTASKCONTEXT = "userTaskContext";
-	public static final String RECIEVINGPERSON = "receivingPerson";
+	public static final String RECEIVINGPERSON = "receivingPerson";
 	public static final String RECIPIENTTYPE = "recipientType";
 	public static final String RECIPIENTLANGUAGE = "recipientLanguage";
 	public static final String SETTING = "setting";
