@@ -62,4 +62,4 @@ VALUES
 INSERT INTO
  cdss_decoupling.user_cdss_supplier (username, cdss_supplier_id)
 VALUES
- ('cdss-supplier', 1);
+ ('admin', 1);

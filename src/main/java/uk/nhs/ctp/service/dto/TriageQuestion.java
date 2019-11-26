@@ -25,9 +25,9 @@ public class TriageQuestion {
 	private List<TriageQuestion> subQuestions;
 
 	private String responseString;
-	private String responseInterger;
+	private String responseInteger;
 	private String responseDecimal;
-	private String responceBoolean;
+	private String responseBoolean;
 	private String responseDate;
 	private String responseAttachment;
 	private String responseAttachmentInitial;
@@ -36,12 +36,12 @@ public class TriageQuestion {
 	private String enableWhenQuestionnaireId;
 	private boolean enableWhenAnswer;
 
-	public String getResponseInterger() {
-		return responseInterger;
+	public String getResponseInteger() {
+		return responseInteger;
 	}
 
-	public void setResponseInterger(String responseInterger) {
-		this.responseInterger = responseInterger;
+	public void setResponseInteger(String responseInteger) {
+		this.responseInteger = responseInteger;
 	}
 
 	public String getResponseDecimal() {
@@ -52,12 +52,12 @@ public class TriageQuestion {
 		this.responseDecimal = responseDecimal;
 	}
 
-	public String getResponceBoolean() {
-		return responceBoolean;
+	public String getResponseBoolean() {
+		return responseBoolean;
 	}
 
-	public void setResponceBoolean(String responceBoolean) {
-		this.responceBoolean = responceBoolean;
+	public void setResponseBoolean(String responseBoolean) {
+		this.responseBoolean = responseBoolean;
 	}
 
 	public String getResponseDate() {

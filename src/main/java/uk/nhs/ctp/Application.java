@@ -1,5 +1,6 @@
 package uk.nhs.ctp;
 
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -21,6 +22,7 @@ import org.hl7.fhir.dstu3.model.CareConnectProcedure;
 import org.hl7.fhir.dstu3.model.CareConnectProcedureRequest;
 import org.hl7.fhir.dstu3.model.CareConnectRelatedPerson;
 import org.hl7.fhir.dstu3.model.CareConnectSpecimen;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -44,6 +46,9 @@ import ca.uhn.fhir.parser.IParser;
 @SpringBootApplication
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class Application extends SpringBootServletInitializer {
+
+	@Value("${fhir.server:http://localhost:8084/fhir}")
+	private String fhirServer;
 
 	@Override
 	protected SpringApplicationBuilder configure(final SpringApplicationBuilder builder) {
@@ -187,6 +192,12 @@ public class Application extends SpringBootServletInitializer {
 	@Bean
 	public SimpleDateFormat reportDateFormat() {
 		return new SimpleDateFormat("yyyyMMddHHmmss");
+	}
+
+
+	@Bean()
+	public IGenericClient fhirClient() {
+		return fhirContext().newRestfulGenericClient(fhirServer);
 	}
 
 }
