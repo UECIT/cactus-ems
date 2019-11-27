@@ -7,6 +7,8 @@ public class ServiceDefinitionDTO {
 	private String serviceDefinitionId;
 	private String description;
 
+	public ServiceDefinitionDTO() {	}
+
 	public ServiceDefinitionDTO(ServiceDefinition sd) {
 		this.setDescription(sd.getDescription());
 		this.setServiceDefinitionId(sd.getServiceDefinitionId());
