@@ -431,4 +431,10 @@ export class QuestionnaireComponent implements OnInit {
     }
     this.reports = reports.reverse();
   }
+
+  hasDraftCareAdvice(careAdvice: any[]) {
+    return careAdvice.find(advice => {
+      return advice.status === 'draft';
+    });
+  }
 }

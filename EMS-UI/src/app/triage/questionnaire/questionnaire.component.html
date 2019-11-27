@@ -125,7 +125,7 @@
         </div>
     </div>
 
-    <div class="row bar" *ngIf="questionnaire.referralRequest && questionnaire.referralRequest.status == 'draft'">
+    <div class="row bar" *ngIf="(questionnaire.referralRequest && questionnaire.referralRequest.status == 'draft') || hasDraftCareAdvice(questionnaire.careAdvice)">
     <div class="result">
     <mat-card style="padding-right: 30px;">
         <mat-card-title class="col-12">Interim Result: {{ questionnaire.result }} 

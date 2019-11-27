@@ -14,6 +14,7 @@ public class CarePlanDTO {
 	private String system;
 	private String code;
 	private String text;
+	private String status;
 
 	private ArrayList<ActivityDTO> activities;
 	private ArrayList<SupportingInfoDTO> supportingInfo;
@@ -25,6 +26,10 @@ public class CarePlanDTO {
 
 	public CarePlanDTO(CarePlan carePlan) {
 		super();
+
+		if (carePlan.getStatus() != null) {
+			this.setStatus(carePlan.getStatus().toCode());
+		}
 
 		if (carePlan.getTitle() != null) {
 			this.setTitle(carePlan.getTitle());
@@ -142,4 +147,11 @@ public class CarePlanDTO {
 		this.notes = notes;
 	}
 
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
 }
