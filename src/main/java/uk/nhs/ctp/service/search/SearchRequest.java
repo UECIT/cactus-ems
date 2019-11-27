@@ -16,7 +16,7 @@ public abstract class SearchRequest extends PageRequest {
 	}
 	
 	private static Sort createSort(Collection<SearchSort> sorts) {
-		return new Sort(sorts.stream().map(sort -> 
+		return Sort.by(sorts.stream().map(sort ->
 			new Order(sort.getDirection(), sort.getSortField().getFieldName()))
 				.collect(Collectors.toList()));
 	}

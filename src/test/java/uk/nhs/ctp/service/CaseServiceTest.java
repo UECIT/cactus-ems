@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.Optional;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.Immunization;
@@ -94,8 +95,8 @@ public class CaseServiceTest {
 		caseImmunization = mock(CaseImmunization.class);
 		caseMedication = mock(CaseMedication.class);
 		triageCase = mock(Cases.class);
-		
-		when(mockCaseRepository.findOne(1L)).thenReturn(triageCase);
+
+		when(mockCaseRepository.findById(1L)).thenReturn(Optional.of(triageCase));
 		when(mockCaseRepository.save(any(Cases.class))).thenReturn(triageCase);
 		when(observation.getValue()).thenReturn(new BooleanType(true));
 		doReturn(caseObservation).when(spyCaseService).createCaseObservation(observation);

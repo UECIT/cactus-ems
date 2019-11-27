@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
@@ -157,7 +158,7 @@ public class ParametersServiceTest {
 
 	@Test
 	public void testParametersCreatedCorrectlyWithNoCaseDataStored() {
-		when(mockCaseRepository.findOne(1L)).thenReturn(caseWithNoData);
+		when(mockCaseRepository.findById(1L)).thenReturn(Optional.of(caseWithNoData));
 
 		Parameters parameters = parametersService.getEvaluateParameters(
 				1L,
@@ -179,7 +180,7 @@ public class ParametersServiceTest {
 	
 	@Test
 	public void testParametersCreatedCorrectlyWithNoCaseDataStoredAndQuestionAnswered() throws FHIRException {
-		when(mockCaseRepository.findOne(1L)).thenReturn(caseWithNoData);
+		when(mockCaseRepository.findById(1L)).thenReturn(Optional.of(caseWithNoData));
 		
 		Parameters parameters = parametersService.getEvaluateParameters(
 				1L,
@@ -211,7 +212,7 @@ public class ParametersServiceTest {
 	
 	@Test
 	public void testParametersCreatedCorrectlyWithCaseImmunizationStored() {
-		when(mockCaseRepository.findOne(1L)).thenReturn(caseWithImmunization);
+		when(mockCaseRepository.findById(1L)).thenReturn(Optional.of(caseWithImmunization));
 
 		Parameters parameters = parametersService.getEvaluateParameters(
 				1L,
@@ -243,7 +244,7 @@ public class ParametersServiceTest {
 	
 	@Test
 	public void testParametersCreatedCorrectlyWithCaseMedicationStored() throws FHIRException {
-		when(mockCaseRepository.findOne(1L)).thenReturn(caseWithMedication);
+		when(mockCaseRepository.findById(1L)).thenReturn(Optional.of(caseWithMedication));
 
 		Parameters parameters = parametersService.getEvaluateParameters(
 				1L,
@@ -275,7 +276,7 @@ public class ParametersServiceTest {
 	
 	@Test
 	public void testParametersCreatedCorrectlyWithCaseObservationStored() throws FHIRException {
-		when(mockCaseRepository.findOne(1L)).thenReturn(caseWithObservation);
+		when(mockCaseRepository.findById(1L)).thenReturn(Optional.of(caseWithObservation));
 
 		Parameters parameters = parametersService.getEvaluateParameters(
 				1L,
@@ -307,7 +308,7 @@ public class ParametersServiceTest {
 
 	@Test
 	public void testParametersCreatedCorrectlyWithCaseDataStoredAndQuestionAnswered() throws FHIRException {
-		when(mockCaseRepository.findOne(1L)).thenReturn(caseWithData);
+		when(mockCaseRepository.findById(1L)).thenReturn(Optional.of(caseWithData));
 
 		Parameters parameters = parametersService.getEvaluateParameters(
 				1L,

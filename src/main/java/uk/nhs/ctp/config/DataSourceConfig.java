@@ -1,8 +1,12 @@
 package uk.nhs.ctp.config;
 
+import com.mysql.cj.conf.PropertyKey;
+import com.mysql.cj.jdbc.Driver;
+import com.zaxxer.hikari.util.DriverDataSource;
+import java.util.Properties;
 import javax.persistence.EntityManagerFactory;
 
-import org.apache.tomcat.jdbc.pool.DataSource;
+import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,8 +17,6 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
-
-import com.mysql.jdbc.Driver;
 
 @Configuration
 @EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", transactionManagerRef = "transactionManager", basePackages = "uk.nhs.ctp")
@@ -32,17 +34,13 @@ public class DataSourceConfig {
 	@Value("${datasource.showSql:false}")
 	private boolean showSql;
 
-	@Bean(destroyMethod = "close")
-	public DataSource dataSource() {
-		final DataSource dataSource = new DataSource();
+	@Bean()
+	public DriverDataSource dataSource() {
+		Properties properties = new Properties();
+		final DriverDataSource dataSource = new DriverDataSource(dataSourceUrl, Driver.class.getName(), properties, username, password);
 		
-		dataSource.setUrl(dataSourceUrl);
-		dataSource.setUsername(username);
-		dataSource.setPassword(password);
-		
-		dataSource.setDriverClassName(Driver.class.getName());
-		dataSource.setValidationQuery("select 1 as dbcp_connection_test");
-		dataSource.setTestOnBorrow(true);
+//		dataSource.setValidationQuery("select 1 as dbcp_connection_test");
+//		dataSource.setTestOnBorrow(true);
 
 		return dataSource;
 	}

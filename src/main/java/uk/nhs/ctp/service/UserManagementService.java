@@ -33,14 +33,14 @@ public class UserManagementService {
 	private CdssSupplierService cdssSupplierService;
 
 	public UserDTO getUserByUsername(String username) throws NotFoundException {
-		UserEntity userEntity = userRepository.findOne(username);
+		UserEntity userEntity = userRepository.findByUsername(username);
 		ErrorHandlingUtils.checkEntityExists(userEntity, "User");
 
 		return convertToUserDTO(userEntity);
 	}
 
 	public UserEntity updateUser(UserDTO userDTO) throws Exception {
-		UserEntity userEntity = userRepository.findOne(userDTO.getUsername());
+		UserEntity userEntity = userRepository.findByUsername(userDTO.getUsername());
 		ErrorHandlingUtils.checkEntityExists(userEntity, "User");
 
 		setUserDetails(userDTO, userEntity);
@@ -110,7 +110,7 @@ public class UserManagementService {
 	}
 
 	public void deleteUser(String username) {
-		userRepository.delete(username);
+		userRepository.deleteById(username);
 	}
 
 	public List<String> getExistingUsernames() {
