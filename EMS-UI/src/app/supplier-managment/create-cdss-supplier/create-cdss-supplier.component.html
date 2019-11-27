@@ -35,6 +35,16 @@
       </div>
 
       <div>
+        <mat-form-field class="">
+          <input matInput placeholder="Service Definition Id e.g. CD1" formControlName="serviceDefinitionId">
+        </mat-form-field>
+        <mat-form-field class="">
+          <input matInput placeholder="Service Description e.g. Headache" formControlName="serviceDescription">
+        </mat-form-field>
+        <span class="actionButton" (click)="addSeviceDefinition(formData.value)">Add Service Definition</span>
+      </div>
+
+      <div>
         <p title="Defines how referenced resources will be defined in the $evaluate request">
           Reference types:
         </p>
@@ -43,16 +53,6 @@
           <mat-button-toggle value="BundledReferences">Bundled</mat-button-toggle>
           <mat-button-toggle value="ContainedReferences">Contained</mat-button-toggle>
         </mat-button-toggle-group>
-      </div>
-
-      <div>
-        <mat-form-field class="">
-          <input matInput placeholder="Service Definition Id e.g. CD1" formControlName="serviceDefinitionId">
-        </mat-form-field>
-        <mat-form-field class="">
-          <input matInput placeholder="Service Description e.g. Headache" formControlName="serviceDescription">
-        </mat-form-field>
-        <span class="actionButton" (click)="addSeviceDefinition(formData.value)">Add Service Definition</span>
       </div>
 
       <div class="buttons">
