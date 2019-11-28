@@ -50,13 +50,14 @@ public class CdssService {
 	private IParser fhirParser;
 
 	private HttpHeaders headers;
+
+	@Autowired
 	private RestTemplate restTemplate;
 
 	public CdssService() {
 		headers = new HttpHeaders();
 		headers.setContentType(MediaType.valueOf(SystemConstants.APPLICATION_FHIR_JSON));
 		headers.add("Authorization", SystemConstants.AUTH_TOKEN);
-		restTemplate = new RestTemplate();
 	}
 
 	/**
