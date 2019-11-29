@@ -7,8 +7,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.List;
-
 import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CareConnectObservation;
@@ -33,7 +31,6 @@ import org.hl7.fhir.dstu3.model.Person;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.SystemURL;
 import uk.nhs.ctp.entities.CaseImmunization;
@@ -83,7 +79,8 @@ public class ParametersService {
 			TriageQuestion[] questionResponse,
 			SettingsDTO settings,
 			Boolean amending,
-			ReferencingContext referencingContext) {
+			ReferencingContext referencingContext,
+			String questionnaireId) {
 
 		var storageService = storageServiceFactory.load(referencingContext);
 
@@ -105,7 +102,7 @@ public class ParametersService {
 
 		setObservations(caseEntity, parameters);
 		setContext(caseEntity, parameters);
-		setQuestionnaireResponse(questionResponse, parameters, amending, storageService);
+		setQuestionnaireResponse(questionResponse, parameters, amending, storageService, questionnaireId);
 		addObservationInputData(caseEntity, parameters);
 		addImmunizationInputData(caseEntity, parameters);
 		addMedicationInputData(caseEntity, parameters);
@@ -336,11 +333,11 @@ public class ParametersService {
 			TriageQuestion[] questionResponse,
 			Parameters parameters,
 			Boolean amending,
-			ReferenceStorageService storageService) {
+			ReferenceStorageService storageService, String questionnaireId) {
 		if (questionResponse != null) {
 			QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse()
 					.setQuestionnaire(new Reference(new IdType(SystemConstants.QUESTIONNAIRE,
-							questionResponse[0].getQuestionnaireId().replace("#", ""))));
+							questionnaireId.replace("#", ""))));
 			questionnaireResponse.setStatus(amending
 					? QuestionnaireResponseStatus.AMENDED
 					: QuestionnaireResponseStatus.COMPLETED);

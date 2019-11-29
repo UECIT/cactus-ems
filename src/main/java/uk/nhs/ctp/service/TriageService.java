@@ -179,7 +179,8 @@ public class TriageService {
 				requestDetails.getQuestionResponse(),
 				requestDetails.getSettings(),
 				requestDetails.isAmendingPrevious(),
-				referencingContext);
+				referencingContext,
+				requestDetails.getQuestionnaireId());
 
 		Resource resource = cdssService.evaluateServiceDefinition(
 				parameters,

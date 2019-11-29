@@ -2,6 +2,7 @@ package uk.nhs.ctp.service.dto;
 
 public class CdssRequestDTO {
 
+	private String questionnaireId;
 	private Long caseId;
 	private Long cdssSupplierId;
 	private String serviceDefinitionId;
@@ -57,4 +58,11 @@ public class CdssRequestDTO {
 		this.amendingPrevious = amendingPrevious;
 	}
 
+	public String getQuestionnaireId() {
+		return questionnaireId;
+	}
+
+	public void setQuestionnaireId(String questionnaireId) {
+		this.questionnaireId = questionnaireId;
+	}
 }

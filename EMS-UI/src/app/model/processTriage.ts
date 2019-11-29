@@ -2,6 +2,7 @@ import { Options } from './questionnaire';
 import { Settings } from './settings';
 
 export class ProcessTriage {
+  questionnaireId: string;
   caseId: number;
   cdssSupplierId: number;
   questionResponse: QuestionnaireResponse[];

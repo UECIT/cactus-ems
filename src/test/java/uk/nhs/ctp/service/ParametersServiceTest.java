@@ -164,7 +164,7 @@ public class ParametersServiceTest {
 				null,
 				settings,
 				false,
-				referencingContext);
+				referencingContext, "");
 		
 		assertNotNull(parameters);
 		
@@ -186,7 +186,7 @@ public class ParametersServiceTest {
 				questionResponses,
 				settings,
 				false,
-				referencingContext);
+				referencingContext, "1");
 
 		assertNotNull(parameters);
 		
@@ -218,7 +218,7 @@ public class ParametersServiceTest {
 				null,
 				settings,
 				false,
-				referencingContext);
+				referencingContext, "");
 
 		assertNotNull(parameters);
 		
@@ -250,7 +250,7 @@ public class ParametersServiceTest {
 				null,
 				settings,
 				false,
-				referencingContext);
+				referencingContext, "");
 
 		assertNotNull(parameters);
 		
@@ -282,7 +282,7 @@ public class ParametersServiceTest {
 				null,
 				settings,
 				false,
-				referencingContext);
+				referencingContext, "");
 
 		assertNotNull(parameters);
 		
@@ -314,7 +314,7 @@ public class ParametersServiceTest {
 				questionResponses,
 				settings,
 				false,
-				referencingContext);
+				referencingContext, "1");
 
 		assertNotNull(parameters);
 		
