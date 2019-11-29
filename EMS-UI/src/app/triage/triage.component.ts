@@ -99,7 +99,11 @@ export class TriageComponent implements OnInit {
       this.triage.questionResponse = new Array();
 
       // Add blank questions
+      if (!this.answerSelected) {
+        this.answerSelected = new Array();
+      }
       this.questionnaire.triageQuestions.forEach(question => {
+        this.triage.questionnaireId = question.questionnaireId;
         this.answerSelected.forEach(answer => {
           if (
             question !== answer.triageQuestion &&

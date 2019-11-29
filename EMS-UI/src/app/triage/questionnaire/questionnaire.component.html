@@ -74,6 +74,17 @@
                         </mat-form-field>
                     </div>        
                 </form>
+
+                <form #form="ngForm" class="col-12" *ngIf="triageQuestion.questionType == 'DISPLAY'">
+                    <div class="answers">
+                            <mat-card class="example-full-width col-8">
+                                <mat-card-content>
+                                    <p><strong>Text:</strong> {{triageQuestion.question}}</p>   
+                                </mat-card-content>
+                            </mat-card>
+                    </div>
+                </form>
+
                 <form #form="ngForm" class="col-12" *ngIf="triageQuestion.questionType == 'DECIMAL'">
                     <div class="answers">
                         <img *ngIf="hasInitialValue(triageQuestion)" [src]="triageQuestion.responseAttachmentInitial" height="200" style="float:right;">
