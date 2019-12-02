@@ -53,11 +53,12 @@ public class ResponseService {
 		setTriageRequestDetails(caseId, cdssSupplierId, cdssResult.getServiceDefinitionId(), response);
 		if (cdssResult.hasResult()) {
 			setResult(cdssResult.getResult().getActionFirstRep().getResource().getResource(), response);
-			if (cdssResult.hasTrigger()) {
-				response.setSwitchTrigger(cdssResult.getSwitchTrigger());
-			}
 		} else if (questionnaire != null) {
 			setTriageQuestion(questionnaire, response, null);
+		}
+
+		if (cdssResult.hasTrigger()) {
+			response.setSwitchTrigger(cdssResult.getSwitchTrigger());
 		}
 		
 		if (cdssResult.hasReferralRequest()) {
