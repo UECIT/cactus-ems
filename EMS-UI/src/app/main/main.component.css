@@ -23,6 +23,12 @@ nav {
   background-color: rgba(214, 220, 226, 0.74);
 }
 
+.supplierGroup {
+  margin: 30px;
+  padding: 10px 30px;
+  background-color: #f8f8f8;
+}
+
 .btnSearch {
   flex: 0 0 20%;
   min-width: 170px;

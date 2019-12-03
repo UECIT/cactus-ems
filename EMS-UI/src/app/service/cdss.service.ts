@@ -1,9 +1,11 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { environment } from '../../environments/environment';
-import { CdssSupplier, ReferencingTypes } from '../model/cdssSupplier';
-import { Token } from '../model/token';
-import { SessionStorage } from 'h5webstorage';
+import {Injectable} from '@angular/core';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {environment} from '../../environments/environment';
+import {CdssSupplier, ReferencingTypes, ServiceDefinition} from '../model/cdssSupplier';
+import {Token} from '../model/token';
+import {SessionStorage} from 'h5webstorage';
+import {ToastrService} from 'ngx-toastr';
+import {Observable} from "rxjs";
 
 const httpOptions = {
   headers: new HttpHeaders()
@@ -15,24 +17,42 @@ const httpOptions = {
 export class CdssService {
   tokenInfo: Token;
 
-  constructor(private http: HttpClient, private sessionStorage: SessionStorage) {}
+  constructor(private http: HttpClient, private sessionStorage: SessionStorage, private toastr: ToastrService) {
+  }
 
-  getCdssSuppliers() {
+  getCdssSuppliers(): Observable<CdssSupplier[]> {
     if (this.sessionStorage['auth_token'] != null) {
       httpOptions.headers = httpOptions.headers.set(
-        'Authorization',
-        this.sessionStorage['auth_token']
+          'Authorization',
+          this.sessionStorage['auth_token']
       );
       const url = `${environment.EMS_API}/cdss`;
       return this.http.get<CdssSupplier[]>(url, httpOptions);
     }
   }
 
+  async listServiceDefinitions(cdssId: number): Promise<ServiceDefinition[]> {
+    if (this.sessionStorage['auth_token'] != null) {
+      try {
+        httpOptions.headers = httpOptions.headers.set(
+            'Authorization',
+            this.sessionStorage['auth_token']
+        );
+        const url = `${environment.EMS_API}/cdss/${cdssId}/ServiceDefinition?_summary=true`;
+        return await this.http.get<ServiceDefinition[]>(url, httpOptions).toPromise();
+      } catch (err) {
+        this.toastr.error(
+            err.error.target.__zone_symbol__xhrURL + ' - ' +
+            err.message);
+      }
+    }
+  }
+
   getCdssSuppliersUnfiltered() {
     if (this.sessionStorage['auth_token'] != null) {
       httpOptions.headers = httpOptions.headers.set(
-        'Authorization',
-        this.sessionStorage['auth_token']
+          'Authorization',
+          this.sessionStorage['auth_token']
       );
       const url = `${environment.EMS_API}/cdss?admin=true`;
       return this.http.get<CdssSupplier[]>(url, httpOptions);
@@ -42,8 +62,8 @@ export class CdssService {
   getCdssSupplier(id: any) {
     if (this.sessionStorage['auth_token'] != null) {
       httpOptions.headers = httpOptions.headers.set(
-        'Authorization',
-        this.sessionStorage['auth_token']
+          'Authorization',
+          this.sessionStorage['auth_token']
       );
       const url = `${environment.EMS_API}/cdss/${id}`;
       return this.http.get<CdssSupplier>(url, httpOptions).toPromise();
@@ -53,12 +73,12 @@ export class CdssService {
   createCdssSupplier(cdssSupplier: CdssSupplier) {
     if (this.sessionStorage['auth_token'] != null) {
       httpOptions.headers = httpOptions.headers.set(
-        'Authorization',
-        this.sessionStorage['auth_token']
+          'Authorization',
+          this.sessionStorage['auth_token']
       );
       httpOptions.headers = httpOptions.headers.set(
-        'Content-Type',
-        'application/json'
+          'Content-Type',
+          'application/json'
       );
       const dto = {
         ...cdssSupplier,
@@ -66,9 +86,9 @@ export class CdssService {
       };
       const url = `${environment.EMS_API}/cdss`;
       return this.http.post<CdssSupplier>(
-        url,
-        JSON.stringify(dto),
-        httpOptions
+          url,
+          JSON.stringify(dto),
+          httpOptions
       );
     }
   }
@@ -76,12 +96,12 @@ export class CdssService {
   updateCdssSupplier(cdssSupplier: CdssSupplier) {
     if (this.sessionStorage['auth_token'] != null) {
       httpOptions.headers = httpOptions.headers.set(
-        'Authorization',
-        this.sessionStorage['auth_token']
+          'Authorization',
+          this.sessionStorage['auth_token']
       );
       httpOptions.headers = httpOptions.headers.set(
-        'Content-Type',
-        'application/json'
+          'Content-Type',
+          'application/json'
       );
       const url = `${environment.EMS_API}/cdss`;
       return this.http.put(url, JSON.stringify(cdssSupplier), httpOptions);
@@ -91,12 +111,12 @@ export class CdssService {
   deleteCdssSupplier(cdssSupplierId: String) {
     if (this.sessionStorage['auth_token'] != null) {
       httpOptions.headers = httpOptions.headers.set(
-        'Authorization',
-        this.sessionStorage['auth_token']
+          'Authorization',
+          this.sessionStorage['auth_token']
       );
       httpOptions.headers = httpOptions.headers.set(
-        'Content-Type',
-        'application/json'
+          'Content-Type',
+          'application/json'
       );
       const url = `${environment.EMS_API}/cdss/${cdssSupplierId}`;
       return this.http.delete<CdssSupplier>(url, httpOptions);

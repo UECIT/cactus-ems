@@ -9,12 +9,17 @@ public class ServiceDefinitionDTO {
 
 	public ServiceDefinitionDTO() {	}
 
-	public ServiceDefinitionDTO(ServiceDefinition sd) {
-		this.setDescription(sd.getDescription());
-		this.setServiceDefinitionId(sd.getServiceDefinitionId());
+	public ServiceDefinitionDTO(ServiceDefinition serviceDefinition) {
+		this.description = serviceDefinition.getDescription();
+		this.serviceDefinitionId = serviceDefinition.getServiceDefinitionId();
 	}
 
-	public String getServiceDefinitionId() {
+	public ServiceDefinitionDTO(org.hl7.fhir.dstu3.model.ServiceDefinition serviceDefinition) {
+		this.description = serviceDefinition.getDescription();
+		this.serviceDefinitionId = serviceDefinition.getIdElement().getIdPart();
+	}
+
+  public String getServiceDefinitionId() {
 		return serviceDefinitionId;
 	}
 
