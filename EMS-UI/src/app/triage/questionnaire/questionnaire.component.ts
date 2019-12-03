@@ -433,6 +433,10 @@ export class QuestionnaireComponent implements OnInit {
   }
 
   hasDraftCareAdvice(careAdvice: any[]) {
+    if (!careAdvice) {
+      return false;
+    }
+
     return careAdvice.find(advice => {
       return advice.status === 'draft';
     });
