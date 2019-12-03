@@ -15,9 +15,9 @@ import { ToastrService } from 'ngx-toastr';
   styleUrls: ['./service-definition.component.css']
 })
 export class ServiceDefinitionComponent implements OnInit, OnChanges {
-  @Input() selectedSupplier: CdssSupplier;
-  @Input() selectedServiceDefinition: String;
-  @Input() selectedQueryType: String;
+  @Input() selectedSupplier: number;
+  @Input() selectedServiceDefinition: string;
+  @Input() selectedQueryType: string;
 
   CdssUrl: any;
   serviceDefinition: any;
@@ -35,7 +35,7 @@ export class ServiceDefinitionComponent implements OnInit, OnChanges {
     if (changes.selectedSupplier !== undefined) {
       if (changes.selectedSupplier.currentValue !== undefined) {
         this.CdssUrl = await this.serviceDefinitionService.getCdssSupplierUrl(
-          changes.selectedSupplier.currentValue.id
+          changes.selectedSupplier.currentValue
         ).catch(err => {
           this.toastr.error(
             err.error.target.__zone_symbol__xhrURL + ' - ' +

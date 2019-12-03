@@ -3,13 +3,13 @@
         <div class="container">
 
             <div class="row bar">
-                <span class="col-12 question" style="font-weight: bold;">
+                <div class="col-12 question" style="font-weight: bold;">
                     {{ triageQuestion.question }} 
                     <span *ngFor="let infomation of triageQuestion.subQuestions">
                         <mat-icon *ngIf="infomation.questionType == 'DISPLAY' && infomation.extension.display == triageQuestion.questionId" matTooltipPosition="after" matTooltip="{{ infomation.question }}">help</mat-icon>
                     </span>
                     <span *ngIf="triageQuestion.required">*Required</span>
-                </span>
+                </div>
             </div>
 
             <div class="answers row">
@@ -31,13 +31,13 @@
                 <form #form="ngForm" class="col-12" *ngIf="triageQuestion.questionType == 'GROUP' && triageQuestion.subQuestions">
                 <div *ngFor="let subQuestion of triageQuestion.subQuestions">
                     <div class="row" *ngIf="subQuestion.questionType == 'CHOICE'">
-                        <span class="col-12 question" style="font-weight: bold;">
+                        <div class="col-12 question" style="font-weight: bold;">
                             {{ subQuestion.question }} 
                             <span *ngFor="let infomation of triageQuestion.subQuestions">
                                 <mat-icon *ngIf="infomation.questionType == 'DISPLAY' && infomation.extension.display == subQuestion.questionId" matTooltipPosition="after" matTooltip="{{ infomation.question }}">help</mat-icon>
                             </span>
                             <span *ngIf="subQuestion.required">*Required</span>
-                        </span>
+                        </div>
                     </div>
 
                     <img *ngIf="hasInitialValue(subQuestion)" [src]="subQuestion.responseAttachmentInitial" height="200" style="float:right;">
@@ -212,9 +212,9 @@
 <ng-template #elseBlock> 
     <div class="container-fluid col-12">
         <div class="row bar col-12">
-            <span class="col-12 question" style="font-weight: bold;">
+            <div class="col-12 question" style="font-weight: bold;">
                 Result
-            </span>
+            </div>
         </div>
         <div class="result">
 

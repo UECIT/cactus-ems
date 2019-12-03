@@ -7,6 +7,8 @@ import { ProcessTriage } from '../model/processTriage';
 import { environment } from '../../environments/environment';
 import 'rxjs/operators/map';
 import {SessionStorage} from 'h5webstorage';
+import {SelectService} from "../model/selectService";
+import {CdssSupplier, ServiceDefinition} from "../model/cdssSupplier";
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -17,7 +19,7 @@ const httpOptions = {
 @Injectable({
   providedIn: 'root'
 })
-export class QuestionnaireService {
+export class TriageService {
   launchTriage: LaunchTriage = new LaunchTriage();
 
   constructor(private http: HttpClient, private sessionStorage: SessionStorage) {}
@@ -67,6 +69,21 @@ export class QuestionnaireService {
       return this.http
         .put<Questionnaire>(url, JSON.stringify(triage), httpOptions)
         .toPromise();
+    }
+  }
+
+  async selectServiceDefinitions(request: SelectService): Promise<CdssSupplier[]>{
+    if (this.sessionStorage['auth_token'] != null) {
+      httpOptions.headers = httpOptions.headers.set(
+          'Authorization',
+          this.sessionStorage['auth_token']
+      );
+      const url = `${environment.EMS_API}/case/serviceDefinitions`;
+      return this.http.post<CdssSupplier[]>(
+          url,
+          JSON.stringify(request),
+          httpOptions
+      ).toPromise();
     }
   }
 }

@@ -20,7 +20,7 @@ import { StoreModule } from '@ngrx/store';
 import { patientReducer } from './reducers/patient.reducer';
 import { tokenReducer } from './reducers/auth-token.reducer';
 import { QuestionnaireComponent } from './triage/questionnaire/questionnaire.component';
-import { QuestionnaireService } from './service/questionnaire.service';
+import { TriageService } from './service/triage.service';
 import { AgePipe } from './pipe/age';
 import { UpdateUsersComponent } from './user-management/update-users/update-users.component';
 import { CreateUsersComponent } from './user-management/create-users/create-users.component';
@@ -124,7 +124,7 @@ export function hljsLanguages() {
     LoginService,
     ManageUsersService,
     PatientService,
-    QuestionnaireService,
+    TriageService,
     CdssService,
     CaseService,
     DosService,

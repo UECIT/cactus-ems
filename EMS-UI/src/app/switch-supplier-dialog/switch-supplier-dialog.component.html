@@ -2,7 +2,8 @@
 <div mat-dialog-content>
   <p>Please select a cdss supplier?</p>
   <mat-form-field>
-    <mat-select placeholder="Cdss Supplier" [(value)]="data.cdssSupplier">
+    <mat-select placeholder="Cdss Supplier" [(value)]="data.cdssSupplier"
+                (selectionChange)="updateServiceDefinitions()">
       <mat-option *ngFor="let cdssSupplier of cdssSuppliers" [value]="cdssSupplier">
         {{cdssSupplier.name}}
       </mat-option>
@@ -12,7 +13,7 @@
   <p *ngIf="data.cdssSupplier != null">Please select a service definition?</p>
   <mat-form-field *ngIf="data.cdssSupplier != null">
     <mat-select placeholder="Service Definition" [(value)]="data.serviceDefinition">
-      <mat-option *ngFor="let serviceDefinition of data.cdssSupplier.serviceDefinitions" [value]="serviceDefinition.serviceDefinitionId">
+      <mat-option *ngFor="let serviceDefinition of serviceDefinitions" [value]="serviceDefinition.serviceDefinitionId">
         {{serviceDefinition.description}}
       </mat-option>
     </mat-select>

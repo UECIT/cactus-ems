@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { QuestionnaireService } from '../service/questionnaire.service';
+import { TriageService } from '../service/triage.service';
 import {
   Questionnaire,
   Options,
@@ -51,7 +51,7 @@ export class TriageComponent implements OnInit {
 
   constructor(
     public router: Router,
-    private questionnaireService: QuestionnaireService,
+    private triageService: TriageService,
     private store: Store<AppState>,
     private caseService: CaseService,
     public dialog: MatDialog,
@@ -79,7 +79,7 @@ export class TriageComponent implements OnInit {
   }
 
   async getQuestionnaire() {
-    this.questionnaire = await this.questionnaireService
+    this.questionnaire = await this.triageService
       .getQuestionnaire(this.patientId)
       .toPromise();
     this.getCaseAndSupplierName(this.questionnaire.caseId);
@@ -110,11 +110,11 @@ export class TriageComponent implements OnInit {
             question.questionType !== 'GROUP'
           ) {
             const questionResponse = new QuestionResponse();
-            const answer = new Options();
-            answer.code = '260413007';
-            answer.display = 'None';
-            answer.extension = null;
-            questionResponse.answer = answer;
+            const qrAnswer = new Options();
+            qrAnswer.code = '260413007';
+            qrAnswer.display = 'None';
+            qrAnswer.extension = null;
+            questionResponse.answer = qrAnswer;
             questionResponse.triageQuestion = question;
 
             if (
@@ -163,7 +163,7 @@ export class TriageComponent implements OnInit {
       this.sessionStorage['cdssSupplierId']
     );
     this.triage.amendingPrevious = this.amendingPrevious;
-    this.questionnaire = await this.questionnaireService.processTriage(
+    this.questionnaire = await this.triageService.processTriage(
       this.triage,
       back
     );
@@ -179,7 +179,7 @@ export class TriageComponent implements OnInit {
       this.triage.serviceDefinitionId = this.sessionStorage['serviceDefinitionId'];
       this.triage.cdssSupplierId = Number.parseInt(
         this.sessionStorage['cdssSupplierId']);
-      this.questionnaire = await this.questionnaireService.processTriage(
+      this.questionnaire = await this.triageService.processTriage(
         this.triage,
         back
       );
