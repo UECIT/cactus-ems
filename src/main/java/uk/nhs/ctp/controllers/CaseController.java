@@ -1,6 +1,5 @@
 package uk.nhs.ctp.controllers;
 
-import java.util.Collections;
 import java.util.List;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +19,7 @@ import uk.nhs.ctp.service.dto.CdssResponseDTO;
 import uk.nhs.ctp.service.dto.CdssSupplierDTO;
 import uk.nhs.ctp.service.dto.ServiceDefinitionSearchDTO;
 import uk.nhs.ctp.service.dto.TriageLaunchDTO;
+import uk.nhs.ctp.service.search.SearchParameters;
 
 @CrossOrigin
 @RestController
@@ -47,21 +47,13 @@ public class CaseController {
 
   @PostMapping(path = "/serviceDefinitions")
   public @ResponseBody
-  List<CdssSupplierDTO> getServiceDefinitions(@RequestBody ServiceDefinitionSearchDTO requestDTO)
-      throws Exception {
+  List<CdssSupplierDTO> getServiceDefinitions(@RequestBody ServiceDefinitionSearchDTO requestDTO) {
+
     // TODO include query parameters based on patient, case and context
-    List<CdssSupplierDTO> serviceDefinitions = cdssService
-        .queryServiceDefinitions("triage", Collections.emptyMap());
-
-    // Only return first SD for each supplier
-    // TODO remove when triage query is finished
-    for (CdssSupplierDTO supplierDTO : serviceDefinitions) {
-      if (!supplierDTO.getServiceDefinitions().isEmpty()) {
-        supplierDTO.setServiceDefinitions(supplierDTO.getServiceDefinitions().subList(0, 1));
-      }
-    }
-
-    return serviceDefinitions;
+    return cdssService
+        .queryServiceDefinitions(new SearchParameters()
+            .withQuery("triage")
+        );
   }
 
   @PutMapping(path = "/")
