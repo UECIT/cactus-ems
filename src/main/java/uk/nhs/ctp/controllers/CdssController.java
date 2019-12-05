@@ -1,6 +1,5 @@
 package uk.nhs.ctp.controllers;
 
-import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -23,6 +22,7 @@ import uk.nhs.ctp.service.CdssSupplierService;
 import uk.nhs.ctp.service.dto.CdssSupplierDTO;
 import uk.nhs.ctp.service.dto.NewCdssSupplierDTO;
 import uk.nhs.ctp.service.dto.ServiceDefinitionDTO;
+import uk.nhs.ctp.service.search.SearchParameters;
 
 @CrossOrigin
 @RestController
@@ -68,10 +68,9 @@ public class CdssController {
   List<ServiceDefinitionDTO> getServiceDefinitions(@PathVariable Long id,
       HttpServletRequest request) {
     // TODO search parameters
-    // TODO use non-triage query
     CdssSupplier cdssSupplier = cdssSupplierService.getCdssSupplier(id);
-    CdssSupplierDTO cdssSupplierDTO = cdssService.queryServiceDefinitions(cdssSupplier,
-        "triage", Collections.emptyMap());
+    CdssSupplierDTO cdssSupplierDTO = cdssService
+        .queryServiceDefinitions(cdssSupplier, new SearchParameters());
     return cdssSupplierDTO.getServiceDefinitions();
   }
 

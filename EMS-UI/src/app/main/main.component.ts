@@ -132,6 +132,7 @@ export class MainComponent implements OnInit {
         this.availableServiceDefinitions = selectedSDs;
       } else {
         this.toastr.info('No available service definitions');
+        this.availableServiceDefinitions = [];
       }
     }
   }

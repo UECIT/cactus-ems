@@ -148,11 +148,13 @@ public class CaseService {
 				}
 			}
 			// add code here to deal with storing any items that do not match the above
-			else {
+			else if (resource instanceof Parameters) {
 				Parameters currentParameters = (Parameters) resource;
 				ParametersParameterComponent currentParameter = currentParameters.getParameterFirstRep();
 				
 				triageCase.addParameter(createCaseParameter(currentParameter));
+			} else {
+				LOG.warn("Unsupported outputParameter type: {}" + resource.getResourceType().name());
 			}
 			
 		});

@@ -3,15 +3,16 @@ package uk.nhs.ctp.service;
 import ca.uhn.fhir.parser.IParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.net.ConnectException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
+import javax.validation.constraints.NotNull;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
@@ -30,7 +31,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.enums.AuditEntryType;
@@ -38,6 +41,7 @@ import uk.nhs.ctp.exception.EMSException;
 import uk.nhs.ctp.repos.CdssSupplierRepository;
 import uk.nhs.ctp.service.dto.CdssSupplierDTO;
 import uk.nhs.ctp.service.dto.ServiceDefinitionDTO;
+import uk.nhs.ctp.service.search.SearchParameters;
 
 @Service
 public class CdssService {
@@ -118,20 +122,23 @@ public class CdssService {
    *
    * @return
    */
-  public List<CdssSupplierDTO> queryServiceDefinitions(String query, Map<String, String> parameters) {
+  public List<CdssSupplierDTO> queryServiceDefinitions(@NotNull SearchParameters parameters) {
     return cdssSupplierRepository.findAll().parallelStream()
-        .map(supplier -> queryServiceDefinitions(supplier, query, parameters))
+        .map(supplier -> queryServiceDefinitions(supplier, parameters))
         .filter(Objects::nonNull)
+        .filter(supplier -> !CollectionUtils.isEmpty(supplier.getServiceDefinitions()))
         .collect(Collectors.toList());
   }
 
-  public CdssSupplierDTO queryServiceDefinitions(CdssSupplier supplier, String query, Map<String, String> parameters) {
-    // TODO pass in query parameters
-    String url = String.format("%s/ServiceDefinition?_query=%s", supplier.getBaseUrl(), query);
+  public CdssSupplierDTO queryServiceDefinitions(
+      @NotNull CdssSupplier supplier, @NotNull SearchParameters parameters) {
 
+    String url = buildSearchUrl(
+        String.format("%s/ServiceDefinition", supplier.getBaseUrl()), parameters);
     CdssSupplierDTO supplierDTO = new CdssSupplierDTO(supplier);
     try {
-      String responseBody = sendHttpRequest(url, HttpMethod.GET, new HttpEntity<>(headers));
+      String responseBody = sendHttpRequest(url, HttpMethod.GET,
+          new HttpEntity<>(headers));
       Bundle bundle = (Bundle) fhirParser.parseResource(responseBody);
 
       List<ServiceDefinitionDTO> serviceDefinitions = bundle.getEntry().stream()
@@ -143,8 +150,19 @@ public class CdssService {
     } catch (Exception e) {
       LOG.error("Unable to fetch service definitions from {}: {}. "
           + "Falling back to local definitions", supplier.getName(), collectMessages(e));
+
+      // Triage search not allowed if search is not supported
+      if ("triage".equals(parameters.getQuery())) {
+        supplierDTO.setServiceDefinitions(Collections.emptyList());
+      }
     }
     return supplierDTO;
+  }
+
+  private String buildSearchUrl(String path, SearchParameters parameters) {
+    UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(path);
+    uriBuilder.queryParams(parameters.toMultiValueMap());
+    return uriBuilder.build().toUriString();
   }
 
   private String collectMessages(Throwable e) {

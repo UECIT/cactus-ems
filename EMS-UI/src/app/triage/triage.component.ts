@@ -178,7 +178,7 @@ export class TriageComponent implements OnInit {
       this.triage.questionResponse = null;
       this.triage.serviceDefinitionId = this.sessionStorage['serviceDefinitionId'];
       this.triage.cdssSupplierId = Number.parseInt(
-        this.sessionStorage['cdssSupplierId']);
+          this.questionnaire.switchTrigger.split('/').shift());
       this.questionnaire = await this.triageService.processTriage(
         this.triage,
         back

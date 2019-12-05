@@ -31,28 +31,29 @@ import uk.nhs.ctp.utils.ResourceProviderUtils;
 public class TriageService {
 	private static final Logger LOG = LoggerFactory.getLogger(TriageService.class);
 
-	@Autowired
-	private CaseService caseService;
+	private final CaseService caseService;
+	private final CdssService cdssService;
+	private final ParametersService parametersService;
+	private final ResponseService responseService;
+	private final AuditService auditService;
+	private final CdssSupplierService cdssSupplierService;
+	private final ReferencingContextFactory referencingContextFactory;
 
-	@Autowired
-	private CdssService cdssService;
-
-	@Autowired
-	private ParametersService parametersService;
-	
-	@Autowired
-	private ResponseService responseService;
-
-	@Autowired
-	private AuditService auditService;
-	
-	@Autowired
-	private CdssSupplierService cdssSupplierService;
-
-	@Autowired
-	private ReferencingContextFactory referencingContextFactory;
-	
 	private Map<Class<?>, ResponseResolver<? extends Resource>> responseResolverMap = new HashMap<>();
+
+	public TriageService(
+			CaseService caseService, CdssService cdssService, ParametersService parametersService,
+			ResponseService responseService, AuditService auditService,
+			CdssSupplierService cdssSupplierService,
+			ReferencingContextFactory referencingContextFactory) {
+		this.caseService = caseService;
+		this.cdssService = cdssService;
+		this.parametersService = parametersService;
+		this.responseService = responseService;
+		this.auditService = auditService;
+		this.cdssSupplierService = cdssSupplierService;
+		this.referencingContextFactory = referencingContextFactory;
+	}
 
 	@Autowired
 	public <T extends Resource> void setResponseResolvers(List<ResponseResolver<T>> responseResolvers) {
