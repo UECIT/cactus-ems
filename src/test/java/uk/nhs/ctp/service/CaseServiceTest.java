@@ -34,6 +34,7 @@ import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.repos.PatientRepository;
 import uk.nhs.ctp.repos.TestScenarioRepository;
+import uk.nhs.ctp.service.factory.ReferenceStorageServiceFactory;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -54,6 +55,9 @@ public class CaseServiceTest {
 	
 	@Mock
 	private TestScenarioRepository mockTestScenarioRepository;
+
+	@Mock
+	private ReferenceStorageServiceFactory referenceStorageServiceFactory;
 	
 	Observation observation;
 	Immunization immunization;
@@ -69,7 +73,12 @@ public class CaseServiceTest {
 	
 	@Before
 	public void setup() {
-		spyCaseService = spy(new CaseService());
+		spyCaseService = spy(new CaseService(
+				mockCaseRepository,
+				mockPatientRepository,
+				mockTestScenarioRepository,
+				referenceStorageServiceFactory
+		));
 		MockitoAnnotations.initMocks(this);
 		observation = mock(Observation.class);
 		immunization = mock(Immunization.class);

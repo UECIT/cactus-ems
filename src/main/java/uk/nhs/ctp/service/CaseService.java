@@ -39,7 +39,6 @@ import uk.nhs.ctp.utils.ErrorHandlingUtils;
 
 @Service
 @AllArgsConstructor
-@NoArgsConstructor
 public class CaseService {
 	private static final Logger LOG = LoggerFactory.getLogger(CaseService.class);
 
