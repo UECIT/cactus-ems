@@ -17,4 +17,8 @@ public class ReferenceStorageServiceFactory {
   public ReferenceStorageService load(ReferencingContext context) {
     return new ReferenceStorageService(fhirClient, context);
   }
+
+  public ReferenceStorageService load() {
+    return new ReferenceStorageService(fhirClient, null);
+  }
 }
