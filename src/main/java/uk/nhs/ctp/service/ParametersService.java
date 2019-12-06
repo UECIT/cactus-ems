@@ -7,6 +7,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
 import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CareConnectObservation;
@@ -45,6 +49,7 @@ import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.CaseParameter;
 import uk.nhs.ctp.entities.Cases;
+import uk.nhs.ctp.entities.QuestionResponse;
 import uk.nhs.ctp.exception.EMSException;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.builder.CareConnectPatientBuilder;
@@ -55,6 +60,7 @@ import uk.nhs.ctp.service.factory.ReferenceStorageServiceFactory;
 import uk.nhs.ctp.utils.ErrorHandlingUtils;
 
 @Service
+@AllArgsConstructor
 public class ParametersService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ParametersService.class);
@@ -63,16 +69,6 @@ public class ParametersService {
 	private CareConnectPatientBuilder careConnectPatientBuilder;
 	private RelatedPersonBuilder relatedPersonBuilder;
 	private ReferenceStorageServiceFactory storageServiceFactory;
-
-	public ParametersService(CaseRepository caseRepository,
-			CareConnectPatientBuilder careConnectPatientBuilder,
-			RelatedPersonBuilder relatedPersonBuilder,
-			ReferenceStorageServiceFactory storageServiceFactory) {
-		this.caseRepository = caseRepository;
-		this.careConnectPatientBuilder = careConnectPatientBuilder;
-		this.relatedPersonBuilder = relatedPersonBuilder;
-		this.storageServiceFactory = storageServiceFactory;
-	}
 
 	Parameters getEvaluateParameters(
 			Long caseId,
@@ -90,6 +86,9 @@ public class ParametersService {
 		Parameters parameters = new Parameters();
 		parameters.setMeta(new Meta().addProfile(SystemURL.SERVICE_DEFINITION_EVALUATE));
 
+		List<QuestionnaireResponse> questionnaireResponses = getExistingResponses(
+				parameters, caseEntity, storageService);
+
 		setRequestId(caseId, parameters);
 
 		try {
@@ -102,7 +101,8 @@ public class ParametersService {
 
 		setObservations(caseEntity, parameters);
 		setContext(caseEntity, parameters);
-		setQuestionnaireResponse(questionResponse, parameters, amending, storageService, questionnaireId);
+		saveQuestionnaireResponse(questionResponse, parameters, amending,
+				storageService, questionnaireId, caseEntity, questionnaireResponses);
 		addObservationInputData(caseEntity, parameters);
 		addImmunizationInputData(caseEntity, parameters);
 		addMedicationInputData(caseEntity, parameters);
@@ -118,8 +118,8 @@ public class ParametersService {
 		setUserLanguage(caseEntity, parameters, settings);
 		setUserTaskContext(caseEntity, parameters, settings);
 		try {
-			setInitiatingPerson(caseEntity, parameters, settings, storageService);
-			setReceivingPerson(caseEntity, parameters, settings, storageService);
+			setInitiatingPerson(parameters, settings);
+			setReceivingPerson(parameters, settings);
 		} catch (FHIRException e) {
 			LOG.error("Cannot parse gender code", e);
 			throw new EMSException(HttpStatus.INTERNAL_SERVER_ERROR, "Cannot parse person gender code", e);
@@ -134,12 +134,26 @@ public class ParametersService {
 		return parameters;
 	}
 
+	private List<QuestionnaireResponse> getExistingResponses(Parameters parameters, Cases caseEntity,
+			ReferenceStorageService storageService) {
+
+		// Get reference to all questionnaire responses for this case
+		if (caseEntity.getQuestionResponses() == null) {
+			return null;
+		}
+
+		List<String> qrReferences = caseEntity.getQuestionResponses().stream()
+				.map(QuestionResponse::getReference)
+				.collect(Collectors.toUnmodifiableList());
+
+		return storageService
+				.findResources(qrReferences, QuestionnaireResponse.class);
+	}
+
 	// Adjust to get actual Person.
 	private void setInitiatingPerson(
-			Cases caseEntity,
 			Parameters parameters,
-			SettingsDTO settings,
-			ReferenceStorageService storageService)
+			SettingsDTO settings)
 			throws FHIRException, ParseException {
 
 		var names = new ArrayList<HumanName>();
@@ -158,7 +172,7 @@ public class ParametersService {
 				.setBirthDate(birthDate);
 		parameters.addParameter()
 				.setName(SystemConstants.INITIATINGPERSON)
-				.setValue(storageService.store(person));
+				.setResource(person);
 	}
 
 	private void setUserType(Cases caseEntity, Parameters parameters, SettingsDTO settings) {
@@ -197,10 +211,8 @@ public class ParametersService {
 	}
 
 	private void setReceivingPerson(
-			Cases caseEntity,
 			Parameters parameters,
-			SettingsDTO settings,
-			ReferenceStorageService storageService)
+			SettingsDTO settings)
 			throws FHIRException, ParseException {
 
 		var names = new ArrayList<HumanName>();
@@ -219,7 +231,7 @@ public class ParametersService {
 				.setBirthDate(birthDate);
 		parameters.addParameter()
 				.setName(SystemConstants.RECEIVINGPERSON)
-				.setValue(storageService.store(person));
+				.setResource(person);
 	}
 
 	private void setRecipientType(Cases caseEntity, Parameters parameters, SettingsDTO settings) {
@@ -329,18 +341,17 @@ public class ParametersService {
 		}
 	}
 
-	private void setQuestionnaireResponse(
+	private void saveQuestionnaireResponse(
 			TriageQuestion[] questionResponse,
 			Parameters parameters,
 			Boolean amending,
-			ReferenceStorageService storageService, String questionnaireId) {
+			ReferenceStorageService storageService, String questionnaireId,
+			Cases caseEntity,
+			List<QuestionnaireResponse> questionnaireResponses) {
 		if (questionResponse != null) {
 			QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse()
 					.setQuestionnaire(new Reference(new IdType(SystemConstants.QUESTIONNAIRE,
 							questionnaireId.replace("#", ""))));
-			questionnaireResponse.setStatus(amending
-					? QuestionnaireResponseStatus.AMENDED
-					: QuestionnaireResponseStatus.COMPLETED);
 
 			for (TriageQuestion triageQuestion : questionResponse) {
 				questionnaireResponse.addItem()
@@ -362,8 +373,36 @@ public class ParametersService {
 
 			questionnaireResponse.setSource(storageService.store(patient));
 
-			parameters.addParameter().setName(SystemConstants.INPUT_DATA).setResource(questionnaireResponse);
+			var qr = questionnaireResponses.stream()
+					.filter(equalQuestionnaireIds(questionnaireId))
+					.findFirst();
+
+			if (qr.isPresent() && amending) {
+				qr.orElseThrow(IllegalStateException::new)
+						.setStatus(QuestionnaireResponseStatus.AMENDED)
+						.setItem(questionnaireResponse.getItem());
+
+				storageService.updateExternal(qr.get());
+			}
+			else if (qr.isEmpty()) {
+				questionnaireResponse.setStatus(QuestionnaireResponseStatus.COMPLETED);
+				Reference qrRef = storageService.storeExternal(questionnaireResponse);
+				QuestionResponse questionResponseEntity = QuestionResponse.builder()
+						.reference(qrRef.getResource().getIdElement().getValue())
+						.questionnaireId(questionnaireId)
+						.build();
+				caseEntity.addQuestionResponse(questionResponseEntity);
+				caseRepository.save(caseEntity);
+				questionnaireResponses.add(questionnaireResponse);
+			}
+
+			questionnaireResponses.forEach(resource -> parameters.addParameter().setName(SystemConstants.INPUT_DATA).setResource(resource));
 		}
+	}
+
+	private Predicate<QuestionnaireResponse> equalQuestionnaireIds(String questionnaireId) {
+		return resp -> resp.getQuestionnaire().getReference().split("/")[1]
+				.equals(questionnaireId);
 	}
 
 	private void setContext(Cases caseEntity, Parameters parameters) {

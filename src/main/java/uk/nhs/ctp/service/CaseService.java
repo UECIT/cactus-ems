@@ -1,14 +1,21 @@
 package uk.nhs.ctp.service;
 
+import static com.google.common.collect.MoreCollectors.onlyElement;
+
+import com.google.common.collect.MoreCollectors;
 import java.util.Date;
 import java.util.List;
 
+import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Immunization;
 import org.hl7.fhir.dstu3.model.MedicationAdministration;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.slf4j.Logger;
@@ -22,24 +29,24 @@ import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.CaseParameter;
 import uk.nhs.ctp.entities.PatientEntity;
+import uk.nhs.ctp.entities.QuestionResponse;
 import uk.nhs.ctp.entities.TestScenario;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.repos.PatientRepository;
 import uk.nhs.ctp.repos.TestScenarioRepository;
+import uk.nhs.ctp.service.factory.ReferenceStorageServiceFactory;
 import uk.nhs.ctp.utils.ErrorHandlingUtils;
 
 @Service
+@AllArgsConstructor
+@NoArgsConstructor
 public class CaseService {
 	private static final Logger LOG = LoggerFactory.getLogger(CaseService.class);
 
-	@Autowired
 	private CaseRepository caseRepository;
-
-	@Autowired
 	private PatientRepository patientRepository;
-
-	@Autowired
 	private TestScenarioRepository testScenarioRepository;
+	private ReferenceStorageServiceFactory storageServiceFactory;
 
 	/**
 	 * Create new case from patient ID and store in database
@@ -146,6 +153,24 @@ public class CaseService {
 					LOG.info("Adding Medication for case " + triageCase.getId());
 					triageCase.addMedication(createCaseMedication((MedicationAdministration) resource));
 				}
+			} else if (resource instanceof QuestionnaireResponse) {
+				var storageService = storageServiceFactory.load();
+
+				QuestionnaireResponse qr = (QuestionnaireResponse) resource;
+
+				QuestionResponse existingResponse = triageCase.getQuestionResponses().stream()
+						.filter(response -> response.getQuestionnaireId()
+								.equals(qr.getQuestionnaire().getReference().split("/")[1]))
+						.collect(onlyElement());
+
+				resource.setId(existingResponse.getReference());
+
+				try {
+					storageService.updateExternal(resource);
+				} catch (Exception e) {
+					LOG.error("Could not update questionnaire response with id " + resource.getId() + "\n" + e.getMessage());
+				}
+
 			}
 			// add code here to deal with storing any items that do not match the above
 			else if (resource instanceof Parameters) {

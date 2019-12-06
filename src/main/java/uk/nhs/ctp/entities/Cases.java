@@ -19,9 +19,13 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "cases")
+@Getter
+@Setter
 public class Cases {
 
 	@Id
@@ -72,56 +76,16 @@ public class Cases {
 	@JoinColumn(name = "case_id")
 	private List<CaseParameter> parameters;
 
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	@JoinColumn(name = "case_id")
+	private List<QuestionResponse> questionResponses;
+
 	@Column(name = "session_id")
 	private String sessionId;
 	
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "case_timestamp")
 	private Date timestamp;
-
-	public Long getId() {
-		return id;
-	}
-
-	public String getGender() {
-		return gender;
-	}
-
-	public String getFirstName() {
-		return firstName;
-	}
-
-	public String getLastName() {
-		return lastName;
-	}
-
-	public String getAddress() {
-		return address;
-	}
-
-	public String getNhsNumber() {
-		return nhsNumber;
-	}
-
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
-
-	public void setAddress(String address) {
-		this.address = address;
-	}
-
-	public void setNhsNumber(String nhsNumber) {
-		this.nhsNumber = nhsNumber;
-	}
-
-	public Date getDateOfBirth() {
-		return dateOfBirth;
-	}
 
 	public List<CaseImmunization> getImmunizations() {
 		if (this.immunizations == null) {
@@ -158,46 +122,6 @@ public class Cases {
 		this.medications.add(medication);
 	}
 
-	public void setMedications(List<CaseMedication> medications) {
-		this.medications = medications;
-	}
-
-	public Date getTimestamp() {
-		return timestamp;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public void setGender(String gender) {
-		this.gender = gender;
-	}
-
-	public void setDateOfBirth(Date dateOfBirth) {
-		this.dateOfBirth = dateOfBirth;
-	}
-
-	public Party getParty() {
-		return party;
-	}
-
-	public Skillset getSkillset() {
-		return skillset;
-	}
-
-	public void setParty(Party party) {
-		this.party = party;
-	}
-
-	public void setSkillset(Skillset skillset) {
-		this.skillset = skillset;
-	}
-
-	public void setImmunizations(List<CaseImmunization> immunizations) {
-		this.immunizations = immunizations;
-	}
-
 	public void addImmunization(CaseImmunization immunization) {
 		if (this.immunizations == null) {
 			this.immunizations = new ArrayList<>();
@@ -205,19 +129,11 @@ public class Cases {
 		this.immunizations.add(immunization);
 	}
 
-	public void setObservations(List<CaseObservation> observations) {
-		this.observations = observations;
-	}
-
 	public void addObservation(CaseObservation observation) {
 		if (this.observations == null) {
 			this.observations = new ArrayList<>();
 		}
 		this.observations.add(observation);
-	}
-	
-	public void setParameters(List<CaseParameter> parameters) {
-		this.parameters = parameters;
 	}
 
 	public void addParameter(CaseParameter parameter) {
@@ -227,15 +143,10 @@ public class Cases {
 		this.parameters.add(parameter);
 	}
 
-	public String getSessionId() {
-		return sessionId;
-	}
-
-	public void setSessionId(String sessionId) {
-		this.sessionId = sessionId;
-	}
-
-	public void setTimestamp(Date timestamp) {
-		this.timestamp = timestamp;
+	public void addQuestionResponse(QuestionResponse questionResponse) {
+		if (this.questionResponses == null) {
+			this.questionResponses = new ArrayList<>();
+		}
+		this.questionResponses.add(questionResponse);
 	}
 }
