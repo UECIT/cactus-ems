@@ -11,7 +11,10 @@ import {MatSnackBar} from '@angular/material';
 import {SessionStorage} from 'h5webstorage';
 import {SelectService} from '../model/selectService';
 import {TriageService} from '../service/triage.service';
+import {RoleService} from '../service/role.service';
 import {ToastrService} from 'ngx-toastr';
+import {Code} from '../model/case';
+
 
 @Component({
   selector: 'app-main',
@@ -31,6 +34,8 @@ export class MainComponent implements OnInit {
   selectedQueryType = 'id';
   serviceDefinitionMode = 'automated';
   availableServiceDefinitions: CdssSupplier[];
+  roles: Code[];
+  selectedRole: Code;
 
   constructor(
       public router: Router,
@@ -38,6 +43,7 @@ export class MainComponent implements OnInit {
       private store: Store<AppState>,
       private cdssSupplierService: CdssService,
       private triageService: TriageService,
+      private roleService: RoleService,
       public snackBar: MatSnackBar,
       private sessionStorage: SessionStorage,
       private toastr: ToastrService
@@ -55,6 +61,7 @@ export class MainComponent implements OnInit {
   ngOnInit() {
     this.getPatients();
     this.getCdssSuppliers();
+    this.getRoles();
     this.autoSelectServiceDefinition(false);
     // this.openSnackBar();
     console.log(this.sessionStorage['displayedTestWarningMessage']);
@@ -92,6 +99,9 @@ export class MainComponent implements OnInit {
         'cdssSupplierId',
         this.selectedSupplier.toString()
     );
+    this.sessionStorage.setItem(
+        'role', this.selectedRole.toString()
+    );
     this.router.navigate(['/triage']);
   }
 
@@ -105,6 +115,12 @@ export class MainComponent implements OnInit {
         await this.cdssSupplierService.getCdssSuppliers().toPromise();
   }
 
+  async getRoles() {
+    this.roles = 
+        await this.roleService.getRoles().toPromise();
+      this.selectedRole = this.roles[0];
+  }
+
   async setSelectedSupplier(supplier: CdssSupplier) {
     this.selectedSupplier = supplier.id;
     this.addSupplierToStore(supplier);
@@ -115,6 +131,10 @@ export class MainComponent implements OnInit {
 
   addSupplierToStore(supplier: CdssSupplier) {
     this.sessionStorage.setItem('cdssSupplierName', supplier.name);
+  }
+
+  addRoleToStore(role: Code) {
+    this.selectedRole = role;
   }
 
   async autoSelectServiceDefinition(force: boolean) {
