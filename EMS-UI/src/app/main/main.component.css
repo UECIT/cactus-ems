@@ -1,14 +1,17 @@
 .sectionTitle {
   text-align: left; 
   padding: 20px 20px 0 20px; 
+  font-weight: bold;
 }
 
 nav {
-  display: flex;
   margin: auto;
   justify-content: left;
-  padding: 10px 30px;
-  
+  padding: 10px 20px;
+}
+
+nav > div {
+  display: flex;
 }
 
 .row:nth-child(odd) > div > div, .row:nth-child(odd) > div > nav {
@@ -26,24 +29,49 @@ nav {
 }
 
 .btnSearch {
-  flex: 0 0 20%;
   min-width: 170px;
   width:100%;
-  max-width: 33%;
   /* any width as long a % times number of items does not exceed 100% */
   text-align: center;
-  background: white;
+  background: rgb(250, 241, 248);
   color: #333333;
   white-space:normal;
   margin: 5px;
-  border: white solid 2px;  
+  border: black solid 1px;  
+  border-radius: 5px;
+}
+
+.btnSearch:hover {
+  box-shadow: 0 12px 16px 0;
+}
+
+.btnSearch:active {
+  transform: translateY(1px);
 }
 
 .btnSearch.selected {
   border: #005EB8 solid 2px;
+  background: rgb(245, 214, 238);
 }
+
 
 .launch {
     background-color: rgba(0, 103, 71, 1); 
     color: white;
+    border-radius: 30px;
+}
+
+.launch:disabled {
+  color: lightgray;
+}
+
+.section {
+  box-sizing: border-box;
+  border-bottom: 1.2px solid black;
+}
+
+.launchSection {
+  padding: 10px;
+  width: 50%;
+  margin: auto;
 }
