@@ -1,7 +1,7 @@
 <div class="row">
   <div class="col-sm-12 text-center">
-    <div class="sectionTitle patientSection">1. Select Patient</div>
-    <nav class="patientSection d-flex flex-wrap">
+    <div class="sectionTitle">1. Select Patient</div>
+    <nav class="d-flex flex-wrap">
       <div *ngFor="let patient of patients" class="">
         <button mat-raised-button [class.selected]="patient == selectedPatient"
                 class="btn btn-primary btnSearch text-center" (click)="addPatientToStore(patient); autoSelectServiceDefinition(false)">
@@ -19,15 +19,22 @@
 
 <div class="row">
   <div class="col-sm-12 text-center">
-    <div class="sectionTitle patientSection">2. Select context</div>
-    <nav class="patientSection d-flex flex-wrap">
-
+    <div class="sectionTitle">2. Select Role</div>
+    <nav class="d-flex flex-wrap">
+      <div *ngFor = "let role of roles">
+        <button mat-raised-button [class.selected]="role == selectedRole"
+                class="btn btn-primary btnSearch text-center" (click)="addRoleToStore(role)">
+          <div>
+            {{ role.description }}
+          </div>
+        </button>
+      </div>
     </nav>
   </div>
 </div>
 
 <div class="row">
-  <div class="modeSection col-sm-12 text-center">
+  <div class="col-sm-12 text-center">
     <div class="sectionTitle">3. Service Definition Selection Mode</div>
     <nav class="d-flex flex-wrap">
       <div>
@@ -50,9 +57,9 @@
 
 <div class="row" *ngIf="serviceDefinitionMode == 'manual'">
   <div class="col-sm-12 text-center">
-    <div class="sectionTitle cdssSection">4. Select CDSS</div>
+    <div class="sectionTitle">4. Select CDSS</div>
     <!-- Overrides the background color from the patients section -->
-    <nav class="cdssSection d-flex flex-wrap">
+    <nav class="d-flex flex-wrap">
       <div *ngFor="let supplier of cdssSuppliers">
         <button mat-raised-button [class.selected]="supplier.id == selectedSupplier"
                 class="btn btn-primary btnSearch text-center"
@@ -66,8 +73,8 @@
 
 <div class="row" *ngIf="serviceDefinitionMode == 'manual' && serviceDefinitions != null">
   <div class="col-sm-12 text-center">
-    <div class="sectionTitle contextSection">5. Select Service Definition</div>
-    <nav class="contextSection">
+    <div class="sectionTitle">5. Select Service Definition</div>
+    <nav>
       <mat-form-field *ngIf="serviceDefinitions != null">
         <mat-select placeholder="Service Definition" [(ngModel)]="selectedServiceDefinition">
           <mat-option *ngFor="let serviceDefinition of serviceDefinitions"
@@ -86,9 +93,9 @@
 
 <div class="row" *ngIf="serviceDefinitionMode == 'automated'">
   <div class="col-sm-12 text-center">
-    <div class="sectionTitle cdssSection">4. Select Service Definition</div>
+    <div class="sectionTitle">4. Select Service Definition</div>
 
-    <div class="cdssSection d-flex flex-row">
+    <div class="d-flex flex-row">
       <div *ngFor="let supplier of availableServiceDefinitions"
            class="supplierGroup d-flex flex-column">
         {{ supplier.name }}
