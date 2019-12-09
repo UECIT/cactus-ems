@@ -14,6 +14,7 @@ import {TriageService} from '../service/triage.service';
 import {RoleService} from '../service/role.service';
 import {ToastrService} from 'ngx-toastr';
 import {Code} from '../model/case';
+import {Settings} from '../model/settings';
 
 
 @Component({
@@ -36,6 +37,8 @@ export class MainComponent implements OnInit {
   availableServiceDefinitions: CdssSupplier[];
   roles: Code[];
   selectedRole: Code;
+  settings: Code[];
+  selectedSetting: Code;
 
   constructor(
       public router: Router,
@@ -62,6 +65,7 @@ export class MainComponent implements OnInit {
     this.getPatients();
     this.getCdssSuppliers();
     this.getRoles();
+    this.getSettings();
     this.autoSelectServiceDefinition(false);
     // this.openSnackBar();
     console.log(this.sessionStorage['displayedTestWarningMessage']);
@@ -87,7 +91,10 @@ export class MainComponent implements OnInit {
   getPatients() {
     this.patientService
     .getAllPatients()
-    .subscribe(patients => (this.patients = patients));
+    .subscribe(patients => {
+      this.patients = patients;
+      this.addPatientToStore(this.patients[0]);
+    })
   }
 
   triage() {
@@ -99,9 +106,11 @@ export class MainComponent implements OnInit {
         'cdssSupplierId',
         this.selectedSupplier.toString()
     );
-    this.sessionStorage.setItem(
-        'role', this.selectedRole.toString()
-    );
+
+    var settings: Settings = this.sessionStorage['settings'];
+    settings.userType = this.selectedRole;
+    settings.setting = this.selectedSetting;
+    this.sessionStorage.setItem('settings', JSON.stringify(settings))
     this.router.navigate(['/triage']);
   }
 
@@ -121,6 +130,24 @@ export class MainComponent implements OnInit {
       this.selectedRole = this.roles[0];
   }
 
+  getSettings() { //TODO: get from a service
+    this.settings = [
+      {
+        'id': 1,
+        'description': 'Online',
+        'code': 'online',
+        'display': 'Online'
+      },
+      {
+        'id': 2,
+        'description': 'Phone call',
+        'code': 'phone',
+        'display': 'Phone call'
+      }
+    ]
+    this.selectedSetting = this.settings[0];
+  }
+
   async setSelectedSupplier(supplier: CdssSupplier) {
     this.selectedSupplier = supplier.id;
     this.addSupplierToStore(supplier);
@@ -135,6 +162,10 @@ export class MainComponent implements OnInit {
 
   addRoleToStore(role: Code) {
     this.selectedRole = role;
+  }
+
+  addSettingToStore(setting: Code) {
+    this.selectedSetting = setting;
   }
 
   async autoSelectServiceDefinition(force: boolean) {

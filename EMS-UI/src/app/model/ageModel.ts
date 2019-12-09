@@ -16,7 +16,7 @@ export class Age {
       !this.dateOfBirth.isValid() ||
       !this.dateEnd.isValid()
     ) {
-      throw new Error('Invalid dates.');
+      throw new Error('Invalid dates.' + dateOfBirthStr + ' and ' + dateEndStr);
     }
 
     this.days = this.dateEnd.date() - this.dateOfBirth.date();

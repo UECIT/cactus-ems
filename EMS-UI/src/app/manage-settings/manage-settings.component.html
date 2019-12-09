@@ -37,11 +37,6 @@
 
       <div class="input">
         <mat-form-field class="full-width">
-          <input matInput placeholder="User Type" formControlName="userType">
-        </mat-form-field>
-      </div>
-      <div class="input">
-        <mat-form-field class="full-width">
           <input matInput placeholder="User Language" formControlName="userLanguage">
         </mat-form-field>
       </div>
@@ -84,20 +79,18 @@
           <input matInput placeholder="Recipient Language" formControlName="recipientLanguage">
         </mat-form-field>
       </div>
+
       <hr>
 
-      <div class="input">
-        <mat-form-field class="full-width">
-          <input matInput placeholder="Setting" formControlName="setting">
-        </mat-form-field>
-      </div>
-
       <div class="buttons">
-        <button [disabled]="!formData.valid" type="submit" class="actionButton">Save</button>
-        <span class="cancelButton" [routerLink]="['/users']">Cancel</span>
+        <button [disabled]="!formData.valid" type="submit" class="actionButton" (click)="updateSettings(this.formData)">Save</button>
+        <span class="cancelButton" [routerLink]="['/main']">Cancel</span>
       </div>
       <div class="alert alert-danger" *ngIf="updateError">
         {{ updateErrorMessage }}
+      </div>
+      <div class="alert alert-info" *ngIf="saved">
+        Settings saved successfully for this session.
       </div>
     </form>
   </div>

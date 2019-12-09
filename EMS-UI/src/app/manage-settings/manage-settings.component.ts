@@ -13,40 +13,41 @@ export class ManageSettingsComponent implements OnInit {
   formData: FormGroup;
   settings: Settings = new Settings();
   loaded = false;
+  saved: boolean;
   title: String = 'Update Settings';
 
   constructor(private sessionStorage: SessionStorage) {}
 
   ngOnInit() {
+    var oldSettings: Settings = this.sessionStorage['settings'];
     this.formData = new FormGroup({
-      initiatingPersonName: new FormControl('Joe Bloggs', [
+      initiatingPersonName: new FormControl(oldSettings.initiatingPerson.name, [
         Validators.required
       ]),
-      initiatingPersonTelecom: new FormControl('0123 123 1234', [
+      initiatingPersonTelecom: new FormControl(oldSettings.initiatingPerson.telecom, [
         Validators.required
       ]),
-      initiatingPersonGender: new FormControl('male', [Validators.required]),
-      initiatingPersonBirthDate: new FormControl('2011-09-07', [
+      initiatingPersonGender: new FormControl(oldSettings.initiatingPerson.gender, [Validators.required]),
+      initiatingPersonBirthDate: new FormControl(oldSettings.initiatingPerson.birthDate, [
         Validators.required
       ]),
-      userType: new FormControl('Call Handler', [Validators.required]),
-      userLanguage: new FormControl('English', [Validators.required]),
-      userTaskContext: new FormControl('Triage', [Validators.required]),
-      receivingPersonName: new FormControl('Jane Bloggs', [
+      userLanguage: new FormControl(oldSettings.userLanguage.display, [Validators.required]),
+      userTaskContext: new FormControl(oldSettings.userTaskContext.display, [Validators.required]),
+      receivingPersonName: new FormControl(oldSettings.receivingPerson.name, [
         Validators.required
       ]),
-      receivingPersonTelecom: new FormControl('0123 123 1234', [
+      receivingPersonTelecom: new FormControl(oldSettings.receivingPerson.telecom, [
         Validators.required
       ]),
-      receivingPersonGender: new FormControl('female', [Validators.required]),
-      receivingPersonBirthDate: new FormControl('2011-09-07', [
+      receivingPersonGender: new FormControl(oldSettings.receivingPerson.gender, [Validators.required]),
+      receivingPersonBirthDate: new FormControl(oldSettings.receivingPerson.birthDate, [
         Validators.required
       ]),
-      recipientType: new FormControl('Patient', [Validators.required]),
-      recipientLanguage: new FormControl('English', [Validators.required]),
-      setting: new FormControl('111', [Validators.required])
+      recipientType: new FormControl(oldSettings.recipientType.display, [Validators.required]),
+      recipientLanguage: new FormControl(oldSettings.recipientLanguage.display, [Validators.required]),
     });
     this.loaded = true;
+    this.saved = false;
   }
 
   get initiatingPersonName() {
@@ -60,9 +61,6 @@ export class ManageSettingsComponent implements OnInit {
   }
   get initiatingPersonBirthDate() {
     return this.formData.get('initiatingPersonBirthDate');
-  }
-  get userType() {
-    return this.formData.get('userType');
   }
   get userLanguage() {
     return this.formData.get('userLanguage');
@@ -88,9 +86,6 @@ export class ManageSettingsComponent implements OnInit {
   get recipientLanguage() {
     return this.formData.get('recipientLanguage');
   }
-  get setting() {
-    return this.formData.get('setting');
-  }
 
   updateSettings(data) {
     this.settings.initiatingPerson = new Person();
@@ -105,15 +100,10 @@ export class ManageSettingsComponent implements OnInit {
     this.settings.receivingPerson.gender = data.receivingPersonGender;
     this.settings.receivingPerson.birthDate = data.receivingPersonBirthDate;
 
-    this.settings.userType = new Code();
     this.settings.userLanguage = new Code();
     this.settings.userTaskContext = new Code();
     this.settings.recipientType = new Code();
     this.settings.recipientLanguage = new Code();
-    this.settings.setting = new Code();
-
-    this.settings.userType.code = '158974003';
-    this.settings.userType.display = data.userType;
 
     this.settings.userLanguage.code = 'en';
     this.settings.userLanguage.display = data.userLanguage;
@@ -127,8 +117,12 @@ export class ManageSettingsComponent implements OnInit {
     this.settings.recipientLanguage.code = 'en';
     this.settings.recipientLanguage.display = data.recipientLanguage;
 
-    this.settings.setting.code = data.setting;
-    this.settings.setting.display = data.setting;
+    //TODO: makde sure we do not overwrite settings made elsewhere - we should work out a better way of saving settings.
+    var oldSettings: Settings = this.sessionStorage['settings'];
+    this.settings.userType = oldSettings.userType;
+    this.settings.setting = oldSettings.setting;
+
     this.sessionStorage.setItem('settings', JSON.stringify(this.settings));
+    this.saved = true;
   }
 }
