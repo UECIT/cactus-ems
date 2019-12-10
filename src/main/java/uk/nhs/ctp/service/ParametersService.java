@@ -114,7 +114,7 @@ public class ParametersService {
 		// userType, userLanguage, userTaskContext,
 		// receivingPerson, initiatingPerson,
 		// recipientType, recipientLanguage, setting
-		setUserType(caseEntity, parameters, settings);
+		setUserType(parameters, settings);
 		setUserLanguage(caseEntity, parameters, settings);
 		setUserTaskContext(caseEntity, parameters, settings);
 		try {
@@ -175,17 +175,12 @@ public class ParametersService {
 				.setResource(person);
 	}
 
-	private void setUserType(Cases caseEntity, Parameters parameters, SettingsDTO settings) {
+	private void setUserType(Parameters parameters, SettingsDTO settings) {
 		CodeableConcept codeableConcept = new CodeableConcept();
 
-		if (caseEntity.getSkillset().getCode().equalsIgnoreCase("PA")) {
-			codeableConcept.setText("Patient").addCoding().setCode("116154003").setDisplay("Patient")
-					.setSystem(SystemURL.SNOMED);
-		} else {
-			codeableConcept.setText(settings.getUserType().getDisplay()).addCoding()
-					.setCode(settings.getUserType().getCode()).setDisplay(settings.getUserType().getDisplay())
-					.setSystem(SystemURL.SNOMED);
-		}
+		codeableConcept.setText(settings.getUserType().getDisplay()).addCoding()
+				.setCode(settings.getUserType().getCode()).setDisplay(settings.getUserType().getDisplay())
+				.setSystem(SystemURL.SNOMED);
 
 		parameters.addParameter().setName(SystemConstants.USERTYPE).setValue(codeableConcept);
 	}

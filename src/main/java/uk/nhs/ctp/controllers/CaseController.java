@@ -1,6 +1,10 @@
 package uk.nhs.ctp.controllers;
 
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.EQUAL;
+import static uk.nhs.ctp.utils.DateUtils.calculateAge;
+
 import java.util.List;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,8 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.nhs.ctp.entities.Cases;
+import uk.nhs.ctp.entities.PatientEntity;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.CdssService;
+import uk.nhs.ctp.service.PatientService;
 import uk.nhs.ctp.service.TriageService;
 import uk.nhs.ctp.service.dto.CdssRequestDTO;
 import uk.nhs.ctp.service.dto.CdssResponseDTO;
@@ -24,20 +30,13 @@ import uk.nhs.ctp.service.search.SearchParameters;
 @CrossOrigin
 @RestController
 @RequestMapping(path = "/case")
+@AllArgsConstructor
 public class CaseController {
 
   private final CdssService cdssService;
   private final TriageService triageService;
   private final CaseRepository caseRepository;
-
-  public CaseController(
-      CdssService cdssService,
-      TriageService triageService,
-      CaseRepository caseRepository) {
-    this.cdssService = cdssService;
-    this.triageService = triageService;
-    this.caseRepository = caseRepository;
-  }
+  private final PatientService patientService;
 
   @PostMapping(path = "/")
   public @ResponseBody
@@ -49,10 +48,18 @@ public class CaseController {
   public @ResponseBody
   List<CdssSupplierDTO> getServiceDefinitions(@RequestBody ServiceDefinitionSearchDTO requestDTO) {
 
-    // TODO include query parameters based on patient, case and context
+    PatientEntity patient = patientService.findById(requestDTO.getPatientId());
+
     return cdssService
-        .queryServiceDefinitions(new SearchParameters()
-            .withQuery("triage")
+        .queryServiceDefinitions(SearchParameters.builder()
+            .query("triage")
+            .contextValue("gender", patient.getGender())
+            .contextQuantity("age", EQUAL, calculateAge(patient.getDateOfBirth()))
+            .contextValue("user", requestDTO.getSettings().getUserType().getCode())
+            .contextValue("setting", requestDTO.getSettings().getSetting().getCode())
+            .contextValue("task", requestDTO.getSettings().getUserTaskContext().getCode())
+            .jurisdiction("GB") //TODO: create UI element to select, hardcoded for now
+            .build()
         );
   }
 
