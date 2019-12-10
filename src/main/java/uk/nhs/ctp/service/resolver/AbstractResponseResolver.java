@@ -217,10 +217,11 @@ public abstract class AbstractResponseResolver<RESOURCE extends Resource> implem
 
     if (optional.isPresent()) {
       List<CdssSupplierDTO> serviceDefinitionBySupplier = cdssService
-          .queryServiceDefinitions(new SearchParameters()
-              .withQuery("triage")
-              .withTypeCode("CareConnectObservation$" +
-              optional.get().getCodeFilterFirstRep().getValueCodingFirstRep().getCode()));
+          .queryServiceDefinitions(SearchParameters.builder()
+              .query("triage")
+              .type("CareConnectObservation$" +
+                  optional.get().getCodeFilterFirstRep().getValueCodingFirstRep().getCode())
+              .build());
 
       Optional<String> matchedService = serviceDefinitionBySupplier
           .stream()

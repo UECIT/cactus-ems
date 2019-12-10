@@ -107,16 +107,13 @@ export class MainComponent implements OnInit {
         this.selectedSupplier.toString()
     );
 
-    var settings: Settings = this.sessionStorage['settings'];
-    settings.userType = this.selectedRole;
-    settings.setting = this.selectedSetting;
-    this.sessionStorage.setItem('settings', JSON.stringify(settings))
     this.router.navigate(['/triage']);
   }
 
   addPatientToStore(patient: Patient) {
     this.selectedPatient = patient;
     this.store.dispatch(new PatientActions.AddPatient(patient));
+    this.sessionStorage.setItem('patient', JSON.stringify(patient));
   }
 
   async getCdssSuppliers() {
@@ -127,7 +124,7 @@ export class MainComponent implements OnInit {
   async getRoles() {
     this.roles = 
         await this.roleService.getRoles().toPromise();
-      this.selectedRole = this.roles[0];
+    this.selectedRole = this.roles[0];
   }
 
   getSettings() { //TODO: get from a service
@@ -162,10 +159,18 @@ export class MainComponent implements OnInit {
 
   addRoleToStore(role: Code) {
     this.selectedRole = role;
+    var settings: Settings = this.sessionStorage['settings'];
+    settings.userType = this.selectedRole;
+    this.sessionStorage.setItem('settings', JSON.stringify(settings))
+    this.autoSelectServiceDefinition(false);
   }
 
   addSettingToStore(setting: Code) {
     this.selectedSetting = setting;
+    var settings: Settings = this.sessionStorage['settings'];
+    settings.setting = this.selectedSetting;
+    this.sessionStorage.setItem('settings', JSON.stringify(settings))
+    this.autoSelectServiceDefinition(false);
   }
 
   async autoSelectServiceDefinition(force: boolean) {
@@ -177,6 +182,12 @@ export class MainComponent implements OnInit {
       if (this.selectedPatient) {
         request.patientId = this.selectedPatient.id;
       }
+      var settings: Settings = this.sessionStorage['settings'];
+      request.settings = settings;
+
+      var patient: Patient = this.sessionStorage['patient']
+      request.patientId = patient.id;
+      
       const selectedSDs = await this.triageService.selectServiceDefinitions(request);
 
       if (selectedSDs.length > 0) {

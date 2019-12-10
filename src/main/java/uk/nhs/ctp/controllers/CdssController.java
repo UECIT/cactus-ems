@@ -70,7 +70,7 @@ public class CdssController {
     // TODO search parameters
     CdssSupplier cdssSupplier = cdssSupplierService.getCdssSupplier(id);
     CdssSupplierDTO cdssSupplierDTO = cdssService
-        .queryServiceDefinitions(cdssSupplier, new SearchParameters());
+        .queryServiceDefinitions(cdssSupplier, SearchParameters.builder().build());
     return cdssSupplierDTO.getServiceDefinitions();
   }
 
