@@ -36,9 +36,8 @@ export class MainComponent implements OnInit {
   serviceDefinitionMode = 'automated';
   availableServiceDefinitions: CdssSupplier[];
   roles: Code[];
-  selectedRole: Code;
   settings: Code[];
-  selectedSetting: Code;
+  jurisdictions: Code[]
 
   constructor(
       public router: Router,
@@ -66,6 +65,7 @@ export class MainComponent implements OnInit {
     this.getCdssSuppliers();
     this.getRoles();
     this.getSettings();
+    this.getJurisdictions();
     this.autoSelectServiceDefinition(false);
     // this.openSnackBar();
     console.log(this.sessionStorage['displayedTestWarningMessage']);
@@ -124,7 +124,6 @@ export class MainComponent implements OnInit {
   async getRoles() {
     this.roles = 
         await this.roleService.getRoles().toPromise();
-    this.selectedRole = this.roles[0];
   }
 
   getSettings() { //TODO: get from a service
@@ -142,7 +141,23 @@ export class MainComponent implements OnInit {
         'display': 'Phone call'
       }
     ]
-    this.selectedSetting = this.settings[0];
+  }
+
+  getJurisdictions() { //TODO: get from a service
+    this.jurisdictions = [
+      {
+        'id': 1,
+        'description': 'United Kingdom of Great Britain and Northern Ireland (the)',
+        'code': 'GB',
+        'display': 'United Kingdom of Great Britain and Northern Ireland (the)'
+      },
+      {
+        'id': 2,
+        'description': 'Tokelau',
+        'code': 'TK',
+        'display': 'Tokelau'
+      }
+    ]
   }
 
   async setSelectedSupplier(supplier: CdssSupplier) {
@@ -158,17 +173,22 @@ export class MainComponent implements OnInit {
   }
 
   addRoleToStore(role: Code) {
-    this.selectedRole = role;
     var settings: Settings = this.sessionStorage['settings'];
-    settings.userType = this.selectedRole;
+    settings.userType = role;
     this.sessionStorage.setItem('settings', JSON.stringify(settings))
     this.autoSelectServiceDefinition(false);
   }
 
   addSettingToStore(setting: Code) {
-    this.selectedSetting = setting;
     var settings: Settings = this.sessionStorage['settings'];
-    settings.setting = this.selectedSetting;
+    settings.setting = setting;
+    this.sessionStorage.setItem('settings', JSON.stringify(settings))
+    this.autoSelectServiceDefinition(false);
+  }
+
+  addJurisdictionToStore(jurisdiction: Code) {
+    var settings: Settings = this.sessionStorage['settings'];
+    settings.jurisdiction = jurisdiction;
     this.sessionStorage.setItem('settings', JSON.stringify(settings))
     this.autoSelectServiceDefinition(false);
   }

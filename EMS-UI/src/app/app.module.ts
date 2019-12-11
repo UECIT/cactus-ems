@@ -58,6 +58,7 @@ import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { HighlightModule } from 'ngx-highlightjs';
 import xml from 'highlight.js/lib/languages/xml';
 import { ToastrModule } from 'ngx-toastr';
+import { TriageSelectionComponent } from './main/triage-selection/triage-selection.component';
 
 export function hljsLanguages() {
   return [
@@ -97,7 +98,8 @@ export function hljsLanguages() {
     ManageSettingsComponent,
     QuestionsDisplayComponent,
     ViewAuditsComponent,
-    HandoverMessageDialogComponent
+    HandoverMessageDialogComponent,
+    TriageSelectionComponent
   ],
   entryComponents: [SwitchSupplierDialogComponent, SwitchServicePromptDialogComponent, HandoverMessageDialogComponent],
   imports: [

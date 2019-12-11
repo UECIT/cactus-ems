@@ -19,41 +19,23 @@
   </div>
 </div>
 
-<div class="row">
-  <div class="col-sm-12 text-center">
-    <div class="section">
-      <div class="sectionTitle">Select Role</div>
-      <nav class="d-flex flex-wrap">
-        <div *ngFor = "let role of roles">
-          <button mat-raised-button [class.selected]="role == selectedRole"
-                  class="btn btn-primary btnSearch text-center" (click)="addRoleToStore(role)">
-            <div>
-              {{ role.description }}
-            </div>
-          </button>
-        </div>
-      </nav>
-    </div>
-  </div>
-</div>
+<triage-selection
+  [title]="'Select Role'"
+  [options]="roles"
+  (onChange)="addRoleToStore($event)">
+</triage-selection>
 
-<div class="row">
-    <div class="col-sm-12 text-center">
-      <div class="section">
-        <div class="sectionTitle">Select Setting Context</div>
-        <nav class="d-flex flex-wrap">
-          <div *ngFor = "let setting of settings">
-            <button mat-raised-button [class.selected]="setting == selectedSetting"
-                    class="btn btn-primary btnSearch text-center" (click)="addSettingToStore(setting)">
-              <div>
-                {{ setting.description }}
-              </div>
-            </button>
-          </div>
-        </nav>
-      </div>
-    </div>
-  </div>
+<triage-selection
+  [title]="'Select Setting Context'"
+  [options]="settings"
+  (onChange)="addSettingToStore($event)">
+</triage-selection>
+
+<triage-selection
+  [title]="'Select Jurisdiction'"
+  [options]="jurisdictions"
+  (onChange)="addJurisdictionToStore($event)">
+</triage-selection>
 
 <div class="row">
   <div class="col-sm-12 text-center">

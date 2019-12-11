@@ -9,6 +9,7 @@ export class Settings {
   recipientType: Code;
   recipientLanguage: Code;
   setting: Code;
+  jurisdiction: Code;
 }
 
 export class Person {
