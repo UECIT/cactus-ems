@@ -58,7 +58,7 @@ public class CaseController {
             .contextValue("user", requestDTO.getSettings().getUserType().getCode())
             .contextValue("setting", requestDTO.getSettings().getSetting().getCode())
             .contextValue("task", requestDTO.getSettings().getUserTaskContext().getCode())
-            .jurisdiction("GB") //TODO: create UI element to select, hardcoded for now
+            .jurisdiction(requestDTO.getSettings().getJurisdiction().getCode())
             .build()
         );
   }
