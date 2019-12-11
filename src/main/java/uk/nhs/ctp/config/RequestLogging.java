@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
@@ -30,6 +31,8 @@ public class RequestLogging {
 
   @Component
   public static class Interceptor implements ClientHttpRequestInterceptor {
+
+    private static final MediaType ANY_TEXT_TYPE = MediaType.valueOf("text/*");
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -49,7 +52,12 @@ public class RequestLogging {
       log.info("URI         : {}", request.getURI());
       log.info("Method      : {}", request.getMethod());
       log.info("Headers     : {}", request.getHeaders());
-      log.info("Request body: {}", new String(body, StandardCharsets.UTF_8));
+      MediaType contentType = request.getHeaders().getContentType();
+      if (contentType.isCompatibleWith(ANY_TEXT_TYPE) || contentType.isCompatibleWith(MediaType.APPLICATION_JSON)) {
+        log.info("Request body: {}", new String(body, StandardCharsets.UTF_8));
+      } else {
+        log.info("Request body: NON TEXT: {}", contentType);
+      }
       log.info("============= request end ({}) ===============", request.hashCode());
     }
 
@@ -61,8 +69,13 @@ public class RequestLogging {
       log.info("Status text  : {}", response.getStatusText());
       log.info("Headers      : {}", response.getHeaders());
 
-      String responseBody = StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8);
-      log.info("Response body: {}", responseBody);
+      MediaType contentType = response.getHeaders().getContentType();
+      if (contentType.isCompatibleWith(ANY_TEXT_TYPE) || contentType.isCompatibleWith(MediaType.APPLICATION_JSON)) {
+        String responseBody = StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8);
+        log.info("Response body: {}", responseBody);
+      } else {
+        log.info("Request body: NON TEXT: {}", contentType);
+      }
       log.info("=========== response end ({}) ================", request.hashCode());
     }
 
