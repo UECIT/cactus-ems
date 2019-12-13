@@ -52,7 +52,7 @@ public class AttachmentService {
     String digestHeader = response.getHeaders().getFirst("Digest");
     byte[] digest = DigestUtils.sha1(data);
     Preconditions
-        .checkState(formatDigestHeader(digest).equals(digestHeader));
+        .checkState(formatDigestHeader(digest).equals(digestHeader), "Invalid digest: " + digestHeader);
     log.info("Successfully stored attachment with digest {}", digestHeader);
 
     return new Attachment()
@@ -77,7 +77,7 @@ public class AttachmentService {
       String digest = response.getHeaders().getFirst("Digest");
       if (ArrayUtils.isNotEmpty(attachment.getHash())) {
         Preconditions
-            .checkState(formatDigestHeader(attachment.getHash()).equals(digest));
+            .checkState(formatDigestHeader(attachment.getHash()).equals(digest), "Invalid Digest: " + digest);
       }
       log.info("Loaded attachment data with digest {}", digest);
 
