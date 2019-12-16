@@ -32,6 +32,9 @@
         <p matLine *ngIf="questionResponse.responseAttachment" matTooltip="{{questionResponse.question}}: {{questionResponse.responseAttachment}}"
         matTooltipPosition="right">{{questionResponse.question}}: {{questionResponse.responseAttachment}}</p>
 
+        <p matLine *ngIf="questionResponse.responseCoordinates" matTooltip="{{coordinatesString(questionResponse)}}"
+        matTooltipPosition="right">{{coordinatesString(questionResponse)}}</p>
+
           <mat-icon *ngIf="!amendingPrevious" matListIcon>edit</mat-icon>
           <mat-icon *ngIf="amendingPrevious" matListIcon>report_off</mat-icon>
         </mat-list-option>

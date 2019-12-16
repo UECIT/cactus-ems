@@ -24,6 +24,7 @@ import org.hl7.fhir.dstu3.model.CareConnectProcedure;
 import org.hl7.fhir.dstu3.model.CareConnectProcedureRequest;
 import org.hl7.fhir.dstu3.model.CareConnectRelatedPerson;
 import org.hl7.fhir.dstu3.model.CareConnectSpecimen;
+import org.hl7.fhir.dstu3.model.CoordinateResource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -153,6 +154,8 @@ public class FHIRConfig {
     fhirContext.setDefaultTypeForProfile(
         "https://fhir.hl7.org.uk/STU3/StructureDefinition/CareConnect-Specimen-1",
         CareConnectSpecimen.class);
+
+    fhirContext.registerCustomType(CoordinateResource.class);
 
     return fhirContext;
   }

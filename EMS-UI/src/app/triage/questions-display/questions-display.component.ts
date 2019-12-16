@@ -30,4 +30,10 @@ export class QuestionsDisplayComponent implements OnInit {
     }
   }
 
+  coordinatesString(response): string {
+    return response.question.replace(/!\[.*?\]\((.*?)\)/g, "") + ": " 
+      + response.responseCoordinates.x + "-" 
+      + response.responseCoordinates.y;
+  }
+
 }

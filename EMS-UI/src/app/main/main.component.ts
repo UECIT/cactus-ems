@@ -206,7 +206,9 @@ export class MainComponent implements OnInit {
       request.settings = settings;
 
       var patient: Patient = this.sessionStorage['patient']
-      request.patientId = patient.id;
+      if (patient) {
+        request.patientId = patient.id;
+      }
       
       const selectedSDs = await this.triageService.selectServiceDefinitions(request);
 

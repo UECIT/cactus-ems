@@ -1,4 +1,4 @@
-import { Options } from './questionnaire';
+import { Options, Coordinates, QuestionExtension } from './questionnaire';
 import { Settings } from './settings';
 
 export class ProcessTriage {
@@ -24,4 +24,6 @@ export class QuestionnaireResponse {
   responseDate: string;
   responseAttachment: string;
   responseAttachmentType: string;
+  responseCoordinates: Coordinates;
+  extension: QuestionExtension;
 }

@@ -13,6 +13,7 @@ import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.CareConnectCarePlan;
 import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.DataRequirement;
+import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementCodeFilterComponent;
 import org.hl7.fhir.dstu3.model.GuidanceResponse;
 import org.hl7.fhir.dstu3.model.GuidanceResponse.GuidanceResponseStatus;
 import org.hl7.fhir.dstu3.model.Parameters;
@@ -216,11 +217,14 @@ public abstract class AbstractResponseResolver<RESOURCE extends Resource> implem
         data -> data.getType().equals("CareConnectObservation")).findFirst();
 
     if (optional.isPresent()) {
+      List<String> triggerCodes = optional.get().getCodeFilter().stream()
+          .map(filter -> "CareConnectObservation$" + filter.getValueCodingFirstRep().getCode())
+          .collect(Collectors.toList());
+
       List<CdssSupplierDTO> serviceDefinitionBySupplier = cdssService
           .queryServiceDefinitions(SearchParameters.builder()
               .query("triage")
-              .type("CareConnectObservation$" +
-                  optional.get().getCodeFilterFirstRep().getValueCodingFirstRep().getCode())
+              .typeCode(triggerCodes)
               .build());
 
       Optional<String> matchedService = serviceDefinitionBySupplier
