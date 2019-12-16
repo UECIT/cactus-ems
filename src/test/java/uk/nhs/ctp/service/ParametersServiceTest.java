@@ -398,14 +398,16 @@ public class ParametersServiceTest {
 
     assertEquals(3, observations.size());
 
-    Observation observation = observations.get(2);
+    Observation observation = observations.stream()
+        .filter(o -> o.getCode().getCodingFirstRep().getCode().equals("123456"))
+        .findFirst()
+        .orElse(null);
 
     assertNotNull(observation);
     assertEquals(ObservationStatus.FINAL, observation.getStatus());
     assertNull(observation.getId());
     assertNotNull(observation.getCode());
     assertEquals(1, observation.getCode().getCoding().size());
-    assertEquals("123456", observation.getCode().getCodingFirstRep().getCode());
     assertEquals("Test Observation", observation.getCode().getCodingFirstRep().getDisplay());
     assertEquals("true", observation.getValueCodeableConcept().getCodingFirstRep().getCode());
   }
