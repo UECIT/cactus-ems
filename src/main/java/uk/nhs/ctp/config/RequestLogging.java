@@ -1,9 +1,12 @@
 package uk.nhs.ctp.config;
 
+import static java.util.Arrays.asList;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.client.RestTemplateCustomizer;
@@ -32,9 +35,23 @@ public class RequestLogging {
   @Component
   public static class Interceptor implements ClientHttpRequestInterceptor {
 
-    private static final MediaType ANY_TEXT_TYPE = MediaType.valueOf("text/*");
+    private static List<MediaType> textContentTypes = asList(
+        MediaType.valueOf("text/*"),
+        MediaType.valueOf("application/*+xml")
+    );
+
+    private static List<MediaType> jsonContentTypes = asList(
+        MediaType.valueOf("application/*+json"),
+        MediaType.APPLICATION_JSON
+    );
 
     private final Logger log = LoggerFactory.getLogger(getClass());
+
+    private final ObjectMapper objectMapper;
+
+    public Interceptor(ObjectMapper objectMapper) {
+      this.objectMapper = objectMapper;
+    }
 
     @Override
     public ClientHttpResponse intercept(
@@ -53,11 +70,7 @@ public class RequestLogging {
       log.info("Method      : {}", request.getMethod());
       log.info("Headers     : {}", request.getHeaders());
       MediaType contentType = request.getHeaders().getContentType();
-      if (contentType.isCompatibleWith(ANY_TEXT_TYPE) || contentType.isCompatibleWith(MediaType.APPLICATION_JSON)) {
-        log.info("Request body: {}", new String(body, StandardCharsets.UTF_8));
-      } else {
-        log.info("Request body: NON TEXT: {}", contentType);
-      }
+      formatBody(new ByteArrayInputStream(body), contentType);
       log.info("============= request end ({}) ===============", request.hashCode());
     }
 
@@ -70,13 +83,20 @@ public class RequestLogging {
       log.info("Headers      : {}", response.getHeaders());
 
       MediaType contentType = response.getHeaders().getContentType();
-      if (contentType.isCompatibleWith(ANY_TEXT_TYPE) || contentType.isCompatibleWith(MediaType.APPLICATION_JSON)) {
-        String responseBody = StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8);
+      formatBody(response.getBody(), contentType);
+      log.info("=========== response end ({}) ================", request.hashCode());
+    }
+
+    private void formatBody(InputStream body, MediaType contentType) throws IOException {
+      if (jsonContentTypes.stream().anyMatch(contentType::isCompatibleWith)) {
+        String responseBody = StreamUtils.copyToString(body, contentType.getCharset());
+        log.info("Response body: {}", responseBody);
+      } else if (textContentTypes.stream().anyMatch(contentType::isCompatibleWith)) {
+        String responseBody = StreamUtils.copyToString(body, contentType.getCharset());
         log.info("Response body: {}", responseBody);
       } else {
         log.info("Request body: NON TEXT: {}", contentType);
       }
-      log.info("=========== response end ({}) ================", request.hashCode());
     }
 
   }
