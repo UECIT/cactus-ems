@@ -50,9 +50,11 @@ export class TriageQuestion {
   responseDate: string;
   responseAttachment: string;
   responseAttachmentInitial: string;
+  responseCoordinates: Coordinates;
   enableWhenAnswer: boolean;
   enableWhenQuestionnaireId: string;
   subQuestions: any;
+  extension: QuestionExtension;
 }
 
 export class Options {
@@ -61,9 +63,15 @@ export class Options {
   extension: Extension;
 }
 
-export class Extension {
+export class Extension { //TODO: remove this version of extension
   url: string;
   value: string;
+}
+
+export class QuestionExtension {
+  code: string;
+  display: string;
+  system: string;
 }
 
 export class QuestionResponse {
@@ -76,4 +84,9 @@ export class QuestionResponse {
   responseDate: string;
   responseAttachment: string;
   responseAttachmentType: string;
+}
+
+export class Coordinates {
+  x: number;
+  y: number;
 }

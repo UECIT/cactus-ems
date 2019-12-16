@@ -12,6 +12,8 @@ import { ReportService } from 'src/app/service/report.service';
 import beautify from 'xml-beautifier';
 import { environment } from 'src/environments/environment';
 import { ToastrService } from 'ngx-toastr';
+import { ServiceDefinitionService } from '../../service/service-definition.service';
+
 
 export interface DialogData {
   handoverMessage: any;
@@ -36,8 +38,12 @@ export class QuestionnaireComponent implements OnInit {
   handoverMessage: any;
   reports: any;
   isloadingReport: boolean;
+  supplierId: string;
 
-  constructor(public dialog: MatDialog, private reportService: ReportService, private toastr: ToastrService) { }
+  constructor(public dialog: MatDialog, 
+    private reportService: ReportService, 
+    private toastr: ToastrService, 
+    private serviceDefinitionService: ServiceDefinitionService) { }
 
   openDialog(): void {
     const dialogRef = this.dialog.open(HandoverMessageDialogComponent, {
@@ -120,6 +126,7 @@ export class QuestionnaireComponent implements OnInit {
           err.message);
       });
     }
+    this.supplierId = await this.serviceDefinitionService.getCdssSupplierUrl(this.questionnaire.cdssSupplierId);
   }
 
   getFreeText(questionId: string): string {
@@ -153,13 +160,15 @@ export class QuestionnaireComponent implements OnInit {
     );
     const questionResponse: QuestionResponse = new QuestionResponse();
     questionResponse.triageQuestion = triageQuestion;
-    questionResponse.responseString =
-      'ImageCoordinatePosition:' + event.offsetX + ',' + event.offsetY;
+    questionResponse.triageQuestion.responseCoordinates = {
+      x: event.offsetX,
+      y: event.offsetY
+    };
     this.answerSelected.push(questionResponse);
     this.answerSelectedChange.emit(this.answerSelected);
     this.freeText.set(
       triageQuestion.questionId,
-      questionResponse.responseString
+      questionResponse.triageQuestion.responseCoordinates.x + ", " + questionResponse.triageQuestion.responseCoordinates.y
     );
   }
 
@@ -440,5 +449,20 @@ export class QuestionnaireComponent implements OnInit {
     return careAdvice.find(advice => {
       return advice.status === 'draft';
     });
+  }
+
+  isImageMap(question: TriageQuestion) {
+    return question.questionType == 'REFERENCE' && question.extension.code == 'imagemap'; 
+  }
+
+  getImageUrl(question: String) {
+    if (this.supplierId) {
+      return this.supplierId.replace("/fhir", "/image/") + question.match(/!\[.*?\]\((.*?)\)/)[1];
+    }
+    return "Image not found";
+  }
+
+  formatQuestion(question: TriageQuestion) {
+    return question.question.replace(/!\[.*?\]\((.*?)\)/g, "");
   }
 }

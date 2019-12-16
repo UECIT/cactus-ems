@@ -6,6 +6,7 @@ import static uk.nhs.ctp.utils.ResourceProviderUtils.getParameterByName;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -16,6 +17,7 @@ import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ContactPoint;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
+import org.hl7.fhir.dstu3.model.CoordinateResource;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.DecimalType;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
@@ -29,6 +31,7 @@ import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Person;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus;
@@ -342,11 +345,23 @@ public class ParametersService {
         String attachmentType = triageQuestion.getResponseAttachmentType();
         return attachmentService.storeAttachment(
             MediaType.valueOf(attachmentType), attachmentData);
+      case "REFERENCE":
+        if (isImageMapAnswer(triageQuestion)) {
+          CoordinateResource coordinateResource = new CoordinateResource();
+          coordinateResource.setXCoordinate(new IntegerType(triageQuestion.getResponseCoordinates().getX()));
+          coordinateResource.setYCoordinate(new IntegerType(triageQuestion.getResponseCoordinates().getY()));
+          return new Reference(coordinateResource);
+        }
       default:
         return new Coding()
             .setCode(triageQuestion.getResponse().getCode())
             .setDisplay(triageQuestion.getResponse().getDisplay());
     }
+  }
+
+  private boolean isImageMapAnswer(TriageQuestion triageQuestion) {
+    return triageQuestion.getExtension()
+        .getCode().equals("imagemap");
   }
 
   private void saveQuestionnaireResponse(

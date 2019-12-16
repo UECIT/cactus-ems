@@ -3,6 +3,7 @@ package uk.nhs.ctp.service.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Data;
 import org.hl7.fhir.dstu3.model.Extension;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -32,6 +33,7 @@ public class TriageQuestion {
 	private String responseAttachment;
 	private String responseAttachmentInitial;
 	private String responseAttachmentType;
+	private Coordinates responseCoordinates;
 	
 	private String enableWhenQuestionnaireId;
 	private boolean enableWhenAnswer;
@@ -214,4 +216,11 @@ public class TriageQuestion {
 		this.enableWhenAnswer = enableWhenAnswer;
 	}
 
+	public Coordinates getResponseCoordinates() {
+		return responseCoordinates;
+	}
+
+	public void setResponseCoordinates(Coordinates responseCoordinates) {
+		this.responseCoordinates = responseCoordinates;
+	}
 }

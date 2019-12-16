@@ -137,6 +137,7 @@ export class TriageComponent implements OnInit {
         questionnaireResponse.questionId = element.triageQuestion.questionId;
         questionnaireResponse.questionType =
           element.triageQuestion.questionType;
+        questionnaireResponse.extension = element.triageQuestion.extension;
         if (questionnaireResponse.questionType === 'STRING') {
           questionnaireResponse.responseString = element.responseString;
         } else if (questionnaireResponse.questionType === 'INTEGER') {
@@ -151,6 +152,8 @@ export class TriageComponent implements OnInit {
           questionnaireResponse.responseAttachment = element.responseAttachment;
           questionnaireResponse.responseAttachmentType =
             element.responseAttachmentType;
+        } else if (questionnaireResponse.questionType === 'REFERENCE' && element.triageQuestion.extension.code == 'imagemap') {
+            questionnaireResponse.responseCoordinates = element.triageQuestion.responseCoordinates;
         } else {
           questionnaireResponse.response = element.answer;
         }
