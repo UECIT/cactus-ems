@@ -138,12 +138,12 @@ export class TriageComponent implements OnInit {
         questionnaireResponse.questionType =
           element.triageQuestion.questionType;
         questionnaireResponse.extension = element.triageQuestion.extension;
-        if (questionnaireResponse.questionType === 'STRING') {
+        if (questionnaireResponse.questionType === 'STRING' || questionnaireResponse.questionType === 'TEXT') {
           questionnaireResponse.responseString = element.responseString;
         } else if (questionnaireResponse.questionType === 'INTEGER') {
           questionnaireResponse.responseInterger = element.responseInterger;
         } else if (questionnaireResponse.questionType === 'BOOLEAN') {
-          questionnaireResponse.responceBoolean = element.responceBoolean;
+          questionnaireResponse.responseBoolean = element.responseBoolean;
         } else if (questionnaireResponse.questionType === 'DECIMAL') {
           questionnaireResponse.responseDecimal = element.responseDecimal;
         } else if (questionnaireResponse.questionType === 'DATE') {

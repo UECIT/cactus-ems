@@ -20,7 +20,7 @@ export class QuestionnaireResponse {
   responseString: string;
   responseInterger: number;
   responseDecimal: number;
-  responceBoolean: boolean;
+  responseBoolean: boolean;
   responseDate: string;
   responseAttachment: string;
   responseAttachmentType: string;

@@ -331,6 +331,7 @@ public class ParametersService {
   private Type getAnswerValue(TriageQuestion triageQuestion) {
     switch (triageQuestion.getQuestionType().toUpperCase()) {
       case "STRING":
+      case "TEXT":
         return new StringType(triageQuestion.getResponseString());
       case "INTEGER":
         return new IntegerType(triageQuestion.getResponseInteger());

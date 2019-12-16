@@ -223,7 +223,7 @@ export class QuestionnaireComponent implements OnInit {
   }
 
   onBooleanAnswerChange(
-    responceBoolean: boolean,
+    responseBoolean: boolean,
     triageQuestion: TriageQuestion
   ) {
     this.answerSelected = this.answerSelected.filter(
@@ -231,12 +231,12 @@ export class QuestionnaireComponent implements OnInit {
     );
     const questionResponse: QuestionResponse = new QuestionResponse();
     questionResponse.triageQuestion = triageQuestion;
-    questionResponse.responceBoolean = responceBoolean;
+    questionResponse.responseBoolean = responseBoolean;
     this.answerSelected.push(questionResponse);
     this.answerSelectedChange.emit(this.answerSelected);
     this.freeText.set(
       triageQuestion.questionId,
-      responceBoolean.valueOf.toString()
+      responseBoolean.valueOf.toString()
     );
   }
 
