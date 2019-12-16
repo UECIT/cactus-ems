@@ -6,11 +6,14 @@ import static uk.nhs.ctp.utils.ResourceProviderUtils.getParameterByName;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import lombok.AllArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CareConnectObservation;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -29,9 +32,9 @@ import org.hl7.fhir.dstu3.model.MedicationAdministration;
 import org.hl7.fhir.dstu3.model.MedicationAdministration.MedicationAdministrationStatus;
 import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
-import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Person;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus;
@@ -100,15 +103,15 @@ public class ParametersService {
           .setResource(careConnectPatientBuilder.build(caseEntity, storageService));
     } catch (FHIRException e) {
       LOG.error("Cannot parse gender code", e);
-      throw new EMSException(HttpStatus.INTERNAL_SERVER_ERROR, "Cannot parse patient gender code",
-          e);
+      throw new EMSException(HttpStatus.INTERNAL_SERVER_ERROR,
+          "Cannot parse patient gender code", e);
     }
 
-    setObservations(caseEntity, parameters);
     setContext(caseEntity, parameters);
     saveQuestionnaireResponse(questionResponse, parameters, amending,
         storageService, questionnaireId, caseEntity, questionnaireResponses);
-    addObservationInputData(caseEntity, parameters);
+
+    addObservations(caseEntity, parameters);
     addImmunizationInputData(caseEntity, parameters);
     addMedicationInputData(caseEntity, parameters);
 
@@ -127,8 +130,8 @@ public class ParametersService {
       setReceivingPerson(parameters, settings);
     } catch (FHIRException e) {
       LOG.error("Cannot parse gender code", e);
-      throw new EMSException(HttpStatus.INTERNAL_SERVER_ERROR, "Cannot parse person gender code",
-          e);
+      throw new EMSException(HttpStatus.INTERNAL_SERVER_ERROR,
+          "Cannot parse person gender code", e);
     } catch (ParseException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -140,12 +143,13 @@ public class ParametersService {
     return parameters;
   }
 
+  @Nonnull
   private List<QuestionnaireResponse> getExistingResponses(Parameters parameters, Cases caseEntity,
       ReferenceStorageService storageService) {
 
     // Get reference to all questionnaire responses for this case
     if (caseEntity.getQuestionResponses() == null) {
-      return null;
+      return new ArrayList<>();
     }
 
     List<String> qrReferences = caseEntity.getQuestionResponses().stream()
@@ -295,26 +299,72 @@ public class ParametersService {
     }
   }
 
-  private void addObservationInputData(Cases caseEntity, Parameters parameters) {
-    if (!caseEntity.getObservations().isEmpty()) {
-      for (CaseObservation observationEntity : caseEntity.getObservations()) {
-        Observation observation = new CareConnectObservation()
-            .setStatus(Observation.ObservationStatus.FINAL)
-            .setCode(new CodeableConcept().addCoding(new Coding(SystemURL.SNOMED,
-                observationEntity.getCode(), observationEntity.getDisplay())))
-            .setValue(new BooleanType(observationEntity.getValue()));
+  private void addObservations(Cases caseEntity, Parameters parameters) {
+    var observations = new TreeMap<CodeableConcept, Observation>(
+        Comparator.comparing((CodeableConcept a) -> a.getCodingFirstRep().getCode())
+            .thenComparing(a -> a.getCodingFirstRep().getSystem())
+    );
 
-        if (observationEntity.getDataAbsentCode() != null
-            && observationEntity.getDataAbsentDisplay() != null) {
-          observation
-              .setDataAbsentReason(new CodeableConcept().addCoding(new Coding(SystemURL.SNOMED,
-                  observationEntity.getDataAbsentCode(),
-                  observationEntity.getDataAbsentDisplay())));
-        }
+    // Patient observations
+    Observation genderObservation = new CareConnectObservation()
+        .setStatus(Observation.ObservationStatus.FINAL)
+        .setCode(
+            new CodeableConcept().addCoding(new Coding(SystemURL.SNOMED, "263495000", "Gender")))
+        .setValue(new StringType(caseEntity.getGender()));
+    observations.put(genderObservation.getCode(), genderObservation);
 
-        parameters.addParameter().setName(SystemConstants.INPUT_DATA).setResource(observation);
+    Observation ageObservation = new CareConnectObservation()
+        .setStatus(Observation.ObservationStatus.FINAL)
+        .setCode(new CodeableConcept().addCoding(new Coding(SystemURL.SNOMED, "397669002", "Age")))
+        .setValue(new StringType(caseEntity.getDateOfBirth().toString()));
+    observations.put(ageObservation.getCode(), ageObservation);
+
+    // CDSS Observations
+    for (CaseObservation oe : caseEntity.getObservations()) {
+      Observation observation = buildObservation(oe);
+
+      if (oe.getDataAbsentCode() != null && oe.getDataAbsentDisplay() != null) {
+        observation
+            .setDataAbsentReason(new CodeableConcept().addCoding(new Coding(
+                oe.getDataAbsentSystem(),
+                oe.getDataAbsentCode(),
+                oe.getDataAbsentDisplay())));
       }
+
+      observations.put(observation.getCode(), observation);
     }
+
+    // Add combined observations to parameters
+    for (Observation o : observations.values()) {
+      parameters.addParameter()
+          .setName(SystemConstants.INPUT_DATA)
+          .setResource(o);
+    }
+  }
+
+  private Observation buildObservation(CaseObservation observationEntity) {
+    Observation observation = new CareConnectObservation()
+        .setStatus(ObservationStatus.FINAL)
+        .setCode(new CodeableConcept().addCoding(new Coding(observationEntity.getSystem(),
+            observationEntity.getCode(), observationEntity.getDisplay())));
+
+    switch (StringUtils.defaultString(observationEntity.getValueSystem(), "")) {
+      case "boolean":
+        observation.setValue(new BooleanType(observationEntity.getValueCode()));
+        break;
+      case "string":
+        observation.setValue(new StringType(observationEntity.getValueCode()));
+        break;
+      default:
+        observation.setValue(
+            new CodeableConcept().addCoding(new Coding(
+                observationEntity.getValueSystem(),
+                observationEntity.getValueCode(),
+                observationEntity.getValueDisplay())
+            ));
+    }
+
+    return observation;
   }
 
   private void addParameterInputData(Cases caseEntity, Parameters parameters) {
@@ -349,8 +399,10 @@ public class ParametersService {
       case "REFERENCE":
         if (isImageMapAnswer(triageQuestion)) {
           CoordinateResource coordinateResource = new CoordinateResource();
-          coordinateResource.setXCoordinate(new IntegerType(triageQuestion.getResponseCoordinates().getX()));
-          coordinateResource.setYCoordinate(new IntegerType(triageQuestion.getResponseCoordinates().getY()));
+          coordinateResource
+              .setXCoordinate(new IntegerType(triageQuestion.getResponseCoordinates().getX()));
+          coordinateResource
+              .setYCoordinate(new IntegerType(triageQuestion.getResponseCoordinates().getY()));
           return new Reference(coordinateResource);
         }
       default:
@@ -442,22 +494,6 @@ public class ParametersService {
             .setValue(new StringType(caseEntity.getSkillset().getCode())));
 
     inputParameters.setResource(inputParamsResource);
-  }
-
-  private void setObservations(Cases caseEntity, Parameters parameters) throws FHIRException {
-
-    Observation genderObservation = new CareConnectObservation()
-        .setStatus(Observation.ObservationStatus.FINAL)
-        .setCode(
-            new CodeableConcept().addCoding(new Coding(SystemURL.SNOMED, "263495000", "Gender")))
-        .setValue(new StringType(caseEntity.getGender()));
-    parameters.addParameter().setName(SystemConstants.INPUT_DATA).setResource(genderObservation);
-
-    Observation ageObservation = new CareConnectObservation()
-        .setStatus(Observation.ObservationStatus.FINAL)
-        .setCode(new CodeableConcept().addCoding(new Coding(SystemURL.SNOMED, "397669002", "Age")))
-        .setValue(new StringType(caseEntity.getDateOfBirth().toString()));
-    parameters.addParameter().setName(SystemConstants.INPUT_DATA).setResource(ageObservation);
   }
 
   private void setRequestId(Long caseId, Parameters parameters) {

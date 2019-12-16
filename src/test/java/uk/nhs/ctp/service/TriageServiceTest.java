@@ -58,7 +58,7 @@ public class TriageServiceTest {
 	
 	@Before
 	public void setup() {
-		spyTriageService = spy(TriageService.class);
+		spyTriageService = spy(new TriageService());
 		
 		MockitoAnnotations.initMocks(this);
 		

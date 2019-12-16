@@ -1,7 +1,6 @@
 package uk.nhs.ctp.entities;
 
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,87 +9,45 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import lombok.Data;
 
 @Entity
 @Table(name = "case_observation")
+@Data
 public class CaseObservation {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-	@Column(name = "code")
-	private String code;
+  @Column(name = "system")
+  private String system;
 
-	@Column(name = "display")
-	private String display;
+  @Column(name = "code")
+  private String code;
 
-	@Column(name = "data_absent_code")
-	private String dataAbsentCode;
+  @Column(name = "display")
+  private String display;
 
-	@Column(name = "data_absent_display")
-	private String dataAbsentDisplay;
+  @Column(name = "data_absent_system")
+  private String dataAbsentSystem;
 
-	@Column(name = "value")
-	private Boolean value;
+  @Column(name = "data_absent_code")
+  private String dataAbsentCode;
 
-	@Temporal(TemporalType.DATE)
-	@Column(name = "observation_timestamp")
-	private Date timestamp;
+  @Column(name = "data_absent_display")
+  private String dataAbsentDisplay;
 
-	public Long getId() {
-		return id;
-	}
+  @Column(name = "value_system")
+  private String valueSystem;
 
-	public String getCode() {
-		return code;
-	}
+  @Column(name = "value_code")
+  private String valueCode;
 
-	public String getDisplay() {
-		return display;
-	}
+  @Column(name = "value_display")
+  private String valueDisplay;
 
-	public Boolean getValue() {
-		return value;
-	}
-
-	public Date getTimestamp() {
-		return timestamp;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public void setCode(String code) {
-		this.code = code;
-	}
-
-	public void setDisplay(String display) {
-		this.display = display;
-	}
-
-	public void setValue(Boolean value) {
-		this.value = value;
-	}
-
-	public void setTimestamp(Date timestamp) {
-		this.timestamp = timestamp;
-	}
-
-	public String getDataAbsentCode() {
-		return dataAbsentCode;
-	}
-
-	public void setDataAbsentCode(String dataAbsentCode) {
-		this.dataAbsentCode = dataAbsentCode;
-	}
-
-	public String getDataAbsentDisplay() {
-		return dataAbsentDisplay;
-	}
-
-	public void setDataAbsentDisplay(String dataAbsentDisplay) {
-		this.dataAbsentDisplay = dataAbsentDisplay;
-	}
+  @Temporal(TemporalType.DATE)
+  @Column(name = "observation_timestamp")
+  private Date timestamp;
 }
