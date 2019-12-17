@@ -224,4 +224,9 @@ export class MainComponent implements OnInit {
   selectServiceDefinition(serviceDefinition: ServiceDefinition) {
     this.selectedServiceDefinition = serviceDefinition.serviceDefinitionId;
   }
+
+  // NCTH-269: Unsure which field should be displayed, for now falling back to ID
+  getServiceDefinitionText(serviceDefinition: ServiceDefinition) {
+    return serviceDefinition.description || serviceDefinition.serviceDefinitionId;
+  }
 }
