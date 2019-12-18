@@ -1,7 +1,6 @@
 package uk.nhs.ctp.controllers;
 
-import static ca.uhn.fhir.rest.param.ParamPrefixEnum.EQUAL;
-import static uk.nhs.ctp.utils.DateUtils.calculateAge;
+import static uk.nhs.ctp.utils.DateUtils.ageCodeFromDate;
 
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -48,19 +47,23 @@ public class CaseController {
   public @ResponseBody
   List<CdssSupplierDTO> getServiceDefinitions(@RequestBody ServiceDefinitionSearchDTO requestDTO) {
 
-    PatientEntity patient = patientService.findById(requestDTO.getPatientId());
+    SearchParameters searchParameters = SearchParameters.builder()
+      .query("triage")
+      .contextValue("user", requestDTO.getSettings().getUserType().getCode())
+      .contextValue("setting", requestDTO.getSettings().getSetting().getCode())
+      .contextValue("task", requestDTO.getSettings().getUserTaskContext().getCode())
+      .jurisdiction(requestDTO.getSettings().getJurisdiction().getCode())
+      .build();
 
-    return cdssService
-        .queryServiceDefinitions(SearchParameters.builder()
-            .query("triage")
-            .contextValue("gender", patient.getGender())
-            .contextQuantity("age", EQUAL, calculateAge(patient.getDateOfBirth()))
-            .contextValue("user", requestDTO.getSettings().getUserType().getCode())
-            .contextValue("setting", requestDTO.getSettings().getSetting().getCode())
-            .contextValue("task", requestDTO.getSettings().getUserTaskContext().getCode())
-            .jurisdiction(requestDTO.getSettings().getJurisdiction().getCode())
-            .build()
-        );
+    if (requestDTO.getPatientId() != null) {
+      PatientEntity patient = patientService.findById(requestDTO.getPatientId());
+
+      searchParameters.toBuilder()
+        .contextValue("gender", patient.getGender())
+        .contextValue("age", ageCodeFromDate(patient.getDateOfBirth()));
+    }
+
+    return cdssService.queryServiceDefinitions(searchParameters);
   }
 
   @PutMapping(path = "/")

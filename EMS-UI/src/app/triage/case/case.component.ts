@@ -15,6 +15,7 @@ import { CdssSupplier } from 'src/app/model/cdssSupplier';
 import { Router } from '@angular/router';
 import { SessionStorage } from 'h5webstorage';
 import { ToastrService } from 'ngx-toastr';
+import { Settings } from 'src/app/model/settings';
 
 export interface DialogData {
   cdssSupplier: CdssSupplier;
@@ -39,6 +40,7 @@ export class CaseComponent implements OnInit {
   ) => boolean;
 
   caseId: Number;
+  role: String;
 
   cdssSupplier: CdssSupplier;
   serviceDefinition: string;
@@ -66,6 +68,13 @@ export class CaseComponent implements OnInit {
     if (this.case) {
       this.caseId = new Number(this.case.id);
     }
+
+    var settings: Settings = this.sessionStorage['settings'];
+
+    if (settings) {
+      this.role = settings.userType.description;
+    }
+
   }
 
   async continue(switchCdss: boolean) {

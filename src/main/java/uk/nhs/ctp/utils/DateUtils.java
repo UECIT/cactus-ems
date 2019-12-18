@@ -22,4 +22,8 @@ public class DateUtils {
     return Period.between(localDate, LocalDate.now()).getYears();
   }
 
+  public static String ageCodeFromDate(@NonNull Date dateOfBirth) {
+    return calculateAge(dateOfBirth) >= 16 ? "adult" : "child";
+  }
+
 }
