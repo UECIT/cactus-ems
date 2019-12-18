@@ -1,18 +1,13 @@
-import { HandoverMessageDialogComponent } from '../handover-message-dialog/handover-message-dialog.component';
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import {
-  Questionnaire,
-  Options,
-  QuestionResponse,
-  TriageQuestion
-} from '../../model/questionnaire';
-import { QuestionnaireResponse } from '../../model/processTriage';
-import { MatDialog } from '@angular/material';
-import { ReportService } from 'src/app/service/report.service';
+import {HandoverMessageDialogComponent} from '../handover-message-dialog/handover-message-dialog.component';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Options, Questionnaire, QuestionResponse, TriageQuestion} from '../../model/questionnaire';
+import {QuestionnaireResponse} from '../../model/processTriage';
+import {MatDialog} from '@angular/material';
+import {ReportService} from 'src/app/service/report.service';
 import beautify from 'xml-beautifier';
-import { environment } from 'src/environments/environment';
-import { ToastrService } from 'ngx-toastr';
-import { ServiceDefinitionService } from '../../service/service-definition.service';
+import {environment} from 'src/environments/environment';
+import {ToastrService} from 'ngx-toastr';
+import {ServiceDefinitionService} from '../../service/service-definition.service';
 
 
 export interface DialogData {
@@ -40,10 +35,13 @@ export class QuestionnaireComponent implements OnInit {
   isloadingReport: boolean;
   supplierId: string;
 
-  constructor(public dialog: MatDialog, 
-    private reportService: ReportService, 
-    private toastr: ToastrService, 
-    private serviceDefinitionService: ServiceDefinitionService) { }
+  showHandover = false;
+
+  constructor(public dialog: MatDialog,
+              private reportService: ReportService,
+              private toastr: ToastrService,
+              private serviceDefinitionService: ServiceDefinitionService) {
+  }
 
   openDialog(): void {
     const dialogRef = this.dialog.open(HandoverMessageDialogComponent, {
@@ -65,25 +63,25 @@ export class QuestionnaireComponent implements OnInit {
   async ngOnInit() {
     if (this.questionnaire.triageQuestions != null) {
       const initialAttachQuestions = this.questionnaire.triageQuestions.filter(
-        question => question.responseAttachmentInitial != null
+          question => question.responseAttachmentInitial != null
       );
       for (let i = 0; i < initialAttachQuestions.length; i++) {
         this.url.set(
-          initialAttachQuestions[i].questionId,
-          initialAttachQuestions[i].responseAttachmentInitial
+            initialAttachQuestions[i].questionId,
+            initialAttachQuestions[i].responseAttachmentInitial
         );
       }
     }
 
     if (this.questionnaire.triageQuestions != null) {
       const enableWhenQuestions = this.questionnaire.triageQuestions.filter(
-        question => question.enableWhenQuestionnaireId != null
+          question => question.enableWhenQuestionnaireId != null
       );
       for (let i = 0; i < enableWhenQuestions.length; i++) {
         const answer = [enableWhenQuestions[i].enableWhenQuestionnaireId, enableWhenQuestions[i].enableWhenAnswer.toString()];
         this.enableWhen.set(
-          enableWhenQuestions[i].questionId,
-          answer
+            enableWhenQuestions[i].questionId,
+            answer
         );
       }
     }
@@ -92,38 +90,38 @@ export class QuestionnaireComponent implements OnInit {
     if (this.answerSelected == null) {
       this.answerSelected = new Array();
     } else if (
-      this.answerSelected != null &&
-      this.questionnaire.triageQuestions != null
+        this.answerSelected != null &&
+        this.questionnaire.triageQuestions != null
     ) {
       const stringQuestions = this.questionnaire.triageQuestions.filter(
-        question => question.questionType === 'STRING'
+          question => question.questionType === 'STRING'
       );
       for (let i = 0; i < stringQuestions.length; i++) {
         const answers = this.answerSelected.filter(
-          answer =>
-            answer.triageQuestion.questionId === stringQuestions[i].questionId
+            answer =>
+                answer.triageQuestion.questionId === stringQuestions[i].questionId
         );
         if (answers.length > 0 && answers[0].answer != null) {
           // expect either a single answer or none for text questions
           this.freeText.set(
-            stringQuestions[i].questionId,
-            answers[0].answer.display
+              stringQuestions[i].questionId,
+              answers[0].answer.display
           );
         }
       }
     }
 
     // check for result and build the handoverMessage and corresponding reports.
-    if (this.questionnaire.referralRequest != null) {
+    if (this.questionnaire.referralRequest != null && this.showHandover) {
       await this.getHandoverMessage().catch(err => {
         this.toastr.error(
-          err.error.target.__zone_symbol__xhrURL + ' - ' +
-          err.message);
+            err.error.target.__zone_symbol__xhrURL + ' - ' +
+            err.message);
       });
       await this.get111Report().catch(err => {
         this.toastr.error(
-          err.error.target.__zone_symbol__xhrURL + ' - ' +
-          err.message);
+            err.error.target.__zone_symbol__xhrURL + ' - ' +
+            err.message);
       });
     }
     this.supplierId = await this.serviceDefinitionService.getCdssSupplierUrl(this.questionnaire.cdssSupplierId);
@@ -141,7 +139,7 @@ export class QuestionnaireComponent implements OnInit {
     const enableOrNot = this.enableWhen.get(triageQuestion.questionId);
     if (enableOrNot != null) {
       const hasAnswer = this.answerSelected.filter(
-        answer => answer.triageQuestion.questionId === enableOrNot[0]
+          answer => answer.triageQuestion.questionId === enableOrNot[0]
       );
       if (hasAnswer.length > 0) {
         return enableOrNot[1] !== 'true';
@@ -156,7 +154,7 @@ export class QuestionnaireComponent implements OnInit {
     }
 
     this.answerSelected = this.answerSelected.filter(
-      e => e.triageQuestion.questionId !== triageQuestion.questionId
+        e => e.triageQuestion.questionId !== triageQuestion.questionId
     );
     const questionResponse: QuestionResponse = new QuestionResponse();
     questionResponse.triageQuestion = triageQuestion;
@@ -167,8 +165,8 @@ export class QuestionnaireComponent implements OnInit {
     this.answerSelected.push(questionResponse);
     this.answerSelectedChange.emit(this.answerSelected);
     this.freeText.set(
-      triageQuestion.questionId,
-      questionResponse.triageQuestion.responseCoordinates.x + ", " + questionResponse.triageQuestion.responseCoordinates.y
+        triageQuestion.questionId,
+        questionResponse.triageQuestion.responseCoordinates.x + ', ' + questionResponse.triageQuestion.responseCoordinates.y
     );
   }
 
@@ -182,7 +180,7 @@ export class QuestionnaireComponent implements OnInit {
 
   onStringAnswerChange(responseString: string, triageQuestion: TriageQuestion) {
     this.answerSelected = this.answerSelected.filter(
-      e => e.triageQuestion.questionId !== triageQuestion.questionId
+        e => e.triageQuestion.questionId !== triageQuestion.questionId
     );
     const questionResponse: QuestionResponse = new QuestionResponse();
     questionResponse.triageQuestion = triageQuestion;
@@ -193,11 +191,11 @@ export class QuestionnaireComponent implements OnInit {
   }
 
   onIntegerAnswerChange(
-    responseInterger: number,
-    triageQuestion: TriageQuestion
+      responseInterger: number,
+      triageQuestion: TriageQuestion
   ) {
     this.answerSelected = this.answerSelected.filter(
-      e => e.triageQuestion.questionId !== triageQuestion.questionId
+        e => e.triageQuestion.questionId !== triageQuestion.questionId
     );
     const questionResponse: QuestionResponse = new QuestionResponse();
     questionResponse.triageQuestion = triageQuestion;
@@ -208,11 +206,11 @@ export class QuestionnaireComponent implements OnInit {
   }
 
   onDecimalAnswerChange(
-    responseDecimal: number,
-    triageQuestion: TriageQuestion
+      responseDecimal: number,
+      triageQuestion: TriageQuestion
   ) {
     this.answerSelected = this.answerSelected.filter(
-      e => e.triageQuestion.questionId !== triageQuestion.questionId
+        e => e.triageQuestion.questionId !== triageQuestion.questionId
     );
     const questionResponse: QuestionResponse = new QuestionResponse();
     questionResponse.triageQuestion = triageQuestion;
@@ -223,11 +221,11 @@ export class QuestionnaireComponent implements OnInit {
   }
 
   onBooleanAnswerChange(
-    responseBoolean: boolean,
-    triageQuestion: TriageQuestion
+      responseBoolean: boolean,
+      triageQuestion: TriageQuestion
   ) {
     this.answerSelected = this.answerSelected.filter(
-      e => e.triageQuestion.questionId !== triageQuestion.questionId
+        e => e.triageQuestion.questionId !== triageQuestion.questionId
     );
     const questionResponse: QuestionResponse = new QuestionResponse();
     questionResponse.triageQuestion = triageQuestion;
@@ -235,14 +233,14 @@ export class QuestionnaireComponent implements OnInit {
     this.answerSelected.push(questionResponse);
     this.answerSelectedChange.emit(this.answerSelected);
     this.freeText.set(
-      triageQuestion.questionId,
-      responseBoolean.valueOf.toString()
+        triageQuestion.questionId,
+        responseBoolean.valueOf.toString()
     );
   }
 
   onDateAnswerChange(responseDate: Date, triageQuestion: TriageQuestion) {
     this.answerSelected = this.answerSelected.filter(
-      e => e.triageQuestion.questionId !== triageQuestion.questionId
+        e => e.triageQuestion.questionId !== triageQuestion.questionId
     );
     const questionResponse: QuestionResponse = new QuestionResponse();
     questionResponse.triageQuestion = triageQuestion;
@@ -255,7 +253,7 @@ export class QuestionnaireComponent implements OnInit {
   onAttachmentAnswerChange(event: any, triageQuestion: TriageQuestion) {
     if (event.target.files[0]) {
       this.answerSelected = this.answerSelected.filter(
-        e => e.triageQuestion.questionId !== triageQuestion.questionId
+          e => e.triageQuestion.questionId !== triageQuestion.questionId
       );
       const questionResponse: QuestionResponse = new QuestionResponse();
       questionResponse.triageQuestion = triageQuestion;
@@ -284,21 +282,21 @@ export class QuestionnaireComponent implements OnInit {
       return;
     }
     this.cleanupAnswersSelected(
-      triageQuestion.questionId,
-      selectedOption,
-      triageQuestion.repeats
+        triageQuestion.questionId,
+        selectedOption,
+        triageQuestion.repeats
     );
     const questionResponse: QuestionResponse = new QuestionResponse();
     questionResponse.triageQuestion = triageQuestion;
     questionResponse.answer = selectedOption;
 
     if (
-      this.answerSelected.filter(
-        vendor => vendor.answer === questionResponse.answer
-      ).length > 0
+        this.answerSelected.filter(
+            vendor => vendor.answer === questionResponse.answer
+        ).length > 0
     ) {
       this.answerSelected = this.answerSelected.filter(
-        e => e.answer !== selectedOption
+          e => e.answer !== selectedOption
       );
     } else {
       this.answerSelected.push(questionResponse);
@@ -308,20 +306,20 @@ export class QuestionnaireComponent implements OnInit {
   }
 
   cleanupAnswersSelected(
-    selectedQuestionId: string,
-    selectedOption: Options,
-    repeats: boolean
+      selectedQuestionId: string,
+      selectedOption: Options,
+      repeats: boolean
   ) {
     if (!repeats || selectedOption.extension) {
       this.answerSelected = this.answerSelected.filter(
-        e => e.triageQuestion.questionId !== selectedQuestionId
+          e => e.triageQuestion.questionId !== selectedQuestionId
       );
     } else if (!selectedOption.extension) {
       let i = 0;
       this.answerSelected.forEach(element => {
         if (
-          element.answer.extension !== selectedOption.extension &&
-          element.triageQuestion.questionId === selectedQuestionId
+            element.answer.extension !== selectedOption.extension &&
+            element.triageQuestion.questionId === selectedQuestionId
         ) {
           this.answerSelected.splice(i, 1);
         }
@@ -331,17 +329,17 @@ export class QuestionnaireComponent implements OnInit {
   }
 
   selectedContains(
-    selectedOption: Options,
-    selectedQuestionId: TriageQuestion
+      selectedOption: Options,
+      selectedQuestionId: TriageQuestion
   ): boolean {
     if (
-      this.answerSelected.some(
-        e =>
-          e.answer != null &&
-          e.answer.code === selectedOption.code &&
-          e.answer.display === selectedOption.display &&
-          e.triageQuestion.questionId === selectedQuestionId.questionId
-      )
+        this.answerSelected.some(
+            e =>
+                e.answer != null &&
+                e.answer.code === selectedOption.code &&
+                e.answer.display === selectedOption.display &&
+                e.triageQuestion.questionId === selectedQuestionId.questionId
+        )
     ) {
       return true;
     }
@@ -351,8 +349,8 @@ export class QuestionnaireComponent implements OnInit {
     this.handoverMessage = await this.reportService.getHandover(this.questionnaire.caseId, this.questionnaire.referralRequest.resourceId);
     await this.reportService.postHandoverTemplate(this.handoverMessage).catch(err => {
       this.toastr.error(
-        err.error.target.__zone_symbol__xhrURL + ' - ' +
-        err.message);
+          err.error.target.__zone_symbol__xhrURL + ' - ' +
+          err.message);
     });
   }
 
@@ -365,57 +363,57 @@ export class QuestionnaireComponent implements OnInit {
   async get111Report() {
     this.isloadingReport = true;
     const reports = await this.reportService
-      .getReport(this.questionnaire.caseId, this.questionnaire.referralRequest.resourceId, this.handoverMessage);
+    .getReport(this.questionnaire.caseId, this.questionnaire.referralRequest.resourceId, this.handoverMessage);
 
-      reports.forEach(async report => {
-        if (report.reportType === 'ONE_ONE_ONE_V2') {
-          this.isloadingReport = true;
-          report.ValidationReport = await this.reportService.validate111ReportV2(report.request)
-          .catch(err => {
-            this.toastr.error(
+    reports.forEach(async report => {
+      if (report.reportType === 'ONE_ONE_ONE_V2') {
+        this.isloadingReport = true;
+        report.ValidationReport = await this.reportService.validate111ReportV2(report.request)
+        .catch(err => {
+          this.toastr.error(
               err.error.target.__zone_symbol__xhrURL + ' - ' +
               err.message);
-            this.isloadingReport = false;
-          });
           this.isloadingReport = false;
-        }
+        });
+        this.isloadingReport = false;
+      }
 
-        if (report.reportType === 'ONE_ONE_ONE_V3') {
-          this.isloadingReport = true;
-          report.ValidationReport = await this.reportService.validate111ReportV3(report.request)
-          .catch(err => {
-            this.toastr.error(
+      if (report.reportType === 'ONE_ONE_ONE_V3') {
+        this.isloadingReport = true;
+        report.ValidationReport = await this.reportService.validate111ReportV3(report.request)
+        .catch(err => {
+          this.toastr.error(
               err.error.target.__zone_symbol__xhrURL + ' - ' +
               err.message);
-            this.isloadingReport = false;
-          });
           this.isloadingReport = false;
-        }
+        });
+        this.isloadingReport = false;
+      }
 
-        if (report.reportType === 'AMBULANCE_V2') {
-          this.isloadingReport = true;
-          report.ValidationReport = await this.reportService.validateAmbulanceRequestV2(report.request)
-          .catch(err => {
-            this.toastr.error(
+      if (report.reportType === 'AMBULANCE_V2') {
+        this.isloadingReport = true;
+        report.ValidationReport = await this.reportService.validateAmbulanceRequestV2(report.request)
+        .catch(err => {
+          this.toastr.error(
               err.error.target.__zone_symbol__xhrURL + ' - ' +
               err.message);
-            this.isloadingReport = false;
-          });
           this.isloadingReport = false;
-        }
+        });
+        this.isloadingReport = false;
+      }
 
-        if (report.reportType === 'AMBULANCE_V3') {
-          this.isloadingReport = true;
-          report.ValidationReport = await this.reportService.validateAmbulanceRequestV3(report.request)
-          .catch(err => {
-            this.toastr.error(
+      if (report.reportType === 'AMBULANCE_V3') {
+        this.isloadingReport = true;
+        report.ValidationReport = await this.reportService.validateAmbulanceRequestV3(report.request)
+        .catch(err => {
+          this.toastr.error(
               err.error.target.__zone_symbol__xhrURL + ' - ' +
               err.message);
-            this.isloadingReport = false;
-          });
           this.isloadingReport = false;
-        }
-      });
+        });
+        this.isloadingReport = false;
+      }
+    });
 
     for (let index = 0; index < reports.length; index++) {
       const report = reports[index];
@@ -452,17 +450,17 @@ export class QuestionnaireComponent implements OnInit {
   }
 
   isImageMap(question: TriageQuestion) {
-    return question.questionType == 'REFERENCE' && question.extension.code == 'imagemap'; 
+    return question.questionType == 'REFERENCE' && question.extension.code == 'imagemap';
   }
 
   getImageUrl(question: String) {
     if (this.supplierId) {
-      return this.supplierId.replace("/fhir", "/image/") + question.match(/!\[.*?\]\((.*?)\)/)[1];
+      return this.supplierId.replace('/fhir', '/image/') + question.match(/!\[.*?\]\((.*?)\)/)[1];
     }
-    return "Image not found";
+    return 'Image not found';
   }
 
   formatQuestion(question: TriageQuestion) {
-    return question.question.replace(/!\[.*?\]\((.*?)\)/g, "");
+    return question.question.replace(/!\[.*?\]\((.*?)\)/g, '');
   }
 }
