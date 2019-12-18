@@ -13,7 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-@Builder
+@Builder(toBuilder = true)
 @Getter
 public class SearchParameters {
 

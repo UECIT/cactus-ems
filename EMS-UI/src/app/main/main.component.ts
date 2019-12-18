@@ -11,7 +11,6 @@ import {MatSnackBar} from '@angular/material';
 import {SessionStorage} from 'h5webstorage';
 import {SelectService} from '../model/selectService';
 import {TriageService} from '../service/triage.service';
-import {RoleService} from '../service/role.service';
 import {ToastrService} from 'ngx-toastr';
 import {Code} from '../model/case';
 import {Settings} from '../model/settings';
@@ -45,7 +44,6 @@ export class MainComponent implements OnInit {
       private store: Store<AppState>,
       private cdssSupplierService: CdssService,
       private triageService: TriageService,
-      private roleService: RoleService,
       public snackBar: MatSnackBar,
       private sessionStorage: SessionStorage,
       private toastr: ToastrService
@@ -121,12 +119,30 @@ export class MainComponent implements OnInit {
         await this.cdssSupplierService.getCdssSuppliers().toPromise();
   }
 
-  async getRoles() {
-    this.roles = 
-        await this.roleService.getRoles().toPromise();
+  getRoles() {
+    this.roles = [
+      {
+        'id': 1,
+        'description': 'Clinical',
+        'code': '103GC0700X',
+        'display': 'Clinical'
+      },
+      {
+        'id': 2,
+        'description': 'Urgent',
+        'code': '261QU0200X',
+        'display': 'Call Handler'
+      },
+      {
+        'id': 3,
+        'description': 'Patient',
+        'code': 'PA',
+        'display': 'Patient'
+      }
+    ]
   }
 
-  getSettings() { //TODO: get from a service
+  getSettings() {
     this.settings = [
       {
         'id': 1,
@@ -143,7 +159,7 @@ export class MainComponent implements OnInit {
     ]
   }
 
-  getJurisdictions() { //TODO: get from a service
+  getJurisdictions() {
     this.jurisdictions = [
       {
         'id': 1,
@@ -206,9 +222,6 @@ export class MainComponent implements OnInit {
       request.settings = settings;
 
       var patient: Patient = this.sessionStorage['patient']
-      if (patient) {
-        request.patientId = patient.id;
-      }
       
       const selectedSDs = await this.triageService.selectServiceDefinitions(request);
 
