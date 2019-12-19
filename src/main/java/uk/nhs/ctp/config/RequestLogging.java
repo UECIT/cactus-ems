@@ -2,11 +2,13 @@ package uk.nhs.ctp.config;
 
 import static java.util.Arrays.asList;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.client.RestTemplateCustomizer;
@@ -95,10 +97,12 @@ public class RequestLogging {
 
     private void formatBody(InputStream body, MediaType contentType) throws IOException {
       if (jsonContentTypes.stream().anyMatch(contentType::isCompatibleWith)) {
-        String bodyString = StreamUtils.copyToString(body, contentType.getCharset());
+        String bodyString = StreamUtils.copyToString(body,
+            ObjectUtils.defaultIfNull(contentType.getCharset(), Charsets.UTF_8));
         log.info("Body: {}", bodyString);
       } else if (textContentTypes.stream().anyMatch(contentType::isCompatibleWith)) {
-        String bodyString = StreamUtils.copyToString(body, contentType.getCharset());
+        String bodyString = StreamUtils.copyToString(body,
+            ObjectUtils.defaultIfNull(contentType.getCharset(), Charsets.UTF_8));
         log.info("Body: {}", bodyString);
       } else {
         log.info("Body: NON TEXT: {}", contentType);
