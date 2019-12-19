@@ -2,21 +2,17 @@ package uk.nhs.ctp.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.net.ConnectException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.entities.AuditRecord;
 import uk.nhs.ctp.entities.Cases;
+import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.service.dto.CdssRequestDTO;
 import uk.nhs.ctp.service.dto.CdssResponseDTO;
 import uk.nhs.ctp.service.dto.CdssResult;
@@ -27,8 +23,7 @@ import uk.nhs.ctp.service.resolver.ResponseResolver;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
 
 @Service
-@NoArgsConstructor
-@AllArgsConstructor(onConstructor = @__(@Autowired))
+@AllArgsConstructor
 public class TriageService {
 
   private static final Logger LOG = LoggerFactory.getLogger(TriageService.class);
@@ -40,15 +35,7 @@ public class TriageService {
   private AuditService auditService;
   private CdssSupplierService cdssSupplierService;
   private ReferencingContextFactory referencingContextFactory;
-
-  private static Map<Class<?>, ResponseResolver<? extends Resource>> responseResolverMap = new HashMap<>();
-
-  @Autowired
-  public <T extends Resource> void setResponseResolvers(
-      List<ResponseResolver<T>> responseResolvers) {
-    responseResolvers
-        .forEach(resolver -> responseResolverMap.put(resolver.getResourceClass(), resolver));
-  }
+  private ResponseResolver responseResolver;
 
   /**
    * Creates case from test case scenario and patient details and launches first triage request
@@ -67,6 +54,7 @@ public class TriageService {
     cdssRequest.setCdssSupplierId(requestDetails.getCdssSupplierId());
     cdssRequest.setServiceDefinitionId(requestDetails.getServiceDefinitionId());
     cdssRequest.setSettings(requestDetails.getSettings());
+    cdssRequest.setPatientId(requestDetails.getPatientId());
 
     return processTriageRequest(cdssRequest);
   }
@@ -169,7 +157,7 @@ public class TriageService {
         requestDetails.getCaseId(),
         requestDetails.getQuestionResponse(),
         requestDetails.getSettings(),
-        requestDetails.isAmendingPrevious(),
+        requestDetails.getAmendingPrevious(),
         referencingContext,
         requestDetails.getQuestionnaireId());
 
@@ -180,10 +168,10 @@ public class TriageService {
         requestDetails.getCaseId(),
         referencingContext);
 
-    CdssResult cdssResult = responseResolverMap.get(resource.getClass())
-        .resolve(resource, cdssSupplierService.getCdssSupplier(requestDetails.getCdssSupplierId()));
+    CdssSupplier cdssSupplier = cdssSupplierService
+        .getCdssSupplier(requestDetails.getCdssSupplierId());
 
-    return cdssResult;
+    return responseResolver.resolve(resource, cdssSupplier, requestDetails.getSettings(), requestDetails.getPatientId());
   }
 
   /**

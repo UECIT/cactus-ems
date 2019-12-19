@@ -166,6 +166,7 @@ export class TriageComponent implements OnInit {
       this.sessionStorage['cdssSupplierId']
     );
     this.triage.amendingPrevious = this.amendingPrevious;
+    this.triage.patientId = this.patientId;
     this.questionnaire = await this.triageService.processTriage(
       this.triage,
       back
