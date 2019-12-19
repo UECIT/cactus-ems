@@ -3,16 +3,14 @@ package uk.nhs.ctp.service.resolver;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.CareConnectCarePlan;
 import org.hl7.fhir.dstu3.model.CarePlan;
-import org.hl7.fhir.dstu3.model.DataRequirement;
 import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementCodeFilterComponent;
 import org.hl7.fhir.dstu3.model.GuidanceResponse;
 import org.hl7.fhir.dstu3.model.GuidanceResponse.GuidanceResponseStatus;
@@ -23,64 +21,32 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.RequestGroup;
 import org.hl7.fhir.dstu3.model.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.exception.EMSException;
-import uk.nhs.ctp.repos.ServiceDefinitionRepository;
-import uk.nhs.ctp.service.CdssService;
-import uk.nhs.ctp.service.CdssSupplierService;
 import uk.nhs.ctp.service.dto.CarePlanDTO;
 import uk.nhs.ctp.service.dto.CdssResult;
-import uk.nhs.ctp.service.dto.CdssSupplierDTO;
-import uk.nhs.ctp.service.search.SearchParameters;
+import uk.nhs.ctp.service.dto.SettingsDTO;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
 
-public abstract class AbstractResponseResolver<RESOURCE extends Resource> implements
-    ResponseResolver<RESOURCE> {
+@AllArgsConstructor
+@Component
+public class ResponseResolverImpl implements ResponseResolver {
 
-  @Autowired
-  private CdssService cdssService;
-
-  @Autowired
-  private CdssSupplierService cdssSupplierService;
-
-  @Autowired
-  private ServiceDefinitionRepository serviceDefinitionRepository;
-
-  @Autowired
+  private ResourceExtractor resourceExtractor;
   private IParser fhirParser;
-
-  @Autowired
   private FhirContext fhirContext;
+  private SwitchTriggerResolver switchTriggerResolver;
 
-  private Map<Class<? extends Resource>, Function<Resource, List<String>>> referenceFunctions;
-
-  public AbstractResponseResolver() {
-    referenceFunctions = new HashMap<>();
-
-    referenceFunctions.put(ActivityDefinition.class, (resource) -> {
-      List<String> references = new ArrayList<>();
-      references.add(((ActivityDefinition) resource).getLibraryFirstRep().getReference());
-      return references;
-    });
-
-    referenceFunctions.put(ReferralRequest.class, (resource) -> {
-      List<String> references = new ArrayList<>();
-      references.add(((ReferralRequest) resource).getBasedOnFirstRep().getReference());
-      references.add(((ReferralRequest) resource).getRelevantHistoryFirstRep().getReference());
-      return references;
-    });
-
-  }
-
-  public CdssResult resolve(Resource resource, CdssSupplier cdssSupplier) {
-    GuidanceResponse guidanceResponse = extractGuidanceResponse(resource);
-    List<Resource> extractedResources = extractResources(resource, cdssSupplier);
+  @Override
+  public CdssResult resolve(Resource resource, CdssSupplier cdssSupplier, SettingsDTO settings, Long patientId) {
+    GuidanceResponse guidanceResponse = resourceExtractor.extractGuidanceResponse(resource);
+    List<Resource> extractedResources = resourceExtractor.extractResources(resource, cdssSupplier);
 
     CdssResult cdssResult = new CdssResult();
-    extractedResources.stream()
+    extractedResources
         .forEach(child -> addContained(child, cdssSupplier, guidanceResponse));
 
     cdssResult.setOutputData(getOutputData(guidanceResponse));
@@ -91,7 +57,7 @@ public abstract class AbstractResponseResolver<RESOURCE extends Resource> implem
 
     if (guidanceResponse.getStatus() == GuidanceResponseStatus.SUCCESS) {
       cdssResult.setResult(getResult(guidanceResponse));
-      cdssResult.setSwitchTrigger(getTrigger(guidanceResponse));
+      cdssResult.setSwitchTrigger(switchTriggerResolver.getSwitchTrigger(guidanceResponse, settings, patientId));
     }
 
     cdssResult.setReferralRequest(
@@ -103,7 +69,7 @@ public abstract class AbstractResponseResolver<RESOURCE extends Resource> implem
     cdssResult.setCareAdvice(
         ResourceProviderUtils
             .getResources(guidanceResponse.getContained(), CareConnectCarePlan.class)
-            .stream().map(plan -> new CarePlanDTO(plan)).collect(Collectors.toList()));
+            .stream().map(CarePlanDTO::new).collect(Collectors.toList()));
 
     // Add support for data-requested
     if (guidanceResponse.getStatus() == GuidanceResponseStatus.DATAREQUIRED
@@ -117,20 +83,29 @@ public abstract class AbstractResponseResolver<RESOURCE extends Resource> implem
   private void addContained(Resource resource, CdssSupplier cdssSupplier,
       GuidanceResponse guidanceResponse) {
     guidanceResponse.addContained(resource);
-
-    try {
-      if (referenceFunctions.containsKey(resource.getClass())) {
-        List<String> childReferences = referenceFunctions.get(resource.getClass()).apply(resource);
-        childReferences.stream().forEach(childReference -> {
-          if (childReference != null) {
-            guidanceResponse.addContained(ResourceProviderUtils.getResource(fhirContext,
-                cdssSupplier.getBaseUrl(), ResourceProviderUtils.getResourceType(childReference),
-                childReference));
-          }
-        });
-      }
-    } catch (Exception e) {
+    List<String> references;
+    if (resource instanceof ActivityDefinition) {
+      ActivityDefinition activityDefinition = (ActivityDefinition) resource;
+      references = Collections.singletonList((activityDefinition).getLibraryFirstRep().getReference());
     }
+    else if (resource instanceof ReferralRequest) {
+      ReferralRequest referralRequest = (ReferralRequest) resource;
+      references = Arrays.asList(
+          referralRequest.getBasedOnFirstRep().getReference(),
+          referralRequest.getRelevantHistoryFirstRep().getReference()
+      );
+    }
+    else {
+      return;
+    }
+
+    references.forEach(childReference -> {
+      if (childReference != null) {
+        guidanceResponse.addContained(ResourceProviderUtils.getResource(fhirContext,
+            cdssSupplier.getBaseUrl(), ResourceProviderUtils.getResourceType(childReference),
+            childReference));
+      }
+    });
   }
 
   private List<Resource> getOutputData(GuidanceResponse guidanceResponse) {
@@ -186,6 +161,7 @@ public abstract class AbstractResponseResolver<RESOURCE extends Resource> implem
     return null;
   }
 
+  @Override
   public RequestGroup getResult(GuidanceResponse guidanceResponse) {
 
     if (guidanceResponse.hasResult() && guidanceResponse.getResult().getResource() != null) {
@@ -212,50 +188,19 @@ public abstract class AbstractResponseResolver<RESOURCE extends Resource> implem
     return null;
   }
 
-  private String getTrigger(GuidanceResponse guidanceResponse) {
-    Optional<DataRequirement> optional = guidanceResponse.getDataRequirement().stream().filter(
-        data -> data.getType().equals("CareConnectObservation")).findFirst();
-
-    if (optional.isPresent()) {
-      List<String> triggerCodes = optional.get().getCodeFilter().stream()
-          .map(filter -> "CareConnectObservation$" + filter.getValueCodingFirstRep().getCode())
-          .collect(Collectors.toList());
-
-      List<CdssSupplierDTO> serviceDefinitionBySupplier = cdssService
-          .queryServiceDefinitions(SearchParameters.builder()
-              .query("triage")
-              .typeCode(triggerCodes)
-              .build());
-
-      Optional<String> matchedService = serviceDefinitionBySupplier
-          .stream()
-          .findFirst()
-          .flatMap(supplier -> supplier.getServiceDefinitions().stream()
-              .findFirst()
-              .map(sd -> supplier.getId() + "/" + sd.getServiceDefinitionId())
-          );
-
-      return matchedService.orElse(null);
-    }
-
-    return null;
-  }
-
+  @Override
   public String getQuestionnaireReference(GuidanceResponse guidanceResponse) {
+
     if (guidanceResponse.hasDataRequirement()) {
+      DataRequirementCodeFilterComponent requirement = guidanceResponse
+          .getDataRequirementFirstRep()
+          .getCodeFilterFirstRep();
 
-      try {
-        return guidanceResponse.getDataRequirementFirstRep()
-            .getCodeFilterFirstRep().getValueSetStringType().getValueAsString();
-      } catch (Exception e) {
-        e.printStackTrace();
+      if (requirement.getValueSetStringType() != null) {
+        return requirement.getValueSetStringType().getValueAsString();
       }
-
-      try {
-        return guidanceResponse.getDataRequirementFirstRep()
-            .getCodeFilterFirstRep().getValueSetReference().getReference();
-      } catch (Exception e) {
-        e.printStackTrace();
+      else if (requirement.getValueSetReference() != null) {
+        return requirement.getValueSetReference().getReference();
       }
 
     } else if (guidanceResponse.getStatus().equals(GuidanceResponseStatus.DATAREQUIRED)) {
@@ -264,11 +209,5 @@ public abstract class AbstractResponseResolver<RESOURCE extends Resource> implem
     }
     return null;
   }
-
-  public abstract Class<RESOURCE> getResourceClass();
-
-  protected abstract GuidanceResponse extractGuidanceResponse(Resource resource);
-
-  protected abstract List<Resource> extractResources(Resource resource, CdssSupplier cdssSupplier);
 
 }

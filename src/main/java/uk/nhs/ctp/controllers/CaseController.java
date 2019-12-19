@@ -1,6 +1,6 @@
 package uk.nhs.ctp.controllers;
 
-import static uk.nhs.ctp.utils.DateUtils.ageCodeFromDate;
+import static java.util.Collections.emptyList;
 
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -14,17 +14,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.nhs.ctp.entities.Cases;
-import uk.nhs.ctp.entities.PatientEntity;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.CdssService;
-import uk.nhs.ctp.service.PatientService;
 import uk.nhs.ctp.service.TriageService;
 import uk.nhs.ctp.service.dto.CdssRequestDTO;
 import uk.nhs.ctp.service.dto.CdssResponseDTO;
 import uk.nhs.ctp.service.dto.CdssSupplierDTO;
 import uk.nhs.ctp.service.dto.ServiceDefinitionSearchDTO;
 import uk.nhs.ctp.service.dto.TriageLaunchDTO;
-import uk.nhs.ctp.service.search.SearchParameters;
+import uk.nhs.ctp.service.search.SearchParametersTransformer;
 
 @CrossOrigin
 @RestController
@@ -35,7 +33,8 @@ public class CaseController {
   private final CdssService cdssService;
   private final TriageService triageService;
   private final CaseRepository caseRepository;
-  private final PatientService patientService;
+
+  private final SearchParametersTransformer searchParametersTransformer;
 
   @PostMapping(path = "/")
   public @ResponseBody
@@ -47,23 +46,10 @@ public class CaseController {
   public @ResponseBody
   List<CdssSupplierDTO> getServiceDefinitions(@RequestBody ServiceDefinitionSearchDTO requestDTO) {
 
-    SearchParameters searchParameters = SearchParameters.builder()
-      .query("triage")
-      .contextValue("user", requestDTO.getSettings().getUserType().getCode())
-      .contextValue("setting", requestDTO.getSettings().getSetting().getCode())
-      .contextValue("task", requestDTO.getSettings().getUserTaskContext().getCode())
-      .jurisdiction(requestDTO.getSettings().getJurisdiction().getCode())
-      .build();
+    var params = searchParametersTransformer
+        .transform(emptyList(), requestDTO.getSettings(), requestDTO.getPatientId());
 
-    if (requestDTO.getPatientId() != null) {
-      PatientEntity patient = patientService.findById(requestDTO.getPatientId());
-
-      searchParameters.toBuilder()
-        .contextValue("gender", patient.getGender())
-        .contextValue("age", ageCodeFromDate(patient.getDateOfBirth()));
-    }
-
-    return cdssService.queryServiceDefinitions(searchParameters);
+    return cdssService.queryServiceDefinitions(params);
   }
 
   @PutMapping(path = "/")
