@@ -67,7 +67,6 @@ public class CdssController {
   public @ResponseBody
   List<ServiceDefinitionDTO> getServiceDefinitions(@PathVariable Long id,
       HttpServletRequest request) {
-    // TODO search parameters
     CdssSupplier cdssSupplier = cdssSupplierService.getCdssSupplier(id);
     CdssSupplierDTO cdssSupplierDTO = cdssService
         .queryServiceDefinitions(cdssSupplier, SearchParameters.builder().build());

@@ -18,5 +18,10 @@ public final class SystemURL {
 	public static final String OPERATION_OUTCOME = "https://www.hl7.org/fhir/operationoutcome.html";
 	public static final String SERVICE_DEFINITION_EVALUATE = "http://hl7.org/fhir/OperationDefinition/ServiceDefinition-evaluate";
 	public static final String QUESTIONNAIRE = "https://www.hl7.org/fhir/questionnaire.html";
+	public static final String CS_PROVIDER_TAXONOMY = "http://hl7.org/fhir/valueset-provider-taxonomy.html";
+	public static final String CS_CDS_STUB = "cdss/supplier/stub";
+	public static final String CS_GENDER = "http://hl7.org/fhir/administrative-gender";
+
+
 
 }
