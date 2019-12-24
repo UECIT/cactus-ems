@@ -23,7 +23,7 @@ public class DateUtils {
   }
 
   public static String ageCodeFromDate(@NonNull Date dateOfBirth) {
-    return calculateAge(dateOfBirth) >= 16 ? "adult" : "child";
+    return calculateAge(dateOfBirth) >= 16 ? "133936004" : "67822003"; //"adult" : "child";
   }
 
 }

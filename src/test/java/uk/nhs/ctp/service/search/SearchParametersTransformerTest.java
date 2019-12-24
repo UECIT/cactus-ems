@@ -1,16 +1,23 @@
 package uk.nhs.ctp.service.search;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
-import java.util.List;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.DataRequirement;
+import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementCodeFilterComponent;
+import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementDateFilterComponent;
+import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,14 +44,17 @@ public class SearchParametersTransformerTest {
   @Test
   public void createSearchParametersFromTriggers() {
 
-    List<String> triggers = ImmutableList.of("coughing", "sneezing", "breathing");
+    DataRequirement observationRequirement = createObservationRequirement("coughing", "absent",
+        LocalDateTime.of(2001, 2, 3, 4, 5, 6));
+    DataRequirement patientRequirement = createPatientRequirement(LocalDate.of(2004, 2,1));
 
     SearchParameters searchParameters =
-        searchParametersTransformer.transform(triggers, null, null);
+        searchParametersTransformer.transform(ImmutableList.of(observationRequirement, patientRequirement), null, null);
 
-    assertThat(searchParameters.getTypeCode(),
-        containsInAnyOrder("coughing", "sneezing", "breathing"));
-
+    assertThat(searchParameters.getObservationTriggers(),
+        contains("CareConnectObservation$code$coughing$value$absent$effective$2001-02-03T04:05:06"));
+    assertThat(searchParameters.getPatientTriggers(),
+        contains("CareConnectPatient$birthDate$2004-02-01"));
   }
 
   @Test
@@ -91,8 +101,8 @@ public class SearchParametersTransformerTest {
     SearchParameters searchParameters = searchParametersTransformer
         .transform(emptyList(), null, patientId);
 
-    assertThat(searchParameters.getContextValueCode(), containsInAnyOrder("gender$male", "age$child"));
-
+    assertThat(searchParameters.getContextValueCode(),
+        containsInAnyOrder("gender$male", "age$http://snomed.info/sct|67822003"));
   }
 
   @Test
@@ -112,8 +122,42 @@ public class SearchParametersTransformerTest {
     SearchParameters searchParameters = searchParametersTransformer
         .transform(emptyList(), null, patientId);
 
-    assertThat(searchParameters.getContextValueCode(), containsInAnyOrder("gender$female", "age$adult"));
+    assertThat(searchParameters.getContextValueCode(),
+        containsInAnyOrder("gender$female", "age$http://snomed.info/sct|133936004"));
+  }
 
+  private DataRequirement createObservationRequirement(String code, String value, LocalDateTime date) {
+    DataRequirement dataRequirement = new DataRequirement();
+    dataRequirement.setType("CareConnectObservation");
+
+    DataRequirementCodeFilterComponent codeFilter = new DataRequirementCodeFilterComponent();
+    codeFilter.setPath("code");
+    codeFilter.setValueCoding(singletonList(new Coding("system", code, code)));
+    dataRequirement.addCodeFilter(codeFilter);
+
+    DataRequirementCodeFilterComponent valueFilter = new DataRequirementCodeFilterComponent();
+    valueFilter.setPath("value");
+    valueFilter.setValueCoding(singletonList(new Coding("system", value, value)));
+    dataRequirement.addCodeFilter(valueFilter);
+
+    DataRequirementDateFilterComponent effectiveFilter = new DataRequirementDateFilterComponent();
+    effectiveFilter.setPath("effective");
+    effectiveFilter.setValue(new DateTimeType(Date.from(date.atZone(ZoneId.systemDefault()).toInstant())));
+    dataRequirement.addDateFilter(effectiveFilter);
+
+    return dataRequirement;
+  }
+
+  private DataRequirement createPatientRequirement(LocalDate date) {
+    DataRequirement dataRequirement = new DataRequirement();
+    dataRequirement.setType("CareConnectPatient");
+
+    DataRequirementDateFilterComponent birthDateFilter = new DataRequirementDateFilterComponent();
+    birthDateFilter.setPath("birthDate");
+    birthDateFilter.setValue(new DateTimeType(Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant())));
+    dataRequirement.addDateFilter(birthDateFilter);
+
+    return dataRequirement;
   }
 
 }

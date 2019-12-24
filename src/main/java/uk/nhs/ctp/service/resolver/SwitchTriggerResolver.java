@@ -1,7 +1,5 @@
 package uk.nhs.ctp.service.resolver;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.hl7.fhir.dstu3.model.GuidanceResponse;
 import org.springframework.stereotype.Component;
@@ -18,18 +16,12 @@ public class SwitchTriggerResolver {
 
   public String getSwitchTrigger(GuidanceResponse guidanceResponse, SettingsDTO settingsDTO, Long patientId) {
 
-    var optionalDataRequirement = guidanceResponse.getDataRequirement().stream()
-        .filter(data -> data.getType().equals("CareConnectObservation")).findFirst();
+    var dataRequirements = guidanceResponse.getDataRequirement();
 
-    if (optionalDataRequirement.isPresent()) {
-      List<String> triggerCodes = optionalDataRequirement.get().getCodeFilter().stream()
-          .map(filter -> "CareConnectObservation$" + filter.getValueCodingFirstRep().getCode())
-          .collect(Collectors.toList());
-
-      var searchParameters = searchParametersTransformer.transform(triggerCodes, settingsDTO, patientId);
-      var serviceDefinitionBySupplier = cdssService.queryServiceDefinitions(searchParameters);
-
-      var matchedService = serviceDefinitionBySupplier.stream()
+    if (!dataRequirements.isEmpty()) {
+      var searchParams = searchParametersTransformer.transform(dataRequirements, settingsDTO, patientId);
+      var serviceDefBySupplier = cdssService.queryServiceDefinitions(searchParams);
+      var matchedService = serviceDefBySupplier.stream()
           .findFirst()
           .flatMap(supplier -> supplier.getServiceDefinitions().stream()
               .findFirst()
