@@ -5,10 +5,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
@@ -25,6 +27,8 @@ import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +39,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.nhs.ctp.entities.AuditRecord;
 import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
@@ -59,11 +64,16 @@ public class ParametersServiceTest {
 
   @Mock
   private CaseRepository mockCaseRepository;
+  @Mock
+  private AuditService mockAuditService;
+  @Mock
+  private ReferenceStorageService mockStorageService;
 
   private Cases caseWithNoData, caseWithObservation, caseWithImmunization, caseWithMedication, caseWithData;
   private CaseObservation caseObservation;
   private CaseImmunization caseImmunization;
   private CaseMedication caseMedication;
+  private AuditRecord caseAudit;
   private Calendar calendar;
   private TriageQuestion[] questionResponses;
   private SettingsDTO settings;
@@ -113,6 +123,11 @@ public class ParametersServiceTest {
     caseWithData.addMedication(caseMedication);
     caseWithData.addObservation(caseObservation);
 
+    caseAudit = new AuditRecord();
+    caseAudit.setCaseId(1L);
+    caseAudit.setTriageComplete(false);
+    caseAudit.setCreatedDate(new Date());
+
     var questionResponsesTemp = new ArrayList<TriageQuestion>();
 
     TriageQuestion questionResponse = new TriageQuestion();
@@ -155,6 +170,7 @@ public class ParametersServiceTest {
   @Test
   public void testParametersCreatedCorrectlyWithNoCaseDataStored() {
     when(mockCaseRepository.findOne(1L)).thenReturn(caseWithNoData);
+    when(mockAuditService.getAuditRecordByCase(1L)).thenReturn(caseAudit);
 
     Parameters parameters = parametersService.getEvaluateParameters(
         1L,
@@ -166,7 +182,7 @@ public class ParametersServiceTest {
     assertNotNull(parameters);
 
     List<ParametersParameterComponent> parameterComponents = parameters.getParameter();
-    assertEquals(13, parameterComponents.size());
+    assertEquals(14, parameterComponents.size());
 
     testRequestIdParamIsCorrect(parameterComponents);
     testPatientParamIsCorrect(parameterComponents);
@@ -178,6 +194,8 @@ public class ParametersServiceTest {
   public void testParametersCreatedCorrectlyWithNoCaseDataStoredAndQuestionAnswered()
       throws FHIRException {
     when(mockCaseRepository.findOne(1L)).thenReturn(caseWithNoData);
+    when(mockAuditService.getAuditRecordByCase(1L)).thenReturn(caseAudit);
+    when(mockStorageService.storeExternal(any(Resource.class))).thenReturn(new Reference());
 
     Parameters parameters = parametersService.getEvaluateParameters(
         1L,
@@ -190,7 +208,7 @@ public class ParametersServiceTest {
 
     List<ParametersParameterComponent> parameterComponents = parameters.getParameter();
 
-    assertEquals(14, parameterComponents.size());
+    assertEquals(15, parameterComponents.size());
 
     testRequestIdParamIsCorrect(parameterComponents);
     testPatientParamIsCorrect(parameterComponents);
@@ -210,6 +228,7 @@ public class ParametersServiceTest {
   @Test
   public void testParametersCreatedCorrectlyWithCaseImmunizationStored() {
     when(mockCaseRepository.findOne(1L)).thenReturn(caseWithImmunization);
+    when(mockAuditService.getAuditRecordByCase(1L)).thenReturn(caseAudit);
 
     Parameters parameters = parametersService.getEvaluateParameters(
         1L,
@@ -222,7 +241,7 @@ public class ParametersServiceTest {
 
     List<ParametersParameterComponent> parameterComponents = parameters.getParameter();
 
-    assertEquals(14, parameterComponents.size());
+    assertEquals(15, parameterComponents.size());
 
     testRequestIdParamIsCorrect(parameterComponents);
     testPatientParamIsCorrect(parameterComponents);
@@ -242,6 +261,7 @@ public class ParametersServiceTest {
   @Test
   public void testParametersCreatedCorrectlyWithCaseMedicationStored() throws FHIRException {
     when(mockCaseRepository.findOne(1L)).thenReturn(caseWithMedication);
+    when(mockAuditService.getAuditRecordByCase(1L)).thenReturn(caseAudit);
 
     Parameters parameters = parametersService.getEvaluateParameters(
         1L,
@@ -254,7 +274,7 @@ public class ParametersServiceTest {
 
     List<ParametersParameterComponent> parameterComponents = parameters.getParameter();
 
-    assertEquals(14, parameterComponents.size());
+    assertEquals(15, parameterComponents.size());
 
     testRequestIdParamIsCorrect(parameterComponents);
     testPatientParamIsCorrect(parameterComponents);
@@ -274,6 +294,7 @@ public class ParametersServiceTest {
   @Test
   public void testParametersCreatedCorrectlyWithCaseObservationStored() throws FHIRException {
     when(mockCaseRepository.findOne(1L)).thenReturn(caseWithObservation);
+    when(mockAuditService.getAuditRecordByCase(1L)).thenReturn(caseAudit);
 
     Parameters parameters = parametersService.getEvaluateParameters(
         1L,
@@ -286,7 +307,7 @@ public class ParametersServiceTest {
 
     List<ParametersParameterComponent> parameterComponents = parameters.getParameter();
 
-    assertEquals(14, parameterComponents.size());
+    assertEquals(15, parameterComponents.size());
 
     testRequestIdParamIsCorrect(parameterComponents);
     testPatientParamIsCorrect(parameterComponents);
@@ -307,6 +328,8 @@ public class ParametersServiceTest {
   public void testParametersCreatedCorrectlyWithCaseDataStoredAndQuestionAnswered()
       throws FHIRException {
     when(mockCaseRepository.findOne(1L)).thenReturn(caseWithData);
+    when(mockAuditService.getAuditRecordByCase(1L)).thenReturn(caseAudit);
+    when(mockStorageService.storeExternal(any(Resource.class))).thenReturn(new Reference());
 
     Parameters parameters = parametersService.getEvaluateParameters(
         1L,
@@ -319,7 +342,7 @@ public class ParametersServiceTest {
 
     List<ParametersParameterComponent> parameterComponents = parameters.getParameter();
 
-    assertEquals(17, parameterComponents.size());
+    assertEquals(18, parameterComponents.size());
 
     testRequestIdParamIsCorrect(parameterComponents);
     testPatientParamIsCorrect(parameterComponents);

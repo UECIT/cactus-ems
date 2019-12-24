@@ -1,5 +1,6 @@
 package uk.nhs.ctp.service;
 
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static uk.nhs.ctp.utils.ResourceProviderUtils.getParameterAsResource;
 import static uk.nhs.ctp.utils.ResourceProviderUtils.getParameterByName;
 
@@ -23,6 +24,9 @@ import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.dstu3.model.CoordinateResource;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.DecimalType;
+import org.hl7.fhir.dstu3.model.Duration;
+import org.hl7.fhir.dstu3.model.Encounter;
+import org.hl7.fhir.dstu3.model.Encounter.EncounterStatus;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -35,6 +39,7 @@ import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Person;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus;
@@ -49,6 +54,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.SystemURL;
+import uk.nhs.ctp.entities.AuditRecord;
 import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
@@ -76,6 +82,8 @@ public class ParametersService {
   private RelatedPersonBuilder relatedPersonBuilder;
   private ReferenceStorageServiceFactory storageServiceFactory;
   private AttachmentService attachmentService;
+  private AuditService auditService;
+  private EncounterTransformer encounterTransformer;
 
   Parameters getEvaluateParameters(
       Long caseId,
@@ -89,6 +97,10 @@ public class ParametersService {
 
     Cases caseEntity = caseRepository.findOne(caseId);
     ErrorHandlingUtils.checkEntityExists(caseEntity, "Case");
+    var caseAudit = auditService.getAuditRecordByCase(caseId);
+    if (caseAudit == null) {
+      throw new NullPointerException("Could not find an audit record for case " + caseId);
+    }
 
     Parameters parameters = new Parameters();
     parameters.setMeta(new Meta().addProfile(SystemURL.SERVICE_DEFINITION_EVALUATE));
@@ -107,6 +119,10 @@ public class ParametersService {
           "Cannot parse patient gender code", e);
     }
 
+    parameters.addParameter()
+        .setName(SystemConstants.ENCOUNTER)
+        .setResource(encounterTransformer.transform(caseAudit));
+
     setContext(caseEntity, parameters);
     saveQuestionnaireResponse(questionResponse, parameters, amending,
         storageService, questionnaireId, caseEntity, questionnaireResponses);
@@ -123,8 +139,8 @@ public class ParametersService {
     // receivingPerson, initiatingPerson,
     // recipientType, recipientLanguage, setting
     setUserType(parameters, settings);
-    setUserLanguage(caseEntity, parameters, settings);
-    setUserTaskContext(caseEntity, parameters, settings);
+    setUserLanguage(parameters, settings);
+    setUserTaskContext(parameters, settings);
     try {
       setInitiatingPerson(parameters, settings);
       setReceivingPerson(parameters, settings);
@@ -136,9 +152,9 @@ public class ParametersService {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    setRecipientType(caseEntity, parameters, settings);
-    setRecipientLanguage(caseEntity, parameters, settings);
-    setSetting(caseEntity, parameters, settings);
+    setRecipientType(parameters, settings);
+    setRecipientLanguage(parameters, settings);
+    setSetting(parameters, settings);
 
     return parameters;
   }
@@ -195,7 +211,7 @@ public class ParametersService {
     parameters.addParameter().setName(SystemConstants.USERTYPE).setValue(codeableConcept);
   }
 
-  private void setUserLanguage(Cases caseEntity, Parameters parameters, SettingsDTO settings) {
+  private void setUserLanguage(Parameters parameters, SettingsDTO settings) {
     CodeableConcept codeableConcept = new CodeableConcept();
 
     codeableConcept.setText(settings.getUserLanguage().getDisplay()).addCoding()
@@ -206,7 +222,7 @@ public class ParametersService {
     parameters.addParameter().setName(SystemConstants.USERLANGUAGE).setValue(codeableConcept);
   }
 
-  private void setUserTaskContext(Cases caseEntity, Parameters parameters, SettingsDTO settings) {
+  private void setUserTaskContext(Parameters parameters, SettingsDTO settings) {
     CodeableConcept codeableConcept = new CodeableConcept();
 
     codeableConcept.setText(settings.getUserTaskContext().getDisplay()).addCoding()
@@ -241,7 +257,7 @@ public class ParametersService {
         .setResource(person);
   }
 
-  private void setRecipientType(Cases caseEntity, Parameters parameters, SettingsDTO settings) {
+  private void setRecipientType(Parameters parameters, SettingsDTO settings) {
     CodeableConcept codeableConcept = new CodeableConcept();
 
     codeableConcept.setText(settings.getRecipientType().getDisplay()).addCoding()
@@ -252,7 +268,7 @@ public class ParametersService {
     parameters.addParameter().setName(SystemConstants.RECIPIENTTYPE).setValue(codeableConcept);
   }
 
-  private void setRecipientLanguage(Cases caseEntity, Parameters parameters, SettingsDTO settings) {
+  private void setRecipientLanguage(Parameters parameters, SettingsDTO settings) {
     CodeableConcept codeableConcept = new CodeableConcept();
 
     codeableConcept.setText(settings.getRecipientLanguage().getDisplay()).addCoding()
@@ -263,7 +279,7 @@ public class ParametersService {
     parameters.addParameter().setName(SystemConstants.RECIPIENTLANGUAGE).setValue(codeableConcept);
   }
 
-  private void setSetting(Cases caseEntity, Parameters parameters, SettingsDTO settings) {
+  private void setSetting(Parameters parameters, SettingsDTO settings) {
     CodeableConcept codeableConcept = new CodeableConcept();
 
     codeableConcept.setText(settings.getSetting().getDisplay()).addCoding()

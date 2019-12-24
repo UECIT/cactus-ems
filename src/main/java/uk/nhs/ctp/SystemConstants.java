@@ -17,7 +17,7 @@ public final class SystemConstants {
 	public static final String PATIENT = "patient";
 
 	// initiatingPerson, userType, userLanguage, userTaskContext, receivingPerson,
-	// recipientType, recipientLanguage, setting
+	// recipientType, recipientLanguage, setting, encounter
 	public static final String INITIATINGPERSON = "initiatingPerson";
 	public static final String USERTYPE = "userType";
 	public static final String USERLANGUAGE = "userLanguage";
@@ -26,6 +26,7 @@ public final class SystemConstants {
 	public static final String RECIPIENTTYPE = "recipientType";
 	public static final String RECIPIENTLANGUAGE = "recipientLanguage";
 	public static final String SETTING = "setting";
+	public static final String ENCOUNTER = "encounter";
 
 	public static final String REQUEST_ID = "requestId";
 	public static final String APPLICATION_FHIR_JSON = "application/fhir+json; charset=utf-8";
