@@ -1,6 +1,5 @@
 package uk.nhs.ctp.service;
 
-import static java.time.temporal.ChronoUnit.SECONDS;
 import static uk.nhs.ctp.utils.ResourceProviderUtils.getParameterAsResource;
 import static uk.nhs.ctp.utils.ResourceProviderUtils.getParameterByName;
 
@@ -24,9 +23,6 @@ import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.dstu3.model.CoordinateResource;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.DecimalType;
-import org.hl7.fhir.dstu3.model.Duration;
-import org.hl7.fhir.dstu3.model.Encounter;
-import org.hl7.fhir.dstu3.model.Encounter.EncounterStatus;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -39,7 +35,6 @@ import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
-import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Person;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus;
@@ -54,7 +49,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.SystemURL;
-import uk.nhs.ctp.entities.AuditRecord;
 import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
@@ -326,12 +320,14 @@ public class ParametersService {
         .setStatus(Observation.ObservationStatus.FINAL)
         .setCode(
             new CodeableConcept().addCoding(new Coding(SystemURL.SNOMED, "263495000", "Gender")))
+        .setIssued(caseEntity.getTimestamp())
         .setValue(new StringType(caseEntity.getGender()));
     observations.put(genderObservation.getCode(), genderObservation);
 
     Observation ageObservation = new CareConnectObservation()
         .setStatus(Observation.ObservationStatus.FINAL)
         .setCode(new CodeableConcept().addCoding(new Coding(SystemURL.SNOMED, "397669002", "Age")))
+        .setIssued(caseEntity.getTimestamp())
         .setValue(new StringType(caseEntity.getDateOfBirth().toString()));
     observations.put(ageObservation.getCode(), ageObservation);
 
@@ -361,6 +357,7 @@ public class ParametersService {
   private Observation buildObservation(CaseObservation observationEntity) {
     Observation observation = new CareConnectObservation()
         .setStatus(ObservationStatus.FINAL)
+        .setIssued(observationEntity.getTimestamp())
         .setCode(new CodeableConcept().addCoding(new Coding(observationEntity.getSystem(),
             observationEntity.getCode(), observationEntity.getDisplay())));
 
