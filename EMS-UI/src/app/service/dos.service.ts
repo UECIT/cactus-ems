@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpHeaders, HttpClient } from '@angular/common/http';
-import { CheckCapacitySummary } from '../model/checkCapacitySummary';
+import { ReferralRequest } from 'src/app/model/questionnaire';
 import { environment } from '../../environments/environment';
 import { SessionStorage } from 'h5webstorage';
 
@@ -14,7 +14,7 @@ const httpOptions = {
 export class DosService {
   constructor(private http: HttpClient, private sessionStorage: SessionStorage) {}
 
-  getDosResponse(checkCapacitySummary: CheckCapacitySummary) {
+  getDosResponse(referralRequest: ReferralRequest) {
     if (this.sessionStorage['auth_token'] != null) {
       httpOptions.headers = httpOptions.headers.set(
         'Authorization',
@@ -27,7 +27,7 @@ export class DosService {
       const url = `${environment.EMS_API}/dos`;
       return this.http.post<Object>(
         url,
-        JSON.stringify(checkCapacitySummary),
+        JSON.stringify(referralRequest.resourceId),
         httpOptions
       );
     }

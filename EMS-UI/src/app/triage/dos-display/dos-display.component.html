@@ -1,45 +1,11 @@
-<mat-card class="checkCapacitySummaryResponse" style="margin-right: 45px;">
+<mat-card class="response" style="margin-right: 45px;">
 
 <mat-card-title>Search for Service: </mat-card-title>
 
-  <form class="checkCapacitySummary-form">
-    <mat-form-field class="example-full-width col-md-3">
-      <input type="text" matInput placeholder="Gender" name="gender" [(ngModel)]="checkCapacitySummary.gender" disabled>
-    </mat-form-field>
+<button mat-raised-button (click)="getDosResponse()" class="col-md-4" id="search">Search</button>
 
-    <mat-form-field class="example-full-width col-md-3">
-      <input type="number" matInput placeholder="Disposition" name="disposition" [(ngModel)]="checkCapacitySummary.disposition" disabled>
-    </mat-form-field>
-
-    <mat-form-field class="example-full-width col-md-3">
-      <input type="number" matInput placeholder="Symptom Group" name="symptomGroup" [(ngModel)]="checkCapacitySummary.symptomGroup" disabled>
-    </mat-form-field>
-
-    <mat-form-field class="example-full-width col-md-3">
-      <input type="number" matInput placeholder="Symptom Discriminator" name="symptomDiscriminatorInt" [(ngModel)]="checkCapacitySummary.symptomDiscriminatorInt" disabled>
-    </mat-form-field>
-
-    <mat-form-field class="example-full-width col-md-4">
-      <input type="text" matInput placeholder="Postcode" name="postcode" [(ngModel)]="checkCapacitySummary.postcode">
-    </mat-form-field>
-
-    <mat-form-field class="example-full-width col-md-4">
-      <input type="number" matInput placeholder="Search Distance (km)" name="searchDistance" [(ngModel)]="checkCapacitySummary.searchDistance">
-    </mat-form-field>
-    
-    <mat-form-field class="example-full-width col-md-4">
-      <mat-select placeholder="Service" matNativeControl name="service" [(ngModel)]="checkCapacitySummary.service" (selectionChange)="nullifyCheckCapacitySummaryResponse()" required>
-    	<mat-option value="rest">REST</mat-option>
-    	<mat-option value="soap">SOAP</mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <button mat-raised-button (click)="getDosResponse()" class="col-md-4" id="search">Search</button>
-  </form>
-
-  <mat-card-title *ngIf="checkCapacitySummaryResponse || !checkCapacitySummaryError" style="clear:both;">Service Summary: </mat-card-title>
-  <ngx-json-viewer *ngIf="checkCapacitySummaryResponse && checkCapacitySummary.service == 'soap' " [json]="checkCapacitySummaryResponse.checkCapacitySummaryResult.serviceCareSummaryDestination" [expanded]="false"></ngx-json-viewer>
-  <ngx-json-viewer *ngIf="checkCapacitySummaryResponse && checkCapacitySummary.service == 'rest' " [json]="checkCapacitySummaryResponse.success.services" [expanded]="false"></ngx-json-viewer>
-  <mat-card-title *ngIf="checkCapacitySummaryError" style="clear:both;">Error Summary: </mat-card-title>
-  <ngx-json-viewer *ngIf="checkCapacitySummaryError" [json]="checkCapacitySummaryError.error" [expanded]="true"></ngx-json-viewer>
+<mat-card-title *ngIf="response || !error" style="clear:both;">Service Summary: </mat-card-title>
+<ngx-json-viewer *ngIf="response" [json]="response" [expanded]="false"></ngx-json-viewer>
+<mat-card-title *ngIf="error" style="clear:both;">Error Summary: </mat-card-title>
+<ngx-json-viewer *ngIf="error" [json]="error.error" [expanded]="true"></ngx-json-viewer>
 </mat-card>

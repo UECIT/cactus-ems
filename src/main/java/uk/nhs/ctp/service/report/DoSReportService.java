@@ -1,27 +1,24 @@
 package uk.nhs.ctp.service.report;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import java.util.Optional;
-
 import javax.xml.bind.JAXBException;
-
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.codesystems.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.DoSService;
 import uk.nhs.ctp.service.dto.DoSRequestDTO;
+import uk.nhs.ctp.service.dto.HealthcareService;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.dto.ReportType;
 import uk.nhs.ctp.service.dto.ReportsDTO;
-import uk.nhs.ctp.service.report.dos.rest.DosApiResponseDTO;
 
 @Service
 public class DoSReportService implements Reportable {
@@ -43,8 +40,9 @@ public class DoSReportService implements Reportable {
 		
 		Cases caseEntity = caseRepository.findOne(request.getCaseId());
 		
-		DosApiResponseDTO dosResponse = 
-				dosService.getDoSRESTService(createDoSRequest(caseEntity, request.getReferralRequest()));
+		List<HealthcareService> dosResponse =
+				dosService.getDoS(request.getReferralRequest().getId());
+
 		
 		return new ReportsDTO(mapper.writeValueAsString(createDoSRequest(caseEntity, request.getReferralRequest())), 
 				mapper.writeValueAsString(dosResponse), ReportType.DOS, ContentType.JSON);
