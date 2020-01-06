@@ -36,7 +36,8 @@ export class MainComponent implements OnInit {
   availableServiceDefinitions: CdssSupplier[];
   roles: Code[];
   settings: Code[];
-  jurisdictions: Code[]
+  jurisdictions: Code[];
+  selectionModeOptions: any[];
 
   constructor(
       public router: Router,
@@ -64,35 +65,27 @@ export class MainComponent implements OnInit {
     this.getRoles();
     this.getSettings();
     this.getJurisdictions();
+    this.getSelectionModeOptions();
+
+    var settings: Settings = this.sessionStorage['settings'];
+    settings.jurisdiction = this.jurisdictions[0];
+    settings.setting = this.settings[0];
+    settings.userType = this.roles[0];
+    this.sessionStorage.setItem('settings', JSON.stringify(settings));
+
     this.autoSelectServiceDefinition(false);
-    // this.openSnackBar();
-    console.log(this.sessionStorage['displayedTestWarningMessage']);
-    if (
-        this.sessionStorage['displayedTestWarningMessage'] === 'false' ||
-        this.sessionStorage['displayedTestWarningMessage'] == null
-    ) {
-      setTimeout(() =>
-          this.openSnackBar(
-              'This Test Harness is for demonstration purposes only and is not representative of any EMS final product.'
-          )
-      );
-      this.sessionStorage.setItem('displayedTestWarningMessage', 'true');
-    }
+    this.openSnackBar();
 
     this.sessionStorage.setItem('triageItems', '[]');
   }
 
-  openSnackBar(message) {
-    this.snackBar.open(message, 'I Understand');
-  }
-
-  getPatients() {
-    this.patientService
-    .getAllPatients()
-    .subscribe(patients => {
-      this.patients = patients;
-      this.addPatientToStore(this.patients[0]);
-    })
+  openSnackBar() {
+    var hasDisplayed = this.sessionStorage['displayedTestWarningMessage']
+    if (hasDisplayed === 'false' || hasDisplayed == null) {
+      setTimeout(() => 
+        this.snackBar.open('This Test Harness is for demonstration purposes only and is not representative of any EMS final product.', 'I Understand'));
+    }
+    this.sessionStorage.setItem('displayedTestWarningMessage', 'true');
   }
 
   triage() {
@@ -108,10 +101,10 @@ export class MainComponent implements OnInit {
     this.router.navigate(['/triage']);
   }
 
-  addPatientToStore(patient: Patient) {
-    this.selectedPatient = patient;
-    this.store.dispatch(new PatientActions.AddPatient(patient));
-    this.sessionStorage.setItem('patient', JSON.stringify(patient));
+  async getPatients() {
+    this.patients = await this.patientService.getAllPatients().toPromise();
+    this.selectedPatient = this.patients[0];
+    this.store.dispatch(new PatientActions.AddPatient(this.selectedPatient));
   }
 
   async getCdssSuppliers() {
@@ -176,6 +169,19 @@ export class MainComponent implements OnInit {
     ]
   }
 
+  getSelectionModeOptions() {
+    this.selectionModeOptions = [
+      {
+        'id':'automated',
+        'display': 'Automated'
+      },
+      {
+        'id':'manual',
+        'display': 'Manual'
+      }
+    ]
+  }
+
   async setSelectedSupplier(supplier: CdssSupplier) {
     this.selectedSupplier = supplier.id;
     this.addSupplierToStore(supplier);
@@ -191,22 +197,38 @@ export class MainComponent implements OnInit {
   addRoleToStore(role: Code) {
     var settings: Settings = this.sessionStorage['settings'];
     settings.userType = role;
-    this.sessionStorage.setItem('settings', JSON.stringify(settings))
+    this.sessionStorage.setItem('settings', JSON.stringify(settings));
     this.autoSelectServiceDefinition(false);
   }
 
   addSettingToStore(setting: Code) {
     var settings: Settings = this.sessionStorage['settings'];
     settings.setting = setting;
-    this.sessionStorage.setItem('settings', JSON.stringify(settings))
+    this.sessionStorage.setItem('settings', JSON.stringify(settings));
     this.autoSelectServiceDefinition(false);
   }
 
   addJurisdictionToStore(jurisdiction: Code) {
     var settings: Settings = this.sessionStorage['settings'];
     settings.jurisdiction = jurisdiction;
-    this.sessionStorage.setItem('settings', JSON.stringify(settings))
+    this.sessionStorage.setItem('settings', JSON.stringify(settings));
     this.autoSelectServiceDefinition(false);
+  }
+
+  addPatientToStore(patient: Patient) {
+    this.selectedPatient = patient;
+    this.store.dispatch(new PatientActions.AddPatient(patient));
+    this.sessionStorage.setItem('patient', JSON.stringify(patient));
+    this.autoSelectServiceDefinition(false);
+  }
+
+  changeSelectionMode(mode: any) {
+    this.serviceDefinitionMode = mode.id;
+    if (this.serviceDefinitionMode === 'automated') {
+      this.autoSelectServiceDefinition(false);
+    } else if (this.cdssSuppliers.length > 0) {
+      this.setSelectedSupplier(this.cdssSuppliers[0])
+    }
   }
 
   async autoSelectServiceDefinition(force: boolean) {

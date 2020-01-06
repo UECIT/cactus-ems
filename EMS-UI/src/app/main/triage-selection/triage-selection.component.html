@@ -7,7 +7,7 @@
           <button mat-raised-button [class.selected]="option == selected"
                   class="btn btn-primary btnSearch text-center" (click)="change(option)">
             <div>
-              {{ option.display }}
+              {{ option.display || option.name || option }}
             </div>
           </button>
         </div>

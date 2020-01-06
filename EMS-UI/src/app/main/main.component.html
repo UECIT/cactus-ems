@@ -1,86 +1,45 @@
-<div class="row">
-  <div class="col-sm-12 text-center">
-    <div class="section">
-      <div class="sectionTitle">Select Patient</div>
-      <nav class="d-flex flex-wrap">
-        <div *ngFor="let patient of patients" class="">
-          <button mat-raised-button [class.selected]="patient == selectedPatient"
-                  class="btn btn-primary btnSearch text-center" (click)="addPatientToStore(patient); autoSelectServiceDefinition(false)">
-            <div>
-              {{ patient.title }} {{ patient.firstName }} {{ patient.lastName }}
-            </div>
-            <div>
-              Age: {{ patient.dateOfBirth | age }}
-            </div>
-          </button>
-        </div>
-      </nav>
-    </div>
-  </div>
-</div>
+<!-- Patient selection -->
+<patient-selection
+  [patients]="patients"
+  (onChange)="addPatientToStore($event)">
+</patient-selection>
 
+<!-- Role selection -->
 <triage-selection
   [title]="'Select Role'"
   [options]="roles"
   (onChange)="addRoleToStore($event)">
 </triage-selection>
 
+<!-- Setting selection -->
 <triage-selection
   [title]="'Select Setting Context'"
   [options]="settings"
   (onChange)="addSettingToStore($event)">
 </triage-selection>
 
+<!-- Jurisdiction selection -->
 <triage-selection
   [title]="'Select Jurisdiction'"
   [options]="jurisdictions"
   (onChange)="addJurisdictionToStore($event)">
 </triage-selection>
 
-<div class="row">
-  <div class="col-sm-12 text-center">
-    <div class="section">
-      <div class="sectionTitle">Service Definition Selection Mode</div>
-      <nav class="d-flex flex-wrap">
-        <div>
-          <button mat-raised-button [class.selected]="serviceDefinitionMode == 'automated'"
-                  class="btn btn-primary btnSearch text-center"
-                  (click)="autoSelectServiceDefinition(true);">
-            Automated
-          </button>
-        </div>
-        <div>
-          <button mat-raised-button [class.selected]="serviceDefinitionMode == 'manual'"
-                  class="btn btn-primary btnSearch text-center"
-                  (click)="serviceDefinitionMode = 'manual'">
-            Manual
-          </button>
-        </div>
-      </nav>
-    </div>
-  </div>
-</div>
+<!-- Selection mode selection -->
+<triage-selection
+  [title]="'Service Definition Selection Mode'"
+  [options]="selectionModeOptions"
+  (onChange)="changeSelectionMode($event)">
+</triage-selection>
 
-<div class="row" *ngIf="serviceDefinitionMode == 'manual'">
-  <div class="col-sm-12 text-center">
-    <div class="section">
-      <div class="sectionTitle">
-          Select CDSS
-        </div>
-        <!-- Overrides the background color from the patients section -->
-        <nav class="d-flex flex-wrap">
-          <div *ngFor="let supplier of cdssSuppliers">
-            <button mat-raised-button [class.selected]="supplier.id == selectedSupplier"
-                    class="btn btn-primary btnSearch text-center"
-                    (click)="setSelectedSupplier(supplier)">
-              {{ supplier.name }}
-            </button>
-          </div>
-        </nav>
-    </div>
-  </div>
-</div>
+<!-- Supplier selection (manual) -->
+<triage-selection *ngIf="serviceDefinitionMode == 'manual'"
+  [title]="'Select CDSS'"
+  [options]="cdssSuppliers"
+  (onChange)="setSelectedSupplier($event)">
+</triage-selection>
 
+<!-- Service selection (manual) -->
 <div class="row" *ngIf="serviceDefinitionMode == 'manual' && serviceDefinitions != null">
   <div class="col-sm-12 text-center">
     <div class="section">
@@ -92,17 +51,12 @@
                           [value]="serviceDefinition.serviceDefinitionId">{{ getServiceDefinitionText(serviceDefinition) }}</mat-option>
             </mat-select>
           </mat-form-field>
-          <!--      <mat-form-field *ngIf="serviceDefinitions != null">-->
-          <!--        <mat-select [(ngModel)]="selectedQueryType">-->
-          <!--          <mat-option value="id">Get by Id</mat-option>-->
-          <!--          <mat-option value="attributes">Search by Attributes</mat-option>-->
-          <!--        </mat-select>-->
-          <!--      </mat-form-field>-->
         </nav>
     </div>
   </div>
 </div>
 
+<!-- Service selection (automated) -->
 <div class="row" *ngIf="serviceDefinitionMode == 'automated'">
   <div class="col-sm-12 text-center">
     <div class="section">
