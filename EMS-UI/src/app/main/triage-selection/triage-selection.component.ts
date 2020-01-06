@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 
 @Component({
   selector: 'triage-selection',
@@ -18,7 +18,7 @@ export class TriageSelectionComponent {
 
   ngOnChanges() {
     if (this.options) {
-      this.change(this.options[0]);
+      this.selected = this.options[0];
     }
   }
 

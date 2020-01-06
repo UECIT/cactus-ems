@@ -59,6 +59,7 @@ import { HighlightModule } from 'ngx-highlightjs';
 import xml from 'highlight.js/lib/languages/xml';
 import { ToastrModule } from 'ngx-toastr';
 import { TriageSelectionComponent } from './main/triage-selection/triage-selection.component';
+import { PatientSelectionComponent } from './main/patient-selection/patient-selection.component';
 
 export function hljsLanguages() {
   return [
@@ -99,7 +100,8 @@ export function hljsLanguages() {
     QuestionsDisplayComponent,
     ViewAuditsComponent,
     HandoverMessageDialogComponent,
-    TriageSelectionComponent
+    TriageSelectionComponent,
+    PatientSelectionComponent
   ],
   entryComponents: [SwitchSupplierDialogComponent, SwitchServicePromptDialogComponent, HandoverMessageDialogComponent],
   imports: [
