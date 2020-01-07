@@ -1,9 +1,9 @@
 package uk.nhs.ctp.service;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
-import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -25,16 +25,23 @@ public class DoSService {
 
 	private FhirContext fhirContext;
 	private HealthcareServiceTransformer healthcareServiceTransformer;
+	private IGenericClient fhirClient;
 
-	public DoSService(FhirContext fhirContext, HealthcareServiceTransformer healthcareServiceTransformer) {
+	public DoSService(FhirContext fhirContext, HealthcareServiceTransformer healthcareServiceTransformer, IGenericClient fhirClient) {
 		this.fhirContext = fhirContext;
 		this.healthcareServiceTransformer = healthcareServiceTransformer;
+		this.fhirClient = fhirClient;
 	}
 
-	public List<HealthcareService> getDoS(String id) {
+	public List<HealthcareService> getDoS(String referralRequestRef) {
+
+		ReferralRequest referralRequest = fhirClient.read()
+				.resource(ReferralRequest.class)
+				.withUrl(referralRequestRef)
+				.execute();
 
 		return fhirContext.newRestfulClient(IRestfulClient.class, dosServer)
-				.searchForHealthcareServices(new ReferenceParam(id))
+				.searchForHealthcareServices(referralRequest)
 				.getEntry().stream()
 				.map(entry -> (org.hl7.fhir.dstu3.model.HealthcareService) entry.getResource())
 				.map(healthcareServiceTransformer::transform)
@@ -43,8 +50,8 @@ public class DoSService {
 	}
 
 	interface IRestfulClient extends ca.uhn.fhir.rest.client.api.IRestfulClient {
-		@Search(type = org.hl7.fhir.dstu3.model.HealthcareService.class)
+		@Operation(name = "$check-services", type = org.hl7.fhir.dstu3.model.HealthcareService.class)
 		Bundle searchForHealthcareServices(
-				@RequiredParam(name = ReferralRequest.SP_SUBJECT) ReferenceParam referralRequestParam);
+				@OperationParam(name = "referralRequest") ReferralRequest referralRequest);
 	}
 }
