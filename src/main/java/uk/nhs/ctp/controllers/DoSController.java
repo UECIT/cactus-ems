@@ -1,5 +1,6 @@
 package uk.nhs.ctp.controllers;
 
+import com.fasterxml.jackson.databind.node.TextNode;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -20,8 +21,8 @@ public class DoSController {
 	private DoSService dosService;
 
 	@PostMapping
-	public @ResponseBody List<HealthcareService> getDoS(@RequestBody String referralRequestId) {
-		return dosService.getDoS(referralRequestId);
+	public @ResponseBody List<HealthcareService> getDoS(@RequestBody TextNode referralRequestId) {
+		return dosService.getDoS(referralRequestId.asText());
 	}
 
 }
