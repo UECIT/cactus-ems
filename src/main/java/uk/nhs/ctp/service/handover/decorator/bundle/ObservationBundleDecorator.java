@@ -1,8 +1,7 @@
 package uk.nhs.ctp.service.handover.decorator.bundle;
 
-import java.util.Optional;
-
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.CareConnectObservation;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
@@ -23,12 +22,30 @@ public class ObservationBundleDecorator extends BundleDecorator<AuditEntry, Care
 		if (auditEntry.getContained() != null) {
 			Bundle containedBundle = fhirParser.parseResource(Bundle.class, auditEntry.getContained());
 			Parameters parameters = ResourceProviderUtils.getResource(containedBundle, Parameters.class);
-			if (parameters != null) {
-				Optional<ParametersParameterComponent> optional = parameters.getParameter().stream().filter(param -> 
-						param.getResource().getClass().equals(CareConnectObservation.class)).findFirst();
-				
-				if (optional.isPresent()) addToBundle(bundle, (CareConnectObservation)optional.get().getResource());
+			if (parameters == null) {
+				return;
 			}
+
+			var newObservation = parameters.getParameter()
+					.stream()
+					.map(ParametersParameterComponent::getResource)
+					.filter(CareConnectObservation.class::isInstance)
+					.map(CareConnectObservation.class::cast)
+					.findFirst()
+					.orElseThrow();
+
+			bundle.getEntry()
+					.stream()
+					.map(BundleEntryComponent::getResource)
+					.filter(CareConnectObservation.class::isInstance)
+					.map(CareConnectObservation.class::cast)
+					.filter(c -> c.getCode().equalsDeep(newObservation.getCode()))
+					.findFirst()
+					.ifPresentOrElse(existingObservation -> {
+						if (newObservation.getIssued().after(existingObservation.getIssued())) {
+							existingObservation.setValue(newObservation.getValue());
+						}
+					}, () -> addToBundle(bundle, newObservation));
 		}
 	}
 }

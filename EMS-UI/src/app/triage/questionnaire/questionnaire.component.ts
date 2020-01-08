@@ -118,11 +118,12 @@ export class QuestionnaireComponent implements OnInit {
             err.error.target.__zone_symbol__xhrURL + ' - ' +
             err.message);
       });
-      await this.get111Report().catch(err => {
-        this.toastr.error(
-            err.error.target.__zone_symbol__xhrURL + ' - ' +
-            err.message);
-      });
+      //TODO: this is very broken
+      // await this.get111Report().catch(err => {
+      //   this.toastr.error(
+      //       err.error.target.__zone_symbol__xhrURL + ' - ' +
+      //       err.message);
+      // });
     }
     this.supplierId = await this.serviceDefinitionService.getCdssSupplierUrl(this.questionnaire.cdssSupplierId);
   }

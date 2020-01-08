@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.CareConnectCarePlan;
 import org.hl7.fhir.dstu3.model.CareConnectPatient;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
@@ -21,7 +22,6 @@ import uk.nhs.ctp.entities.AuditEntry;
 import uk.nhs.ctp.enums.AuditEntryType;
 import uk.nhs.ctp.service.AuditService;
 import uk.nhs.ctp.service.dto.HandoverRequestDTO;
-import uk.nhs.ctp.service.factory.DocumentBundleFactory;
 import uk.nhs.ctp.service.handover.decorator.ResourceDecorator;
 import uk.nhs.ctp.service.handover.decorator.referral.FlagSupportingInfoDecorator;
 import uk.nhs.ctp.service.handover.decorator.referral.ProcedureRequestBasedOnDecorator;
@@ -40,13 +40,10 @@ public abstract class HandoverService {
 	private ProcedureRequestBasedOnDecorator procedureRequestBasedOnDecorator;
 	
 	@Autowired
-	private ProvenanceRelevantHistoryDecorator provenanceReleventHistoryDecorator;
+	private ProvenanceRelevantHistoryDecorator provenanceRelevantHistoryDecorator;
 	
 	@Autowired 
-	private FlagSupportingInfoDecorator flagSupportingInfoDecorator; 
-	
-	@Autowired
-	private DocumentBundleFactory documentBundleFactory;
+	private FlagSupportingInfoDecorator flagSupportingInfoDecorator;
 	
 	@Autowired
 	private List<ResourceDecorator<ReferralRequest, AuditEntry>> referralRequestAuditDecorators;
@@ -68,28 +65,33 @@ public abstract class HandoverService {
 		
 		AuditEntry latestEntry = auditEntries.get(auditEntries.size() - 1);
 		request.setResourceBundle(fhirParser.parseResource(Bundle.class, latestEntry.getContained()));
-		
-		Bundle documentBundle = documentBundleFactory.create("resourceBundle", true);
+
+		Bundle documentBundle = new Bundle();
+		documentBundle.setId("#resourceBundle");
+		documentBundle.setType(BundleType.COLLECTION);
+
 		ReferralRequest referralRequest = getResource(request, ReferralRequest.class);
 		referralRequest.setRecipient(new ArrayList<>());
 		
-		referralRequestAuditDecorators.stream().forEach(decorator -> decorator.decorate(referralRequest, latestEntry));
+		referralRequestAuditDecorators
+				.forEach(decorator -> decorator.decorate(referralRequest, latestEntry));
 		procedureRequestBasedOnDecorator.decorate(referralRequest, getResource(request, ProcedureRequest.class));
-		provenanceReleventHistoryDecorator.decorate(referralRequest, getResource(request, Provenance.class));
+		provenanceRelevantHistoryDecorator.decorate(referralRequest, getResource(request, Provenance.class));
 		flagSupportingInfoDecorator.decorate(referralRequest, ResourceProviderUtils.getResource(
 				referralRequest.getSubject().getResource(), CareConnectPatient.class));
 
-		bundlePatientDecorators.stream().forEach(decorator -> decorator.decorate(documentBundle, 
+		bundlePatientDecorators.forEach(decorator -> decorator.decorate(documentBundle,
 				ResourceProviderUtils.getResource(referralRequest.getSubject().getResource(), CareConnectPatient.class)));
 		
-		bundleCarePlanDecorators.stream().forEach(decorator -> decorator.decorate(documentBundle, 
+		bundleCarePlanDecorators.forEach(decorator -> decorator.decorate(documentBundle,
 				ResourceProviderUtils.getResource(request.getResourceBundle(), CareConnectCarePlan.class)));
 		
-		auditEntries.stream().forEach(auditEntry -> {
-			bundleAuditDecorators.stream().forEach(decorator -> decorator.decorate(documentBundle, auditEntry));
+		auditEntries.forEach(auditEntry -> {
+			bundleAuditDecorators.forEach(decorator -> decorator.decorate(documentBundle, auditEntry));
 		});
 		
 		referralRequest.addSupportingInfo(new Reference(documentBundle));
+		referralRequest.addContained(documentBundle);
 
 		return fhirParser.encodeResourceToString(referralRequest);
 	}
