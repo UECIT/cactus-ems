@@ -15,7 +15,6 @@ public class EncounterTransformer {
   public Encounter transform(AuditRecord audit) {
     var encounter = new Encounter();
 
-    encounter.setId(audit.getCaseId().toString());
     encounter.setStatus(audit.isTriageComplete()
         ? EncounterStatus.FINISHED
         : EncounterStatus.TRIAGED);

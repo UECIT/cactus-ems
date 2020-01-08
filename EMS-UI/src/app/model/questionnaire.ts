@@ -26,6 +26,7 @@ export class ReferralRequest {
   relevantHistory: string;
   resourceId: string;
   reasonReference: string;
+  contextReference: string;
 }
 
 export class Code {

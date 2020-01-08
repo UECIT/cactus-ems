@@ -51,6 +51,19 @@ export class ReportService {
     }
   }
 
+  generateReport(encounterId: string) {
+    const httpOptions = {headers: new HttpHeaders()};
+    if (this.sessionStorage['auth_token'] != null) {
+      httpOptions.headers = httpOptions.headers.set(
+        'Authorization',
+        this.sessionStorage['auth_token']
+      );
+      const url = `${environment.EMS_API}/report/encounter`;
+      return this.http.post<any>(url, encounterId, httpOptions)
+      .toPromise();
+    }
+  }
+
   validate111ReportV2(oneOneOneReportXml: any) {
     const httpOptions = {
       headers: new HttpHeaders(),
