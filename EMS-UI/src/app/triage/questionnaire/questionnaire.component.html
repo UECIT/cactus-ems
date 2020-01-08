@@ -300,34 +300,21 @@
         <mat-card-title class="col-8" style="display:inline-block;">
           Result: {{ questionnaire.result }}</mat-card-title>
 
-        <div *ngIf="showHandover">
-          <button *ngIf="handoverMessage && reports && !isloadingReport" id="continue"
-                  class="col-sm-4 offset-sm-0" (click)="openDialog()" style="display:inline-block;">
+        <div>
+          <button [ngClass]="{'no-padding': !showHandover}"
+                  class="col-sm-4 offset-sm-0 continue"
+                  [disabled]="!showHandover"
+                  (click)="openDialog()">
             View Result/Reports
+              <mat-progress-bar *ngIf="!showHandover" mode="indeterminate"></mat-progress-bar>
           </button>
 
-          <a *ngIf="handoverMessage && reports && !isloadingReport"
-             href="{{getPostCallInformationTemplateURL()}}" target="blank">
-            <button id="continue" class="col-sm-4 offset-sm-0" style="display:inline-block;">
+          <a href="{{getPostCallInformationTemplateURL()}}" target="blank">
+            <button class="col-sm-4 offset-sm-0 continue"
+                    [ngClass]="{'no-padding': !showHandover}"
+                    [disabled]="!showHandover">
               View Post Call Information
-            </button>
-          </a>
-
-          <button *ngIf="!handoverMessage || !reports || isloadingReport" id="continue"
-                  class="col-sm-4 offset-sm-0" style="padding:0px!important;display:inline-block;"
-                  disabled>
-            View Result/Reports
-            <mat-progress-bar mode="indeterminate"
-                              style="width:100%;padding: 0;margin: 0;"></mat-progress-bar>
-          </button>
-
-          <a *ngIf="!handoverMessage || !reports || isloadingReport"
-             href="{{getPostCallInformationTemplateURL()}}" target="blank">
-            <button id="continue" class="col-sm-4 offset-sm-0"
-                    style="padding:0px!important;display:inline-block;" disabled>
-              View Post Call Information
-              <mat-progress-bar mode="indeterminate"
-                                style="width:100%;padding: 0;margin: 0;"></mat-progress-bar>
+              <mat-progress-bar *ngIf="!showHandover" mode="indeterminate"></mat-progress-bar>
             </button>
           </a>
         </div>

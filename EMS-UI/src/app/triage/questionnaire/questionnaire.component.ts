@@ -35,8 +35,6 @@ export class QuestionnaireComponent implements OnInit {
   isloadingReport: boolean;
   supplierId: string;
 
-  showHandover = false;
-
   constructor(public dialog: MatDialog,
               private reportService: ReportService,
               private toastr: ToastrService,
@@ -112,12 +110,19 @@ export class QuestionnaireComponent implements OnInit {
     }
 
     // check for result and build the handoverMessage and corresponding reports.
-    if (this.questionnaire.referralRequest != null && this.showHandover) {
+    if (this.questionnaire.referralRequest != null) {
       await this.getHandoverMessage().catch(err => {
         this.toastr.error(
             err.error.target.__zone_symbol__xhrURL + ' - ' +
             err.message);
       });
+      await this.reportService.generateReport(this.questionnaire.referralRequest.contextReference)
+        .then(result => {
+          this.reports = [result];
+        })
+        .catch(err => {
+          console.log(err);
+        })
       //TODO: this is very broken
       // await this.get111Report().catch(err => {
       //   this.toastr.error(
@@ -463,5 +468,9 @@ export class QuestionnaireComponent implements OnInit {
 
   formatQuestion(question: TriageQuestion) {
     return question.question.replace(/!\[.*?\]\((.*?)\)/g, '');
+  }
+
+  get showHandover() {
+    return this.handoverMessage && this.reports && !this.isloadingReport;
   }
 }
