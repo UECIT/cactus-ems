@@ -4,8 +4,17 @@
 
 <button mat-raised-button (click)="getDosResponse()" class="col-md-4" id="search">Search</button>
 
-<mat-card-title *ngIf="response || !error" style="clear:both;">Service Summary: </mat-card-title>
-<ngx-json-viewer *ngIf="response" [json]="response" [expanded]="false"></ngx-json-viewer>
+<mat-card-title *ngIf="response">Services Summary: </mat-card-title>
+<mat-radio-group [(ngModel)]="selectedService">
+    <div class="service-selection" *ngFor="let service of response">
+        <mat-radio-button [value]="service">
+            {{service.name}}
+        </mat-radio-button>
+        <button mat-button class="modal-link" color="primary" (click)="viewDetails(service)">View Details</button>
+    </div>
+    <a *ngIf="selectedService" mat-fab (click)="invoke()">Invoke!</a>
+</mat-radio-group>
+
 <mat-card-title *ngIf="error" style="clear:both;">Error Summary: </mat-card-title>
 <ngx-json-viewer *ngIf="error" [json]="error.error" [expanded]="true"></ngx-json-viewer>
 </mat-card>

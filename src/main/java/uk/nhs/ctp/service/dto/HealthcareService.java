@@ -10,8 +10,14 @@ public class HealthcareService {
 
   long id;
   String name;
-  List<String> addresses;
+  String endpoint;
+  String description;
   boolean active;
   boolean appointmentRequired;
+  String phoneNumber;
+  String email;
+  List<String> provision;
+  List<String> availableTimes;
+  List<String> notAvailableTimes;
 
 }
