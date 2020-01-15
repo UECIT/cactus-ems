@@ -3,6 +3,7 @@ import { HttpHeaders, HttpClient } from '@angular/common/http';
 import { ReferralRequest } from 'src/app/model/questionnaire';
 import { environment } from '../../environments/environment';
 import { SessionStorage } from 'h5webstorage';
+import { HealthcareService } from '../model/dos';
 
 const httpOptions = {
   headers: new HttpHeaders()
@@ -25,7 +26,7 @@ export class DosService {
         'application/json'
       );
       const url = `${environment.EMS_API}/dos`;
-      return this.http.post<Object>(
+      return this.http.post<HealthcareService[]>(
         url,
         JSON.stringify(referralRequest.resourceId),
         httpOptions

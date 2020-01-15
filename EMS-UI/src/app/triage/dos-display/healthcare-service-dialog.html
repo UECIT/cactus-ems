@@ -1,0 +1,25 @@
+<h1 mat-dialog-title>Service: {{service.name}}</h1>
+<div mat-dialog-content>
+    <p>Description: {{service.description}}</p>
+    <p>Active: {{service.active}}</p>
+    <p>Appointment Required: {{service.appointmentRequired}}</p>
+    <p>Phone Number: {{service.phoneNumber}}</p>
+    <p>Email: {{service.email}}</p>
+    <p>Endpoint: {{service.endpoint}}</p>
+
+    <p>Provision:</p>
+    <ul>
+        <li *ngFor="let prov of service.provision">{{prov}}</li>
+    </ul>
+    <p>Available:</p>
+    <ul>
+        <li *ngFor="let avail of service.availableTimes">{{avail}}</li>
+    </ul>
+    <p>Closed:</p>
+    <ul>
+        <li *ngFor="let notAvail of service.notAvailableTimes">{{notAvail}}</li>
+    </ul>
+</div>
+<div mat-dialog-actions>
+    <button mat-button (click)="close()">Close</button>
+</div>

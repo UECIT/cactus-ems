@@ -1,6 +1,8 @@
-import { Component, Input } from '@angular/core';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material';
+import { Component, Input, Inject } from '@angular/core';
 import { ReferralRequest } from 'src/app/model/questionnaire';
 import { DosService } from 'src/app/service/dos.service';
+import { HealthcareService } from 'src/app/model/dos';
 
 @Component({
   selector: 'app-dos-display',
@@ -10,9 +12,10 @@ import { DosService } from 'src/app/service/dos.service';
 export class DosDisplayComponent {
   @Input() referralRequest: ReferralRequest;
 
-  response: object;
+  response: HealthcareService[];
+  selectedService: HealthcareService;
   error: object;
-  constructor(private dosService: DosService) {
+  constructor(private dosService: DosService, public dialog: MatDialog) {
   }
 
   async getDosResponse() {
@@ -30,4 +33,28 @@ export class DosDisplayComponent {
         }
       );
   }
+
+  viewDetails(selected: HealthcareService) {
+    console.log(selected);
+    this.dialog.open(HealthcareServiceDialog, {
+      data: selected
+    });
+  }
+
+  invoke() {
+    console.log(this.selectedService.endpoint);
+  }
+}
+
+@Component({
+  selector: 'healthcare-service-dialog',
+  templateUrl: 'healthcare-service-dialog.html'
+})
+export class HealthcareServiceDialog {
+  constructor(public dialogRef: MatDialogRef<HealthcareServiceDialog>,
+    @Inject(MAT_DIALOG_DATA) public service: HealthcareService) {}
+
+    close(): void {
+      this.dialogRef.close();
+    }
 }

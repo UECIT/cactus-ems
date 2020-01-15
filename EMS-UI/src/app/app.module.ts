@@ -46,7 +46,7 @@ import { AuditService } from './service/audit.service';
 import { SwitchSupplierDialogComponent } from './switch-supplier-dialog/switch-supplier-dialog.component';
 import { SwitchServicePromptDialogComponent } from './switch-service-prompt-dialog/switch-service-prompt-dialog.component';
 import { DosService } from './service/dos.service';
-import { DosDisplayComponent } from './triage/dos-display/dos-display.component';
+import { DosDisplayComponent, HealthcareServiceDialog } from './triage/dos-display/dos-display.component';
 import { ManageSettingsComponent } from './manage-settings/manage-settings.component';
 import { QuestionsDisplayComponent } from './triage/questions-display/questions-display.component';
 import {WebStorageModule} from 'h5webstorage';
@@ -101,9 +101,10 @@ export function hljsLanguages() {
     ViewAuditsComponent,
     HandoverMessageDialogComponent,
     TriageSelectionComponent,
-    PatientSelectionComponent
+    PatientSelectionComponent,
+    HealthcareServiceDialog
   ],
-  entryComponents: [SwitchSupplierDialogComponent, SwitchServicePromptDialogComponent, HandoverMessageDialogComponent],
+  entryComponents: [SwitchSupplierDialogComponent, SwitchServicePromptDialogComponent, HandoverMessageDialogComponent, HealthcareServiceDialog],
   imports: [
     BrowserModule,
     StoreModule.forRoot({
