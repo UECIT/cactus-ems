@@ -61,7 +61,7 @@ export class ReportService {
           this.sessionStorage['auth_token']
       );
       const url = `${environment.EMS_API}/report`;
-      const handoverRequest = {'handoverJson': JSON.stringify(handoverMessage), 'caseId': caseId};
+      const handoverRequest = {handoverJson: JSON.stringify(handoverMessage), caseId: caseId};
       return this.http.post<any>(url, handoverRequest, httpOptions).toPromise();
     }
   }

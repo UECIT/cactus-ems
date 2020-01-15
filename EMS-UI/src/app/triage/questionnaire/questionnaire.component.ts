@@ -88,11 +88,8 @@ export class QuestionnaireComponent implements OnInit {
 
     this.freeText = new Map<string, string>();
     if (this.answerSelected == null) {
-      this.answerSelected = new Array();
-    } else if (
-        this.answerSelected != null &&
-        this.questionnaire.triageQuestions != null
-    ) {
+      this.answerSelected = [];
+    } else if (this.questionnaire.triageQuestions != null) {
       const stringQuestions = this.questionnaire.triageQuestions.filter(
           question => question.questionType === 'STRING'
       );
@@ -121,12 +118,12 @@ export class QuestionnaireComponent implements OnInit {
       });
       await this.reportService.generateReport(this.questionnaire.referralRequest.contextReference)
         .then(result => {
-          this.reports = [result];
+          this.reports = result;
         })
         .catch(err => {
           console.log(err);
-        })
-      //TODO: this is very broken
+        });
+      // TODO: this is very broken
       // await this.get111Report().catch(err => {
       //   this.toastr.error(
       //       err.error.target.__zone_symbol__xhrURL + ' - ' +
@@ -364,7 +361,7 @@ export class QuestionnaireComponent implements OnInit {
   }
 
   getPostCallInformationTemplateURL() {
-    if (this.handoverMessage != undefined) {
+    if (this.handoverMessage !== undefined) {
       return `${environment.UECDI_API}/handover/${this.handoverMessage.id}`;
     }
   }

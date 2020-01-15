@@ -96,11 +96,11 @@ export class TriageComponent implements OnInit {
     if (switchCdss) {
       this.triage.questionResponse = null;
     } else if (!back) {
-      this.triage.questionResponse = new Array();
+      this.triage.questionResponse = [];
 
       // Add blank questions
       if (!this.answerSelected) {
-        this.answerSelected = new Array();
+        this.answerSelected = [];
       }
       this.questionnaire.triageQuestions.forEach(question => {
         this.triage.questionnaireId = question.questionnaireId;
@@ -191,7 +191,7 @@ export class TriageComponent implements OnInit {
     }
 
     // reset the value.
-    this.answerSelected = new Array();
+    this.answerSelected = [];
     this.amendingPrevious = false;
     this.isLoading = false;
 
