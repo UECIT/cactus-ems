@@ -1,14 +1,29 @@
-import { Injectable } from '@angular/core';
-import { HttpHeaders, HttpClient } from '@angular/common/http';
-import { environment } from '../../environments/environment';
-import { SessionStorage } from 'h5webstorage';
+import {Injectable} from '@angular/core';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {environment} from '../../environments/environment';
+import {SessionStorage} from 'h5webstorage';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReportService {
 
-  constructor(private http: HttpClient, private sessionStorage: SessionStorage) { }
+  constructor(private http: HttpClient, private sessionStorage: SessionStorage) {
+  }
+
+  getEnabled(): Promise<boolean> {
+    const httpOptions = {
+      headers: new HttpHeaders()
+    };
+    if (this.sessionStorage['auth_token'] != null) {
+      httpOptions.headers = httpOptions.headers.set(
+          'Authorization',
+          this.sessionStorage['auth_token']
+      );
+      const url = `${environment.EMS_API}/report/enabled`;
+      return this.http.get<any>(url, httpOptions).toPromise();
+    }
+  }
 
   getHandover(caseId: any, resourceUrl: any) {
     const httpOptions = {
@@ -16,8 +31,8 @@ export class ReportService {
     };
     if (this.sessionStorage['auth_token'] != null) {
       httpOptions.headers = httpOptions.headers.set(
-        'Authorization',
-        this.sessionStorage['auth_token']
+          'Authorization',
+          this.sessionStorage['auth_token']
       );
       const url = `${environment.EMS_API}/handover`;
       const handoverRequest = {'resourceUrl': resourceUrl, 'caseId': caseId};
@@ -30,8 +45,8 @@ export class ReportService {
       headers: new HttpHeaders()
     };
     httpOptions.headers = httpOptions.headers.set(
-      'Content-Type',
-      'application/json'
+        'Content-Type',
+        'application/json'
     );
     return this.http.post<any>(`${environment.UECDI_API}/handover`, handoverMessage, httpOptions).toPromise();
   }
@@ -42,8 +57,8 @@ export class ReportService {
     };
     if (this.sessionStorage['auth_token'] != null) {
       httpOptions.headers = httpOptions.headers.set(
-        'Authorization',
-        this.sessionStorage['auth_token']
+          'Authorization',
+          this.sessionStorage['auth_token']
       );
       const url = `${environment.EMS_API}/report`;
       const handoverRequest = {'handoverJson': JSON.stringify(handoverMessage), 'caseId': caseId};
@@ -55,8 +70,8 @@ export class ReportService {
     const httpOptions = {headers: new HttpHeaders()};
     if (this.sessionStorage['auth_token'] != null) {
       httpOptions.headers = httpOptions.headers.set(
-        'Authorization',
-        this.sessionStorage['auth_token']
+          'Authorization',
+          this.sessionStorage['auth_token']
       );
       const url = `${environment.EMS_API}/report/encounter`;
       return this.http.post<any>(url, encounterId, httpOptions)
@@ -70,8 +85,8 @@ export class ReportService {
       responseType: 'text' as 'json'
     };
     httpOptions.headers = httpOptions.headers.set(
-      'Content-Type',
-      'application/xml'
+        'Content-Type',
+        'application/xml'
     );
     const url = `${environment.UECDI_VALIDATE_API}/validate/111v2`;
     return this.http.post<any>(url, oneOneOneReportXml, httpOptions).toPromise();
@@ -83,8 +98,8 @@ export class ReportService {
       responseType: 'text' as 'json'
     };
     httpOptions.headers = httpOptions.headers.set(
-      'Content-Type',
-      'application/xml'
+        'Content-Type',
+        'application/xml'
     );
     const url = `${environment.UECDI_VALIDATE_API}/validate/111v3`;
     return this.http.post<any>(url, oneOneOneReportXml, httpOptions).toPromise();
@@ -96,8 +111,8 @@ export class ReportService {
       responseType: 'text' as 'json'
     };
     httpOptions.headers = httpOptions.headers.set(
-      'Content-Type',
-      'application/xml'
+        'Content-Type',
+        'application/xml'
     );
     const url = `${environment.UECDI_VALIDATE_API}/validate/ambulancev2`;
     return this.http.post<any>(url, oneOneOneReportXml, httpOptions).toPromise();
@@ -109,8 +124,8 @@ export class ReportService {
       responseType: 'text' as 'json'
     };
     httpOptions.headers = httpOptions.headers.set(
-      'Content-Type',
-      'application/xml'
+        'Content-Type',
+        'application/xml'
     );
     const url = `${environment.UECDI_VALIDATE_API}/validate/ambulancev3`;
     return this.http.post<any>(url, ambulanceRequestXml, httpOptions).toPromise();
