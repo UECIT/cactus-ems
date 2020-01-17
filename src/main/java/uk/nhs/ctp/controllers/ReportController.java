@@ -35,8 +35,8 @@ public class ReportController {
   }
 
   @PostMapping
-  public @ResponseBody
-  Collection<ReportsDTO> getReport(
+  @ResponseBody
+  public Collection<ReportsDTO> getReport(
       @RequestBody ReportRequestDTO reportRequestDTO)
       throws JAXBException, JsonProcessingException {
 
@@ -45,8 +45,8 @@ public class ReportController {
   }
 
   @PostMapping(path = "/encounter")
-  public @ResponseBody
-  ReportsDTO getReports(@RequestBody String encounterRef) {
+  @ResponseBody
+  public Collection<ReportsDTO> getReports(@RequestBody String encounterRef) {
     return reportService.generateReports(encounterRef);
   }
 
