@@ -34,6 +34,7 @@ export class QuestionnaireComponent implements OnInit {
   reports: any;
   isloadingReport: boolean;
   supplierId: string;
+  isReportEnabled: boolean;
 
   constructor(public dialog: MatDialog,
               private reportService: ReportService,
@@ -59,6 +60,7 @@ export class QuestionnaireComponent implements OnInit {
   }
 
   async ngOnInit() {
+
     if (this.questionnaire.triageQuestions != null) {
       const initialAttachQuestions = this.questionnaire.triageQuestions.filter(
           question => question.responseAttachmentInitial != null
@@ -110,7 +112,8 @@ export class QuestionnaireComponent implements OnInit {
     }
 
     // check for result and build the handoverMessage and corresponding reports.
-    if (this.questionnaire.referralRequest != null) {
+    this.isReportEnabled = await this.reportService.getEnabled();
+    if (this.questionnaire.referralRequest != null && this.isReportEnabled) {
       await this.getHandoverMessage().catch(err => {
         this.toastr.error(
             err.error.target.__zone_symbol__xhrURL + ' - ' +
@@ -470,7 +473,11 @@ export class QuestionnaireComponent implements OnInit {
     return question.question.replace(/!\[.*?\]\((.*?)\)/g, '');
   }
 
-  get showHandover() {
+  get reportReady() {
     return this.handoverMessage && this.reports && !this.isloadingReport;
+  }
+
+  get reportEnabled() {
+    return this.isReportEnabled;
   }
 }

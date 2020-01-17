@@ -300,21 +300,21 @@
         <mat-card-title class="col-8" style="display:inline-block;">
           Result: {{ questionnaire.result }}</mat-card-title>
 
-        <div>
-          <button [ngClass]="{'no-padding': !showHandover}"
+        <div *ngIf="reportEnabled">
+          <button [ngClass]="{'no-padding': !reportReady}"
                   class="col-sm-4 offset-sm-0 continue"
-                  [disabled]="!showHandover"
+                  [disabled]="!reportReady"
                   (click)="openDialog()">
             View Result/Reports
-              <mat-progress-bar *ngIf="!showHandover" mode="indeterminate"></mat-progress-bar>
+              <mat-progress-bar *ngIf="!reportReady" mode="indeterminate"></mat-progress-bar>
           </button>
 
           <a href="{{getPostCallInformationTemplateURL()}}" target="blank">
             <button class="col-sm-4 offset-sm-0 continue"
-                    [ngClass]="{'no-padding': !showHandover}"
-                    [disabled]="!showHandover">
+                    [ngClass]="{'no-padding': !reportReady}"
+                    [disabled]="!reportReady">
               View Post Call Information
-              <mat-progress-bar *ngIf="!showHandover" mode="indeterminate"></mat-progress-bar>
+              <mat-progress-bar *ngIf="!reportReady" mode="indeterminate"></mat-progress-bar>
             </button>
           </a>
         </div>
