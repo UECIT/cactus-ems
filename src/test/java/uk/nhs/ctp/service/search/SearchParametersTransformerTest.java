@@ -52,7 +52,7 @@ public class SearchParametersTransformerTest {
         searchParametersTransformer.transform(ImmutableList.of(observationRequirement, patientRequirement), null, null);
 
     assertThat(searchParameters.getObservationTriggers(),
-        contains("CareConnectObservation$code$coughing$value$absent$effective$2001-02-03T04:05:06"));
+        contains("CareConnectObservation$code$system|coughing$value$system|absent$effective$2001-02-03T04:05:06"));
     assertThat(searchParameters.getPatientTriggers(),
         contains("CareConnectPatient$birthDate$2004-02-01"));
   }
@@ -80,7 +80,8 @@ public class SearchParametersTransformerTest {
     assertThat(searchParameters.getQuery(), is("triage"));
     assertThat(searchParameters.getJurisdiction(), is("GB"));
     assertThat(searchParameters.getContextValueCode(),
-        containsInAnyOrder("user$patient", "setting$online", "task$example"));
+        containsInAnyOrder("user$http://hl7.org/fhir/valueset-provider-taxonomy.html|patient",
+            "setting$http://hl7.org/fhir/valueset-provider-taxonomy.html|online", "task$cdss/supplier/stub|example"));
 
   }
 
@@ -102,7 +103,7 @@ public class SearchParametersTransformerTest {
         .transform(emptyList(), null, patientId);
 
     assertThat(searchParameters.getContextValueCode(),
-        containsInAnyOrder("gender$male", "age$http://snomed.info/sct|67822003"));
+        containsInAnyOrder("gender$http://hl7.org/fhir/administrative-gender|male", "age$http://snomed.info/sct|67822003"));
   }
 
   @Test
@@ -123,7 +124,7 @@ public class SearchParametersTransformerTest {
         .transform(emptyList(), null, patientId);
 
     assertThat(searchParameters.getContextValueCode(),
-        containsInAnyOrder("gender$female", "age$http://snomed.info/sct|133936004"));
+        containsInAnyOrder("gender$http://hl7.org/fhir/administrative-gender|female", "age$http://snomed.info/sct|133936004"));
   }
 
   private DataRequirement createObservationRequirement(String code, String value, LocalDateTime date) {
