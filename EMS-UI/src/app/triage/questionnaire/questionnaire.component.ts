@@ -123,12 +123,6 @@ export class QuestionnaireComponent implements OnInit {
         .catch(err => {
           console.log(err);
         });
-      // TODO: this is very broken
-      // await this.get111Report().catch(err => {
-      //   this.toastr.error(
-      //       err.error.target.__zone_symbol__xhrURL + ' - ' +
-      //       err.message);
-      // });
     }
     this.supplierId = await this.serviceDefinitionService.getCdssSupplierUrl(this.questionnaire.cdssSupplierId);
   }
@@ -364,85 +358,6 @@ export class QuestionnaireComponent implements OnInit {
     if (this.handoverMessage !== undefined) {
       return `${environment.UECDI_API}/handover/${this.handoverMessage.id}`;
     }
-  }
-
-  async get111Report() {
-    this.isloadingReport = true;
-    const reports = await this.reportService
-    .getReport(this.questionnaire.caseId, this.questionnaire.referralRequest.resourceId, this.handoverMessage);
-
-    reports.forEach(async report => {
-      if (report.reportType === 'ONE_ONE_ONE_V2') {
-        this.isloadingReport = true;
-        report.ValidationReport = await this.reportService.validate111ReportV2(report.request)
-        .catch(err => {
-          this.toastr.error(
-              err.error.target.__zone_symbol__xhrURL + ' - ' +
-              err.message);
-          this.isloadingReport = false;
-        });
-        this.isloadingReport = false;
-      }
-
-      if (report.reportType === 'ONE_ONE_ONE_V3') {
-        this.isloadingReport = true;
-        report.ValidationReport = await this.reportService.validate111ReportV3(report.request)
-        .catch(err => {
-          this.toastr.error(
-              err.error.target.__zone_symbol__xhrURL + ' - ' +
-              err.message);
-          this.isloadingReport = false;
-        });
-        this.isloadingReport = false;
-      }
-
-      if (report.reportType === 'AMBULANCE_V2') {
-        this.isloadingReport = true;
-        report.ValidationReport = await this.reportService.validateAmbulanceRequestV2(report.request)
-        .catch(err => {
-          this.toastr.error(
-              err.error.target.__zone_symbol__xhrURL + ' - ' +
-              err.message);
-          this.isloadingReport = false;
-        });
-        this.isloadingReport = false;
-      }
-
-      if (report.reportType === 'AMBULANCE_V3') {
-        this.isloadingReport = true;
-        report.ValidationReport = await this.reportService.validateAmbulanceRequestV3(report.request)
-        .catch(err => {
-          this.toastr.error(
-              err.error.target.__zone_symbol__xhrURL + ' - ' +
-              err.message);
-          this.isloadingReport = false;
-        });
-        this.isloadingReport = false;
-      }
-    });
-
-    for (let index = 0; index < reports.length; index++) {
-      const report = reports[index];
-
-      if (report.contentType === 'XML') {
-        if (report.request) {
-          report.request = beautify(report.request);
-        }
-        if (report.response) {
-          report.response = beautify(report.response);
-        }
-      }
-
-      if (report.contentType === 'JSON') {
-        if (report.request) {
-          report.request = JSON.parse(report.request);
-        }
-        if (report.response) {
-          report.response = JSON.parse(report.response);
-        }
-      }
-    }
-    this.reports = reports.reverse();
   }
 
   hasDraftCareAdvice(careAdvice: any[]) {

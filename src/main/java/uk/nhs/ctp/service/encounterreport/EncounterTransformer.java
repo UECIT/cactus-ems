@@ -1,4 +1,4 @@
-package uk.nhs.ctp.service;
+package uk.nhs.ctp.service.encounterreport;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 

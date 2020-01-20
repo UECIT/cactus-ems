@@ -62,6 +62,7 @@ import uk.nhs.ctp.service.builder.CareConnectPatientBuilder;
 import uk.nhs.ctp.service.builder.RelatedPersonBuilder;
 import uk.nhs.ctp.service.dto.SettingsDTO;
 import uk.nhs.ctp.service.dto.TriageQuestion;
+import uk.nhs.ctp.service.encounterreport.EncounterTransformer;
 import uk.nhs.ctp.service.factory.ReferenceStorageServiceFactory;
 import uk.nhs.ctp.utils.ErrorHandlingUtils;
 
