@@ -18,6 +18,7 @@ import uk.nhs.ctp.service.dto.CdssResponseDTO;
 import uk.nhs.ctp.service.dto.CdssResult;
 import uk.nhs.ctp.service.dto.TriageLaunchDTO;
 import uk.nhs.ctp.service.dto.TriageQuestion;
+import uk.nhs.ctp.service.encounter.EncounterService;
 import uk.nhs.ctp.service.factory.ReferencingContextFactory;
 import uk.nhs.ctp.service.resolver.ResponseResolver;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
@@ -36,6 +37,7 @@ public class TriageService {
   private CdssSupplierService cdssSupplierService;
   private ReferencingContextFactory referencingContextFactory;
   private ResponseResolver responseResolver;
+  private EncounterService encounterService;
 
   /**
    * Creates case from test case scenario and patient details and launches first triage request
@@ -68,15 +70,17 @@ public class TriageService {
    */
   public CdssResponseDTO processTriageRequest(CdssRequestDTO requestDetails)
       throws ConnectException, JsonProcessingException, FHIRException {
-    LOG.info("Processing triage for case " + requestDetails.getCaseId());
+
+    Long caseId = requestDetails.getCaseId();
+    LOG.info("Processing triage for case " + caseId);
 
     // start audit
-    AuditRecord auditRecord = auditService.createNewAudit(requestDetails.getCaseId());
+    AuditRecord auditRecord = auditService.createNewAudit(caseId);
 
     CdssResult cdssResult = updateCaseUsingCdss(requestDetails);
 
     CdssResponseDTO cdssResponse = buildResponseDtoFromResult(cdssResult,
-        requestDetails.getCaseId(),
+        caseId,
         requestDetails.getCdssSupplierId());
 
     auditService
@@ -87,11 +91,13 @@ public class TriageService {
       cdssResult = updateCaseUsingCdss(requestDetails);
 
       // Add Audit Record
-      cdssResponse = buildResponseDtoFromResult(cdssResult, requestDetails.getCaseId(),
+      cdssResponse = buildResponseDtoFromResult(cdssResult, caseId,
           requestDetails.getCdssSupplierId());
       auditService
           .updateAuditEntry(auditRecord, requestDetails, cdssResponse, cdssResult.getContained());
     }
+
+    encounterService.updateEncounter(caseId);
 
     return cdssResponse;
   }
@@ -105,18 +111,22 @@ public class TriageService {
    */
   public CdssResponseDTO processTriageAmendRequest(CdssRequestDTO requestDetails)
       throws ConnectException, JsonProcessingException, FHIRException {
-    LOG.info("Amending triage for case " + requestDetails.getCaseId());
+
+    Long caseId = requestDetails.getCaseId();
+    LOG.info("Amending triage for case " + caseId);
 
     // start audit
-    AuditRecord auditRecord = auditService.createNewAudit(requestDetails.getCaseId());
+    AuditRecord auditRecord = auditService.createNewAudit(caseId);
     CdssResult cdssResult = amendCaseUsingCdss(requestDetails);
 
     // Add Audit Record
-    CdssResponseDTO cdssResponse = buildAmendResponseDtoFromResult(cdssResult,
-        requestDetails.getCaseId(),
-        requestDetails.getCdssSupplierId(), requestDetails.getQuestionResponse());
+    CdssResponseDTO cdssResponse = buildAmendResponseDtoFromResult(
+        cdssResult, caseId, requestDetails.getCdssSupplierId(),
+        requestDetails.getQuestionResponse());
     auditService
         .updateAuditEntry(auditRecord, requestDetails, cdssResponse, cdssResult.getContained());
+
+    encounterService.updateEncounter(caseId);
 
     return cdssResponse;
   }
@@ -134,9 +144,11 @@ public class TriageService {
     CdssResult cdssResult = amendCaseUsingCdss(requestDetails);
 
     if (cdssResult.hasOutputData() || cdssResult.getSessionId() != null) {
-      LOG.info("Update case for " + requestDetails.getCaseId());
-      caseService.updateCase(requestDetails.getCaseId(), cdssResult.getOutputData(),
+      Long caseId = requestDetails.getCaseId();
+      LOG.info("Update case for " + caseId);
+      caseService.updateCase(caseId, cdssResult.getOutputData(),
           cdssResult.getSessionId());
+      encounterService.updateEncounter(caseId);
     }
 
     return cdssResult;
@@ -171,7 +183,8 @@ public class TriageService {
     CdssSupplier cdssSupplier = cdssSupplierService
         .getCdssSupplier(requestDetails.getCdssSupplierId());
 
-    return responseResolver.resolve(resource, cdssSupplier, requestDetails.getSettings(), requestDetails.getPatientId());
+    return responseResolver.resolve(resource, cdssSupplier, requestDetails.getSettings(),
+        requestDetails.getPatientId());
   }
 
   /**

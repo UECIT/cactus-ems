@@ -62,7 +62,7 @@ import uk.nhs.ctp.service.builder.CareConnectPatientBuilder;
 import uk.nhs.ctp.service.builder.RelatedPersonBuilder;
 import uk.nhs.ctp.service.dto.SettingsDTO;
 import uk.nhs.ctp.service.dto.TriageQuestion;
-import uk.nhs.ctp.service.encounterreport.EncounterTransformer;
+import uk.nhs.ctp.service.encounter.EncounterTransformer;
 import uk.nhs.ctp.service.factory.ReferenceStorageServiceFactory;
 import uk.nhs.ctp.utils.ErrorHandlingUtils;
 
@@ -116,7 +116,7 @@ public class ParametersService {
 
     parameters.addParameter()
         .setName(SystemConstants.ENCOUNTER)
-        .setResource(encounterTransformer.transform(caseAudit));
+        .setResource(encounterTransformer.transform(caseEntity, caseAudit));
 
     setContext(caseEntity, parameters);
     saveQuestionnaireResponse(questionResponse, parameters, amending,

@@ -31,6 +31,7 @@ import uk.nhs.ctp.entities.TestScenario;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.repos.PatientRepository;
 import uk.nhs.ctp.repos.TestScenarioRepository;
+import uk.nhs.ctp.service.encounter.EncounterService;
 import uk.nhs.ctp.service.factory.ReferenceStorageServiceFactory;
 import uk.nhs.ctp.utils.ErrorHandlingUtils;
 
@@ -44,6 +45,7 @@ public class CaseService {
   private PatientRepository patientRepository;
   private TestScenarioRepository testScenarioRepository;
   private ReferenceStorageServiceFactory storageServiceFactory;
+  private EncounterService encounterService;
 
   /**
    * Create new case from patient ID and store in database
@@ -65,6 +67,9 @@ public class CaseService {
 
     setCaseDetails(patient, testScenario, triageCase);
 
+    // Store a mostly empty encounter record for future reference
+    String encounterRef = encounterService.createEncounter(triageCase);
+    triageCase.setEncounterId(encounterRef);
     return caseRepository.save(triageCase);
   }
 
