@@ -19,7 +19,7 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.stereotype.Component;
-import uk.nhs.ctp.service.encounterreport.EncounterReportService;
+import uk.nhs.ctp.service.encounter.EncounterReportService;
 
 @Component
 @AllArgsConstructor

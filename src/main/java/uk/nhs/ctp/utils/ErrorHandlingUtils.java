@@ -10,7 +10,7 @@ public class ErrorHandlingUtils {
 
 	public static void checkEntityExists(Object object, String objectDescription) {
 		if (object == null) {
-			throw new EMSException(HttpStatus.NOT_FOUND, objectDescription + "not found");
+			throw new EMSException(HttpStatus.NOT_FOUND, objectDescription + " not found");
 		}
 	}
 }

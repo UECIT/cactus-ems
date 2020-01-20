@@ -1,9 +1,9 @@
 package uk.nhs.ctp.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,8 +17,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -28,125 +26,128 @@ import lombok.Setter;
 @Setter
 public class Cases {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-	@Column(name = "firstName")
-	private String firstName;
+  @Column
+  private String encounterId;
 
-	@Column(name = "lastName")
-	private String lastName;
+  @Column(name = "firstName")
+  private String firstName;
 
-	@Column(name = "gender")
-	private String gender;
+  @Column(name = "lastName")
+  private String lastName;
 
-	@JsonFormat(pattern = "yyyy-MM-dd")
-	@Temporal(TemporalType.DATE)
-	@Column(name = "date_of_birth")
-	private Date dateOfBirth;
+  @Column(name = "gender")
+  private String gender;
 
-	@Column(name = "address")
-	private String address;
+  @JsonFormat(pattern = "yyyy-MM-dd")
+  @Temporal(TemporalType.DATE)
+  @Column(name = "date_of_birth")
+  private Date dateOfBirth;
 
-	@Column(name = "nhs_number")
-	private String nhsNumber;
+  @Column(name = "address")
+  private String address;
 
-	@ManyToOne
-	@JoinColumn(name = "party_id")
-	private Party party;
+  @Column(name = "nhs_number")
+  private String nhsNumber;
 
-	@ManyToOne
-	@JoinColumn(name = "skillset_id")
-	private Skillset skillset;
+  @ManyToOne
+  @JoinColumn(name = "party_id")
+  private Party party;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-	@JoinColumn(name = "case_id")
-	private List<CaseImmunization> immunizations;
+  @ManyToOne
+  @JoinColumn(name = "skillset_id")
+  private Skillset skillset;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-	@JoinColumn(name = "case_id")
-	private List<CaseObservation> observations;
+  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+  @JoinColumn(name = "case_id")
+  private List<CaseImmunization> immunizations;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-	@JoinColumn(name = "case_id")
-	private List<CaseMedication> medications;
-	
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-	@JoinColumn(name = "case_id")
-	private List<CaseParameter> parameters;
+  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+  @JoinColumn(name = "case_id")
+  private List<CaseObservation> observations;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-	@JoinColumn(name = "case_id")
-	private List<QuestionResponse> questionResponses;
+  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+  @JoinColumn(name = "case_id")
+  private List<CaseMedication> medications;
 
-	@Column(name = "session_id")
-	private String sessionId;
-	
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "case_timestamp")
-	private Date timestamp;
+  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+  @JoinColumn(name = "case_id")
+  private List<CaseParameter> parameters;
 
-	public List<CaseImmunization> getImmunizations() {
-		if (this.immunizations == null) {
-			this.immunizations = new ArrayList<>();
-		}
-		return immunizations;
-	}
+  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+  @JoinColumn(name = "case_id")
+  private List<QuestionResponse> questionResponses;
 
-	public List<CaseObservation> getObservations() {
-		if (this.observations == null) {
-			this.observations = new ArrayList<>();
-		}
-		return observations;
-	}
-	
-	public List<CaseParameter> getParameters() {
-		if (this.parameters == null) {
-			this.parameters = new ArrayList<>();
-		}
-		return parameters;
-	}
+  @Column(name = "session_id")
+  private String sessionId;
 
-	public List<CaseMedication> getMedications() {
-		if (this.medications == null) {
-			this.medications = new ArrayList<>();
-		}
-		return medications;
-	}
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(name = "case_timestamp")
+  private Date timestamp;
 
-	public void addMedication(CaseMedication medication) {
-		if (this.medications == null) {
-			this.medications = new ArrayList<>();
-		}
-		this.medications.add(medication);
-	}
+  public List<CaseImmunization> getImmunizations() {
+    if (this.immunizations == null) {
+      this.immunizations = new ArrayList<>();
+    }
+    return immunizations;
+  }
 
-	public void addImmunization(CaseImmunization immunization) {
-		if (this.immunizations == null) {
-			this.immunizations = new ArrayList<>();
-		}
-		this.immunizations.add(immunization);
-	}
+  public List<CaseObservation> getObservations() {
+    if (this.observations == null) {
+      this.observations = new ArrayList<>();
+    }
+    return observations;
+  }
 
-	public void addObservation(CaseObservation observation) {
-		if (this.observations == null) {
-			this.observations = new ArrayList<>();
-		}
-		this.observations.add(observation);
-	}
+  public List<CaseParameter> getParameters() {
+    if (this.parameters == null) {
+      this.parameters = new ArrayList<>();
+    }
+    return parameters;
+  }
 
-	public void addParameter(CaseParameter parameter) {
-		if (this.parameters == null) {
-			this.parameters = new ArrayList<>();
-		}
-		this.parameters.add(parameter);
-	}
+  public List<CaseMedication> getMedications() {
+    if (this.medications == null) {
+      this.medications = new ArrayList<>();
+    }
+    return medications;
+  }
 
-	public void addQuestionResponse(QuestionResponse questionResponse) {
-		if (this.questionResponses == null) {
-			this.questionResponses = new ArrayList<>();
-		}
-		this.questionResponses.add(questionResponse);
-	}
+  public void addMedication(CaseMedication medication) {
+    if (this.medications == null) {
+      this.medications = new ArrayList<>();
+    }
+    this.medications.add(medication);
+  }
+
+  public void addImmunization(CaseImmunization immunization) {
+    if (this.immunizations == null) {
+      this.immunizations = new ArrayList<>();
+    }
+    this.immunizations.add(immunization);
+  }
+
+  public void addObservation(CaseObservation observation) {
+    if (this.observations == null) {
+      this.observations = new ArrayList<>();
+    }
+    this.observations.add(observation);
+  }
+
+  public void addParameter(CaseParameter parameter) {
+    if (this.parameters == null) {
+      this.parameters = new ArrayList<>();
+    }
+    this.parameters.add(parameter);
+  }
+
+  public void addQuestionResponse(QuestionResponse questionResponse) {
+    if (this.questionResponses == null) {
+      this.questionResponses = new ArrayList<>();
+    }
+    this.questionResponses.add(questionResponse);
+  }
 }

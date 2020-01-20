@@ -1,4 +1,4 @@
-package uk.nhs.ctp.service.encounterreport;
+package uk.nhs.ctp.service.encounter;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import java.util.List;
