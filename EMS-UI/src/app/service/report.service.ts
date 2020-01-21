@@ -25,32 +25,6 @@ export class ReportService {
     }
   }
 
-  getHandover(caseId: any, resourceUrl: any) {
-    const httpOptions = {
-      headers: new HttpHeaders()
-    };
-    if (this.sessionStorage['auth_token'] != null) {
-      httpOptions.headers = httpOptions.headers.set(
-          'Authorization',
-          this.sessionStorage['auth_token']
-      );
-      const url = `${environment.EMS_API}/handover`;
-      const handoverRequest = {'resourceUrl': resourceUrl, 'caseId': caseId};
-      return this.http.post<any>(url, handoverRequest, httpOptions).toPromise();
-    }
-  }
-
-  postHandoverTemplate(handoverMessage) {
-    const httpOptions = {
-      headers: new HttpHeaders()
-    };
-    httpOptions.headers = httpOptions.headers.set(
-        'Content-Type',
-        'application/json'
-    );
-    return this.http.post<any>(`${environment.UECDI_API}/handover`, handoverMessage, httpOptions).toPromise();
-  }
-
   getReport(caseId: any, resourceUrl: any, handoverMessage: any) {
     const httpOptions = {
       headers: new HttpHeaders()

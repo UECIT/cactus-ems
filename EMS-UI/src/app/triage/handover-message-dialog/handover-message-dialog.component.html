@@ -1,33 +1,6 @@
 <mat-dialog-content class="mat-typography">
 
   <mat-tab-group style="clear: both;">
-    <mat-tab label="Handover Message:">
-        <mat-accordion>
-            <mat-expansion-panel>
-                <mat-expansion-panel-header>
-                  <mat-panel-title>
-                    Handover Message:
-                  </mat-panel-title>
-                  <mat-panel-description>
-                    The handover message.
-                  </mat-panel-description>
-                </mat-expansion-panel-header>
-                <ngx-json-viewer [json]="data.handoverMessage" [expanded]="true"></ngx-json-viewer>
-              </mat-expansion-panel>
-
-              <mat-expansion-panel>
-                  <mat-expansion-panel-header>
-                    <mat-panel-title>
-                      Handover Message (Raw Json):
-                    </mat-panel-title>
-                    <mat-panel-description>
-                      The handover message in Raw Json format.
-                    </mat-panel-description>
-                  </mat-expansion-panel-header>
-                  <pre>{{ data.handoverMessage | json }}</pre>
-                </mat-expansion-panel>
-        </mat-accordion>
-    </mat-tab>
     <mat-tab [label]="report.reportType | report" *ngFor="let report of data.reports">
         <mat-accordion>
             <mat-expansion-panel *ngIf="report.request">
