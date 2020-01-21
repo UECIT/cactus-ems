@@ -60,8 +60,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 
-		http.cors().and().csrf().disable().authorizeRequests().
-		antMatchers("/document").permitAll().anyRequest().authenticated().and()
+		http.cors().and()
+				.csrf().disable()
+				.authorizeRequests()
+					.antMatchers("/document", "/fhir/**").permitAll()
+					.anyRequest().authenticated().and()
 				.addFilterBefore(
 						new JWTLoginFilter("/login", authenticationManager(), userRepository, cdssSupplierRepository),
 						UsernamePasswordAuthenticationFilter.class)

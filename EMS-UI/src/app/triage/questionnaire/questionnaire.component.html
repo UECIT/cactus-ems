@@ -308,15 +308,6 @@
             View Result/Reports
               <mat-progress-bar *ngIf="!reportReady" mode="indeterminate"></mat-progress-bar>
           </button>
-
-          <a href="{{getPostCallInformationTemplateURL()}}" target="blank">
-            <button class="col-sm-4 offset-sm-0 continue"
-                    [ngClass]="{'no-padding': !reportReady}"
-                    [disabled]="!reportReady">
-              View Post Call Information
-              <mat-progress-bar *ngIf="!reportReady" mode="indeterminate"></mat-progress-bar>
-            </button>
-          </a>
         </div>
 
         <mat-tab-group style="clear: both;">

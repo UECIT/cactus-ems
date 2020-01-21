@@ -30,7 +30,6 @@ export class QuestionnaireComponent implements OnInit {
   freeText: Map<string, string>;
   url: Map<string, string> = new Map();
   enableWhen: Map<string, string[]> = new Map();
-  handoverMessage: any;
   reports: any;
   isloadingReport: boolean;
   supplierId: string;
@@ -49,7 +48,6 @@ export class QuestionnaireComponent implements OnInit {
       panelClass: 'report',
       backdropClass: 'report-backdrop',
       data: {
-        handoverMessage: this.handoverMessage,
         reports: this.reports
       }
     });
@@ -111,11 +109,6 @@ export class QuestionnaireComponent implements OnInit {
     // check for result and build the handoverMessage and corresponding reports.
     this.isReportEnabled = await this.reportService.getEnabled();
     if (this.questionnaire.referralRequest != null && this.isReportEnabled) {
-      await this.getHandoverMessage().catch(err => {
-        this.toastr.error(
-            err.error.target.__zone_symbol__xhrURL + ' - ' +
-            err.message);
-      });
       await this.reportService.generateReport(this.questionnaire.referralRequest.contextReference)
         .then(result => {
           this.reports = result;
@@ -345,21 +338,6 @@ export class QuestionnaireComponent implements OnInit {
     }
   }
 
-  async getHandoverMessage() {
-    this.handoverMessage = await this.reportService.getHandover(this.questionnaire.caseId, this.questionnaire.referralRequest.resourceId);
-    await this.reportService.postHandoverTemplate(this.handoverMessage).catch(err => {
-      this.toastr.error(
-          err.error.target.__zone_symbol__xhrURL + ' - ' +
-          err.message);
-    });
-  }
-
-  getPostCallInformationTemplateURL() {
-    if (this.handoverMessage !== undefined) {
-      return `${environment.UECDI_API}/handover/${this.handoverMessage.id}`;
-    }
-  }
-
   hasDraftCareAdvice(careAdvice: any[]) {
     if (!careAdvice) {
       return false;
@@ -386,7 +364,7 @@ export class QuestionnaireComponent implements OnInit {
   }
 
   get reportReady() {
-    return this.handoverMessage && this.reports && !this.isloadingReport;
+    return  this.reports && !this.isloadingReport;
   }
 
   get reportEnabled() {

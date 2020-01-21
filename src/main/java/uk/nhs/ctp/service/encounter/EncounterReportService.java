@@ -27,7 +27,7 @@ public class EncounterReportService {
 
   public List<ReferralRequest> getReferralRequests(String encounterId) {
     return fhirClient.search()
-        .byUrl("ReferralRequest?context:Encounter=" + fhirClient.getServerBase() + "/Encounter/" + encounterId)
+        .byUrl("ReferralRequest?context:Encounter=Encounter/" + encounterId)
         .returnBundle(Bundle.class)
         .execute()
         .getEntry().stream()
@@ -37,7 +37,7 @@ public class EncounterReportService {
 
   public List<Composition> getCompositions(String encounterId) {
     return fhirClient.search()
-        .byUrl("Composition?encounter:Encounter=" + fhirClient.getServerBase() + "/Encounter/" + encounterId)
+        .byUrl("Composition?encounter:Encounter=Encounter/" + encounterId)
         .returnBundle(Bundle.class)
         .execute()
         .getEntry().stream()

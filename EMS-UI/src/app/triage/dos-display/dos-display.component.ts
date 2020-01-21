@@ -1,4 +1,5 @@
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material';
+import {environment} from '../../../environments/environment';
 import { Component, Input, Inject } from '@angular/core';
 import { ReferralRequest } from 'src/app/model/questionnaire';
 import { DosService } from 'src/app/service/dos.service';
@@ -35,14 +36,15 @@ export class DosDisplayComponent {
   }
 
   viewDetails(selected: HealthcareService) {
-    console.log(selected);
     this.dialog.open(HealthcareServiceDialog, {
       data: selected
     });
   }
 
   invoke() {
-    console.log(this.selectedService.endpoint);
+    const encounterRef = `${encodeURI(environment.EMS_API)}/fhir/${this.referralRequest.contextReference}`;
+    const url = `${this.selectedService.endpoint}?encounter=${encounterRef}`;
+    window.open(url);
   }
 }
 
