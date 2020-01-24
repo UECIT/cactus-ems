@@ -443,7 +443,7 @@
   </div>
 
   <app-dos-display
-      *ngIf="questionnaire.referralRequest && questionnaire.referralRequest.serviceRequestedSystem"
+      *ngIf="questionnaire.referralRequest"
       [(referralRequest)]="questionnaire.referralRequest"></app-dos-display>
 
 </ng-template>
