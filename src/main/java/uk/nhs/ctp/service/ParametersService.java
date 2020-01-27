@@ -13,9 +13,12 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CareConnectObservation;
+import org.hl7.fhir.dstu3.model.CareConnectPatient;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ContactPoint;
@@ -42,13 +45,12 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.SystemURL;
+import uk.nhs.ctp.entities.AuditRecord;
 import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
@@ -58,27 +60,28 @@ import uk.nhs.ctp.entities.QuestionResponse;
 import uk.nhs.ctp.exception.EMSException;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.attachment.AttachmentService;
-import uk.nhs.ctp.service.builder.CareConnectPatientBuilder;
+import uk.nhs.ctp.service.builder.ReferenceBuilder;
 import uk.nhs.ctp.service.builder.RelatedPersonBuilder;
 import uk.nhs.ctp.service.dto.SettingsDTO;
 import uk.nhs.ctp.service.dto.TriageQuestion;
 import uk.nhs.ctp.service.encounter.EncounterTransformer;
-import uk.nhs.ctp.service.factory.ReferenceStorageServiceFactory;
+import uk.nhs.ctp.service.factory.ReferenceBuilderFactory;
 import uk.nhs.ctp.utils.ErrorHandlingUtils;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class ParametersService {
 
-  private static final Logger LOG = LoggerFactory.getLogger(ParametersService.class);
+  private static final FastDateFormat DATE_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd");
 
   private CaseRepository caseRepository;
-  private CareConnectPatientBuilder careConnectPatientBuilder;
   private RelatedPersonBuilder relatedPersonBuilder;
-  private ReferenceStorageServiceFactory storageServiceFactory;
+  private ReferenceBuilderFactory referenceBuilderFactory;
   private AttachmentService attachmentService;
   private AuditService auditService;
   private EncounterTransformer encounterTransformer;
+  private StorageService storageService;
 
   Parameters getEvaluateParameters(
       Long caseId,
@@ -88,7 +91,7 @@ public class ParametersService {
       ReferencingContext referencingContext,
       String questionnaireId) {
 
-    var storageService = storageServiceFactory.load(referencingContext);
+    var referenceBuilder = referenceBuilderFactory.load(referencingContext);
 
     Cases caseEntity = caseRepository.findOne(caseId);
     ErrorHandlingUtils.checkEntityExists(caseEntity, "Case");
@@ -100,27 +103,16 @@ public class ParametersService {
     Parameters parameters = new Parameters();
     parameters.setMeta(new Meta().addProfile(SystemURL.SERVICE_DEFINITION_EVALUATE));
 
-    List<QuestionnaireResponse> questionnaireResponses = getExistingResponses(
-        parameters, caseEntity, storageService);
-
-    setRequestId(caseId, parameters);
-
-    try {
-      parameters.addParameter().setName(SystemConstants.PATIENT)
-          .setResource(careConnectPatientBuilder.build(caseEntity, storageService));
-    } catch (FHIRException e) {
-      LOG.error("Cannot parse gender code", e);
-      throw new EMSException(HttpStatus.INTERNAL_SERVER_ERROR,
-          "Cannot parse patient gender code", e);
-    }
-
-    parameters.addParameter()
-        .setName(SystemConstants.ENCOUNTER)
-        .setResource(encounterTransformer.transform(caseEntity, caseAudit));
+    setRequestId(parameters, caseId);
+    setPatient(parameters, caseEntity, storageService);
+    setEncounter(parameters, caseEntity, caseAudit);
 
     setContext(caseEntity, parameters);
+
+    List<QuestionnaireResponse> questionnaireResponses = getExistingResponses(
+        parameters, caseEntity, storageService);
     saveQuestionnaireResponse(questionResponse, parameters, amending,
-        storageService, questionnaireId, caseEntity, questionnaireResponses);
+        storageService, referenceBuilder, questionnaireId, caseEntity, questionnaireResponses);
 
     addObservations(caseEntity, parameters);
     addImmunizationInputData(caseEntity, parameters);
@@ -129,10 +121,7 @@ public class ParametersService {
     // Add extra parameters
     addParameterInputData(caseEntity, parameters);
 
-    // set missing parameters
-    // userType, userLanguage, userTaskContext,
-    // receivingPerson, initiatingPerson,
-    // recipientType, recipientLanguage, setting
+    // Add user context information
     setUserType(parameters, settings);
     setUserLanguage(parameters, settings);
     setUserTaskContext(parameters, settings);
@@ -140,7 +129,7 @@ public class ParametersService {
       setInitiatingPerson(parameters, settings);
       setReceivingPerson(parameters, settings);
     } catch (FHIRException e) {
-      LOG.error("Cannot parse gender code", e);
+      log.error("Cannot parse gender code", e);
       throw new EMSException(HttpStatus.INTERNAL_SERVER_ERROR,
           "Cannot parse person gender code", e);
     } catch (ParseException e) {
@@ -154,9 +143,32 @@ public class ParametersService {
     return parameters;
   }
 
+  private void setEncounter(Parameters parameters, Cases caseEntity, AuditRecord caseAudit) {
+    // TODO fetch already transformed Encounter from FHIR server ?
+    parameters.addParameter()
+        .setName(SystemConstants.ENCOUNTER)
+        .setResource(encounterTransformer.transform(caseEntity, caseAudit));
+  }
+
+  /**
+   * Fetches a FHIR patient record associated with the case and adds it to the parameters
+   */
+  private void setPatient(Parameters parameters, Cases caseEntity,
+      StorageService storageService) {
+    try {
+      CareConnectPatient patient = storageService
+          .findResource(caseEntity.getPatientId(), CareConnectPatient.class);
+      parameters.addParameter().setName(SystemConstants.PATIENT).setResource(patient);
+    } catch (FHIRException e) {
+      log.error("Unable to add patient record to parameters", e);
+      throw new EMSException(HttpStatus.INTERNAL_SERVER_ERROR,
+          "Unable to add patient record to parameters", e);
+    }
+  }
+
   @Nonnull
   private List<QuestionnaireResponse> getExistingResponses(Parameters parameters, Cases caseEntity,
-      ReferenceStorageService storageService) {
+      StorageService storageService) {
 
     // Get reference to all questionnaire responses for this case
     if (caseEntity.getQuestionResponses() == null) {
@@ -171,10 +183,7 @@ public class ParametersService {
         .findResources(qrReferences, QuestionnaireResponse.class);
   }
 
-  // Adjust to get actual Person.
-  private void setInitiatingPerson(
-      Parameters parameters,
-      SettingsDTO settings)
+  private void setInitiatingPerson(Parameters parameters, SettingsDTO settings)
       throws FHIRException, ParseException {
 
     var names = new ArrayList<HumanName>();
@@ -329,7 +338,7 @@ public class ParametersService {
         .setStatus(Observation.ObservationStatus.FINAL)
         .setCode(new CodeableConcept().addCoding(new Coding(SystemURL.SNOMED, "397669002", "Age")))
         .setIssued(caseEntity.getTimestamp())
-        .setValue(new StringType(caseEntity.getDateOfBirth().toString()));
+        .setValue(new StringType(DATE_FORMAT.format(caseEntity.getDateOfBirth())));
     observations.put(ageObservation.getCode(), ageObservation);
 
     // CDSS Observations
@@ -431,11 +440,16 @@ public class ParametersService {
         .getCode().equals("imagemap");
   }
 
+  /**
+   * Saves any changes to QuestionnaireResponses and adds all responses to the parameters
+   */
   private void saveQuestionnaireResponse(
       TriageQuestion[] questionResponse,
       Parameters parameters,
       Boolean amending,
-      ReferenceStorageService storageService, String questionnaireId,
+      StorageService storageService,
+      ReferenceBuilder referenceBuilder,
+      String questionnaireId,
       Cases caseEntity,
       List<QuestionnaireResponse> questionnaireResponses) {
     if (questionResponse != null) {
@@ -459,9 +473,9 @@ public class ParametersService {
 
       var patient = partyComponent.getValue().primitiveValue().equals("1")
           ? getParameterAsResource(parameters.getParameter(), SystemConstants.PATIENT)
-          : relatedPersonBuilder.build();
+          : relatedPersonBuilder.build(context);
 
-      questionnaireResponse.setSource(storageService.store(patient));
+      questionnaireResponse.setSource(referenceBuilder.getReference(patient));
 
       var qr = questionnaireResponses.stream()
           .filter(equalQuestionnaireIds(questionnaireId))
@@ -475,9 +489,9 @@ public class ParametersService {
         storageService.updateExternal(qr.get());
       } else if (qr.isEmpty()) {
         questionnaireResponse.setStatus(QuestionnaireResponseStatus.COMPLETED);
-        Reference qrRef = storageService.storeExternal(questionnaireResponse);
+        String qrRef = storageService.storeExternal(questionnaireResponse);
         QuestionResponse questionResponseEntity = QuestionResponse.builder()
-            .reference(qrRef.getResource().getIdElement().getValue())
+            .reference(qrRef)
             .questionnaireId(questionnaireId)
             .build();
         caseEntity.addQuestionResponse(questionResponseEntity);
@@ -510,7 +524,7 @@ public class ParametersService {
     inputParameters.setResource(inputParamsResource);
   }
 
-  private void setRequestId(Long caseId, Parameters parameters) {
+  private void setRequestId(Parameters parameters, Long caseId) {
     parameters.addParameter().setName(SystemConstants.REQUEST_ID).setValue(new IdType(caseId));
     // parameters.addParameter().setName(SystemConstants.REQUEST_ID).setValue(new
     // StringType(String.valueOf(caseId)));

@@ -3,13 +3,12 @@ package uk.nhs.ctp.service.encounter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.dstu3.model.Encounter;
-import org.hl7.fhir.dstu3.model.Reference;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.entities.AuditRecord;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.repos.AuditRecordRepository;
 import uk.nhs.ctp.repos.CaseRepository;
-import uk.nhs.ctp.service.factory.ReferenceStorageServiceFactory;
+import uk.nhs.ctp.service.StorageService;
 
 @Service
 @AllArgsConstructor
@@ -17,27 +16,16 @@ import uk.nhs.ctp.service.factory.ReferenceStorageServiceFactory;
 public class EncounterService {
 
   private EncounterTransformer encounterTransformer;
-  private ReferenceStorageServiceFactory storageServiceFactory;
+  private StorageService storageService;
 
   private CaseRepository caseRepository;
   private AuditRecordRepository auditRecordRepository;
 
   public String createEncounter(Cases triageCase) {
     Encounter encounter = encounterTransformer.transform(triageCase, null);
-    var storageService = storageServiceFactory.load();
-    Reference encounterRef = storageService.store(encounter);
-    String encounterId = toId(encounterRef);
+    String encounterId = storageService.storeExternal(encounter);
     log.info("Created new Encounter {}", encounterId);
     return encounterId;
-  }
-
-  private static String toId(Reference encounterRef) {
-    if (encounterRef.hasReference()) {
-      return encounterRef.getId();
-    } else if (encounterRef.getResource() != null) {
-      return encounterRef.getResource().getIdElement().toString();
-    }
-    return null;
   }
 
   public void updateEncounter(Long caseId) {
@@ -49,7 +37,6 @@ public class EncounterService {
 
   public void updateEncounter(Cases triageCase, AuditRecord auditRecord) {
     Encounter encounter = encounterTransformer.transform(triageCase, auditRecord);
-    var storageService = storageServiceFactory.load();
     storageService.updateExternal(encounter);
 
     log.info("Updated encounter {} for case {}", encounter.getId(), triageCase.getId());

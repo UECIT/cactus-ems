@@ -2,23 +2,27 @@ package uk.nhs.ctp.service;
 
 import static com.google.common.collect.MoreCollectors.onlyElement;
 
+import com.google.common.base.Preconditions;
 import java.util.Date;
 import java.util.List;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.BooleanType;
+import org.hl7.fhir.dstu3.model.CareConnectPatient;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Immunization;
 import org.hl7.fhir.dstu3.model.MedicationAdministration;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
@@ -31,24 +35,24 @@ import uk.nhs.ctp.entities.TestScenario;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.repos.PatientRepository;
 import uk.nhs.ctp.repos.TestScenarioRepository;
+import uk.nhs.ctp.service.builder.CareConnectPatientBuilder;
 import uk.nhs.ctp.service.encounter.EncounterService;
-import uk.nhs.ctp.service.factory.ReferenceStorageServiceFactory;
 import uk.nhs.ctp.utils.ErrorHandlingUtils;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class CaseService {
-
-  private static final Logger LOG = LoggerFactory.getLogger(CaseService.class);
 
   private CaseRepository caseRepository;
   private PatientRepository patientRepository;
   private TestScenarioRepository testScenarioRepository;
-  private ReferenceStorageServiceFactory storageServiceFactory;
+  private StorageService storageService;
   private EncounterService encounterService;
+  private CareConnectPatientBuilder careConnectPatientBuilder;
 
   /**
-   * Create new case from patient ID and store in database
+   * Create new case from patient ID
    *
    * @param patientId {@link Long}
    * @return {@link Cases}
@@ -58,28 +62,73 @@ public class CaseService {
     PatientEntity patient = patientRepository.findOne(patientId);
     ErrorHandlingUtils.checkEntityExists(patient, "Patient");
 
+    // TODO use test scenario provided by EMS UI
     TestScenario testScenario = testScenarioRepository.findByPatientId(patientId);
     ErrorHandlingUtils.checkEntityExists(testScenario, "Test Scenario");
 
-    Cases triageCase = new Cases();
+    if (StringUtils.isEmpty(patient.getFhirId())) {
+      log.info("Storing patient record in FHIR server");
+      CareConnectPatient patientResource = careConnectPatientBuilder.build(patient, storageService);
 
-    LOG.info("Creating case for patient: " + patient.getFirstName());
+      String patientRef = storageService.storeExternal(patientResource);
+      patient.setFhirId(patientRef);
+      patientRepository.saveAndFlush(patient);
 
-    setCaseDetails(patient, testScenario, triageCase);
-
-    // Store a mostly empty encounter record for future reference
-    String encounterRef = encounterService.createEncounter(triageCase);
-    triageCase.setEncounterId(encounterRef);
-    return caseRepository.save(triageCase);
+      return createCase(patientResource, testScenario);
+    } else {
+      return createCase(patient.getFhirId(), testScenario);
+    }
   }
 
-  private void setCaseDetails(PatientEntity patient, TestScenario testScenario, Cases triageCase) {
-    triageCase.setFirstName(patient.getFirstName());
-    triageCase.setLastName(patient.getLastName());
-    triageCase.setAddress(patient.getAddress());
-    triageCase.setNhsNumber(patient.getNhsNumber());
-    triageCase.setGender(patient.getGender());
-    triageCase.setDateOfBirth(patient.getDateOfBirth());
+  /**
+   * Create new case from patient resource reference
+   */
+  public Cases createCase(String patientRef, TestScenario testScenario) {
+    String resourceType = new Reference(patientRef).getReferenceElement().getResourceType();
+    Preconditions.checkArgument(resourceType.equalsIgnoreCase("Patient"),
+        "Case must be created with a Patient resource");
+
+    CareConnectPatient patientResource = storageService
+        .findResource(patientRef, CareConnectPatient.class);
+
+    return createCase(patientResource, testScenario);
+  }
+
+  /**
+   * Create new case from patient resource
+   */
+  public Cases createCase(CareConnectPatient patient, TestScenario testScenario) {
+
+    log.info("Creating case for patient: " + patient.getNameFirstRep().getNameAsSingleString());
+
+    Cases triageCase = new Cases();
+    triageCase.setPatientId(patient.getId());
+    setCaseDetails(triageCase, patient, testScenario);
+
+    // Store a mostly empty encounter record for future reference
+    triageCase.setEncounterId(encounterService.createEncounter(triageCase));
+    return caseRepository.saveAndFlush(triageCase);
+  }
+
+  private void setCaseDetails(Cases triageCase, CareConnectPatient patient,
+      TestScenario testScenario) {
+    HumanName name = patient.getNameFirstRep();
+    triageCase.setFirstName(name.getGivenAsSingleString());
+    triageCase.setLastName(name.getFamily());
+
+    // TODO handle address better
+    if (patient.hasAddress()) {
+      triageCase.setAddress(StringUtils.join(patient.getAddressFirstRep().getLine(), ", "));
+    }
+
+    if (patient.hasIdentifier()) {
+      triageCase.setNhsNumber(patient.getIdentifierFirstRep().getId());
+    }
+    if (patient.hasGender()) {
+      triageCase.setGender(patient.getGender().toCode());
+    }
+    triageCase.setDateOfBirth(patient.getBirthDate());
+
     triageCase.setSkillset(testScenario.getSkillset());
     triageCase.setParty(testScenario.getParty());
     triageCase.setTimestamp(new Date());
@@ -96,7 +145,7 @@ public class CaseService {
     Cases triageCase = caseRepository.findOne(caseId);
     ErrorHandlingUtils.checkEntityExists(triageCase, "Case");
 
-    LOG.info("Updating case for " + triageCase.getId());
+    log.info("Updating case for " + triageCase.getId());
 
     triageCase.setSessionId(sessionId);
 
@@ -115,7 +164,7 @@ public class CaseService {
         triageCase.addParameter(createCaseParameter(currentParameter));
       } else {
         // TODO add code here to deal with storing any items that do not match the above
-        LOG.warn("Unsupported outputParameter type: {}" + resource.getResourceType().name());
+        log.warn("Unsupported outputParameter type: {}" + resource.getResourceType().name());
       }
 
     });
@@ -124,8 +173,6 @@ public class CaseService {
   }
 
   private void updateQuestionnaireResponse(Cases triageCase, QuestionnaireResponse response) {
-    var storageService = storageServiceFactory.load();
-
     QuestionResponse existingResponse = triageCase.getQuestionResponses().stream()
         .filter(answer -> answer.getQuestionnaireId()
             .equals(response.getQuestionnaire().getReference().split("/")[1]))
@@ -136,7 +183,7 @@ public class CaseService {
     try {
       storageService.updateExternal(response);
     } catch (Exception e) {
-      LOG.error("Could not update questionnaire response with id " + response.getId() + "\n" + e
+      log.error("Could not update questionnaire response with id " + response.getId() + "\n" + e
           .getMessage());
     }
   }
@@ -147,19 +194,19 @@ public class CaseService {
       try {
         if (medicationAdmin.getCode().equalsIgnoreCase(
             currentMed.getMedicationCodeableConcept().getCodingFirstRep().getCode())) {
-          LOG.info("Amending Medication for case " + triageCase.getId());
+          log.info("Amending Medication for case " + triageCase.getId());
           updateMedicationCoding(currentMed, medicationAdmin);
           medicationAdmin.setTimestamp(new Date());
 
           amended = true;
         }
       } catch (FHIRException e) {
-        LOG.error(e.getMessage());
+        log.error(e.getMessage());
       }
     }
 
     if (!amended) {
-      LOG.info("Adding Medication for case " + triageCase.getId());
+      log.info("Adding Medication for case " + triageCase.getId());
       triageCase.addMedication(createCaseMedication(currentMed));
     }
   }
@@ -170,7 +217,7 @@ public class CaseService {
     for (CaseImmunization immunisation : triageCase.getImmunizations()) {
       if (immunisation.getCode()
           .equalsIgnoreCase(currentImm.getVaccineCode().getCodingFirstRep().getCode())) {
-        LOG.info("Amending Immunisation for case " + triageCase.getId());
+        log.info("Amending Immunisation for case " + triageCase.getId());
         updateImmunisationCoding(currentImm, immunisation);
         immunisation.setTimestamp(new Date());
 
@@ -179,7 +226,7 @@ public class CaseService {
     }
 
     if (!amended) {
-      LOG.info("Adding Immunization for case " + triageCase.getId());
+      log.info("Adding Immunization for case " + triageCase.getId());
       triageCase.addImmunization(createCaseImmunization(resource));
     }
   }
@@ -189,7 +236,7 @@ public class CaseService {
     for (CaseObservation observation : triageCase.getObservations()) {
       if (observation.getCode()
           .equalsIgnoreCase(currentObs.getCode().getCoding().get(0).getCode())) {
-        LOG.info("Amending Observation for case " + triageCase.getId());
+        log.info("Amending Observation for case " + triageCase.getId());
 
         updateObservationCoding(currentObs, observation);
         observation.setTimestamp(new Date());
@@ -199,7 +246,7 @@ public class CaseService {
     }
 
     if (!amended) {
-      LOG.info("Adding Observation for case " + triageCase.getId());
+      log.info("Adding Observation for case " + triageCase.getId());
       triageCase.addObservation(createCaseObservation(currentObs));
     }
   }
@@ -304,7 +351,7 @@ public class CaseService {
       caseObservation.setValueCode(valueCoding.getCode());
       caseObservation.setDisplay(valueCoding.getDisplay());
     } else {
-      LOG.error("Unable assign an observation value of type {}", observation.getValue().fhirType());
+      log.error("Unable assign an observation value of type {}", observation.getValue().fhirType());
     }
 
   }
@@ -340,7 +387,7 @@ public class CaseService {
       caseMedication.setCode(coding.getCode());
       caseMedication.setDisplay(coding.getDisplay());
     } catch (FHIRException e) {
-      LOG.error("Unable to fetch medication codeable concept", e);
+      log.error("Unable to fetch medication codeable concept", e);
     }
   }
 

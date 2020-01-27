@@ -81,7 +81,7 @@ public class CdssService {
       Long cdssSupplierId,
       String serviceDefinitionId,
       Long caseId,
-      ReferencingContext referencingContext) throws ConnectException, JsonProcessingException {
+      ReferencingContext referencingContext) throws JsonProcessingException {
 
     IBaseResource requestResource = parameters;
     if (referencingContext.shouldBundle()) {

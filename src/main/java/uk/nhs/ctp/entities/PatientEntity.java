@@ -1,7 +1,7 @@
 package uk.nhs.ctp.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,101 +10,40 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
 
 @Entity
 @Table(name = "patient")
+@Data
 public class PatientEntity {
 
-	@Column(name = "address")
-	private String address;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-	@JsonFormat(pattern = "yyyy-MM-dd")
-	@Temporal(TemporalType.DATE)
-	@Column(name = "date_of_birth")
-	private Date dateOfBirth;
+  @Column
+  private String fhirId;
 
-	@Column(name = "first_name")
-	private String firstName;
+  @Column(name = "address")
+  private String address;
 
-	@Column(name = "gender")
-	private String gender;
+  @JsonFormat(pattern = "yyyy-MM-dd")
+  @Temporal(TemporalType.DATE)
+  @Column(name = "date_of_birth")
+  private Date dateOfBirth;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+  @Column(name = "first_name")
+  private String firstName;
 
-	@Column(name = "last_name")
-	private String lastName;
+  @Column(name = "gender")
+  private String  gender;
 
-	@Column(name = "nhs_number")
-	private String nhsNumber;
+  @Column(name = "last_name")
+  private String lastName;
 
-	@Column(name = "title")
-	private String title;
+  @Column(name = "nhs_number")
+  private String nhsNumber;
 
-	public String getAddress() {
-		return address;
-	}
-
-	public void setAddress(String address) {
-		this.address = address;
-	}
-
-	public Date getDateOfBirth() {
-		return dateOfBirth;
-	}
-
-	public String getFirstName() {
-		return firstName;
-	}
-
-	public String getGender() {
-		return gender;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public String getLastName() {
-		return lastName;
-	}
-
-	public String getNhsNumber() {
-		return nhsNumber;
-	}
-
-	public String getTitle() {
-		return title;
-	}
-
-	public void setDateOfBirth(Date dateOfBirth) {
-		this.dateOfBirth = dateOfBirth;
-	}
-
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
-	public void setGender(String gender) {
-		this.gender = gender;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
-
-	public void setNhsNumber(String nhsNumber) {
-		this.nhsNumber = nhsNumber;
-	}
-
-	public void setTitle(String title) {
-		this.title = title;
-	}
+  @Column(name = "title")
+  private String title;
 }

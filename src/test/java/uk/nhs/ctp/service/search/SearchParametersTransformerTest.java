@@ -24,7 +24,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.nhs.ctp.entities.PatientEntity;
-import uk.nhs.ctp.service.PatientService;
+import uk.nhs.ctp.repos.PatientRepository;
 import uk.nhs.ctp.service.dto.CodeDTO;
 import uk.nhs.ctp.service.dto.SettingsDTO;
 
@@ -34,7 +34,7 @@ public class SearchParametersTransformerTest {
   private SearchParametersTransformer searchParametersTransformer;
 
   @Mock
-  private PatientService patientService;
+  private PatientRepository patientService;
 
   @Before
   public void setup() {
