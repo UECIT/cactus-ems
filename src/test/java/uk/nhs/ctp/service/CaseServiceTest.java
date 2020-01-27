@@ -22,6 +22,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -34,8 +36,10 @@ import uk.nhs.ctp.entities.TestScenario;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.repos.PatientRepository;
 import uk.nhs.ctp.repos.TestScenarioRepository;
+import uk.nhs.ctp.service.builder.CareConnectOrganizationBuilder;
+import uk.nhs.ctp.service.builder.CareConnectPatientBuilder;
+import uk.nhs.ctp.service.builder.CareConnectPractitionerBuilder;
 import uk.nhs.ctp.service.encounter.EncounterService;
-import uk.nhs.ctp.service.factory.ReferenceStorageServiceFactory;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -58,7 +62,7 @@ public class CaseServiceTest {
   private TestScenarioRepository mockTestScenarioRepository;
 
   @Mock
-  private ReferenceStorageServiceFactory referenceStorageServiceFactory;
+  private StorageService storageService;
 
   @Mock
   EncounterService encounterService;
@@ -79,18 +83,25 @@ public class CaseServiceTest {
 
   @Before
   public void setup() {
+    CareConnectPatientBuilder careConnectPatientBuilder = new CareConnectPatientBuilder(
+        new CareConnectOrganizationBuilder(),
+        new CareConnectPractitionerBuilder());
+
     spyCaseService = spy(new CaseService(
         mockCaseRepository,
         mockPatientRepository,
         mockTestScenarioRepository,
-        referenceStorageServiceFactory,
-        encounterService
+        storageService,
+        encounterService,
+        careConnectPatientBuilder
     ));
+
     MockitoAnnotations.initMocks(this);
     patient = new PatientEntity();
     patient.setId(1L);
     patient.setFirstName("Joe");
     patient.setLastName("Bloggs");
+    patient.setGender("male");
     testScenario = mock(TestScenario.class);
     observation = mock(Observation.class);
     immunization = mock(Immunization.class);
@@ -124,6 +135,20 @@ public class CaseServiceTest {
     doReturn(caseObservation).when(spyCaseService).createCaseObservation(observation);
     doReturn(caseImmunization).when(spyCaseService).createCaseImmunization(immunization);
     doReturn(caseMedication).when(spyCaseService).createCaseMedication(medication);
+
+    when(storageService.storeExternal(any())).thenAnswer(new Answer<>() {
+      private long nextId = 1;
+
+      @Override
+      public Object answer(InvocationOnMock invocation) {
+        Resource resource = invocation.getArgumentAt(0, Resource.class);
+        if (resource.hasId()) {
+          return resource.getId();
+        } else {
+          return resource.getResourceType().name() + "/" + nextId++;
+        }
+      }
+    });
   }
 
   @Test

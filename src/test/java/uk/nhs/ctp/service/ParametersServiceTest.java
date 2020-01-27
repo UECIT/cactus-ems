@@ -13,11 +13,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.hl7.fhir.dstu3.model.CareConnectPatient;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Immunization;
 import org.hl7.fhir.dstu3.model.Immunization.ImmunizationStatus;
 import org.hl7.fhir.dstu3.model.MedicationAdministration;
 import org.hl7.fhir.dstu3.model.MedicationAdministration.MedicationAdministrationStatus;
+import org.hl7.fhir.dstu3.model.NHSNumberIdentifier;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Parameters;
@@ -27,7 +29,6 @@ import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus;
-import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Before;
@@ -36,6 +37,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -67,7 +70,7 @@ public class ParametersServiceTest {
   @Mock
   private AuditService mockAuditService;
   @Mock
-  private ReferenceStorageService mockStorageService;
+  private StorageService mockStorageService;
 
   private Cases caseWithNoData, caseWithObservation, caseWithImmunization, caseWithMedication, caseWithData;
   private CaseObservation caseObservation;
@@ -164,8 +167,23 @@ public class ParametersServiceTest {
     settings.setSetting(codeDto);
 
     referencingContext = new ReferencingContext(ReferencingType.ContainedReferences);
-  }
 
+    when(mockStorageService.findResource("Patient/1", CareConnectPatient.class))
+        .thenReturn(newPatient());
+    when(mockStorageService.storeExternal(any())).thenAnswer(new Answer<>() {
+      private long nextId = 1;
+
+      @Override
+      public Object answer(InvocationOnMock invocation) {
+        Resource resource = invocation.getArgumentAt(0, Resource.class);
+        if (resource.hasId()) {
+          return resource.getId();
+        } else {
+          return resource.getResourceType().name() + "/" + nextId++;
+        }
+      }
+    });
+  }
 
   @Test
   public void testParametersCreatedCorrectlyWithNoCaseDataStored() {
@@ -195,7 +213,6 @@ public class ParametersServiceTest {
       throws FHIRException {
     when(mockCaseRepository.findOne(1L)).thenReturn(caseWithNoData);
     when(mockAuditService.getAuditRecordByCase(1L)).thenReturn(caseAudit);
-    when(mockStorageService.storeExternal(any(Resource.class))).thenReturn(new Reference());
 
     Parameters parameters = parametersService.getEvaluateParameters(
         1L,
@@ -329,7 +346,6 @@ public class ParametersServiceTest {
       throws FHIRException {
     when(mockCaseRepository.findOne(1L)).thenReturn(caseWithData);
     when(mockAuditService.getAuditRecordByCase(1L)).thenReturn(caseAudit);
-    when(mockStorageService.storeExternal(any(Resource.class))).thenReturn(new Reference());
 
     Parameters parameters = parametersService.getEvaluateParameters(
         1L,
@@ -555,6 +571,7 @@ public class ParametersServiceTest {
     skillset.setDescription("Clinician");
 
     testCase.setId(1L);
+    testCase.setPatientId("Patient/1");
     testCase.setGender("male");
     testCase.setFirstName("John");
     testCase.setLastName("Smith");
@@ -566,5 +583,23 @@ public class ParametersServiceTest {
     testCase.setTimestamp(calendar.getTime());
 
     return testCase;
+  }
+
+  private CareConnectPatient newPatient() {
+    CareConnectPatient patient = new CareConnectPatient();
+    patient.setId("Patient/1");
+    NHSNumberIdentifier nhsNumber = new NHSNumberIdentifier();
+    nhsNumber.setId("9476719915");
+    patient.addIdentifier(nhsNumber);
+
+    patient.setGender(AdministrativeGender.MALE);
+    patient.addName()
+        .addGiven("John")
+        .setFamily("Smith");
+    patient.setBirthDate(calendar.getTime());
+    patient.addAddress()
+        .addLine("Test address");
+
+    return patient;
   }
 }

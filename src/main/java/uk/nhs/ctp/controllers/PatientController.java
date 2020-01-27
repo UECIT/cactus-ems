@@ -10,22 +10,23 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import uk.nhs.ctp.entities.PatientEntity;
-import uk.nhs.ctp.service.PatientService;
+import uk.nhs.ctp.repos.PatientRepository;
 
 @CrossOrigin
 @RestController
 @RequestMapping(path = "/patient")
 public class PatientController {
 
-	/*
-	 * Endpoints to retrieve, update and delete patients
-	 */
+  /*
+   * Endpoints to retrieve, update and delete patients
+   */
 
-	@Autowired
-	private PatientService patientService;
+  @Autowired
+  private PatientRepository patientRepository;
 
-	@GetMapping(path = "/all")
-	public @ResponseBody List<PatientEntity> getAllPatients() {
-		return patientService.getAllPatients();
-	}
+  @GetMapping(path = "/all")
+  public @ResponseBody
+  List<PatientEntity> getAllPatients() {
+    return patientRepository.findAll();
+  }
 }

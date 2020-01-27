@@ -23,14 +23,14 @@ import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementCodeFilterCompone
 import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementDateFilterComponent;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.entities.PatientEntity;
-import uk.nhs.ctp.service.PatientService;
+import uk.nhs.ctp.repos.PatientRepository;
 import uk.nhs.ctp.service.dto.SettingsDTO;
 
 @Component
 @AllArgsConstructor
 public class SearchParametersTransformer {
 
-  private PatientService patientService;
+  private PatientRepository patientService;
 
   public SearchParameters transform(List<DataRequirement> dataRequirements,
       SettingsDTO settingsDTO,

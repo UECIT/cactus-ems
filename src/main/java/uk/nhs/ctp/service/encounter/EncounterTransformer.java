@@ -7,6 +7,7 @@ import org.hl7.fhir.dstu3.model.Duration;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.Encounter.EncounterStatus;
 import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.entities.AuditRecord;
 import uk.nhs.ctp.entities.Cases;
@@ -14,10 +15,11 @@ import uk.nhs.ctp.entities.Cases;
 @Service
 public class EncounterTransformer {
 
-  public Encounter transform(Cases triageCase, AuditRecord audit) {
+  public Encounter transform(Cases caseEntity, AuditRecord audit) {
     var encounter = new Encounter();
 
-    encounter.setId(triageCase.getEncounterId());
+    encounter.setId(caseEntity.getEncounterId());
+    encounter.setSubject(new Reference(caseEntity.getPatientId()));
 
     // Add fields provided by audit
     if (audit != null) {

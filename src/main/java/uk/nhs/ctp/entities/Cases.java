@@ -17,13 +17,11 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 @Entity
 @Table(name = "cases")
-@Getter
-@Setter
+@Data
 public class Cases {
 
   @Id
@@ -32,6 +30,9 @@ public class Cases {
 
   @Column
   private String encounterId;
+
+  @Column
+  private String patientId;
 
   @Column(name = "firstName")
   private String firstName;
