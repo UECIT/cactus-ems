@@ -1,5 +1,6 @@
 package uk.nhs.ctp.service;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.net.ConnectException;
@@ -8,20 +9,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
 import javax.validation.constraints.NotNull;
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.GuidanceResponse;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Questionnaire;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ServiceDefinition;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -51,6 +48,7 @@ public class CdssService {
   private final CdssSupplierRepository cdssSupplierRepository;
   private final AuditService auditService;
   private final IParser fhirParser;
+  private final FhirContext fhirContext;
 
   private HttpHeaders headers;
   private RestTemplate restTemplate;
@@ -58,11 +56,14 @@ public class CdssService {
   public CdssService(
       CdssSupplierRepository cdssSupplierRepository,
       AuditService auditService,
-      IParser fhirParser, RestTemplate restTemplate) {
+      IParser fhirParser,
+      RestTemplate restTemplate,
+      FhirContext fhirContext) {
     this.cdssSupplierRepository = cdssSupplierRepository;
     this.auditService = auditService;
     this.fhirParser = fhirParser;
     this.restTemplate = restTemplate;
+    this.fhirContext = fhirContext;
 
     headers = new HttpHeaders();
     headers.setContentType(MediaType.valueOf(SystemConstants.APPLICATION_FHIR_JSON));
@@ -76,31 +77,26 @@ public class CdssService {
    * @return {@link GuidanceResponse}
    * @throws JsonProcessingException
    */
-  public Resource evaluateServiceDefinition(
+  public GuidanceResponse evaluateServiceDefinition(
       Parameters parameters,
       Long cdssSupplierId,
       String serviceDefinitionId,
       Long caseId,
       ReferencingContext referencingContext) throws JsonProcessingException {
 
-    IBaseResource requestResource = parameters;
-    if (referencingContext.shouldBundle()) {
-      var bundle = new Bundle().setType(BundleType.COLLECTION);
-      Stream.concat(Stream.of(parameters), referencingContext.getReferencedResources().stream())
-          .map(resource -> new BundleEntryComponent().setResource(resource))
-          .forEach(bundle::addEntry);
-      requestResource = bundle;
-    }
+    String requestBody = fhirParser.encodeResourceToString(parameters);
 
-    String requestBody = fhirParser.encodeResourceToString(requestResource);
-    String responseBody = sendHttpRequest(
-        getBaseUrl(cdssSupplierId) + "/" + SystemConstants.SERVICE_DEFINITION
-            + "/" + serviceDefinitionId + "/" + SystemConstants.EVALUATE, HttpMethod.POST,
-        new HttpEntity<>(requestBody, headers));
+    GuidanceResponse response = fhirContext.newRestfulGenericClient(getBaseUrl(cdssSupplierId))
+        .operation()
+        .onInstance(new IdType(SystemConstants.SERVICE_DEFINITION, serviceDefinitionId))
+        .named(SystemConstants.EVALUATE)
+        .withParameters(parameters)
+        .returnResourceType(GuidanceResponse.class)
+        .execute();
 
+    var responseBody = fhirParser.encodeResourceToString(response);
     auditService.createAuditEntry(caseId, requestBody, responseBody, AuditEntryType.RESULT);
-
-    return (Resource) fhirParser.parseResource(responseBody);
+    return response;
   }
 
   /**

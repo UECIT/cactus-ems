@@ -1,3 +1,4 @@
+import { ErrorMessage } from './../model/questionnaire';
 import { Component, OnInit } from '@angular/core';
 import { TriageService } from '../service/triage.service';
 import {
@@ -41,9 +42,7 @@ export class TriageComponent implements OnInit {
   case: Case;
   isLoading = true;
   cdssSupplierName: string;
-  error = false;
-  errorMessage: string;
-  errorObject: any;
+  errorMessage: ErrorMessage;
   ExternalProcessTriage: Function;
   oldServiceDefinition: string;
   newServiceDefinition: string;
@@ -167,10 +166,24 @@ export class TriageComponent implements OnInit {
     );
     this.triage.amendingPrevious = this.amendingPrevious;
     this.triage.patientId = this.patientId;
-    this.questionnaire = await this.triageService.processTriage(
-      this.triage,
-      back
-    );
+    this.questionnaire = await this.triageService.processTriage(this.triage, back)
+      .then(res => {
+        var quesionnaire = res as Questionnaire;
+        this.errorMessage = quesionnaire.errorMessage;
+        return quesionnaire;
+      })
+      .catch(error => {
+        this.errorMessage = {
+          display: error.error.message,
+          type: "error",
+          diagnostic: error.error.errors[0]
+        }
+        return new Questionnaire();
+      });
+
+    if (this.errorMessage) {
+      return;
+    }
 
     if (this.questionnaire.switchTrigger != null) {
       this.oldServiceDefinition = this.sessionStorage['serviceDefinitionId'];

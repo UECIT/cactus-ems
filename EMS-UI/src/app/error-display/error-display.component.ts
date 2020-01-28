@@ -2,8 +2,7 @@ import { Component, OnInit, Input } from '@angular/core';
 
 @Component({
   selector: 'app-error-display',
-  templateUrl: './error-display.component.html',
-  styleUrls: ['./error-display.component.css']
+  templateUrl: './error-display.component.html'
 })
 export class ErrorDisplayComponent implements OnInit {
   @Input() errorObject: any;

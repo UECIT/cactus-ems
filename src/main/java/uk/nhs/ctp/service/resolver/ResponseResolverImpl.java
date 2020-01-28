@@ -1,5 +1,7 @@
 package uk.nhs.ctp.service.resolver;
 
+import static uk.nhs.ctp.utils.ResourceProviderUtils.getResource;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import java.util.ArrayList;
@@ -14,6 +16,7 @@ import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementCodeFilterComponent;
 import org.hl7.fhir.dstu3.model.GuidanceResponse;
 import org.hl7.fhir.dstu3.model.GuidanceResponse.GuidanceResponseStatus;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
@@ -52,30 +55,36 @@ public class ResponseResolverImpl implements ResponseResolver {
     cdssResult.setOutputData(getOutputData(guidanceResponse));
     cdssResult.setSessionId(getSessionID(guidanceResponse));
     cdssResult.setContained(guidanceResponse.getContained());
-    cdssResult
-        .setServiceDefinitionId(guidanceResponse.getModule().getReferenceElement().getIdPart());
+    cdssResult.setServiceDefinitionId(guidanceResponse.getModule().getReferenceElement().getIdPart());
 
-    if (guidanceResponse.getStatus() == GuidanceResponseStatus.SUCCESS) {
-      cdssResult.setResult(getResult(guidanceResponse));
-      cdssResult.setSwitchTrigger(switchTriggerResolver.getSwitchTrigger(guidanceResponse, settings, patientId));
+    switch (guidanceResponse.getStatus()) {
+      case SUCCESS:
+        cdssResult.setResult(getResult(guidanceResponse));
+        cdssResult.setSwitchTrigger(switchTriggerResolver.getSwitchTrigger(guidanceResponse, settings, patientId));
+        break;
+      case DATAREQUESTED:
+      case DATAREQUIRED:
+        cdssResult.setQuestionnaireRef(getQuestionnaireReference(guidanceResponse));
+        break;
+      case FAILURE:
+        cdssResult.setOperationOutcome(getResource(fhirContext,
+            cdssSupplier.getBaseUrl(), OperationOutcome.class,
+            guidanceResponse.getEvaluationMessageFirstRep().getReference()));
+        break;
+      default:
+        throw new EMSException(HttpStatus.INTERNAL_SERVER_ERROR, "Error parsing guidance response status: " + guidanceResponse.getStatus());
     }
 
     cdssResult.setReferralRequest(
-        ResourceProviderUtils.getResource(guidanceResponse.getContained(), ReferralRequest.class));
+        getResource(guidanceResponse.getContained(), ReferralRequest.class));
 
     cdssResult.setProcedureRequest(
-        ResourceProviderUtils.getResource(guidanceResponse.getContained(), ProcedureRequest.class));
+        getResource(guidanceResponse.getContained(), ProcedureRequest.class));
 
     cdssResult.setCareAdvice(
         ResourceProviderUtils
             .getResources(guidanceResponse.getContained(), CareConnectCarePlan.class)
             .stream().map(CarePlanDTO::new).collect(Collectors.toList()));
-
-    // Add support for data-requested
-    if (guidanceResponse.getStatus() == GuidanceResponseStatus.DATAREQUIRED
-        || guidanceResponse.getStatus() == GuidanceResponseStatus.DATAREQUESTED) {
-      cdssResult.setQuestionnaireId(getQuestionnaireReference(guidanceResponse));
-    }
 
     return cdssResult;
   }
@@ -101,7 +110,7 @@ public class ResponseResolverImpl implements ResponseResolver {
 
     references.forEach(childReference -> {
       if (childReference != null) {
-        guidanceResponse.addContained(ResourceProviderUtils.getResource(fhirContext,
+        guidanceResponse.addContained(getResource(fhirContext,
             cdssSupplier.getBaseUrl(), ResourceProviderUtils.getResourceType(childReference),
             childReference));
       }
