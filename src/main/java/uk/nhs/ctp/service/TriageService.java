@@ -3,9 +3,9 @@ package uk.nhs.ctp.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.net.ConnectException;
 import lombok.AllArgsConstructor;
+import org.hl7.fhir.dstu3.model.GuidanceResponse;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Questionnaire;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -173,7 +173,7 @@ public class TriageService {
         referencingContext,
         requestDetails.getQuestionnaireId());
 
-    Resource resource = cdssService.evaluateServiceDefinition(
+    GuidanceResponse resource = cdssService.evaluateServiceDefinition(
         parameters,
         requestDetails.getCdssSupplierId(),
         requestDetails.getServiceDefinitionId(),

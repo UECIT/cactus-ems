@@ -90,11 +90,11 @@ public class ResponseServiceTest {
 				
 		dataRequirementOnlyCdssResult = new CdssResult();
 		dataRequirementOnlyCdssResult.setServiceDefinitionId(serviceDefinitionId);
-		dataRequirementOnlyCdssResult.setQuestionnaireId("Questionnaire/1");
+		dataRequirementOnlyCdssResult.setQuestionnaireRef("Questionnaire/1");
 		
 		dataRequirementAndResultCdssResult = new CdssResult();
 		dataRequirementAndResultCdssResult.setServiceDefinitionId(serviceDefinitionId);
-		dataRequirementAndResultCdssResult.setQuestionnaireId("Questionnaire/1");
+		dataRequirementAndResultCdssResult.setQuestionnaireRef("Questionnaire/1");
 		dataRequirementAndResultCdssResult.setResult(result);
 	}
 

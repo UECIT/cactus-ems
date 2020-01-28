@@ -1,10 +1,11 @@
 package uk.nhs.ctp.service;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import lombok.AllArgsConstructor;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.CareConnectCarePlan;
@@ -19,8 +20,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import uk.nhs.ctp.OperationOutcomeFactory;
 import uk.nhs.ctp.SystemCode;
 import uk.nhs.ctp.service.dto.CdssResponseDTO;
@@ -30,12 +29,16 @@ import uk.nhs.ctp.service.dto.ProcedureRequestDTO;
 import uk.nhs.ctp.service.dto.ReferralRequestDTO;
 import uk.nhs.ctp.service.dto.TriageOption;
 import uk.nhs.ctp.service.dto.TriageQuestion;
+import uk.nhs.ctp.transform.ErrorMessageTransformer;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
 
 @Service
+@AllArgsConstructor
 public class ResponseService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ResponseService.class);
+
+	private final ErrorMessageTransformer errorMessageTransformer;
 
 	/**
 	 * Build response DTO with a summary of the CDSS response
@@ -71,6 +74,8 @@ public class ResponseService {
 			response.setProcedureRequest(new ProcedureRequestDTO(cdssResult.getProcedureRequest()));
 		}
 
+		response.setErrorMessage(errorMessageTransformer.transform(cdssResult.getOperationOutcome()));
+
 		return response;
 	}
 
@@ -81,7 +86,7 @@ public class ResponseService {
 	 * @param questionnaire    {@link Questionnaire}
 	 * @param caseId           Case ID
 	 * @param cdssSupplierId   CDSS supplier ID
-	 * @param previousResponse
+	 * @param previousQuestions {@link TriageQuestion[]}
 	 * @return {@link CdssResponseDTO}
 	 */
 	public CdssResponseDTO buildAmendResponse(CdssResult cdssResult, Questionnaire questionnaire, Long caseId,

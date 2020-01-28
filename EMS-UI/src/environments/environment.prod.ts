@@ -6,5 +6,5 @@ export const environment = {
   UECDI_VALIDATE_API: 'http://uecdi-tom-tkw.eu-west-2.elasticbeanstalk.com/tkw-client',
 
   TERM_API: 'https://ontoserver.dataproducts.nhs.uk/fhir',
-  version: 'v1.0.6'
+  version: 'v1.1.0'
 };

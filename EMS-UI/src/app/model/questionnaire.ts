@@ -8,6 +8,13 @@ export class Questionnaire {
   referralRequest: ReferralRequest;
   careAdvice: any[];
   procedureRequest: any;
+  errorMessage: ErrorMessage;
+}
+
+export class ErrorMessage {
+  type: String;
+  display: String;
+  diagnostic: String;
 }
 
 export class ReferralRequest {
