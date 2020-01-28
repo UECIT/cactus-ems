@@ -6,7 +6,7 @@ import lombok.Value;
 
 @Value
 @Builder
-public class HealthcareService {
+public class HealthcareServiceDTO {
 
   long id;
   String name;

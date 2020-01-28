@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.nhs.ctp.service.DoSService;
-import uk.nhs.ctp.service.dto.HealthcareService;
+import uk.nhs.ctp.service.dto.HealthcareServiceDTO;
 
 @CrossOrigin
 @RestController
@@ -21,7 +21,7 @@ public class DoSController {
 	private DoSService dosService;
 
 	@PostMapping
-	public @ResponseBody List<HealthcareService> getDoS(@RequestBody TextNode referralRequestId) {
+	public @ResponseBody List<HealthcareServiceDTO> getDoS(@RequestBody TextNode referralRequestId) {
 		return dosService.getDoS(referralRequestId.asText());
 	}
 

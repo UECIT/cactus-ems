@@ -15,7 +15,7 @@ import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.DoSService;
 import uk.nhs.ctp.service.dto.DoSRequestDTO;
-import uk.nhs.ctp.service.dto.HealthcareService;
+import uk.nhs.ctp.service.dto.HealthcareServiceDTO;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.dto.ReportType;
 import uk.nhs.ctp.service.dto.ReportsDTO;
@@ -40,7 +40,7 @@ public class DoSReportService implements Reportable {
 		
 		Cases caseEntity = caseRepository.findOne(request.getCaseId());
 		
-		List<HealthcareService> dosResponse =
+		List<HealthcareServiceDTO> dosResponse =
 				dosService.getDoS(request.getReferralRequest().getId());
 
 		
@@ -54,8 +54,8 @@ public class DoSReportService implements Reportable {
 		dosRequest.deriveGender(caseEntity.getGender());
 		dosRequest.setPostcode(caseEntity.getAddress());
 		dosRequest.setSearchDistance(searchDistance);
-		dosRequest.setSymptomDiscriminatorInt(Integer.valueOf(getServiceRequestedCode(referralRequest, "SD")));
-		dosRequest.setSymptomGroup(Integer.valueOf(getServiceRequestedCode(referralRequest, "SG")));
+		dosRequest.setSymptomDiscriminatorInt(Integer.parseInt(getServiceRequestedCode(referralRequest, "SD")));
+		dosRequest.setSymptomGroup(Integer.parseInt(getServiceRequestedCode(referralRequest, "SG")));
 		
 		return dosRequest;
 	}

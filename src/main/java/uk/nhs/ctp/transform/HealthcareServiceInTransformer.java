@@ -9,20 +9,22 @@ import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.ContactPoint;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.dstu3.model.Endpoint;
+import org.hl7.fhir.dstu3.model.HealthcareService;
 import org.hl7.fhir.dstu3.model.HealthcareService.HealthcareServiceAvailableTimeComponent;
 import org.hl7.fhir.dstu3.model.HealthcareService.HealthcareServiceNotAvailableComponent;
 import org.springframework.stereotype.Component;
-import uk.nhs.ctp.service.dto.HealthcareService;
+import uk.nhs.ctp.service.dto.HealthcareServiceDTO;
 
 @Component
-public class HealthcareServiceTransformer implements Transformer<org.hl7.fhir.dstu3.model.HealthcareService, HealthcareService> {
+public class HealthcareServiceInTransformer
+    implements Transformer<HealthcareService, HealthcareServiceDTO> {
 
   private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
   @Override
-  public HealthcareService transform(org.hl7.fhir.dstu3.model.HealthcareService healthcareService) {
+  public HealthcareServiceDTO transform(HealthcareService healthcareService) {
 
-    return HealthcareService.builder()
+    return HealthcareServiceDTO.builder()
         .active(healthcareService.getActive())
         .endpoint(((Endpoint)healthcareService.getEndpointFirstRep().getResource()).getAddress())
         .appointmentRequired(healthcareService.getAppointmentRequired())
