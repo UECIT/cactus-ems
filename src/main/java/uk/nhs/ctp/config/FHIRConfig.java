@@ -33,7 +33,6 @@ import org.springframework.http.HttpHeaders;
 @Configuration
 public class FHIRConfig {
 
-
   @Value("${fhir.server}")
   private String fhirServer;
 

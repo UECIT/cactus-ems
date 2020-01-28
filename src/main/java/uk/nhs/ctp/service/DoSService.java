@@ -7,13 +7,14 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.HealthcareService;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.nhs.ctp.service.dto.HealthcareService;
-import uk.nhs.ctp.transform.HealthcareServiceTransformer;
+import uk.nhs.ctp.service.dto.HealthcareServiceDTO;
+import uk.nhs.ctp.transform.HealthcareServiceInTransformer;
 
 @Service
 public class DoSService {
@@ -24,16 +25,16 @@ public class DoSService {
 	private String dosServer;
 
 	private FhirContext fhirContext;
-	private HealthcareServiceTransformer healthcareServiceTransformer;
+	private HealthcareServiceInTransformer healthcareServiceInTransformer;
 	private IGenericClient fhirClient;
 
-	public DoSService(FhirContext fhirContext, HealthcareServiceTransformer healthcareServiceTransformer, IGenericClient fhirClient) {
+	public DoSService(FhirContext fhirContext, HealthcareServiceInTransformer healthcareServiceInTransformer, IGenericClient fhirClient) {
 		this.fhirContext = fhirContext;
-		this.healthcareServiceTransformer = healthcareServiceTransformer;
+		this.healthcareServiceInTransformer = healthcareServiceInTransformer;
 		this.fhirClient = fhirClient;
 	}
 
-	public List<HealthcareService> getDoS(String referralRequestRef) {
+	public List<HealthcareServiceDTO> getDoS(String referralRequestRef) {
 
 		ReferralRequest referralRequest = fhirClient.read()
 				.resource(ReferralRequest.class)
@@ -43,8 +44,8 @@ public class DoSService {
 		return fhirContext.newRestfulClient(IRestfulClient.class, dosServer)
 				.searchForHealthcareServices(referralRequest)
 				.getEntry().stream()
-				.map(entry -> (org.hl7.fhir.dstu3.model.HealthcareService) entry.getResource())
-				.map(healthcareServiceTransformer::transform)
+				.map(entry -> (HealthcareService) entry.getResource())
+				.map(healthcareServiceInTransformer::transform)
 				.collect(Collectors.toList());
 
 	}
