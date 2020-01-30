@@ -24,8 +24,14 @@ public class PatientEntity {
   @Column
   private String fhirId;
 
-  @Column(name = "address")
+  @Column
   private String address;
+
+  @Column
+  private String city;
+
+  @Column(name = "postal_code")
+  private String postalCode;
 
   @JsonFormat(pattern = "yyyy-MM-dd")
   @Temporal(TemporalType.DATE)
@@ -35,8 +41,8 @@ public class PatientEntity {
   @Column(name = "first_name")
   private String firstName;
 
-  @Column(name = "gender")
-  private String  gender;
+  @Column
+  private String gender;
 
   @Column(name = "last_name")
   private String lastName;
@@ -44,6 +50,18 @@ public class PatientEntity {
   @Column(name = "nhs_number")
   private String nhsNumber;
 
-  @Column(name = "title")
+  @Column
   private String title;
+
+  @Column(name = "home_phone")
+  private String homePhone;
+
+  @Column
+  private String mobile;
+
+  @Column
+  private String email;
+
+  @Column
+  private String language;
 }

@@ -1,16 +1,22 @@
 package uk.nhs.ctp.service.builder;
 
+import lombok.AllArgsConstructor;
 import org.hl7.fhir.dstu3.model.CareConnectIdentifier;
 import org.hl7.fhir.dstu3.model.CareConnectOrganization;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.springframework.stereotype.Component;
-import uk.nhs.ctp.entities.PatientEntity;
+import uk.nhs.ctp.service.LocalReferenceService;
 
 @Component
+@AllArgsConstructor
 public class CareConnectOrganizationBuilder {
 
-  public CareConnectOrganization build(PatientEntity patientEntity) {
+  private final LocalReferenceService localReferenceService;
+
+  // TODO construct an appropriate organisation from a database record
+  public CareConnectOrganization build() {
     CareConnectIdentifier identifier = new CareConnectIdentifier();
     identifier.setSystem("https://fhir.nhs.uk/Id/ods-organization-code");
     identifier
@@ -19,8 +25,8 @@ public class CareConnectOrganizationBuilder {
             .setDisplay("OC")
             .setCode("OC")));
 
-    // TODO construct an appropriate organisation from the patient record
     CareConnectOrganization organization = new CareConnectOrganization();
+    organization.setId(localReferenceService.buildId(ResourceType.Organization, 1));
     organization.addIdentifier(identifier);
     organization.setName("East Road Pharmacy");
 

@@ -1,10 +1,12 @@
 package uk.nhs.ctp.service.builder;
 
 import java.util.Date;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.Address.AddressType;
 import org.hl7.fhir.dstu3.model.Address.AddressUse;
-import org.hl7.fhir.dstu3.model.CareConnectOrganization;
 import org.hl7.fhir.dstu3.model.CareConnectPatient;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -14,30 +16,24 @@ import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.HumanName.NameUse;
 import org.hl7.fhir.dstu3.model.NHSNumberIdentifier;
-import org.hl7.fhir.dstu3.model.Patient.PatientCommunicationComponent;
 import org.hl7.fhir.dstu3.model.Period;
-import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.entities.PatientEntity;
-import uk.nhs.ctp.service.StorageService;
+import uk.nhs.ctp.service.LocalReferenceService;
 
 @Component
+@AllArgsConstructor
+@Slf4j
 public class CareConnectPatientBuilder {
 
-  private CareConnectOrganizationBuilder careConnectOrganizationBuilder;
-  private CareConnectPractitionerBuilder careConnectPractitionerBuilder;
+  private final LocalReferenceService localReferenceService;
 
-  public CareConnectPatientBuilder(
-      CareConnectOrganizationBuilder careConnectOrganizationBuilder,
-      CareConnectPractitionerBuilder careConnectPractitionerBuilder) {
-    this.careConnectOrganizationBuilder = careConnectOrganizationBuilder;
-    this.careConnectPractitionerBuilder = careConnectPractitionerBuilder;
-  }
-
-  public CareConnectPatient build(PatientEntity patientEntity,
-      StorageService storageService) {
+  public CareConnectPatient build(PatientEntity patientEntity) {
 
     CareConnectPatient patient = new CareConnectPatient();
+    patient.setId(localReferenceService.buildId(ResourceType.Patient, patientEntity.getId()));
+
     addNHSId(patient, patientEntity);
     addName(patient, patientEntity);
     addAddress(patient, patientEntity);
@@ -50,87 +46,102 @@ public class CareConnectPatientBuilder {
     patient.setBirthDate(patientEntity.getDateOfBirth());
     addLanguage(patient, patientEntity);
 
-    addGP(patient, patientEntity, storageService);
-    addPharmacy(patient, patientEntity, storageService);
+    addGP(patient, patientEntity);
+    addPharmacy(patient, patientEntity);
 
     return patient;
   }
 
-  private void addGP(CareConnectPatient patient, PatientEntity patientEntity,
-      StorageService storageService) {
+  private void addGP(CareConnectPatient patient, PatientEntity patientEntity) {
     // TODO add to entity
-    CareConnectOrganization gp = careConnectOrganizationBuilder.build(patientEntity);
-    var practitioner = careConnectPractitionerBuilder.build(gp);
-    patient.addGeneralPractitioner(new Reference(storageService.storeExternal(practitioner)));
+    patient.addGeneralPractitioner(localReferenceService.buildRef(ResourceType.Practitioner, 1));
   }
 
-  private CareConnectOrganization addPharmacy(CareConnectPatient patient,
-      PatientEntity patientEntity, StorageService storageService) {
-    // TODO add to entity
-    CareConnectOrganization pharmacy = careConnectOrganizationBuilder.build(patientEntity);
-    patient.setNominatedPharmacy(new Reference(storageService.storeExternal(pharmacy)));
-    return pharmacy;
-  }
-
-  private void addTelecom(CareConnectPatient patient,
+  private void addPharmacy(CareConnectPatient patient,
       PatientEntity patientEntity) {
     // TODO add to entity
-    patient.addTelecom()
-        .setSystem(ContactPointSystem.PHONE)
-        .setValue("01231231234")
-        .setUse(ContactPointUse.HOME)
-        .setRank(1)
-        .setPeriod(new Period().setStart(new Date()).setEnd(new Date()));
+    patient.setNominatedPharmacy(localReferenceService.buildRef(ResourceType.Organization, 1));
+  }
 
-    // TODO add to entity
-    patient.addTelecom()
-        .setSystem(ContactPointSystem.PHONE)
-        .setValue("01234567899")
-        .setUse(ContactPointUse.MOBILE)
-        .setRank(2)
-        .setPeriod(new Period().setStart(new Date()).setEnd(new Date()));
+  private void addTelecom(CareConnectPatient patient, PatientEntity patientEntity) {
+    int rank = 1;
+    if (StringUtils.isNotEmpty(patientEntity.getHomePhone())) {
+      patient.addTelecom()
+          .setSystem(ContactPointSystem.PHONE)
+          .setValue(patientEntity.getHomePhone())
+          .setUse(ContactPointUse.HOME)
+          .setRank(rank++)
+          .setPeriod(new Period().setStart(new Date()).setEnd(new Date()));
+    }
 
-    // TODO add email to entity
-    patient.addTelecom()
-        .setSystem(ContactPointSystem.EMAIL)
-        .setValue("exmaple@example.com")
-        .setUse(ContactPointUse.HOME)
-        .setRank(3)
-        .setPeriod(new Period().setStart(new Date()).setEnd(new Date()));
+    if (StringUtils.isNotEmpty(patientEntity.getMobile())) {
+      patient.addTelecom()
+          .setSystem(ContactPointSystem.PHONE)
+          .setValue(patientEntity.getMobile())
+          .setUse(ContactPointUse.MOBILE)
+          .setRank(rank++)
+          .setPeriod(new Period().setStart(new Date()).setEnd(new Date()));
+    }
+
+    if (StringUtils.isNotEmpty(patientEntity.getEmail())) {
+      patient.addTelecom()
+          .setSystem(ContactPointSystem.EMAIL)
+          .setValue(patientEntity.getEmail())
+          .setUse(ContactPointUse.HOME)
+          .setRank(rank++)
+          .setPeriod(new Period().setStart(new Date()).setEnd(new Date()));
+    }
   }
 
   private void addAddress(CareConnectPatient patient, PatientEntity patientEntity) {
-    // TODO extend address in entity to full details
-    patient.addAddress()
+    Address address = patient.addAddress()
         .setUse(AddressUse.HOME)
         .setType(AddressType.BOTH)
-        .addLine(patientEntity.getAddress())
-        .setPeriod(new Period().setStart(new Date()).setEnd(new Date()));
+        .setPeriod(new Period().setStart(new Date()).setEnd(new Date()))
+        .setCity(patientEntity.getCity())
+        .setPostalCode(patientEntity.getPostalCode());
+
+    if (StringUtils.isNotEmpty(patientEntity.getAddress())) {
+      for (String line : patientEntity.getAddress().split("\\s*,\\s*")) {
+        address.addLine(line);
+      }
+    }
   }
 
   private void addLanguage(CareConnectPatient patient, PatientEntity patientEntity) {
-    // TODO add to entity
-    CodeableConcept language = new CodeableConcept();
-    language.addCoding().setCode("en").setDisplay("English")
-        .setSystem(
-            "http://uecdi-tom-terminology.eu-west-2.elasticbeanstalk.com/fhir/CodeSystem/languages");
-    patient.addCommunication(new PatientCommunicationComponent(language));
+    String languageCode = patientEntity.getLanguage();
+    if (StringUtils.isNotEmpty(languageCode)) {
+      try {
+        CareConnectLanguage language = CareConnectLanguage.valueOf(languageCode);
+        patient.addCommunication()
+            .setLanguage(language.toCodeableConcept());
+      } catch (IllegalArgumentException e) {
+        log.warn("Unrecognised language code {}", languageCode);
+      }
+    }
   }
 
   private void addNHSId(CareConnectPatient patient, PatientEntity patientEntity) {
+    String nhsNumber = patientEntity.getNhsNumber();
+
     NHSNumberIdentifier nhsIdentifier = new NHSNumberIdentifier();
-    nhsIdentifier.setValue(patientEntity.getNhsNumber());
+    nhsIdentifier.setValue(nhsNumber);
     nhsIdentifier.setSystem(
         "https://fhir.hl7.org.uk/STU3/CodeSystem/CareConnect-NHSNumberVerificationStatus-1");
-    nhsIdentifier.setNhsNumberVerificationStatus(new CodeableConcept().addCoding(new Coding()
-        .setSystem(
-            "https://fhir.hl7.org.uk/STU3/ValueSet/CareConnect-NHSNumberVerificationStatus-1")
-        .setDisplay("Number present and verified")
-        .setCode("21")));
-    nhsIdentifier.setType(new CodeableConcept().addCoding(new Coding()
-        .setSystem("http://hl7.org/fhir/ValueSet/identifier-type")
-        .setDisplay("Passport number")
-        .setCode("PPN")));
+
+    if (StringUtils.isNotEmpty(nhsNumber)) {
+      nhsIdentifier.setNhsNumberVerificationStatus(new CodeableConcept().addCoding(new Coding()
+          .setSystem(
+              "https://fhir.hl7.org.uk/STU3/ValueSet/CareConnect-NHSNumberVerificationStatus-1")
+          .setDisplay("Number present and verified")
+          .setCode("01")));
+    } else {
+      nhsIdentifier.setNhsNumberVerificationStatus(new CodeableConcept().addCoding(new Coding()
+          .setSystem(
+              "https://fhir.hl7.org.uk/STU3/ValueSet/CareConnect-NHSNumberVerificationStatus-1")
+          .setDisplay("Number not present and trace not required")
+          .setCode("07")));
+    }
     patient.addIdentifier(nhsIdentifier);
   }
 

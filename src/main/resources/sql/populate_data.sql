@@ -1,12 +1,12 @@
 INSERT INTO
- cdss_decoupling.patient (id, title, first_name, last_name, address, date_of_birth, gender, nhs_number) 
+ cdss_decoupling.patient (id, title, first_name, last_name, date_of_birth, gender, nhs_number, address, city, postal_code, home_phone, mobile, email, language)
 VALUES
- (1, "Miss", "Joanne", "Bloggs", null, "2011-09-07", "female", "9476719915"),
- (2, "Mrs", "Jenny", "Bloggs", null, "1942-09-07", "female", "9476719916"),
- (3, "Mr", "Joe", "Bloggs", null, "1979-09-07", "male", "9476719915"),
- (4, "Miss", "Hatty", "Bloggs", null, "1949-09-07", "female", "9476719915"),
- (5, "Miss", "John", "Bloggs", null, "1967-09-07", "male", "9476719915"),
- (6, "Miss", "Karen", "Bloggs", null, "1985-09-07", "female", "9476719915");
+ (1, "Miss", "Joanne", "Bloggs", "2011-09-07", "female", "9476719915", "Flat 3, 123 A Road", "London", "W1 123", "020 123 456", "0700 123 456", null, "en"),
+ (2, "Mrs", "Jenny", "Bloggs", "1942-09-07", "female", "9476719916", "Flat 3, 123 A Road", "London", "W1 123", "020 123 456", "0700 123 456", null, "en"),
+ (3, "Mr", "Joe", "Bloggs", "1979-09-07", "male", "9476719917", "Flat 3, 123 A Road", "London", "W1 123", "020 123 456", "0700 123 456", "joe.bloggs@example.com", "en"),
+ (4, "Miss", "Hatty", "Bloggs", "1949-09-07", "female", "9476719918", "Flat 3, 123 A Road", "London", "W1 123", "020 123 456", "0700 123 456", "hatty.bloggs@example.com", "en"),
+ (5, "Miss", "John", "Bloggs", "1967-09-07", "male", "9476719919", "Flat 3, 123 A Road", "London", "W1 123", "020 123 456", "0700 123 456", "john.bloggs@example.com", "en"),
+ (6, "Miss", "Karen", "Bloggs", "1985-09-07", "female", "9476719920", "Flat 3, 123 A Road", "London", "W1 123", "020 123 456", "0700 123 456", "karen.bloggs@example.com", "en");
 
 INSERT INTO
  cdss_decoupling.skillset (id, code, description) 
