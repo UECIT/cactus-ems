@@ -66,18 +66,8 @@ public class CaseService {
     TestScenario testScenario = testScenarioRepository.findByPatientId(patientId);
     ErrorHandlingUtils.checkEntityExists(testScenario, "Test Scenario");
 
-    if (StringUtils.isEmpty(patient.getFhirId())) {
-      log.info("Storing patient record in FHIR server");
-      CareConnectPatient patientResource = careConnectPatientBuilder.build(patient, storageService);
-
-      String patientRef = storageService.storeExternal(patientResource);
-      patient.setFhirId(patientRef);
-      patientRepository.saveAndFlush(patient);
-
-      return createCase(patientResource, testScenario);
-    } else {
-      return createCase(patient.getFhirId(), testScenario);
-    }
+    CareConnectPatient patientResource = careConnectPatientBuilder.build(patient);
+    return createCase(patientResource, testScenario);
   }
 
   /**

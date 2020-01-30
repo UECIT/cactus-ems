@@ -1,7 +1,11 @@
 package uk.nhs.ctp.service.builder;
 
+import lombok.AllArgsConstructor;
 import org.hl7.fhir.dstu3.model.Address;
+import org.hl7.fhir.dstu3.model.Address.AddressType;
+import org.hl7.fhir.dstu3.model.Address.AddressUse;
 import org.hl7.fhir.dstu3.model.BooleanType;
+import org.hl7.fhir.dstu3.model.CareConnectIdentifier;
 import org.hl7.fhir.dstu3.model.CareConnectOrganization;
 import org.hl7.fhir.dstu3.model.CareConnectPractitioner;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -9,22 +13,24 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointUse;
 import org.hl7.fhir.dstu3.model.HumanName;
-import org.hl7.fhir.dstu3.model.CareConnectIdentifier;
-import org.hl7.fhir.dstu3.model.Address.AddressType;
-import org.hl7.fhir.dstu3.model.Address.AddressUse;
 import org.hl7.fhir.dstu3.model.Practitioner.PractitionerQualificationComponent;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.springframework.stereotype.Component;
-
 import uk.nhs.ctp.SystemURL;
+import uk.nhs.ctp.service.LocalReferenceService;
 
 @Component
+@AllArgsConstructor
 public class CareConnectPractitionerBuilder {
+
+  private final LocalReferenceService localReferenceService;
 
   public CareConnectPractitioner build(CareConnectOrganization assigningOrganization) {
     // TODO construct an appropriate record from the patient information
     CareConnectIdentifier sdsIdentifier = new CareConnectIdentifier();
     sdsIdentifier.setSystem("https://fhir.nhs.uk/Id/sds-user-id");
-    sdsIdentifier.setAssignerTarget(assigningOrganization);
+    sdsIdentifier.setAssigner(new Reference(assigningOrganization.getId()));
     sdsIdentifier.setValue("1");
     sdsIdentifier
         .setType(new CodeableConcept().addCoding(new Coding()
@@ -34,7 +40,7 @@ public class CareConnectPractitionerBuilder {
 
     CareConnectIdentifier sdsRoleIdentifier = new CareConnectIdentifier();
     sdsRoleIdentifier.setSystem("https://fhir.nhs.uk/Id/sds-role-profile-id");
-    sdsRoleIdentifier.setAssignerTarget(assigningOrganization);
+    sdsIdentifier.setAssigner(new Reference(assigningOrganization.getId()));
     sdsRoleIdentifier.setValue("2");
     sdsRoleIdentifier.setType(new CodeableConcept().addCoding(new Coding()
         .setSystem("https://fhir.nhs.uk/Id/sds-role-profile-id")
@@ -44,10 +50,7 @@ public class CareConnectPractitionerBuilder {
     CareConnectPractitioner.NhsCommunicationExtension communicationExtension = new CareConnectPractitioner.NhsCommunicationExtension();
     communicationExtension.setPreferred(new BooleanType(true));
     communicationExtension.setInterpreterRequired(new BooleanType(false));
-    communicationExtension.setLanguage(new CodeableConcept().addCoding(new Coding()
-        .setSystem("https://fhir.hl7.org.uk/STU3/ValueSet/CareConnect-HumanLanguage-1")
-        .setDisplay("Bosnian")
-        .setCode("bs")));
+    communicationExtension.setLanguage(CareConnectLanguage.bs.toCodeableConcept());
     communicationExtension.setModeOfCommunication(new CodeableConcept().addCoding(new Coding()
         .setSystem("https://fhir.hl7.org.uk/STU3/ValueSet/CareConnect-LanguageAbilityMode-1")
         .setDisplay("Received spoken")
@@ -75,6 +78,7 @@ public class CareConnectPractitionerBuilder {
     HumanName gpName = new HumanName().addPrefix("Dr").addGiven("M").setFamily("Khan");
 
     CareConnectPractitioner practitioner = new CareConnectPractitioner();
+    practitioner.setId(localReferenceService.buildId(ResourceType.Practitioner, 1));
     practitioner.addName(gpName);
     practitioner.addAddress(gpAddress);
     practitioner.addIdentifier(sdsIdentifier);

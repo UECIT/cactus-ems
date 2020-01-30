@@ -2,7 +2,6 @@ package uk.nhs.ctp.service;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -52,6 +51,9 @@ public class CaseServiceTest {
   @InjectMocks
   private CaseService spyCaseService;
 
+  @Autowired
+  private CareConnectPatientBuilder careConnectPatientBuilder;
+
   @Mock
   private CaseRepository mockCaseRepository;
 
@@ -68,24 +70,38 @@ public class CaseServiceTest {
   EncounterService encounterService;
 
   PatientEntity patient;
+  @Mock
   TestScenario testScenario;
+
+  @Mock
   Observation observation;
+
+  @Mock
   Immunization immunization;
+
+  @Mock
+  CaseObservation caseObservation;
+
+  @Mock
+  CaseImmunization caseImmunization;
+
+  @Mock
+  CaseMedication caseMedication;
+
+  @Mock
+  Cases triageCase;
+
+  @Mock
   MedicationAdministration medication;
+
+  @Mock
   Condition condition;
+
   List<Resource> resourcesObservationsOnly, resourcesImmunizationsOnly, resourcesMedicationsOnly,
       resourcesMultiple, resourcesUnknownType;
 
-  CaseObservation caseObservation;
-  CaseImmunization caseImmunization;
-  CaseMedication caseMedication;
-  Cases triageCase;
-
   @Before
   public void setup() {
-    CareConnectPatientBuilder careConnectPatientBuilder = new CareConnectPatientBuilder(
-        new CareConnectOrganizationBuilder(),
-        new CareConnectPractitionerBuilder());
 
     spyCaseService = spy(new CaseService(
         mockCaseRepository,
@@ -102,11 +118,6 @@ public class CaseServiceTest {
     patient.setFirstName("Joe");
     patient.setLastName("Bloggs");
     patient.setGender("male");
-    testScenario = mock(TestScenario.class);
-    observation = mock(Observation.class);
-    immunization = mock(Immunization.class);
-    medication = mock(MedicationAdministration.class);
-    condition = mock(Condition.class);
 
     resourcesObservationsOnly = new ArrayList<>();
     resourcesImmunizationsOnly = new ArrayList<>();
@@ -121,11 +132,6 @@ public class CaseServiceTest {
     resourcesMultiple.add(immunization);
     resourcesMultiple.add(medication);
     resourcesUnknownType.add(condition);
-
-    caseObservation = mock(CaseObservation.class);
-    caseImmunization = mock(CaseImmunization.class);
-    caseMedication = mock(CaseMedication.class);
-    triageCase = mock(Cases.class);
 
     when(mockPatientRepository.findOne(1L)).thenReturn(patient);
     when(mockTestScenarioRepository.findByPatientId(1L)).thenReturn(testScenario);
