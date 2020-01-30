@@ -19,7 +19,6 @@ import org.hl7.fhir.dstu3.model.GuidanceResponse.GuidanceResponseStatus;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
-import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.RequestGroup;
@@ -77,9 +76,6 @@ public class ResponseResolverImpl implements ResponseResolver {
 
     cdssResult.setReferralRequest(
         getResource(guidanceResponse.getContained(), ReferralRequest.class));
-
-    cdssResult.setProcedureRequest(
-        getResource(guidanceResponse.getContained(), ProcedureRequest.class));
 
     cdssResult.setCareAdvice(
         ResourceProviderUtils

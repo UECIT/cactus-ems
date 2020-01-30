@@ -60,6 +60,7 @@ import xml from 'highlight.js/lib/languages/xml';
 import { ToastrModule } from 'ngx-toastr';
 import { TriageSelectionComponent } from './main/triage-selection/triage-selection.component';
 import { PatientSelectionComponent } from './main/patient-selection/patient-selection.component';
+import { ReferralRequestComponent, ConditionDialog } from './triage/referral-request/referral-request.component';
 
 export function hljsLanguages() {
   return [
@@ -102,9 +103,11 @@ export function hljsLanguages() {
     HandoverMessageDialogComponent,
     TriageSelectionComponent,
     PatientSelectionComponent,
-    HealthcareServiceDialog
+    HealthcareServiceDialog,
+    ReferralRequestComponent,
+    ConditionDialog
   ],
-  entryComponents: [SwitchSupplierDialogComponent, SwitchServicePromptDialogComponent, HandoverMessageDialogComponent, HealthcareServiceDialog],
+  entryComponents: [SwitchSupplierDialogComponent, SwitchServicePromptDialogComponent, HandoverMessageDialogComponent, HealthcareServiceDialog, ConditionDialog],
   imports: [
     BrowserModule,
     StoreModule.forRoot({

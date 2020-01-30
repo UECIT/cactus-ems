@@ -1,0 +1,18 @@
+<p><strong>Status:</strong> {{ referralRequest.status }}</p>
+<p><strong>Priority:</strong> {{ referralRequest.priority }}</p>
+<p><strong>Occurrence:</strong> {{ referralRequest.occurrence }}</p>
+<p><strong>Primary Concern: </strong> 
+  <button mat-button class="modal-link" color="primary" (click)="viewDetails(referralRequest.reasonReference)">
+    {{ referralRequest.reasonReference.condition }}
+  </button>
+</p>
+<p><strong>Secondary Concerns:</strong></p>
+<ul *ngFor="let condition of referralRequest.supportingInfo">
+  <li>
+    <button mat-button class="modal-link" color="primary" (click)="viewDetails(condition)">
+      {{ condition.condition }}
+    </button>
+  </li>
+</ul>
+<p><strong>Next Action:</strong> {{ referralRequest.action }}</p>
+<p><strong>Relevant History:</strong> {{ referralRequest.relevantHistory }}</p>

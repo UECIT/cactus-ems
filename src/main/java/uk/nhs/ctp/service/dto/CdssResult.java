@@ -3,7 +3,6 @@ package uk.nhs.ctp.service.dto;
 import java.util.List;
 import lombok.Data;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.RequestGroup;
 import org.hl7.fhir.dstu3.model.Resource;
@@ -19,7 +18,6 @@ public class CdssResult {
 	private ReferralRequest referralRequest;
 	private List<CarePlanDTO> careAdvice;
 	private String sessionId;
-	private ProcedureRequest procedureRequest;
 	private List<Resource> contained;
 	private OperationOutcome operationOutcome;
 
@@ -53,11 +51,6 @@ public class CdssResult {
 
 	public boolean hasCareAdvice() {
 		return this.careAdvice != null;
-	}
-
-	
-	public boolean hasProcedureRequest() {
-		return procedureRequest != null;
 	}
 
 }
