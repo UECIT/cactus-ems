@@ -7,7 +7,6 @@ export class Questionnaire {
   switchTrigger: string;
   referralRequest: ReferralRequest;
   careAdvice: any[];
-  procedureRequest: any;
   errorMessage: ErrorMessage;
 }
 
@@ -20,26 +19,24 @@ export class ErrorMessage {
 export class ReferralRequest {
   status: string;
   priority: string;
-  serviceRequestedCode: number;
-  serviceRequestedSystem: string;
-  serviceRequested: Code[];
-  serviceDefinitionId: string;
-  occurence: string;
-  specialty: string;
-  recipient: string;
+  occurrence: string;
+  action: string;
   description: string;
-  supportingInfo: string[];
-  note: string;
+  reasonReference: Condition;
+  supportingInfo: Condition[];
   relevantHistory: string;
-  resourceId: string;
-  reasonReference: string;
   contextReference: string;
+  resourceId: string;
 }
 
-export class Code {
-  serviceRequestedSystem: string;
-  serviceRequestedCode: number;
-  serviceRequestedDisplay: string;
+export class Condition {
+  clinicalStatus: string;
+  verificationStatus: string;
+  condition: string;
+  bodySite: string;
+  onset: string;
+  stageSummary: string;
+  evidence: string[];
 }
 
 export class TriageQuestion {

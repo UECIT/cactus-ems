@@ -64,7 +64,7 @@ public class FHIRConfig {
     fhirParser.setPreferTypes(Arrays.asList(
         CareConnectCarePlan.class,
         CareConnectCareTeam.class,
-        CareConnectCondition.class,
+//        CareConnectCondition.class, TODO: NCTH-462
         CareConnectEncounter.class,
         CareConnectEpisodeOfCare.class,
         CareConnectHealthcareService.class,

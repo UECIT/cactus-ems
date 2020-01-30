@@ -19,7 +19,6 @@ public class CdssResponseDTO {
 	private String switchTrigger;
 	private ReferralRequestDTO referralRequest;
 	private List<CarePlanDTO> careAdvice;
-	private ProcedureRequestDTO procedureRequest;
 	private ErrorMessageDTO errorMessage;
 
 }

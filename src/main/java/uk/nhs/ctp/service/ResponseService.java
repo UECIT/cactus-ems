@@ -25,11 +25,10 @@ import uk.nhs.ctp.SystemCode;
 import uk.nhs.ctp.service.dto.CdssResponseDTO;
 import uk.nhs.ctp.service.dto.CdssResult;
 import uk.nhs.ctp.service.dto.ExtensionDTO;
-import uk.nhs.ctp.service.dto.ProcedureRequestDTO;
-import uk.nhs.ctp.service.dto.ReferralRequestDTO;
 import uk.nhs.ctp.service.dto.TriageOption;
 import uk.nhs.ctp.service.dto.TriageQuestion;
 import uk.nhs.ctp.transform.ErrorMessageTransformer;
+import uk.nhs.ctp.transform.ReferralRequestDTOTransformer;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
 
 @Service
@@ -39,6 +38,7 @@ public class ResponseService {
 	private static final Logger LOG = LoggerFactory.getLogger(ResponseService.class);
 
 	private final ErrorMessageTransformer errorMessageTransformer;
+	private final ReferralRequestDTOTransformer referralRequestDTOTransformer;
 
 	/**
 	 * Build response DTO with a summary of the CDSS response
@@ -65,13 +65,10 @@ public class ResponseService {
 		}
 		
 		if (cdssResult.hasReferralRequest()) {
-			response.setReferralRequest(new ReferralRequestDTO(cdssResult.getReferralRequest()));
+			response.setReferralRequest(referralRequestDTOTransformer.transform(cdssResult.getReferralRequest()));
 		}
 		if (cdssResult.hasCareAdvice()) {
 			response.setCareAdvice(cdssResult.getCareAdvice());
-		}
-		if (cdssResult.hasProcedureRequest()) {
-			response.setProcedureRequest(new ProcedureRequestDTO(cdssResult.getProcedureRequest()));
 		}
 
 		response.setErrorMessage(errorMessageTransformer.transform(cdssResult.getOperationOutcome()));
@@ -107,7 +104,7 @@ public class ResponseService {
 
 			setTriageQuestion(questionnaire, response, triageResponses);
 			if (cdssResult.hasReferralRequest()) {
-				response.setReferralRequest(new ReferralRequestDTO(cdssResult.getReferralRequest()));
+				response.setReferralRequest(referralRequestDTOTransformer.transform(cdssResult.getReferralRequest()));
 			}
 		}
 
@@ -130,7 +127,7 @@ public class ResponseService {
 				response.setSwitchTrigger(cdssResult.getSwitchTrigger());
 			}
 			if (cdssResult.hasReferralRequest()) {
-				response.setReferralRequest(new ReferralRequestDTO(cdssResult.getReferralRequest()));
+				response.setReferralRequest(referralRequestDTOTransformer.transform(cdssResult.getReferralRequest()));
 			}
 			if (cdssResult.getCareAdvice() != null) {
 				response.setCareAdvice(cdssResult.getCareAdvice());

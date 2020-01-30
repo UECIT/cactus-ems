@@ -199,52 +199,12 @@
        *ngIf="(questionnaire.referralRequest && questionnaire.referralRequest.status == 'draft') || hasDraftCareAdvice(questionnaire.careAdvice)">
     <div class="result">
       <mat-card style="padding-right: 30px;">
-        <mat-card-title class="col-12">Interim Result: {{ questionnaire.result }}
-          <button *ngIf="handoverMessage && reports && !isloadingReport" id="continue"
-                  class="col-sm-5 offset-sm-2" (click)="openDialog()">
-            View Result/Reports
-          </button>
-          <button *ngIf="!handoverMessage || !reports || isloadingReport" id="continue"
-                  class="col-sm-5 offset-sm-2" style="padding:0px!important;" disabled>
-            View Result/Reports
-            <mat-progress-bar mode="indeterminate"
-                              style="width:100%;padding: 0;margin: 0;"></mat-progress-bar>
-          </button>
-        </mat-card-title>
+        <mat-card-title class="col-12">Interim Result: {{ questionnaire.result }}</mat-card-title>
         <mat-tab-group style="clear: both;">
           <mat-tab label="Interim result:">
             <mat-card>
               <mat-card-content *ngIf="questionnaire.referralRequest">
-                <p *ngIf="questionnaire.referralRequest.status">
-                  <strong>Status:</strong> {{ questionnaire.referralRequest.status}}</p>
-                <p *ngIf="questionnaire.referralRequest.priority">
-                  <strong>Priority:</strong>  {{ questionnaire.referralRequest.priority}}</p>
-                <p *ngIf="questionnaire.referralRequest.serviceRequested"><strong>Service
-                  Requested:</strong></p>
-                <ul *ngFor="let serviceRequested of questionnaire.referralRequest.serviceRequested">
-                  <li><strong>System:</strong> {{ serviceRequested.serviceRequestedSystem }}</li>
-                  <li><strong>Code:</strong> {{ serviceRequested.serviceRequestedCode }}</li>
-                  <li><strong>Display:</strong> {{ serviceRequested.serviceRequestedDisplay }}</li>
-                </ul>
-                <p *ngIf="questionnaire.referralRequest.occurence">
-                  <strong>Occurence:</strong> {{ questionnaire.referralRequest.occurence}}</p>
-                <p *ngIf="questionnaire.referralRequest.specialty">
-                  <strong>Specialty:</strong> {{ questionnaire.referralRequest.specialty}}</p>
-                <p *ngIf="questionnaire.referralRequest.recipient">
-                  <strong>Recipient:</strong> {{ questionnaire.referralRequest.recipient }}</p>
-                <p *ngIf="questionnaire.referralRequest.description">
-                  <strong>Description:</strong> {{ questionnaire.referralRequest.description }}</p>
-                <p *ngIf="questionnaire.referralRequest.reasonReference"><strong>Reason
-                  Reference:</strong> {{ questionnaire.referralRequest.reasonReference }}</p>
-                <p *ngIf="questionnaire.referralRequest.supportingInfo"><strong>Supporting
-                  Info:</strong></p>
-                <ul *ngFor="let supportingInfo of questionnaire.referralRequest.supportingInfo">
-                  <li>{{ supportingInfo }}</li>
-                </ul>
-                <p *ngIf="questionnaire.referralRequest.note">
-                  <strong>Note:</strong> {{ questionnaire.referralRequest.note }}</p>
-                <p *ngIf="questionnaire.referralRequest.relevantHistory"><strong>Relevant
-                  History:</strong> {{ questionnaire.referralRequest.relevantHistory }}</p>
+                <app-referral-request [(referralRequest)]="questionnaire.referralRequest"></app-referral-request>
               </mat-card-content>
             </mat-card>
           </mat-tab>
@@ -315,86 +275,7 @@
             <mat-card>
               <div class="container">
                 <div class="row">
-                  <mat-card-content *ngIf="questionnaire.referralRequest" class="col-6">
-                    <p *ngIf="questionnaire.referralRequest.status">
-                      <strong>Status:</strong> {{ questionnaire.referralRequest.status}}</p>
-                    <p *ngIf="questionnaire.referralRequest.priority">
-                      <strong>Priority:</strong>  {{ questionnaire.referralRequest.priority}}</p>
-
-                    <p *ngIf="questionnaire.referralRequest.serviceRequested"><strong>Service
-                      Requested:</strong></p>
-                    <ul *ngFor="let serviceRequested of questionnaire.referralRequest.serviceRequested">
-                      <li><strong>System:</strong> {{ serviceRequested.serviceRequestedSystem }}
-                      </li>
-                      <li><strong>Code:</strong> {{ serviceRequested.serviceRequestedCode }}</li>
-                      <li><strong>Display:</strong> {{ serviceRequested.serviceRequestedDisplay }}
-                      </li>
-                    </ul>
-                  </mat-card-content>
-                  <mat-card-content *ngIf="questionnaire.referralRequest" class="col-6">
-                    <p *ngIf="questionnaire.referralRequest.occurence">
-                      <strong>Occurence:</strong> {{ questionnaire.referralRequest.occurence}}</p>
-                    <p *ngIf="questionnaire.referralRequest.reasonReference"><strong>Reason
-                      Reference:</strong> {{ questionnaire.referralRequest.reasonReference }}</p>
-                    <p *ngIf="questionnaire.referralRequest.specialty">
-                      <strong>Specialty:</strong> {{ questionnaire.referralRequest.specialty}}</p>
-                    <p *ngIf="questionnaire.referralRequest.recipient">
-                      <strong>Recipient:</strong> {{ questionnaire.referralRequest.recipient }}</p>
-                    <p *ngIf="questionnaire.referralRequest.description">
-                      <strong>Description:</strong> {{ questionnaire.referralRequest.description }}
-                    </p>
-
-                    <p *ngIf="questionnaire.referralRequest.supportingInfo"><strong>Supporting
-                      Info:</strong></p>
-                    <ul *ngFor="let supportingInfo of questionnaire.referralRequest.supportingInfo">
-                      <li>{{ supportingInfo }}</li>
-                    </ul>
-
-                    <p *ngIf="questionnaire.referralRequest.note">
-                      <strong>Note:</strong> {{ questionnaire.referralRequest.note }}</p>
-                    <p *ngIf="questionnaire.referralRequest.relevantHistory"><strong>Relevant
-                      History:</strong> {{ questionnaire.referralRequest.relevantHistory }}</p>
-                  </mat-card-content>
-                </div>
-              </div>
-            </mat-card>
-          </mat-tab>
-
-          <mat-tab label="Procedure Request" *ngIf="questionnaire.procedureRequest">
-            <mat-card>
-              <div class="container">
-                <div class="row">
-                  <mat-card-content>
-                    <p *ngIf="questionnaire.procedureRequest">
-                      <strong>Title:</strong> {{ questionnaire.procedureRequest.text }}</p>
-
-                    <p><strong>Requested procedure:</strong></p>
-                    <ul>
-                      <li *ngIf="questionnaire.procedureRequest.codeDisplay">
-                        <strong>Display:</strong> {{ questionnaire.procedureRequest.codeDisplay }}
-                      </li>
-                      <li *ngIf="questionnaire.procedureRequest.codeSystem">
-                        <strong>System:</strong> {{ questionnaire.procedureRequest.codeSystem }}
-                      </li>
-                      <li *ngIf="questionnaire.procedureRequest.codeCode">
-                        <strong>Code:</strong> {{ questionnaire.procedureRequest.codeCode }}</li>
-                    </ul>
-
-                    <p><strong>Reason for requesting the procedure:</strong></p>
-                    <ul>
-                      <li *ngIf="questionnaire.procedureRequest.reasonCodeDisplay">
-                        <strong>Display:</strong> {{ questionnaire.procedureRequest.reasonCodeDisplay }}
-                      </li>
-                      <li *ngIf="questionnaire.procedureRequest.reasonCodeSystem">
-                        <strong>System:</strong> {{ questionnaire.procedureRequest.reasonCodeSystem }}
-                      </li>
-                      <li *ngIf="questionnaire.procedureRequest.reasonCodeCode">
-                        <strong>Code:</strong> {{ questionnaire.procedureRequest.reasonCodeCode }}
-                      </li>
-                    </ul>
-
-                    <hr>
-                  </mat-card-content>
+                  <app-referral-request [(referralRequest)]="questionnaire.referralRequest"></app-referral-request>
                 </div>
               </div>
             </mat-card>

@@ -6,12 +6,15 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.stereotype.Service;
+import uk.nhs.ctp.service.resolver.reference.IResourceLocator;
 
 @Service
 @AllArgsConstructor
-public class StorageService {
+public class StorageService implements IResourceLocator {
 
   private IGenericClient fhirClient;
 
@@ -38,5 +41,13 @@ public class StorageService {
 
   public <T extends Resource> T findResource(String id, Class<T> clazz) {
     return fhirClient.read().resource(clazz).withUrl(id).execute();
+  }
+
+  public IBaseResource findResource(String id) {
+    IdType idType = new IdType(id);
+    return fhirClient.read()
+        .resource(idType.getResourceType())
+        .withId(idType)
+        .execute();
   }
 }
