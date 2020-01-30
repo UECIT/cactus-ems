@@ -45,7 +45,7 @@ public class EncounterProvider implements IResourceProvider {
 
     if (include.contains(new Include(ENCOUNTER_SUBJECT_INCLUDES))) {
       Patient patient = encounter.hasSubject()
-          ? encounterReportService.getPatient(encounter.getSubject().getId())
+          ? encounterReportService.getPatient(encounter.getSubject().getReference())
           : null;
       if (patient != null) {
         bundle.addEntry()
