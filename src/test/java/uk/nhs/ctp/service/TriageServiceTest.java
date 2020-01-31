@@ -100,24 +100,6 @@ public class TriageServiceTest {
   }
 
   @Test
-  public void testEncounterIsUpdatedOnTriageRequested()
-      throws ConnectException, JsonProcessingException, FHIRException {
-    doReturn(mockCdssResult)
-        .when(spyTriageService)
-        .updateCaseUsingCdss(mockCdssRequestDTO);
-    when(mockCdssResult.isInProgress())
-        .thenReturn(true)
-        .thenReturn(false);
-    doReturn(mockCdssResponseDTO)
-        .when(spyTriageService)
-        .buildResponseDtoFromResult(mockCdssResult, 1L, 1L);
-
-    spyTriageService.processTriageRequest(mockCdssRequestDTO);
-
-    verify(encounterService, times(1)).updateEncounter(1L);
-  }
-
-  @Test
   public void testSecondRequestMadeTwiceWhenNoResultOrDataRequirementReturned()
       throws ConnectException, JsonProcessingException, FHIRException {
     doReturn(mockCdssResult)

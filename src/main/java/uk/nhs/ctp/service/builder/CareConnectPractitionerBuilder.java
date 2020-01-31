@@ -18,13 +18,13 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.SystemURL;
-import uk.nhs.ctp.service.LocalReferenceService;
+import uk.nhs.ctp.service.ReferenceService;
 
 @Component
 @AllArgsConstructor
 public class CareConnectPractitionerBuilder {
 
-  private final LocalReferenceService localReferenceService;
+  private final ReferenceService referenceService;
 
   public CareConnectPractitioner build(CareConnectOrganization assigningOrganization) {
     // TODO construct an appropriate record from the patient information
@@ -78,7 +78,7 @@ public class CareConnectPractitionerBuilder {
     HumanName gpName = new HumanName().addPrefix("Dr").addGiven("M").setFamily("Khan");
 
     CareConnectPractitioner practitioner = new CareConnectPractitioner();
-    practitioner.setId(localReferenceService.buildId(ResourceType.Practitioner, 1));
+    practitioner.setId(referenceService.buildId(ResourceType.Practitioner, 1));
     practitioner.addName(gpName);
     practitioner.addAddress(gpAddress);
     practitioner.addIdentifier(sdsIdentifier);

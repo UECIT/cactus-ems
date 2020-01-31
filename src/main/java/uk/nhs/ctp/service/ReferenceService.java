@@ -2,15 +2,17 @@ package uk.nhs.ctp.service;
 
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ResourceType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
+import uk.nhs.ctp.service.resolver.reference.IResourceLocator;
 
 /**
  * Cleanly construct IDs for Resources served by the local FHIR endpoint
  */
 @Service
-public class LocalReferenceService {
+public class ReferenceService {
 
   @Value("${ems.server}")
   private String emsServer;
@@ -23,5 +25,12 @@ public class LocalReferenceService {
 
   public Reference buildRef(ResourceType resourceType, long id) {
     return new Reference(buildId(resourceType, id));
+  }
+
+  public IBaseResource resolve(Reference reference, IResourceLocator storageService) {
+    if (reference.getResource() != null) {
+      return reference.getResource();
+    }
+    return storageService.findResource(reference.getReference());
   }
 }

@@ -4,7 +4,6 @@
 export const environment = {
   production: false,
   EMS_API: 'http://localhost:8083',
-  EMS_FHIR: 'http://localhost:8083/fhir',
   UECDI_API: 'http://localhost:5000',
   UECDI_VALIDATE_API: 'http://localhost:7000/tkw-client',
   TERM_API: 'https://ontoserver.dataproducts.nhs.uk/fhir',

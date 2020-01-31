@@ -22,9 +22,6 @@ public class PatientEntity {
   private Long id;
 
   @Column
-  private String fhirId;
-
-  @Column
   private String address;
 
   @Column

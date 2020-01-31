@@ -42,7 +42,7 @@ export class DosDisplayComponent {
   }
 
   invoke() {
-    const encounterRef = `${encodeURI(environment.EMS_FHIR)}/${this.referralRequest.contextReference}`;
+    const encounterRef = this.referralRequest.contextReference;
     const url = `${this.selectedService.endpoint}?encounter=${encounterRef}`;
     window.open(url);
   }

@@ -97,8 +97,6 @@ public class TriageService {
           .updateAuditEntry(auditRecord, requestDetails, cdssResponse, cdssResult.getContained());
     }
 
-    encounterService.updateEncounter(caseId);
-
     return cdssResponse;
   }
 
@@ -126,8 +124,6 @@ public class TriageService {
     auditService
         .updateAuditEntry(auditRecord, requestDetails, cdssResponse, cdssResult.getContained());
 
-    encounterService.updateEncounter(caseId);
-
     return cdssResponse;
   }
 
@@ -148,7 +144,6 @@ public class TriageService {
       LOG.info("Update case for " + caseId);
       caseService.updateCase(caseId, cdssResult.getOutputData(),
           cdssResult.getSessionId());
-      encounterService.updateEncounter(caseId);
     }
 
     return cdssResult;

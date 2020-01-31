@@ -35,9 +35,7 @@ import uk.nhs.ctp.entities.TestScenario;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.repos.PatientRepository;
 import uk.nhs.ctp.repos.TestScenarioRepository;
-import uk.nhs.ctp.service.builder.CareConnectOrganizationBuilder;
 import uk.nhs.ctp.service.builder.CareConnectPatientBuilder;
-import uk.nhs.ctp.service.builder.CareConnectPractitionerBuilder;
 import uk.nhs.ctp.service.encounter.EncounterService;
 
 @SpringBootTest
@@ -155,13 +153,6 @@ public class CaseServiceTest {
         }
       }
     });
-  }
-
-  @Test
-  public void testEncounterIsCreatedWhenCaseInitialised() {
-    spyCaseService.createCase(1L);
-
-    verify(encounterService, times(1)).createEncounter(any());
   }
 
   @Test
