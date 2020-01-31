@@ -7,13 +7,13 @@ import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.springframework.stereotype.Component;
-import uk.nhs.ctp.service.LocalReferenceService;
+import uk.nhs.ctp.service.ReferenceService;
 
 @Component
 @AllArgsConstructor
 public class CareConnectOrganizationBuilder {
 
-  private final LocalReferenceService localReferenceService;
+  private final ReferenceService referenceService;
 
   // TODO construct an appropriate organisation from a database record
   public CareConnectOrganization build() {
@@ -26,7 +26,7 @@ public class CareConnectOrganizationBuilder {
             .setCode("OC")));
 
     CareConnectOrganization organization = new CareConnectOrganization();
-    organization.setId(localReferenceService.buildId(ResourceType.Organization, 1));
+    organization.setId(referenceService.buildId(ResourceType.Organization, 1));
     organization.addIdentifier(identifier);
     organization.setName("East Road Pharmacy");
 

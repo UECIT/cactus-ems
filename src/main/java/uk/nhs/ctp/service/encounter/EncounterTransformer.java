@@ -18,7 +18,7 @@ public class EncounterTransformer {
   public Encounter transform(Cases caseEntity, AuditRecord audit) {
     var encounter = new Encounter();
 
-    encounter.setId(caseEntity.getEncounterId());
+    encounter.setId(caseEntity.getId().toString());
     encounter.setSubject(new Reference(caseEntity.getPatientId()));
 
     // Add fields provided by audit

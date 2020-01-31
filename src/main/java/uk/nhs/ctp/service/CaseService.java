@@ -96,7 +96,6 @@ public class CaseService {
     setCaseDetails(triageCase, patient, testScenario);
 
     // Store a mostly empty encounter record for future reference
-    triageCase.setEncounterId(encounterService.createEncounter(triageCase));
     return caseRepository.saveAndFlush(triageCase);
   }
 

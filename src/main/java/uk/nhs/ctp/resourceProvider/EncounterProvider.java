@@ -1,80 +1,67 @@
 package uk.nhs.ctp.resourceProvider;
 
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.annotation.IncludeParam;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
-import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import java.util.List;
-import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntrySearchComponent;
-import org.hl7.fhir.dstu3.model.Bundle.SearchEntryMode;
-import org.hl7.fhir.dstu3.model.Composition;
+import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Encounter;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.stereotype.Component;
-import uk.nhs.ctp.service.encounter.EncounterReportService;
+import uk.nhs.ctp.service.ReferenceService;
+import uk.nhs.ctp.service.StorageService;
+import uk.nhs.ctp.service.encounter.EncounterService;
 
 @Component
 @AllArgsConstructor
 public class EncounterProvider implements IResourceProvider {
 
-  private static final String REFERRAL_REQUEST_CONTEXT_INCLUDES = "ReferralRequest:context";
-  private static final String COMPOSITION_ENCOUNTER_INCLUDES = "Composition:encounter";
-  private static final String ENCOUNTER_SUBJECT_INCLUDES = "Encounter:subject";
+  private StorageService storageService;
+  private EncounterService encounterService;
+  private ReferenceService referenceService;
+  private IGenericClient fhirClient;
 
-  private EncounterReportService encounterReportService;
+  @Operation(name = "$UEC-Report", idempotent = true, type = Encounter.class)
+  public Bundle getEncounterReport(@IdParam IdType encounterIdType) {
 
-  @Search()
-  public Bundle getEncounterReport(
-      @RequiredParam(name = Encounter.SP_RES_ID) StringParam id,
-      @IncludeParam(reverse = true, allow = {REFERRAL_REQUEST_CONTEXT_INCLUDES, COMPOSITION_ENCOUNTER_INCLUDES}) Set<Include> revIncludes,
-      @IncludeParam(allow = {ENCOUNTER_SUBJECT_INCLUDES}) Set<Include> include
-  ) {
-    String encounterId = id.getValue();
     Bundle bundle = new Bundle();
+    bundle.setType(BundleType.DOCUMENT);
 
-    Encounter encounter = encounterReportService.getEncounter(encounterId);
-    bundle.addEntry(new BundleEntryComponent().setResource(encounter));
+    Long encounterIdLong = encounterIdType.getIdPartAsLong();
+    Encounter encounter = encounterService.getEncounter(encounterIdLong);
+    String encounterRefString = referenceService.buildId(ResourceType.Encounter, encounterIdLong);
+    bundle.addEntry(new BundleEntryComponent()
+        .setFullUrl(encounterRefString)
+        .setResource(encounter));
 
-    if (include.contains(new Include(ENCOUNTER_SUBJECT_INCLUDES))) {
-      Patient patient = encounter.hasSubject()
-          ? encounterReportService.getPatient(encounter.getSubject().getReference())
-          : null;
-      if (patient != null) {
-        bundle.addEntry()
-            .setResource(patient)
-            .setSearch(new BundleEntrySearchComponent()
-              .setMode(SearchEntryMode.INCLUDE));
-      }
-    }
+    Patient patient = storageService.findResource(encounter.getSubject().getReference(), Patient.class);
+    bundle.addEntry()
+        .setFullUrl(referenceService.buildId(ResourceType.Patient, patient.getIdElement().getIdPartAsLong()))
+        .setResource(patient);
 
-    if (revIncludes.contains(new Include(REFERRAL_REQUEST_CONTEXT_INCLUDES))) {
-      List<ReferralRequest> referralRequests = encounterReportService.getReferralRequests(encounterId);
-      referralRequests.stream()
-          .map(rr -> new BundleEntryComponent()
-              .setResource(rr)
-              .setSearch(new BundleEntrySearchComponent()
-                  .setMode(SearchEntryMode.INCLUDE)))
-          .forEach(bundle::addEntry);
-    }
+    //TODO: ReferralRequests will come from local fhir server
+    List<ReferralRequest> referralRequests = storageService.findResources("?context:Encounter=" + encounterRefString, ReferralRequest.class);
+    referralRequests.stream()
+        .map(rr -> new BundleEntryComponent()
+            .setFullUrl(rr.getId())
+            .setResource(rr))
+        .forEach(bundle::addEntry);
 
-    if (revIncludes.contains(new Include(COMPOSITION_ENCOUNTER_INCLUDES))) {
-      List<Composition> compositions = encounterReportService.getCompositions(encounterId);
-      compositions.stream()
-          .map(comp -> new BundleEntryComponent()
-              .setResource(comp)
-              .setSearch(new BundleEntrySearchComponent()
-                  .setMode(SearchEntryMode.INCLUDE)))
-          .forEach(bundle::addEntry);
-    }
     return bundle;
+  }
+
+  @Read
+  public Encounter getEncounter(@IdParam IdType id) {
+    return encounterService.getEncounter(id.getIdPartAsLong());
   }
 
   @Override

@@ -20,19 +20,19 @@ import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.entities.PatientEntity;
-import uk.nhs.ctp.service.LocalReferenceService;
+import uk.nhs.ctp.service.ReferenceService;
 
 @Component
 @AllArgsConstructor
 @Slf4j
 public class CareConnectPatientBuilder {
 
-  private final LocalReferenceService localReferenceService;
+  private final ReferenceService referenceService;
 
   public CareConnectPatient build(PatientEntity patientEntity) {
 
     CareConnectPatient patient = new CareConnectPatient();
-    patient.setId(localReferenceService.buildId(ResourceType.Patient, patientEntity.getId()));
+    patient.setId(referenceService.buildId(ResourceType.Patient, patientEntity.getId()));
 
     addNHSId(patient, patientEntity);
     addName(patient, patientEntity);
@@ -54,13 +54,13 @@ public class CareConnectPatientBuilder {
 
   private void addGP(CareConnectPatient patient, PatientEntity patientEntity) {
     // TODO add to entity
-    patient.addGeneralPractitioner(localReferenceService.buildRef(ResourceType.Practitioner, 1));
+    patient.addGeneralPractitioner(referenceService.buildRef(ResourceType.Practitioner, 1));
   }
 
   private void addPharmacy(CareConnectPatient patient,
       PatientEntity patientEntity) {
     // TODO add to entity
-    patient.setNominatedPharmacy(localReferenceService.buildRef(ResourceType.Organization, 1));
+    patient.setNominatedPharmacy(referenceService.buildRef(ResourceType.Organization, 1));
   }
 
   private void addTelecom(CareConnectPatient patient, PatientEntity patientEntity) {

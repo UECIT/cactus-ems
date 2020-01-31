@@ -18,7 +18,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CareConnectObservation;
-import org.hl7.fhir.dstu3.model.CareConnectPatient;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ContactPoint;
@@ -42,6 +41,7 @@ import org.hl7.fhir.dstu3.model.Person;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -50,7 +50,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.SystemURL;
-import uk.nhs.ctp.entities.AuditRecord;
 import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
@@ -64,7 +63,6 @@ import uk.nhs.ctp.service.builder.ReferenceBuilder;
 import uk.nhs.ctp.service.builder.RelatedPersonBuilder;
 import uk.nhs.ctp.service.dto.SettingsDTO;
 import uk.nhs.ctp.service.dto.TriageQuestion;
-import uk.nhs.ctp.service.encounter.EncounterTransformer;
 import uk.nhs.ctp.service.factory.ReferenceBuilderFactory;
 import uk.nhs.ctp.utils.ErrorHandlingUtils;
 
@@ -80,8 +78,8 @@ public class ParametersService {
   private ReferenceBuilderFactory referenceBuilderFactory;
   private AttachmentService attachmentService;
   private AuditService auditService;
-  private EncounterTransformer encounterTransformer;
   private StorageService storageService;
+  private ReferenceService referenceService;
 
   Parameters getEvaluateParameters(
       Long caseId,
@@ -89,7 +87,8 @@ public class ParametersService {
       SettingsDTO settings,
       Boolean amending,
       ReferencingContext referencingContext,
-      String questionnaireId) {
+      String questionnaireId
+  ) {
 
     var referenceBuilder = referenceBuilderFactory.load(referencingContext);
 
@@ -104,8 +103,8 @@ public class ParametersService {
     parameters.setMeta(new Meta().addProfile(SystemURL.SERVICE_DEFINITION_EVALUATE));
 
     setRequestId(parameters, caseId);
-    setPatient(parameters, caseEntity, storageService);
-    setEncounter(parameters, caseEntity, caseAudit);
+    parameters.addParameter(patientParameter(caseEntity.getPatientId()));
+    parameters.addParameter(encounterParameter(caseEntity.getId()));
 
     setContext(caseEntity, parameters);
 
@@ -143,22 +142,17 @@ public class ParametersService {
     return parameters;
   }
 
-  private void setEncounter(Parameters parameters, Cases caseEntity, AuditRecord caseAudit) {
-    // TODO fetch already transformed Encounter from FHIR server ?
-    parameters.addParameter()
+  private ParametersParameterComponent encounterParameter(long encounterId) {
+    return new Parameters.ParametersParameterComponent()
         .setName(SystemConstants.ENCOUNTER)
-        .setResource(encounterTransformer.transform(caseEntity, caseAudit));
+        .setValue(referenceService.buildRef(ResourceType.Encounter, encounterId));
   }
 
-  /**
-   * Fetches a FHIR patient record associated with the case and adds it to the parameters
-   */
-  private void setPatient(Parameters parameters, Cases caseEntity,
-      StorageService storageService) {
+  private ParametersParameterComponent patientParameter(String patientRef) {
     try {
-      CareConnectPatient patient = storageService
-          .findResource(caseEntity.getPatientId(), CareConnectPatient.class);
-      parameters.addParameter().setName(SystemConstants.PATIENT).setResource(patient);
+      return new ParametersParameterComponent()
+          .setName(SystemConstants.PATIENT)
+          .setValue(new Reference(patientRef));
     } catch (FHIRException e) {
       log.error("Unable to add patient record to parameters", e);
       throw new EMSException(HttpStatus.INTERNAL_SERVER_ERROR,

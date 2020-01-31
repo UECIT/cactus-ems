@@ -29,9 +29,6 @@ public class Cases {
   private Long id;
 
   @Column
-  private String encounterId;
-
-  @Column
   private String patientId;
 
   @Column(name = "firstName")
