@@ -72,10 +72,9 @@ public class CdssSupplierService {
 	}
 
 	protected List<CdssSupplierDTO> convertToSupplierDTO(List<CdssSupplier> suppliers) {
-		return suppliers.stream().map(supplier -> {
-			CdssSupplierDTO supplierDTO = new CdssSupplierDTO(supplier);
-			return supplierDTO;
-		}).collect(Collectors.toList());
+		return suppliers.stream()
+				.map(CdssSupplierDTO::new)
+				.collect(Collectors.toList());
 	}
 
 	public CdssSupplier getCdssSupplier(Long id) {

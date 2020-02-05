@@ -1,9 +1,10 @@
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material';
-import {environment} from '../../../environments/environment';
-import { Component, Input, Inject } from '@angular/core';
-import { ReferralRequest } from 'src/app/model/questionnaire';
-import { DosService } from 'src/app/service/dos.service';
-import { HealthcareService } from 'src/app/model/dos';
+import {MatDialogRef, MAT_DIALOG_DATA, MatDialog} from '@angular/material';
+import {Component, Input, Inject} from '@angular/core';
+import {ReferralRequest} from 'src/app/model/questionnaire';
+import {DosService} from 'src/app/service/dos.service';
+import {HealthcareService} from 'src/app/model/dos';
+import {TriageService} from "../../service/triage.service";
+import {ToastrService} from "ngx-toastr";
 
 @Component({
   selector: 'app-dos-display',
@@ -12,27 +13,33 @@ import { HealthcareService } from 'src/app/model/dos';
 })
 export class DosDisplayComponent {
   @Input() referralRequest: ReferralRequest;
+  @Input() caseId: number;
 
   response: HealthcareService[];
   selectedService: HealthcareService;
   error: object;
-  constructor(private dosService: DosService, public dialog: MatDialog) {
+
+  constructor(
+      private dosService: DosService,
+      private triageService: TriageService,
+      private toastr: ToastrService,
+      public dialog: MatDialog) {
   }
 
   async getDosResponse() {
     this.response = null;
     this.error = null;
     await this.dosService
-      .getDosResponse(this.referralRequest)
-      .toPromise()
-      .then(
+    .getDosResponse(this.referralRequest)
+    .toPromise()
+    .then(
         response => {
           this.response = response;
         },
         error => {
           this.error = error;
         }
-      );
+    );
   }
 
   viewDetails(selected: HealthcareService) {
@@ -41,10 +48,18 @@ export class DosDisplayComponent {
     });
   }
 
-  invoke() {
-    const encounterRef = this.referralRequest.contextReference;
-    const url = `${this.selectedService.endpoint}?encounter=${encounterRef}`;
-    window.open(url);
+  async invoke() {
+    try {
+      const encounterRef = this.referralRequest.contextReference;
+      const url = `${this.selectedService.endpoint}?encounter=${encounterRef}`;
+
+      // Service must be updated in referral request before invoking handover
+      await this.triageService.updateSelectedService(this.caseId, this.selectedService);
+
+      window.open(url);
+    } catch (e) {
+      this.toastr.error('Unable to update selected service for case - ' + e.message);
+    }
   }
 }
 
@@ -54,9 +69,10 @@ export class DosDisplayComponent {
 })
 export class HealthcareServiceDialog {
   constructor(public dialogRef: MatDialogRef<HealthcareServiceDialog>,
-    @Inject(MAT_DIALOG_DATA) public service: HealthcareService) {}
+              @Inject(MAT_DIALOG_DATA) public service: HealthcareService) {
+  }
 
-    close(): void {
-      this.dialogRef.close();
-    }
+  close(): void {
+    this.dialogRef.close();
+  }
 }

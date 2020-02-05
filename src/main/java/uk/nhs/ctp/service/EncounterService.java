@@ -1,4 +1,4 @@
-package uk.nhs.ctp.service.encounter;
+package uk.nhs.ctp.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +8,7 @@ import uk.nhs.ctp.entities.AuditRecord;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.repos.AuditRecordRepository;
 import uk.nhs.ctp.repos.CaseRepository;
+import uk.nhs.ctp.transform.EncounterTransformer;
 
 @Service
 @AllArgsConstructor

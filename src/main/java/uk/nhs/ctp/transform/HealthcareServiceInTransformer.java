@@ -25,6 +25,7 @@ public class HealthcareServiceInTransformer
   public HealthcareServiceDTO transform(HealthcareService healthcareService) {
 
     return HealthcareServiceDTO.builder()
+        .id(healthcareService.getId())
         .active(healthcareService.getActive())
         .endpoint(((Endpoint)healthcareService.getEndpointFirstRep().getResource()).getAddress())
         .appointmentRequired(healthcareService.getAppointmentRequired())

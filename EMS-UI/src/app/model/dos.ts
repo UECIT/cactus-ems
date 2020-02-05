@@ -1,5 +1,5 @@
 export class HealthcareService {
-    id: number;
+    id: string;
     name: string;
     endpoint: string;
     description: string;

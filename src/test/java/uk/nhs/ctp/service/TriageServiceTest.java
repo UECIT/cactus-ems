@@ -21,7 +21,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import uk.nhs.ctp.service.dto.CdssRequestDTO;
 import uk.nhs.ctp.service.dto.CdssResponseDTO;
 import uk.nhs.ctp.service.dto.CdssResult;
-import uk.nhs.ctp.service.encounter.EncounterService;
 import uk.nhs.ctp.service.factory.ReferencingContextFactory;
 import uk.nhs.ctp.service.resolver.ResponseResolver;
 

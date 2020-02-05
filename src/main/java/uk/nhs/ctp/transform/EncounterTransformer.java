@@ -1,4 +1,4 @@
-package uk.nhs.ctp.service.encounter;
+package uk.nhs.ctp.transform;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 

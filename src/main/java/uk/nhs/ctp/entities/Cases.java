@@ -14,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -61,23 +62,23 @@ public class Cases {
 
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
   @JoinColumn(name = "case_id")
-  private List<CaseImmunization> immunizations;
+  private List<CaseImmunization> immunizations = new ArrayList<>();
 
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
   @JoinColumn(name = "case_id")
-  private List<CaseObservation> observations;
+  private List<CaseObservation> observations = new ArrayList<>();
 
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
   @JoinColumn(name = "case_id")
-  private List<CaseMedication> medications;
+  private List<CaseMedication> medications = new ArrayList<>();
 
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
   @JoinColumn(name = "case_id")
-  private List<CaseParameter> parameters;
+  private List<CaseParameter> parameters = new ArrayList<>();
 
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
   @JoinColumn(name = "case_id")
-  private List<QuestionResponse> questionResponses;
+  private List<QuestionResponse> questionResponses = new ArrayList<>();
 
   @Column(name = "session_id")
   private String sessionId;
@@ -86,66 +87,31 @@ public class Cases {
   @Column(name = "case_timestamp")
   private Date timestamp;
 
-  public List<CaseImmunization> getImmunizations() {
-    if (this.immunizations == null) {
-      this.immunizations = new ArrayList<>();
-    }
-    return immunizations;
-  }
+  @OneToOne(mappedBy = "caseEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+  protected ReferralRequestEntity referralRequest;
 
-  public List<CaseObservation> getObservations() {
-    if (this.observations == null) {
-      this.observations = new ArrayList<>();
-    }
-    return observations;
-  }
-
-  public List<CaseParameter> getParameters() {
-    if (this.parameters == null) {
-      this.parameters = new ArrayList<>();
-    }
-    return parameters;
-  }
-
-  public List<CaseMedication> getMedications() {
-    if (this.medications == null) {
-      this.medications = new ArrayList<>();
-    }
-    return medications;
+  public void setReferralRequest(ReferralRequestEntity referralRequest) {
+    this.referralRequest = referralRequest;
+    referralRequest.caseEntity = this;
   }
 
   public void addMedication(CaseMedication medication) {
-    if (this.medications == null) {
-      this.medications = new ArrayList<>();
-    }
     this.medications.add(medication);
   }
 
   public void addImmunization(CaseImmunization immunization) {
-    if (this.immunizations == null) {
-      this.immunizations = new ArrayList<>();
-    }
     this.immunizations.add(immunization);
   }
 
   public void addObservation(CaseObservation observation) {
-    if (this.observations == null) {
-      this.observations = new ArrayList<>();
-    }
     this.observations.add(observation);
   }
 
   public void addParameter(CaseParameter parameter) {
-    if (this.parameters == null) {
-      this.parameters = new ArrayList<>();
-    }
     this.parameters.add(parameter);
   }
 
   public void addQuestionResponse(QuestionResponse questionResponse) {
-    if (this.questionResponses == null) {
-      this.questionResponses = new ArrayList<>();
-    }
     this.questionResponses.add(questionResponse);
   }
 }

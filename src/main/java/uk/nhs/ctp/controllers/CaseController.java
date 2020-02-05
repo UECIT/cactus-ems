@@ -15,11 +15,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.repos.CaseRepository;
+import uk.nhs.ctp.service.CaseService;
 import uk.nhs.ctp.service.CdssService;
 import uk.nhs.ctp.service.TriageService;
 import uk.nhs.ctp.service.dto.CdssRequestDTO;
 import uk.nhs.ctp.service.dto.CdssResponseDTO;
 import uk.nhs.ctp.service.dto.CdssSupplierDTO;
+import uk.nhs.ctp.service.dto.SelectedServiceRequestDTO;
 import uk.nhs.ctp.service.dto.ServiceDefinitionSearchDTO;
 import uk.nhs.ctp.service.dto.TriageLaunchDTO;
 import uk.nhs.ctp.service.search.SearchParametersTransformer;
@@ -33,6 +35,7 @@ public class CaseController {
   private final CdssService cdssService;
   private final TriageService triageService;
   private final CaseRepository caseRepository;
+  private final CaseService caseService;
 
   private final SearchParametersTransformer searchParametersTransformer;
 
@@ -68,5 +71,11 @@ public class CaseController {
   public @ResponseBody
   Cases getCase(@PathVariable Long id) {
     return caseRepository.findOne(id);
+  }
+
+  @PutMapping(path = "/selectedService")
+  public @ResponseBody
+  Cases updateSelectedService(@RequestBody SelectedServiceRequestDTO requestDTO) {
+    return caseService.updateSelectedService(requestDTO.getCaseId(), requestDTO.getSelectedServiceId());
   }
 }

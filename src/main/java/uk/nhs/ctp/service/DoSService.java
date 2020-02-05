@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.HealthcareService;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,20 @@ public class DoSService {
 		return fhirContext.newRestfulClient(IRestfulClient.class, dosServer)
 				.searchForHealthcareServices(referralRequest)
 				.getEntry().stream()
-				.map(entry -> (HealthcareService) entry.getResource())
+				.map(entry -> {
+					HealthcareService resource = (HealthcareService) entry.getResource();
+
+					// Establish full URL of resource
+					if (entry.hasFullUrl()) {
+						resource.setId(entry.getFullUrl());
+					} else if (resource.hasId()) {
+						IdType fullId = resource.getIdElement()
+								.withServerBase(dosServer, resource.getResourceType().name());
+						resource.setId(fullId);
+					}
+
+					return resource;
+				})
 				.map(healthcareServiceInTransformer::transform)
 				.collect(Collectors.toList());
 

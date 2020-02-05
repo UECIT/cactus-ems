@@ -18,7 +18,6 @@ import uk.nhs.ctp.service.dto.CdssResponseDTO;
 import uk.nhs.ctp.service.dto.CdssResult;
 import uk.nhs.ctp.service.dto.TriageLaunchDTO;
 import uk.nhs.ctp.service.dto.TriageQuestion;
-import uk.nhs.ctp.service.encounter.EncounterService;
 import uk.nhs.ctp.service.factory.ReferencingContextFactory;
 import uk.nhs.ctp.service.resolver.ResponseResolver;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
@@ -115,7 +114,7 @@ public class TriageService {
 
     // start audit
     AuditRecord auditRecord = auditService.createNewAudit(caseId);
-    CdssResult cdssResult = amendCaseUsingCdss(requestDetails);
+    CdssResult cdssResult = evaluateServiceDefinition(requestDetails);
 
     // Add Audit Record
     CdssResponseDTO cdssResponse = buildAmendResponseDtoFromResult(
@@ -137,30 +136,29 @@ public class TriageService {
   protected CdssResult updateCaseUsingCdss(CdssRequestDTO requestDetails)
       throws ConnectException, JsonProcessingException {
 
-    CdssResult cdssResult = amendCaseUsingCdss(requestDetails);
+    CdssResult cdssResult = evaluateServiceDefinition(requestDetails);
 
     if (cdssResult.hasOutputData() || cdssResult.getSessionId() != null) {
       Long caseId = requestDetails.getCaseId();
       LOG.info("Update case for " + caseId);
-      caseService.updateCase(caseId, cdssResult.getOutputData(),
-          cdssResult.getSessionId());
+      caseService.updateCase(caseId, cdssResult, cdssResult.getSessionId());
     }
 
     return cdssResult;
   }
 
   /**
-   * Executes ServiceDefinition $evaluate operation and stores any output data in the DB
+   * Executes ServiceDefinition $evaluate operation
    *
    * @param requestDetails {@link CdssRequestDTO}
    * @return {@link CdssResult}
    * @throws JsonProcessingException
    */
-  protected CdssResult amendCaseUsingCdss(CdssRequestDTO requestDetails)
+  protected CdssResult evaluateServiceDefinition(CdssRequestDTO requestDetails)
       throws ConnectException, JsonProcessingException {
     var referencingContext = referencingContextFactory.load(requestDetails.getCdssSupplierId());
 
-    Parameters parameters = parametersService.getEvaluateParameters(
+    Parameters request = parametersService.getEvaluateParameters(
         requestDetails.getCaseId(),
         requestDetails.getQuestionResponse(),
         requestDetails.getSettings(),
@@ -168,8 +166,8 @@ public class TriageService {
         referencingContext,
         requestDetails.getQuestionnaireId());
 
-    GuidanceResponse resource = cdssService.evaluateServiceDefinition(
-        parameters,
+    GuidanceResponse response = cdssService.evaluateServiceDefinition(
+        request,
         requestDetails.getCdssSupplierId(),
         requestDetails.getServiceDefinitionId(),
         requestDetails.getCaseId(),
@@ -178,7 +176,7 @@ public class TriageService {
     CdssSupplier cdssSupplier = cdssSupplierService
         .getCdssSupplier(requestDetails.getCdssSupplierId());
 
-    return responseResolver.resolve(resource, cdssSupplier, requestDetails.getSettings(),
+    return responseResolver.resolve(response, cdssSupplier, requestDetails.getSettings(),
         requestDetails.getPatientId());
   }
 

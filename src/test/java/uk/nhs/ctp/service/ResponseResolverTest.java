@@ -31,7 +31,7 @@ import uk.nhs.ctp.service.resolver.ResponseResolver;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
-public class GuidanceResponseServiceTest {
+public class ResponseResolverTest {
 
 	@Autowired
 	private ResponseResolver guidanceResponseService;

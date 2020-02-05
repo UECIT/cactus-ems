@@ -3,8 +3,8 @@ package uk.nhs.ctp.service;
 import static com.google.common.collect.MoreCollectors.onlyElement;
 
 import com.google.common.base.Preconditions;
+import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -20,7 +20,6 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.springframework.stereotype.Service;
@@ -31,12 +30,14 @@ import uk.nhs.ctp.entities.CaseParameter;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.entities.PatientEntity;
 import uk.nhs.ctp.entities.QuestionResponse;
+import uk.nhs.ctp.entities.ReferralRequestEntity;
 import uk.nhs.ctp.entities.TestScenario;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.repos.PatientRepository;
 import uk.nhs.ctp.repos.TestScenarioRepository;
 import uk.nhs.ctp.service.builder.CareConnectPatientBuilder;
-import uk.nhs.ctp.service.encounter.EncounterService;
+import uk.nhs.ctp.service.dto.CdssResult;
+import uk.nhs.ctp.transform.ReferralRequestTransformer;
 import uk.nhs.ctp.utils.ErrorHandlingUtils;
 
 @Service
@@ -48,8 +49,9 @@ public class CaseService {
   private PatientRepository patientRepository;
   private TestScenarioRepository testScenarioRepository;
   private StorageService storageService;
-  private EncounterService encounterService;
   private CareConnectPatientBuilder careConnectPatientBuilder;
+  private ReferralRequestService referralRequestService;
+  private ReferralRequestTransformer referralRequestTransformer;
 
   /**
    * Create new case from patient ID
@@ -126,11 +128,11 @@ public class CaseService {
   /**
    * Convert Output Data Resources to Case Data Records and update Case
    *
-   * @param caseId              {@link Long}
-   * @param outputDataResources {@link List} of {@link Resource}
+   * @param caseId           {@link Long}
+   * @param evaluateResponse results of a request to ServiceDefinition/[id]/$evaluate
    * @return {@link Cases}
    */
-  public Cases updateCase(Long caseId, List<Resource> outputDataResources, String sessionId) {
+  public Cases updateCase(Long caseId, CdssResult evaluateResponse, String sessionId) {
     Cases triageCase = caseRepository.findOne(caseId);
     ErrorHandlingUtils.checkEntityExists(triageCase, "Case");
 
@@ -138,7 +140,8 @@ public class CaseService {
 
     triageCase.setSessionId(sessionId);
 
-    outputDataResources.forEach(resource -> {
+    // Store output data
+    evaluateResponse.getOutputData().forEach(resource -> {
       if (resource instanceof Observation) {
         updateObservation(triageCase, (Observation) resource);
       } else if (resource instanceof Immunization) {
@@ -154,6 +157,14 @@ public class CaseService {
       } else {
         // TODO add code here to deal with storing any items that do not match the above
         log.warn("Unsupported outputParameter type: {}" + resource.getResourceType().name());
+      }
+
+      // Store referral request
+      if (evaluateResponse.getReferralRequest() != null) {
+        log.info("Storing referral request");
+        ReferralRequestEntity referralRequestEntity = referralRequestTransformer
+            .transform(evaluateResponse.getReferralRequest());
+        triageCase.setReferralRequest(referralRequestEntity);
       }
 
     });
@@ -368,7 +379,8 @@ public class CaseService {
    * @param medication
    * @param caseMedication
    */
-  private void updateMedicationCoding(MedicationAdministration medication,
+  private void updateMedicationCoding(
+      MedicationAdministration medication,
       CaseMedication caseMedication) {
     Coding coding;
     try {
@@ -380,4 +392,25 @@ public class CaseService {
     }
   }
 
+  public Cases updateSelectedService(Long caseId, String selectedServiceId) {
+    Cases triageCase = caseRepository.findOne(caseId);
+    ErrorHandlingUtils.checkEntityExists(triageCase, "Case");
+
+    log.info("Setting selected HealthcareService for case " + triageCase.getId());
+
+    Reference serviceRef = new Reference(selectedServiceId);
+    Preconditions.checkArgument(
+        "HealthcareService".equals(serviceRef.getReferenceElement().getResourceType()),
+        "Selected service must be a HealthcareService"
+    );
+    Preconditions.checkNotNull(triageCase.getReferralRequest(), "No referral request found");
+
+    ReferralRequestEntity referralRequestEntity = triageCase.getReferralRequest();
+    referralRequestService.update(referralRequestEntity, referralRequest -> {
+      referralRequest.setRecipient(Collections.singletonList(serviceRef));
+    });
+
+    caseRepository.saveAndFlush(triageCase);
+    return triageCase;
+  }
 }
