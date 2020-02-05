@@ -8,7 +8,7 @@ import lombok.Value;
 @Builder
 public class HealthcareServiceDTO {
 
-  long id;
+  String id;
   String name;
   String endpoint;
   String description;

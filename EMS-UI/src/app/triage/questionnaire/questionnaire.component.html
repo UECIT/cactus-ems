@@ -325,6 +325,7 @@
 
   <app-dos-display
       *ngIf="questionnaire.referralRequest"
+      [(caseId)]="questionnaire.caseId"
       [(referralRequest)]="questionnaire.referralRequest"></app-dos-display>
 
 </ng-template>

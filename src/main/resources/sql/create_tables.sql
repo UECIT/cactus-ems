@@ -94,6 +94,14 @@ CREATE TABLE cdss_decoupling.test_scenario
     FOREIGN KEY (skillset_id) REFERENCES cdss_decoupling.skillset (id)
 );
 
+create table cdss_decoupling.referral_request
+(
+    id       BIGINT AUTO_INCREMENT PRIMARY KEY,
+    case_id  BIGINT   NULL,
+    resource LONGTEXT NULL,
+    FOREIGN KEY (case_id) REFERENCES cases (id)
+);
+
 CREATE TABLE cdss_decoupling.cases
 (
     id             BIGINT       NOT NULL AUTO_INCREMENT,

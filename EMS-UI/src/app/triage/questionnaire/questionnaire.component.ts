@@ -4,9 +4,6 @@ import {Options, Questionnaire, QuestionResponse, TriageQuestion} from '../../mo
 import {QuestionnaireResponse} from '../../model/processTriage';
 import {MatDialog} from '@angular/material';
 import {ReportService} from 'src/app/service/report.service';
-import beautify from 'xml-beautifier';
-import {environment} from 'src/environments/environment';
-import {ToastrService} from 'ngx-toastr';
 import {ServiceDefinitionService} from '../../service/service-definition.service';
 
 
@@ -37,7 +34,6 @@ export class QuestionnaireComponent implements OnInit {
 
   constructor(public dialog: MatDialog,
               private reportService: ReportService,
-              private toastr: ToastrService,
               private serviceDefinitionService: ServiceDefinitionService) {
   }
 
@@ -164,11 +160,7 @@ export class QuestionnaireComponent implements OnInit {
   }
 
   hasInitialValue(triageQuestion: TriageQuestion) {
-    if (triageQuestion.responseAttachmentInitial != null) {
-      return true;
-    } else {
-      return false;
-    }
+    return triageQuestion.responseAttachmentInitial != null;
   }
 
   onStringAnswerChange(responseString: string, triageQuestion: TriageQuestion) {

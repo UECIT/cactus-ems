@@ -11,7 +11,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.entities.PatientEntity;
 import uk.nhs.ctp.repos.PatientRepository;
-import uk.nhs.ctp.service.StorageService;
 import uk.nhs.ctp.service.builder.CareConnectPatientBuilder;
 
 @AllArgsConstructor

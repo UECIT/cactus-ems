@@ -16,7 +16,7 @@ public class HealthcareServiceOutTransformer implements
   @Override
   public HealthcareService transform(HealthcareServiceDTO dto) {
     var healthcareService = new HealthcareService();
-    healthcareService.setId(Long.toString(dto.getId()));
+    healthcareService.setId(dto.getId());
     healthcareService.setActive(dto.isActive());
     healthcareService.addEndpoint()
         .setResource(new Endpoint().setAddress(dto.getEndpoint()));

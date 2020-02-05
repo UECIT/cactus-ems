@@ -12,9 +12,8 @@ public class HealthcareServiceRegistry {
   private String emsServer;
 
   public List<HealthcareServiceDTO> getAll() {
-
     return List.of(HealthcareServiceDTO.builder()
-        .id(1)
+        .id("HealthcareService/1")
         .active(true)
         .endpoint(emsServer + "/fhir")
         .appointmentRequired(false)

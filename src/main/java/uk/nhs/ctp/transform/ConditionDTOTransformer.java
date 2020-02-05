@@ -27,7 +27,7 @@ public class ConditionDTOTransformer implements Transformer<Condition, Condition
     List<String> evidence = condition.getEvidence().stream()
         .map(ConditionEvidenceComponent::getDetail)
         .flatMap(detail -> detail.stream()
-            .map(ref -> referenceService.resolve(ref, storageService))
+            .map(ref -> referenceService.fetch(ref, storageService))
             .map(this::getStringValue))
         .collect(Collectors.toList());
 

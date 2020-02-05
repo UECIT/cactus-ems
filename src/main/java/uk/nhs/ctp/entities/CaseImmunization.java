@@ -10,9 +10,11 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import lombok.Data;
 
 @Entity
 @Table(name = "case_immunization")
+@Data
 public class CaseImmunization {
 
 	@Id
@@ -32,43 +34,4 @@ public class CaseImmunization {
 	@Column(name = "immunization_timestamp")
 	private Date timestamp;
 
-	public Long getId() {
-		return id;
-	}
-
-	public String getCode() {
-		return code;
-	}
-
-	public String getDisplay() {
-		return display;
-	}
-
-	public Boolean getNotGiven() {
-		return notGiven;
-	}
-
-	public Date getTimestamp() {
-		return timestamp;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public void setCode(String code) {
-		this.code = code;
-	}
-
-	public void setDisplay(String display) {
-		this.display = display;
-	}
-
-	public void setNotGiven(Boolean notGiven) {
-		this.notGiven = notGiven;
-	}
-
-	public void setTimestamp(Date timestamp) {
-		this.timestamp = timestamp;
-	}
 }

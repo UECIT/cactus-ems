@@ -1,5 +1,6 @@
 package uk.nhs.ctp.service;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
@@ -14,6 +15,7 @@ import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.Immunization;
 import org.hl7.fhir.dstu3.model.MedicationAdministration;
 import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,83 +33,73 @@ import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.entities.PatientEntity;
+import uk.nhs.ctp.entities.ReferralRequestEntity;
 import uk.nhs.ctp.entities.TestScenario;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.repos.PatientRepository;
 import uk.nhs.ctp.repos.TestScenarioRepository;
 import uk.nhs.ctp.service.builder.CareConnectPatientBuilder;
-import uk.nhs.ctp.service.encounter.EncounterService;
+import uk.nhs.ctp.service.dto.CdssResult;
+import uk.nhs.ctp.transform.ReferralRequestEntityTransformer;
+import uk.nhs.ctp.transform.ReferralRequestTransformer;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
 public class CaseServiceTest {
 
   @Autowired
-  @InjectMocks
-  private CaseService caseService;
-
-  @InjectMocks
-  private CaseService spyCaseService;
-
+  private ReferralRequestService referralRequestService;
+  @Autowired
+  private ReferralRequestTransformer referralRequestTransformer;
+  @Autowired
+  private ReferralRequestEntityTransformer referralRequestEntityTransformer;
   @Autowired
   private CareConnectPatientBuilder careConnectPatientBuilder;
 
   @Mock
   private CaseRepository mockCaseRepository;
-
   @Mock
   private PatientRepository mockPatientRepository;
-
   @Mock
   private TestScenarioRepository mockTestScenarioRepository;
-
   @Mock
   private StorageService storageService;
-
-  @Mock
-  EncounterService encounterService;
-
-  PatientEntity patient;
   @Mock
   TestScenario testScenario;
-
   @Mock
   Observation observation;
-
   @Mock
   Immunization immunization;
-
   @Mock
   CaseObservation caseObservation;
-
   @Mock
   CaseImmunization caseImmunization;
-
   @Mock
   CaseMedication caseMedication;
-
-  @Mock
-  Cases triageCase;
-
   @Mock
   MedicationAdministration medication;
-
   @Mock
   Condition condition;
+
+  @InjectMocks
+  private CaseService spyCaseService;
+
+  PatientEntity patient;
+  Cases triageCase;
 
   List<Resource> resourcesObservationsOnly, resourcesImmunizationsOnly, resourcesMedicationsOnly,
       resourcesMultiple, resourcesUnknownType;
 
   @Before
   public void setup() {
-
     spyCaseService = spy(new CaseService(
         mockCaseRepository,
         mockPatientRepository,
         mockTestScenarioRepository,
         storageService,
-        encounterService,
-        careConnectPatientBuilder
+        careConnectPatientBuilder,
+        referralRequestService,
+        referralRequestTransformer
     ));
 
     MockitoAnnotations.initMocks(this);
@@ -116,6 +108,10 @@ public class CaseServiceTest {
     patient.setFirstName("Joe");
     patient.setLastName("Bloggs");
     patient.setGender("male");
+
+    triageCase = new Cases();
+    triageCase.setId(1L);
+    triageCase.setPatientId("Patient/1");
 
     resourcesObservationsOnly = new ArrayList<>();
     resourcesImmunizationsOnly = new ArrayList<>();
@@ -157,7 +153,9 @@ public class CaseServiceTest {
 
   @Test
   public void testCaseMedicationsStoredWhenOutputDataContainsMedicationsOnly() {
-    spyCaseService.updateCase(1L, resourcesMedicationsOnly, "123456789");
+    CdssResult response = new CdssResult();
+    response.setOutputData(resourcesMedicationsOnly);
+    spyCaseService.updateCase(1L, response, "123456789");
 
     verify(spyCaseService, times(0)).createCaseObservation(any());
     verify(spyCaseService, times(0)).createCaseImmunization(any());
@@ -166,11 +164,26 @@ public class CaseServiceTest {
 
   @Test
   public void testAllCaseDataStoredWhenOutputDataContainsMultipleResources() {
-    spyCaseService.updateCase(1L, resourcesMultiple, "123456789");
+    CdssResult response = new CdssResult();
+    response.setOutputData(resourcesMultiple);
+    spyCaseService.updateCase(1L, response, "123456789");
 
     verify(spyCaseService, times(1)).createCaseObservation(any());
     verify(spyCaseService, times(1)).createCaseImmunization(any());
     verify(spyCaseService, times(1)).createCaseMedication(any());
   }
 
+  @Test
+  public void testUpdateSelectedService() {
+    ReferralRequestEntity referralRequestEntity = referralRequestTransformer
+        .transform(new ReferralRequest());
+    triageCase.setReferralRequest(referralRequestEntity);
+
+    Cases cases = spyCaseService.updateSelectedService(1L, "HealthcareService/5");
+    referralRequestEntity = cases.getReferralRequest();
+    ReferralRequest referralRequest = referralRequestEntityTransformer
+        .transform(referralRequestEntity);
+
+    assertEquals("HealthcareService/5", referralRequest.getRecipientFirstRep().getReference());
+  }
 }

@@ -5,7 +5,6 @@ import {
   OnChanges,
   SimpleChanges
 } from '@angular/core';
-import { CdssSupplier } from '../model/cdssSupplier';
 import { ServiceDefinitionService } from '../service/service-definition.service';
 import { ToastrService } from 'ngx-toastr';
 
