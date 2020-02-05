@@ -54,12 +54,14 @@ public class EncounterProvider implements IResourceProvider {
 
     ReferralRequestEntity referralRequestEntity = referralRequestRepository
         .findByCaseEntity_Id(encounterIdLong);
-    ReferralRequest referralRequest = referralRequestEntityTransformer
-        .transform(referralRequestEntity);
-    bundle.addEntry()
-        .setFullUrl(
-            referenceService.buildId(ResourceType.ReferralRequest, referralRequestEntity.getId()))
-        .setResource(referralRequest);
+    if (referralRequestEntity != null) {
+      ReferralRequest referralRequest = referralRequestEntityTransformer
+          .transform(referralRequestEntity);
+      bundle.addEntry()
+          .setFullUrl(
+              referenceService.buildId(ResourceType.ReferralRequest, referralRequestEntity.getId()))
+          .setResource(referralRequest);
+    }
 
     return bundle;
   }
