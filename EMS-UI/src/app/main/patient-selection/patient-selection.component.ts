@@ -13,8 +13,6 @@ export class PatientSelectionComponent {
 
   selectedPatient: Patient;
 
-  constructor() { }
-
   ngOnChanges() {
     if (this.patients) {
       this.selectedPatient = this.patients[0];

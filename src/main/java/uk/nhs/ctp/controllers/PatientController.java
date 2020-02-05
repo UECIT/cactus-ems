@@ -2,7 +2,7 @@ package uk.nhs.ctp.controllers;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,14 +15,10 @@ import uk.nhs.ctp.repos.PatientRepository;
 @CrossOrigin
 @RestController
 @RequestMapping(path = "/patient")
+@RequiredArgsConstructor
 public class PatientController {
 
-  /*
-   * Endpoints to retrieve, update and delete patients
-   */
-
-  @Autowired
-  private PatientRepository patientRepository;
+  private final PatientRepository patientRepository;
 
   @GetMapping(path = "/all")
   public @ResponseBody

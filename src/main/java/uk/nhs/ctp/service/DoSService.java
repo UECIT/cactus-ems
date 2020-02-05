@@ -7,11 +7,10 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.HealthcareService;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.service.dto.HealthcareServiceDTO;
@@ -19,9 +18,6 @@ import uk.nhs.ctp.transform.HealthcareServiceInTransformer;
 
 @Service
 public class DoSService {
-
-	private static final Logger LOG = LoggerFactory.getLogger(DoSService.class);
-
 	@Value("${dos.server}")
 	private String dosServer;
 
@@ -44,7 +40,8 @@ public class DoSService {
 
 		return fhirContext.newRestfulClient(IRestfulClient.class, dosServer)
 				.searchForHealthcareServices(referralRequest)
-				.getEntry().stream()
+				.getEntry()
+				.stream()
 				.map(entry -> {
 					HealthcareService resource = (HealthcareService) entry.getResource();
 

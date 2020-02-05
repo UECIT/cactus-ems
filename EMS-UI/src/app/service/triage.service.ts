@@ -1,16 +1,18 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {Questionnaire} from '../model/questionnaire';
-import {LaunchTriage} from '../model/launchTriage';
-import {ProcessTriage} from '../model/processTriage';
+import {
+  Questionnaire,
+  LaunchTriage,
+  ProcessTriage,
+  SelectService,
+  CdssSupplier,
+  ServiceDefinition,
+  HealthcareService,
+  Case } from '../model';
 import {environment} from '../../environments/environment';
 import 'rxjs/operators/map';
 import {SessionStorage} from 'h5webstorage';
-import {SelectService} from "../model/selectService";
-import {CdssSupplier, ServiceDefinition} from "../model/cdssSupplier";
-import {HealthcareService} from "../model/dos";
-import {Case} from "../model/case";
 
 const httpOptions = {
   headers: new HttpHeaders({

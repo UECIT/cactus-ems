@@ -32,6 +32,9 @@ public class Cases {
   @Column
   private String patientId;
 
+  @Column
+  private String practitionerId;
+
   @Column(name = "firstName")
   private String firstName;
 

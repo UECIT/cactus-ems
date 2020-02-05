@@ -59,7 +59,7 @@ public class CaseService {
    * @param patientId {@link Long}
    * @return {@link Cases}
    */
-  public Cases createCase(Long patientId) {
+  public Cases createCase(Long patientId, String practitionerId) {
 
     PatientEntity patient = patientRepository.findOne(patientId);
     ErrorHandlingUtils.checkEntityExists(patient, "Patient");
@@ -69,13 +69,13 @@ public class CaseService {
     ErrorHandlingUtils.checkEntityExists(testScenario, "Test Scenario");
 
     CareConnectPatient patientResource = careConnectPatientBuilder.build(patient);
-    return createCase(patientResource, testScenario);
+    return createCase(patientResource, practitionerId, testScenario);
   }
 
   /**
    * Create new case from patient resource reference
    */
-  public Cases createCase(String patientRef, TestScenario testScenario) {
+  public Cases createCase(String patientRef, String practitionerId, TestScenario testScenario) {
     String resourceType = new Reference(patientRef).getReferenceElement().getResourceType();
     Preconditions.checkArgument(resourceType.equalsIgnoreCase("Patient"),
         "Case must be created with a Patient resource");
@@ -83,18 +83,19 @@ public class CaseService {
     CareConnectPatient patientResource = storageService
         .findResource(patientRef, CareConnectPatient.class);
 
-    return createCase(patientResource, testScenario);
+    return createCase(patientResource, practitionerId, testScenario);
   }
 
   /**
    * Create new case from patient resource
    */
-  public Cases createCase(CareConnectPatient patient, TestScenario testScenario) {
+  public Cases createCase(CareConnectPatient patient, String practitionerId, TestScenario testScenario) {
 
     log.info("Creating case for patient: " + patient.getNameFirstRep().getNameAsSingleString());
 
     Cases triageCase = new Cases();
     triageCase.setPatientId(patient.getId());
+    triageCase.setPractitionerId(practitionerId);
     setCaseDetails(triageCase, patient, testScenario);
 
     // Store a mostly empty encounter record for future reference

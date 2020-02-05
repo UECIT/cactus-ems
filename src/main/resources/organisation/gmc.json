@@ -1,0 +1,11 @@
+{
+  "id": "gmc",
+  "name": "General Medical Council",
+  "identifiers": [
+    {
+      "value": "4236457",
+      "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+      "type": "oc"
+    }
+  ]
+}

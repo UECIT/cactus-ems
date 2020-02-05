@@ -1,3 +1,5 @@
+import { Extension } from "./extension";
+
 export class Questionnaire {
   caseId: number;
   cdssSupplierId: number;
@@ -66,11 +68,6 @@ export class Options {
   code: string;
   display: string;
   extension: Extension;
-}
-
-export class Extension { //TODO: remove this version of extension
-  url: string;
-  value: string;
 }
 
 export class QuestionExtension {

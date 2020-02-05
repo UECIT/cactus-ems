@@ -64,6 +64,7 @@ public class CaseServiceTest {
   private TestScenarioRepository mockTestScenarioRepository;
   @Mock
   private StorageService storageService;
+
   @Mock
   TestScenario testScenario;
   @Mock

@@ -61,6 +61,7 @@ import { ToastrModule } from 'ngx-toastr';
 import { TriageSelectionComponent } from './main/triage-selection/triage-selection.component';
 import { PatientSelectionComponent } from './main/patient-selection/patient-selection.component';
 import { ReferralRequestComponent, ConditionDialog } from './triage/referral-request/referral-request.component';
+import { PractitionerSelectionComponent } from './main/practitioner-selection/practitioner-selection.component';
 
 export function hljsLanguages() {
   return [
@@ -105,7 +106,8 @@ export function hljsLanguages() {
     PatientSelectionComponent,
     HealthcareServiceDialog,
     ReferralRequestComponent,
-    ConditionDialog
+    ConditionDialog,
+    PractitionerSelectionComponent
   ],
   entryComponents: [SwitchSupplierDialogComponent, SwitchServicePromptDialogComponent, HandoverMessageDialogComponent, HealthcareServiceDialog, ConditionDialog],
   imports: [

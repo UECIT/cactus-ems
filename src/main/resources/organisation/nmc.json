@@ -1,0 +1,11 @@
+{
+  "id": "nmc",
+  "name": "Nursing and Midwifery Council",
+  "identifiers": [
+    {
+      "value": "1236497",
+      "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+      "type": "oc"
+    }
+  ]
+}
