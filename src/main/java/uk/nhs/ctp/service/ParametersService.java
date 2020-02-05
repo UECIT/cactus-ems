@@ -1,5 +1,6 @@
 package uk.nhs.ctp.service;
 
+import static uk.nhs.ctp.utils.ResourceProviderUtils.getParameterAsReference;
 import static uk.nhs.ctp.utils.ResourceProviderUtils.getParameterAsResource;
 import static uk.nhs.ctp.utils.ResourceProviderUtils.getParameterByName;
 
@@ -439,13 +440,14 @@ public class ParametersService {
    */
   private void saveQuestionnaireResponse(
       TriageQuestion[] questionResponse,
-      Parameters parameters,
+      Parameters parametersResource,
       Boolean amending,
       StorageService storageService,
       ReferenceBuilder referenceBuilder,
       String questionnaireId,
       Cases caseEntity,
       List<QuestionnaireResponse> questionnaireResponses) {
+    var parameters = parametersResource.getParameter();
     if (questionResponse != null) {
       QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse()
           .setQuestionnaire(new Reference(new IdType(SystemConstants.QUESTIONNAIRE,
@@ -459,17 +461,19 @@ public class ParametersService {
       }
 
       var inputParameters = getParameterAsResource(
-          parameters.getParameter(),
+          parameters,
           SystemConstants.INPUT_PARAMETERS,
           Parameters.class);
       var context = getParameterByName(inputParameters.getParameter(), SystemConstants.CONTEXT);
       var partyComponent = getParameterByName(context.getPart(), SystemConstants.PARTY);
 
-      var patient = partyComponent.getValue().primitiveValue().equals("1")
-          ? getParameterAsResource(parameters.getParameter(), SystemConstants.PATIENT)
-          : relatedPersonBuilder.build(context);
-
-      questionnaireResponse.setSource(referenceBuilder.getReference(patient));
+      if (partyComponent.getValue().primitiveValue().equals("1")) {
+        var patient = getParameterAsReference(parameters, SystemConstants.PATIENT);
+        questionnaireResponse.setSource(patient);
+      } else {
+        var patient = relatedPersonBuilder.build(context);
+        questionnaireResponse.setSource(referenceBuilder.getReference(patient));
+      }
 
       var qr = questionnaireResponses.stream()
           .filter(equalQuestionnaireIds(questionnaireId))
@@ -494,14 +498,15 @@ public class ParametersService {
       }
 
       questionnaireResponses.forEach(
-          resource -> parameters.addParameter().setName(SystemConstants.INPUT_DATA)
+          resource -> parametersResource.addParameter()
+              .setName(SystemConstants.INPUT_DATA)
               .setResource(resource));
     }
   }
 
   private Predicate<QuestionnaireResponse> equalQuestionnaireIds(String questionnaireId) {
-    return resp -> resp.getQuestionnaire().getReference().split("/")[1]
-        .equals(questionnaireId);
+    return resp -> new IdType(resp.getQuestionnaire().getReference())
+        .getIdPart().equals(questionnaireId);
   }
 
   private void setContext(Cases caseEntity, Parameters parameters) {

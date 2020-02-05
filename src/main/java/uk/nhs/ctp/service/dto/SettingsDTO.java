@@ -14,5 +14,6 @@ public class SettingsDTO {
 	private CodeDTO recipientLanguage;
 	private CodeDTO setting;
 	private CodeDTO jurisdiction;
+	private PractitionerDTO practitioner;
 
 }

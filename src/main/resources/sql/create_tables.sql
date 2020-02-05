@@ -120,6 +120,8 @@ CREATE TABLE cdss_decoupling.cases
     party_id       BIGINT       NULL,
     session_id     VARCHAR(2500),
     case_timestamp DATETIME     NULL,
+    patientId      VARCHAR(255) NULL,
+    practitionerId VARCHAR(255) NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (party_id) REFERENCES cdss_decoupling.party (id),
     FOREIGN KEY (skillset_id) REFERENCES cdss_decoupling.skillset (id)

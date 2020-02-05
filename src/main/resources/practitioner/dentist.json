@@ -1,0 +1,16 @@
+{
+  "id": "dentist",
+  "name": {
+    "given": "Fangs",
+    "family": "McDentalson"
+  },
+  "identifiers": [{
+    "issuerId": "gdc",
+    "system": "https://fhir.hl7.org.uk/Id/gdc-number",
+    "value": "4444444"
+  }, {
+    "issuerId": "gmc",
+    "system": "https://fhir.hl7.org.uk/Id/gmc-number",
+    "value": "3444444"
+  }]
+}

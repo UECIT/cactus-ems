@@ -29,6 +29,7 @@ import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Before;
@@ -551,12 +552,11 @@ public class ParametersServiceTest {
         .collect(Collectors.toList());
 
     assertEquals(1, patientParams.size());
-    assertNotNull(patientParams.get(0).getResource());
+    assertNotNull(patientParams.get(0).getValue());
 
-    Patient patient = (Patient) patientParams.get(0).getResource();
+    var patient = (Reference) patientParams.get(0).getValue();
 
-    assertEquals(AdministrativeGender.MALE, patient.getGender());
-    assertEquals(calendar.getTime(), patient.getBirthDate());
+    assertEquals(patient.getReference(), "Patient/1");
   }
 
   private Cases newCase() {

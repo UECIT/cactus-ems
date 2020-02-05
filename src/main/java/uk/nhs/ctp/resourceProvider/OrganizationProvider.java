@@ -3,24 +3,23 @@ package uk.nhs.ctp.resourceProvider;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.dstu3.model.CareConnectOrganization;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.stereotype.Component;
-import uk.nhs.ctp.service.builder.CareConnectOrganizationBuilder;
+import uk.nhs.ctp.service.OrganisationService;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Component
 public class OrganizationProvider implements IResourceProvider {
 
-  private final CareConnectOrganizationBuilder organizationBuilder;
+  private final OrganisationService organisationService;
 
   @Read
   public CareConnectOrganization getOrganization(@IdParam IdType id) {
-    // TODO add to database
-    return organizationBuilder.build();
+    return organisationService.get(id.getIdPart());
   }
 
   @Override

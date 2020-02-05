@@ -1,14 +1,20 @@
 <!-- Patient selection -->
 <patient-selection
-  [patients]="patients"
-  (onChange)="addPatientToStore($event)">
+    [patients]="patients"
+    (onChange)="addPatientToStore($event)">
 </patient-selection>
+
+<!-- Practitioner selection -->
+<practitioner-selection
+    [practitioners]="practitioners"
+    (onChange)="addPractitionerToStore($event)">
+</practitioner-selection>
 
 <!-- Role selection -->
 <triage-selection
-  [title]="'Select Role'"
-  [options]="roles"
-  (onChange)="addRoleToStore($event)">
+    [title]="'Select Role'"
+    [options]="roles"
+    (onChange)="addRoleToStore($event)">
 </triage-selection>
 
 <!-- Setting selection -->

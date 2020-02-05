@@ -20,6 +20,7 @@ import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.entities.PatientEntity;
+import uk.nhs.ctp.enums.Language;
 import uk.nhs.ctp.service.ReferenceService;
 
 @Component
@@ -112,9 +113,8 @@ public class CareConnectPatientBuilder {
     String languageCode = patientEntity.getLanguage();
     if (StringUtils.isNotEmpty(languageCode)) {
       try {
-        CareConnectLanguage language = CareConnectLanguage.valueOf(languageCode);
-        patient.addCommunication()
-            .setLanguage(language.toCodeableConcept());
+        Language language = Language.fromCode(languageCode);
+        patient.addCommunication().setLanguage(language.toCodeableConcept());
       } catch (IllegalArgumentException e) {
         log.warn("Unrecognised language code {}", languageCode);
       }

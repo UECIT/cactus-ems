@@ -1,0 +1,12 @@
+{
+  "id": "nurse",
+  "name": {
+    "given": "Claire",
+    "family": "Temple"
+  },
+  "identifiers": [{
+    "issuerId": "nmc",
+    "system": "https://fhir.hl7.org.uk/Id/nmc-pin",
+    "value": "6243572"
+  }]
+}

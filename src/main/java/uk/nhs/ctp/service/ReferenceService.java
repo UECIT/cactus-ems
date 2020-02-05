@@ -21,12 +21,18 @@ public class ReferenceService {
   private String emsServer;
 
   public String buildId(ResourceType resourceType, long id) {
+    return buildId(resourceType, Long.toString(id));
+  }
+  public String buildId(ResourceType resourceType, String id) {
     return UriComponentsBuilder.fromUriString(emsServer)
-        .pathSegment("fhir", resourceType.name(), Long.toString(id))
+        .pathSegment("fhir", resourceType.name(), id)
         .build().toUriString();
   }
 
   public Reference buildRef(ResourceType resourceType, long id) {
+    return new Reference(buildId(resourceType, id));
+  }
+  public Reference buildRef(ResourceType resourceType, String id) {
     return new Reference(buildId(resourceType, id));
   }
 

@@ -23,14 +23,16 @@ import uk.nhs.ctp.SystemCode;
 @Component
 public class ResourceProviderUtils {
 
-	public static Resource getParameterAsResource(
-			List<ParametersParameterComponent> parameters, String parameterName) {
-		return getParameterByName(parameters, parameterName).getResource();
+	public static Reference getParameterAsReference(
+			List<ParametersParameterComponent> parameters,
+			String parameterName) {
+
+		return castToType(getParameterByName(parameters, parameterName).getValue(), Reference.class);
 	}
 	
 	public static <T extends Resource> T getParameterAsResource(
 			List<ParametersParameterComponent> parameters, String parameterName, Class<T> resourceClass) {
-		
+
 		return getResource(getParameterByName(parameters, parameterName).getResource(), resourceClass);
 	}
 	
@@ -56,7 +58,8 @@ public class ResourceProviderUtils {
 	static List<ParametersParameterComponent> getParametersByName(List<ParametersParameterComponent> parameters,
 			String parameterName) {
 
-		return parameters.stream().filter(currentParameter -> parameterName.equals(currentParameter.getName()))
+		return parameters.stream()
+				.filter(p -> parameterName.equals(p.getName()))
 				.collect(Collectors.toList());
 	}
 

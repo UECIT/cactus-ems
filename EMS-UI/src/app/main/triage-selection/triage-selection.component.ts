@@ -8,13 +8,10 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 export class TriageSelectionComponent {
 
   @Input() title: String;
-  @Input() buttonText: String;
   @Input() options: any[];
   @Output() onChange = new EventEmitter<any>();
 
   selected: any;
-
-  constructor() { }
 
   ngOnChanges() {
     if (this.options) {

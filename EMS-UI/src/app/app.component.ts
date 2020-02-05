@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { environment } from '../environments/environment';
-import { Settings, Person } from './model/settings';
-import { Code } from './model/case';
+import { Settings, Person, Code, Practitioner } from './model';
 import { SessionStorage } from 'h5webstorage';
 import { ToastrService } from 'ngx-toastr';
 
@@ -47,6 +46,10 @@ export class AppComponent  implements OnInit {
   
       this.settings.recipientType.code = '116154003';
       this.settings.recipientType.display = 'Patient';
+
+      this.settings.practitioner = new Practitioner();
+      this.settings.practitioner.id = "gp";
+      this.settings.practitioner.name = "Dr M Khan";
   
       this.settings.recipientLanguage.code = 'en';
       this.settings.recipientLanguage.display = 'English';

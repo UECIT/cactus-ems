@@ -1,0 +1,18 @@
+<div class="row">
+  <div class="col-sm-12 text-center">
+    <div class="section">
+      <div class="sectionTitle">Select Practitioner</div>
+      <nav class="d-flex flex-wrap">
+        <div *ngFor="let practitioner of practitioners">
+          <button mat-raised-button [class.selected]="practitioner == selectedPractitioner"
+                  class="btn btn-primary btnSearch text-center" (click)="change(practitioner)">
+            <div>{{ practitioner.name }}</div>
+            <div>
+              Role: {{ practitioner.id }}
+            </div>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </div>
+</div>

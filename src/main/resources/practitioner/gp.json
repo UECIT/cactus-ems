@@ -1,0 +1,45 @@
+{
+  "id": "gp",
+  "name": {
+    "prefix": "Dr",
+    "given": "M",
+    "family": "Khan"
+  },
+  "identifiers": [
+    {
+      "issuerId": "erp",
+      "system": "https://fhir.hl7.org.uk/Id/sds-user-id",
+      "value": "1111111",
+      "type": "sds"
+    }, {
+      "issuerId": "erp",
+      "system": "https://fhir.hl7.org.uk/Id/sds-role-profile-id",
+      "value": "1111112",
+      "type": "sdsr"
+  }],
+  "communicationPreferences": {
+    "preferred": true,
+    "interpreterRequired": false,
+    "language": "bs",
+    "communicationMode": "RSP",
+    "communicationProficiency": "E"
+  },
+  "address": {
+    "lines": [
+      "Dunelm Medical Practice",
+      "Gilesgate Medical Centre",
+      "Sunderland Rd"
+    ],
+    "city": "Durham",
+    "postcode": "S25 4HE",
+    "use": "work"
+  },
+  "contact": [
+    {
+      "value": "01914564521",
+      "system": "phone",
+      "use": "work"
+    }
+  ],
+  "qualification": "gp"
+}

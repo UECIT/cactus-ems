@@ -9,20 +9,17 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.stereotype.Component;
-import uk.nhs.ctp.service.builder.CareConnectOrganizationBuilder;
-import uk.nhs.ctp.service.builder.CareConnectPractitionerBuilder;
+import uk.nhs.ctp.service.PractitionerService;
 
 @AllArgsConstructor
 @Component
 public class PractitionerProvider implements IResourceProvider {
 
-  private final CareConnectOrganizationBuilder organizationBuilder;
-  private final CareConnectPractitionerBuilder practitionerBuilder;
+  private final PractitionerService practitionerService;
 
   @Read
   public CareConnectPractitioner getPractitioner(@IdParam IdType id) {
-    // TODO add to database
-    return practitionerBuilder.build(organizationBuilder.build());
+    return practitionerService.get(id.getIdPart());
   }
 
   @Override

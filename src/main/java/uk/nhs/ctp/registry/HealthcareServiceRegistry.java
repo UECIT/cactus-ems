@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import uk.nhs.ctp.service.dto.HealthcareServiceDTO;
 
 @Component
-public class HealthcareServiceRegistry {
+public class HealthcareServiceRegistry implements Registry<HealthcareServiceDTO> {
 
   @Value("${ems.server}")
   private String emsServer;

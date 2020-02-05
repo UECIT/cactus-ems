@@ -34,11 +34,10 @@ export interface DialogData {
 })
 export class TriageComponent implements OnInit {
   questionnaire: Questionnaire;
-  state: Observable<Patient>;
   patientId: number;
   answerSelected: QuestionResponse[];
-  triage: ProcessTriage = new ProcessTriage();
-  questionnaireResponse: QuestionnaireResponse = new QuestionnaireResponse();
+  triage = new ProcessTriage();
+  questionnaireResponse = new QuestionnaireResponse();
   case: Case;
   isLoading = true;
   cdssSupplierName: string;
@@ -51,16 +50,13 @@ export class TriageComponent implements OnInit {
   constructor(
     public router: Router,
     private triageService: TriageService,
-    private store: Store<AppState>,
     private caseService: CaseService,
     public dialog: MatDialog,
     private sessionStorage: SessionStorage,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    store: Store<AppState>,
   ) {
-    this.state = this.store.select('patient');
-    this.state.subscribe(res => {
-      this.patientId = res.id;
-    });
+    store.select('patient').subscribe(({ id }) => this.patientId = id);
   }
 
   async ngOnInit() {

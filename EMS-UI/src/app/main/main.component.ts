@@ -1,19 +1,21 @@
 import {Component, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
-import {Patient} from '../model/patient';
-import {PatientService} from '../service/patient.service';
+import {MatSnackBar} from '@angular/material';
 import {Store} from '@ngrx/store';
+import {ToastrService} from 'ngx-toastr';
+import {SessionStorage} from 'h5webstorage';
+import {
+  Patient,
+  CdssSupplier,
+  ServiceDefinition,
+  SelectService,
+  Code,
+  Settings,
+  Practitioner
+} from '../model';
+import {PatientService, CdssService, TriageService, PractitionerService} from '../service';
 import {AppState} from '../app.state';
 import * as PatientActions from '../actions/patient.actions';
-import {CdssService} from '../service/cdss.service';
-import {CdssSupplier, ServiceDefinition} from '../model/cdssSupplier';
-import {MatSnackBar} from '@angular/material';
-import {SessionStorage} from 'h5webstorage';
-import {SelectService} from '../model/selectService';
-import {TriageService} from '../service/triage.service';
-import {ToastrService} from 'ngx-toastr';
-import {Code} from '../model/case';
-import {Settings} from '../model/settings';
 
 
 @Component({
@@ -25,6 +27,7 @@ export class MainComponent implements OnInit {
   items = [{text: 'Manage Users'}, {text: 'Settings'}];
 
   patients: Patient[];
+  practitioners: Practitioner[];
   selectedPatient: Patient;
   cdssSuppliers: CdssSupplier[];
   serviceDefinitions: ServiceDefinition[];
@@ -45,6 +48,7 @@ export class MainComponent implements OnInit {
       private store: Store<AppState>,
       private cdssSupplierService: CdssService,
       private triageService: TriageService,
+      private practitionerService: PractitionerService,
       public snackBar: MatSnackBar,
       private sessionStorage: SessionStorage,
       private toastr: ToastrService
@@ -52,11 +56,9 @@ export class MainComponent implements OnInit {
   }
 
   disableLaunch() {
-    return !(
-        this.selectedPatient != null &&
-        this.selectedSupplier != null &&
-        this.selectedServiceDefinition != null
-    );
+    return this.selectedPatient == null ||
+           this.selectedSupplier == null ||
+           this.selectedServiceDefinition == null;
   }
 
   ngOnInit() {
@@ -65,6 +67,7 @@ export class MainComponent implements OnInit {
     this.getRoles();
     this.getSettings();
     this.getJurisdictions();
+    this.getPractitioners();
     this.getSelectionModeOptions();
 
     var settings: Settings = this.sessionStorage['settings'];
@@ -107,9 +110,12 @@ export class MainComponent implements OnInit {
     this.store.dispatch(new PatientActions.AddPatient(this.selectedPatient));
   }
 
+  async getPractitioners() {
+    this.practitioners = await this.practitionerService.getAllPractitioners().toPromise();
+  }
+
   async getCdssSuppliers() {
-    this.cdssSuppliers =
-        await this.cdssSupplierService.getCdssSuppliers().toPromise();
+    this.cdssSuppliers = await this.cdssSupplierService.getCdssSuppliers().toPromise();
   }
 
   getRoles() {
@@ -132,7 +138,7 @@ export class MainComponent implements OnInit {
         'code': 'PA',
         'display': 'Patient'
       }
-    ]
+    ];
   }
 
   getSettings() {
@@ -149,7 +155,7 @@ export class MainComponent implements OnInit {
         'code': 'phone',
         'display': 'Phone call'
       }
-    ]
+    ];
   }
 
   getJurisdictions() {
@@ -166,7 +172,7 @@ export class MainComponent implements OnInit {
         'code': 'TK',
         'display': 'Tokelau'
       }
-    ]
+    ];
   }
 
   getSelectionModeOptions() {
@@ -179,7 +185,7 @@ export class MainComponent implements OnInit {
         'id':'manual',
         'display': 'Manual'
       }
-    ]
+    ];
   }
 
   async setSelectedSupplier(supplier: CdssSupplier) {
@@ -213,6 +219,12 @@ export class MainComponent implements OnInit {
     settings.jurisdiction = jurisdiction;
     this.sessionStorage.setItem('settings', JSON.stringify(settings));
     this.autoSelectServiceDefinition(false);
+  }
+
+  addPractitionerToStore(practitioner: Practitioner) {
+    var settings: Settings = this.sessionStorage['settings'];
+    settings.practitioner = practitioner;
+    this.sessionStorage.setItem('settings', JSON.stringify(settings));
   }
 
   addPatientToStore(patient: Patient) {

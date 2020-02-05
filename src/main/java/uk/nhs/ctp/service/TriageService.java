@@ -48,7 +48,9 @@ public class TriageService {
   public CdssResponseDTO launchTriage(TriageLaunchDTO requestDetails)
       throws ConnectException, JsonProcessingException, FHIRException {
 
-    Cases triageCase = caseService.createCase(requestDetails.getPatientId());
+    Cases triageCase = caseService.createCase(
+        requestDetails.getPatientId(),
+        requestDetails.getSettings().getPractitioner().getId());
 
     CdssRequestDTO cdssRequest = new CdssRequestDTO();
     cdssRequest.setCaseId(triageCase.getId());

@@ -1,4 +1,4 @@
-import { Code } from './case';
+import { Code, Practitioner } from '.';
 
 export class Settings {
   initiatingPerson: Person;
@@ -10,6 +10,7 @@ export class Settings {
   recipientLanguage: Code;
   setting: Code;
   jurisdiction: Code;
+  practitioner: Practitioner;
 }
 
 export class Person {
