@@ -26,7 +26,7 @@ export class NavigationComponent implements OnInit {
 
   logoff() {
     if (this.sessionStorage['auth_token'] != null) {
-      this.loginService.logout(null);
+      this.loginService.logout(null, null);
     }
   }
 

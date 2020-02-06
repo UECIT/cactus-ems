@@ -6,9 +6,8 @@ import {
   ReferencingType,
   ReferencingTypes
 } from '../../model/cdssSupplier';
-import { ManageUsersService } from 'src/app/service/manage-users.service';
 import { CdssService } from 'src/app/service/cdss.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { LoginService } from 'src/app/service/login.service';
 
 @Component({
@@ -103,7 +102,7 @@ export class CreateCdssSupplierComponent implements OnInit {
       error => {
         this.error = true;
         if (error.status === 401) {
-          this.loginService.logout(null);
+          this.loginService.logout(null, null);
         } else {
           this.errorMessage = 'Error creating new supplier.';
           this.errorObject = error;

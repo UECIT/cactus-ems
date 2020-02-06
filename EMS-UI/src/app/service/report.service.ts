@@ -1,3 +1,5 @@
+import { Observable } from 'rxjs';
+import { EncounterReportInput } from './../model/launchTriage';
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {environment} from '../../environments/environment';
@@ -24,19 +26,16 @@ export class ReportService {
       return this.http.get<any>(url, httpOptions).toPromise();
     }
   }
-
-  getReport(caseId: any, resourceUrl: any, handoverMessage: any) {
-    const httpOptions = {
-      headers: new HttpHeaders()
-    };
+  
+  getEncounterReport(encounterId: string): Promise<EncounterReportInput> {
+    const httpOptions = {headers: new HttpHeaders()};
     if (this.sessionStorage['auth_token'] != null) {
       httpOptions.headers = httpOptions.headers.set(
           'Authorization',
           this.sessionStorage['auth_token']
       );
-      const url = `${environment.EMS_API}/report`;
-      const handoverRequest = {handoverJson: JSON.stringify(handoverMessage), caseId: caseId};
-      return this.http.post<any>(url, handoverRequest, httpOptions).toPromise();
+      const url = `${environment.EMS_API}/report/encounter?encounterId=${encounterId}`;
+      return this.http.get<EncounterReportInput>(url, httpOptions).toPromise();
     }
   }
 

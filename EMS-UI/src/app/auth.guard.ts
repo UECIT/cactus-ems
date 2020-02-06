@@ -17,7 +17,7 @@ export class AuthGuard implements CanActivate {
     }
 
     // not logged in so redirect to login page with the return url
-    this.loginService.logout(state.url);
+    this.loginService.logout(next.routeConfig.path, next.queryParams);
     return false;
   }
 }

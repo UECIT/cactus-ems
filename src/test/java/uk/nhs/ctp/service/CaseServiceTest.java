@@ -39,6 +39,7 @@ import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.repos.PatientRepository;
 import uk.nhs.ctp.repos.TestScenarioRepository;
 import uk.nhs.ctp.service.builder.CareConnectPatientBuilder;
+import uk.nhs.ctp.transform.CaseObservationTransformer;
 import uk.nhs.ctp.service.dto.CdssResult;
 import uk.nhs.ctp.transform.ReferralRequestEntityTransformer;
 import uk.nhs.ctp.transform.ReferralRequestTransformer;
@@ -64,6 +65,9 @@ public class CaseServiceTest {
   private TestScenarioRepository mockTestScenarioRepository;
   @Mock
   private StorageService storageService;
+
+  @Mock
+  private CaseObservationTransformer caseObservationTransformer;
 
   @Mock
   TestScenario testScenario;
@@ -99,6 +103,7 @@ public class CaseServiceTest {
         mockTestScenarioRepository,
         storageService,
         careConnectPatientBuilder,
+        caseObservationTransformer,
         referralRequestService,
         referralRequestTransformer
     ));
@@ -133,7 +138,7 @@ public class CaseServiceTest {
     when(mockCaseRepository.findOne(1L)).thenReturn(triageCase);
     when(mockCaseRepository.save(any(Cases.class))).thenReturn(triageCase);
     when(observation.getValue()).thenReturn(new BooleanType(true));
-    doReturn(caseObservation).when(spyCaseService).createCaseObservation(observation);
+    when(caseObservationTransformer.transform(observation)).thenReturn(caseObservation);
     doReturn(caseImmunization).when(spyCaseService).createCaseImmunization(immunization);
     doReturn(caseMedication).when(spyCaseService).createCaseMedication(medication);
 
@@ -158,7 +163,7 @@ public class CaseServiceTest {
     response.setOutputData(resourcesMedicationsOnly);
     spyCaseService.updateCase(1L, response, "123456789");
 
-    verify(spyCaseService, times(0)).createCaseObservation(any());
+    verify(caseObservationTransformer, times(0)).transform(any());
     verify(spyCaseService, times(0)).createCaseImmunization(any());
     verify(spyCaseService, times(1)).createCaseMedication(any());
   }
@@ -169,7 +174,7 @@ public class CaseServiceTest {
     response.setOutputData(resourcesMultiple);
     spyCaseService.updateCase(1L, response, "123456789");
 
-    verify(spyCaseService, times(1)).createCaseObservation(any());
+    verify(caseObservationTransformer, times(1)).transform(any());
     verify(spyCaseService, times(1)).createCaseImmunization(any());
     verify(spyCaseService, times(1)).createCaseMedication(any());
   }

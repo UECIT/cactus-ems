@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CareConnectObservation;
@@ -35,7 +34,6 @@ import org.hl7.fhir.dstu3.model.MedicationAdministration;
 import org.hl7.fhir.dstu3.model.MedicationAdministration.MedicationAdministrationStatus;
 import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.Observation;
-import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Person;
@@ -65,6 +63,7 @@ import uk.nhs.ctp.service.builder.RelatedPersonBuilder;
 import uk.nhs.ctp.service.dto.SettingsDTO;
 import uk.nhs.ctp.service.dto.TriageQuestion;
 import uk.nhs.ctp.service.factory.ReferenceBuilderFactory;
+import uk.nhs.ctp.transform.ObservationTransformer;
 import uk.nhs.ctp.utils.ErrorHandlingUtils;
 
 @Service
@@ -81,6 +80,7 @@ public class ParametersService {
   private AuditService auditService;
   private StorageService storageService;
   private ReferenceService referenceService;
+  private ObservationTransformer observationTransformer;
 
   Parameters getEvaluateParameters(
       Long caseId,
@@ -338,16 +338,7 @@ public class ParametersService {
 
     // CDSS Observations
     for (CaseObservation oe : caseEntity.getObservations()) {
-      Observation observation = buildObservation(oe);
-
-      if (oe.getDataAbsentCode() != null && oe.getDataAbsentDisplay() != null) {
-        observation
-            .setDataAbsentReason(new CodeableConcept().addCoding(new Coding(
-                oe.getDataAbsentSystem(),
-                oe.getDataAbsentCode(),
-                oe.getDataAbsentDisplay())));
-      }
-
+      Observation observation = observationTransformer.transform(oe);
       observations.put(observation.getCode(), observation);
     }
 
@@ -357,32 +348,6 @@ public class ParametersService {
           .setName(SystemConstants.INPUT_DATA)
           .setResource(o);
     }
-  }
-
-  private Observation buildObservation(CaseObservation observationEntity) {
-    Observation observation = new CareConnectObservation()
-        .setStatus(ObservationStatus.FINAL)
-        .setIssued(observationEntity.getTimestamp())
-        .setCode(new CodeableConcept().addCoding(new Coding(observationEntity.getSystem(),
-            observationEntity.getCode(), observationEntity.getDisplay())));
-
-    switch (StringUtils.defaultString(observationEntity.getValueSystem(), "")) {
-      case "boolean":
-        observation.setValue(new BooleanType(observationEntity.getValueCode()));
-        break;
-      case "string":
-        observation.setValue(new StringType(observationEntity.getValueCode()));
-        break;
-      default:
-        observation.setValue(
-            new CodeableConcept().addCoding(new Coding(
-                observationEntity.getValueSystem(),
-                observationEntity.getValueCode(),
-                observationEntity.getValueDisplay())
-            ));
-    }
-
-    return observation;
   }
 
   private void addParameterInputData(Cases caseEntity, Parameters parameters) {

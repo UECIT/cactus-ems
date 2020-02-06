@@ -36,6 +36,8 @@ export class TriageService {
         this.sessionStorage['cdssSupplierId']
     );
     this.launchTriage.settings = JSON.parse(sessionStorage['settings']);
+    let encounterHandover = this.sessionStorage['encounterHandover'];
+    this.launchTriage.encounterId = encounterHandover ? encounterHandover.encounterId : null;
     if (this.sessionStorage['auth_token'] != null) {
       httpOptions.headers = httpOptions.headers.set(
           'Authorization',

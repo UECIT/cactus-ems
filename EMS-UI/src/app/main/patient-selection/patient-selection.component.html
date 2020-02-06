@@ -5,7 +5,7 @@
       <nav class="d-flex flex-wrap">
         <div *ngFor="let patient of patients">
           <button mat-raised-button [class.selected]="patient == selectedPatient"
-                  class="btn btn-primary btnSearch text-center" (click)="change(patient)">
+                  class="btn btn-primary btnSearch text-center" (click)="change(patient)" [disabled]="disabled">
             <div>
               {{ patient.title }} {{ patient.firstName }} {{ patient.lastName }}
             </div>

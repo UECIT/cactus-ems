@@ -32,7 +32,7 @@ public class ContactPointTransformer
     }
 
     return IntStream.rangeClosed(1, from.size())
-        .mapToObj(i -> Pair.of(i, transform(from.get(i))))
+        .mapToObj(i -> Pair.of(i, transform(from.get(i - 1))))
         .peek(p -> p.getRight().setRank(p.getLeft()))
         .map(Pair::getRight)
         .collect(Collectors.toList());

@@ -1,4 +1,4 @@
-import { Extension } from "./extension";
+import { Extension } from "./index";
 
 export class QuestionsAnswer {
   code: string;

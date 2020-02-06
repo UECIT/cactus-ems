@@ -10,15 +10,15 @@ import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.stereotype.Component;
+import uk.nhs.ctp.service.GenericResourceLocator;
 import uk.nhs.ctp.service.ReferenceService;
-import uk.nhs.ctp.service.StorageService;
 import uk.nhs.ctp.service.dto.ConditionDTO;
 
 @Component
 @AllArgsConstructor
 public class ConditionDTOTransformer implements Transformer<Condition, ConditionDTO> {
 
-  private StorageService storageService;
+  private GenericResourceLocator resourceLocator;
   private ReferenceService referenceService;
 
   @Override
@@ -27,7 +27,7 @@ public class ConditionDTOTransformer implements Transformer<Condition, Condition
     List<String> evidence = condition.getEvidence().stream()
         .map(ConditionEvidenceComponent::getDetail)
         .flatMap(detail -> detail.stream()
-            .map(ref -> referenceService.fetch(ref, storageService))
+            .map(ref -> referenceService.fetch(ref, resourceLocator, condition.getIdElement()))
             .map(this::getStringValue))
         .collect(Collectors.toList());
 

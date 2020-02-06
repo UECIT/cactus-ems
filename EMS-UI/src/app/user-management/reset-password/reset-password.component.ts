@@ -100,7 +100,7 @@ export class ResetPasswordComponent implements OnInit {
         },
         error => {
           if (error.status === 401) {
-            this.loginService.logout(null);
+            this.loginService.logout(null, null);
           } else {
             this.error = true;
             this.errorMessage = 'Error resetting password.';

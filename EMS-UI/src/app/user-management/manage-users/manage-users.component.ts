@@ -32,7 +32,7 @@ export class ManageUsersComponent implements OnInit {
         this.error = true;
         this.loaded = true;
         if (error.status === 401) {
-          this.loginService.logout(null);
+          this.loginService.logout(null, null);
         } else {
           this.errorMessage = 'Error retrieving users';
           this.errorObject = error;

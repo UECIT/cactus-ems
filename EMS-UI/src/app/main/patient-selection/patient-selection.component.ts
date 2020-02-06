@@ -9,15 +9,10 @@ import { Patient } from 'src/app/model/patient';
 export class PatientSelectionComponent {
 
   @Input() patients: Patient[];
+  @Input() disabled: boolean;
   @Output() onChange = new EventEmitter<Patient>();
 
-  selectedPatient: Patient;
-
-  ngOnChanges() {
-    if (this.patients) {
-      this.selectedPatient = this.patients[0];
-    }
-  }
+  @Input() selectedPatient: Patient;
 
   change(selection: Patient) {
     this.onChange.emit(selection);

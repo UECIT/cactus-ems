@@ -1,3 +1,4 @@
+import { ReferralRequest } from './../../model/questionnaire';
 import {HandoverMessageDialogComponent} from '../handover-message-dialog/handover-message-dialog.component';
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {Options, Questionnaire, QuestionResponse, TriageQuestion} from '../../model/questionnaire';
@@ -104,7 +105,10 @@ export class QuestionnaireComponent implements OnInit {
 
     // check for result and build the handoverMessage and corresponding reports.
     this.isReportEnabled = await this.reportService.getEnabled();
-    if (this.questionnaire.referralRequest != null && this.isReportEnabled) {
+    if (this.questionnaire.referralRequest != null 
+      && !this.hasDraftReferralRequest()
+      && this.isReportEnabled) {
+        console.log(this.questionnaire.referralRequest)
       await this.reportService.generateReport(this.questionnaire.referralRequest.contextReference)
         .then(result => {
           this.reports = result;
@@ -331,13 +335,11 @@ export class QuestionnaireComponent implements OnInit {
   }
 
   hasDraftCareAdvice(careAdvice: any[]) {
-    if (!careAdvice) {
-      return false;
-    }
+    return careAdvice && careAdvice.find(ca => ca.status === 'draft')
+  }
 
-    return careAdvice.find(advice => {
-      return advice.status === 'draft';
-    });
+  hasDraftReferralRequest() {
+    return this.questionnaire.referralRequest && this.questionnaire.referralRequest.status === 'Draft';
   }
 
   isImageMap(question: TriageQuestion) {
