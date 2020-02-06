@@ -13,10 +13,11 @@ public class GenericResourceLocator implements IResourceLocator {
 
   private FhirContext fhirContext;
 
+  @SuppressWarnings("unchecked")
   @Override
-  public IBaseResource findResource(String id) {
+  public <T extends IBaseResource> T findResource(String id) {
     IdType idType = new IdType(id);
-    return fhirContext.newRestfulGenericClient(idType.getBaseUrl())
+    return (T) fhirContext.newRestfulGenericClient(idType.getBaseUrl())
         .read()
         .resource(idType.getResourceType())
         .withId(idType)

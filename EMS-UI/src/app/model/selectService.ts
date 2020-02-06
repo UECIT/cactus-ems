@@ -2,6 +2,6 @@ import {Settings} from '../model/settings';
 
 export class SelectService {
   caseId: number;
-  patientId: number;
+  patientId: string;
   settings: Settings;
 }

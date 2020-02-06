@@ -1,7 +1,7 @@
 import { Settings } from './settings';
 
 export class LaunchTriage {
-  patientId: number;
+  patientId: string;
   cdssSupplierId?: number;
   serviceDefinitionId?: string;
   settings: Settings;

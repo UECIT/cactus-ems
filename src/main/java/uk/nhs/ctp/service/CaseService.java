@@ -8,7 +8,6 @@ import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu3.model.CareConnectPatient;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Immunization;
@@ -16,6 +15,7 @@ import org.hl7.fhir.dstu3.model.MedicationAdministration;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -25,16 +25,13 @@ import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.CaseParameter;
 import uk.nhs.ctp.entities.Cases;
-import uk.nhs.ctp.entities.PatientEntity;
 import uk.nhs.ctp.entities.QuestionResponse;
 import uk.nhs.ctp.entities.ReferralRequestEntity;
 import uk.nhs.ctp.entities.TestScenario;
 import uk.nhs.ctp.repos.CaseRepository;
-import uk.nhs.ctp.repos.PatientRepository;
 import uk.nhs.ctp.repos.TestScenarioRepository;
-import uk.nhs.ctp.service.builder.CareConnectPatientBuilder;
-import uk.nhs.ctp.transform.CaseObservationTransformer;
 import uk.nhs.ctp.service.dto.CdssResult;
+import uk.nhs.ctp.transform.CaseObservationTransformer;
 import uk.nhs.ctp.transform.ReferralRequestTransformer;
 import uk.nhs.ctp.utils.ErrorHandlingUtils;
 
@@ -44,10 +41,9 @@ import uk.nhs.ctp.utils.ErrorHandlingUtils;
 public class CaseService {
 
   private CaseRepository caseRepository;
-  private PatientRepository patientRepository;
   private TestScenarioRepository testScenarioRepository;
+  private GenericResourceLocator resourceLocator;
   private StorageService storageService;
-  private CareConnectPatientBuilder careConnectPatientBuilder;
   private CaseObservationTransformer caseObservationTransformer;
   private ReferralRequestService referralRequestService;
   private ReferralRequestTransformer referralRequestTransformer;
@@ -58,17 +54,11 @@ public class CaseService {
    * @param patientId {@link Long}
    * @return {@link Cases}
    */
-  public Cases createCase(Long patientId, String practitionerId) {
-
-    PatientEntity patient = patientRepository.findOne(patientId);
-    ErrorHandlingUtils.checkEntityExists(patient, "Patient");
-
+  public Cases createCase(String patientId, String practitionerId) {
     // TODO use test scenario provided by EMS UI
-    TestScenario testScenario = testScenarioRepository.findByPatientId(patientId);
+    TestScenario testScenario = testScenarioRepository.findByPatientId(1L);
     ErrorHandlingUtils.checkEntityExists(testScenario, "Test Scenario");
-
-    CareConnectPatient patientResource = careConnectPatientBuilder.build(patient);
-    return createCase(patientResource, practitionerId, testScenario);
+    return createCase(patientId, practitionerId, testScenario);
   }
 
   /**
@@ -79,16 +69,14 @@ public class CaseService {
     Preconditions.checkArgument(resourceType.equalsIgnoreCase("Patient"),
         "Case must be created with a Patient resource");
 
-    CareConnectPatient patientResource = storageService
-        .findResource(patientRef, CareConnectPatient.class);
-
+    Patient patientResource = resourceLocator.findResource(patientRef);
     return createCase(patientResource, practitionerId, testScenario);
   }
 
   /**
    * Create new case from patient resource
    */
-  public Cases createCase(CareConnectPatient patient, String practitionerId, TestScenario testScenario) {
+  public Cases createCase(Patient patient, String practitionerId, TestScenario testScenario) {
 
     log.info("Creating case for patient: " + patient.getNameFirstRep().getNameAsSingleString());
 
@@ -101,7 +89,7 @@ public class CaseService {
     return caseRepository.saveAndFlush(triageCase);
   }
 
-  private void setCaseDetails(Cases triageCase, CareConnectPatient patient,
+  private void setCaseDetails(Cases triageCase, Patient patient,
       TestScenario testScenario) {
     HumanName name = patient.getNameFirstRep();
     triageCase.setFirstName(name.getGivenAsSingleString());

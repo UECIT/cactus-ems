@@ -44,8 +44,7 @@ public class EncounterProvider implements IResourceProvider {
     Patient patient = storageService
         .findResource(encounter.getSubject().getReference(), Patient.class);
     bundle.addEntry()
-        .setFullUrl(referenceService
-            .buildId(ResourceType.Patient, patient.getIdElement().getIdPartAsLong()))
+        .setFullUrl(referenceService.buildId(patient.getIdElement()))
         .setResource(patient);
 
     encounterService.getReferralRequestForEncounter(encounterIdLong)

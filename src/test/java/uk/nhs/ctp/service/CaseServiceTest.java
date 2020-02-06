@@ -64,6 +64,8 @@ public class CaseServiceTest {
   @Mock
   private TestScenarioRepository mockTestScenarioRepository;
   @Mock
+  private GenericResourceLocator resourceLocator;
+  @Mock
   private StorageService storageService;
 
   @Mock
@@ -99,10 +101,9 @@ public class CaseServiceTest {
   public void setup() {
     spyCaseService = spy(new CaseService(
         mockCaseRepository,
-        mockPatientRepository,
         mockTestScenarioRepository,
+        resourceLocator,
         storageService,
-        careConnectPatientBuilder,
         caseObservationTransformer,
         referralRequestService,
         referralRequestTransformer

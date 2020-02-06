@@ -73,7 +73,7 @@ export class MainComponent implements OnInit {
         .then(er => {
           this.encounterReportInput = er;
           this.sessionStorage.setItem('encounterHandover', JSON.stringify(er));
-          this.getPatients();
+          this.getPatients(this.encounterReportInput.patientId, this.encounterReportInput.encounterId);
         });
 
     }
@@ -126,16 +126,12 @@ export class MainComponent implements OnInit {
     this.router.navigate(['/triage']);
   }
 
-  async getPatients() {
-    this.patients = await this.patientService.getAllPatients().toPromise();
+  async getPatients(patientId?: string, encounterId?: string) {
+    this.patients = patientId && encounterId
+      ? [await this.patientService.getPatient(patientId, encounterId).toPromise()]
+      : await this.patientService.getAllPatients().toPromise();
 
-    if (this.encounterReportInput) {
-      let patientId = +this.encounterReportInput.patientId.split("/").slice(-1)[0]; //Assume last thing is the ID
-      this.selectedPatient = this.patients.find(patient => patient.id === patientId);
-    }
-    else {
-      this.selectedPatient = this.patients[0];
-    }
+    this.selectedPatient = this.patients[0];
     this.store.dispatch(new PatientActions.AddPatient(this.selectedPatient));
   }
 

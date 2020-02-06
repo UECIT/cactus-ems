@@ -34,7 +34,7 @@ export interface DialogData {
 })
 export class TriageComponent implements OnInit {
   questionnaire: Questionnaire;
-  patientId: number;
+  patientId: string;
   answerSelected: QuestionResponse[];
   triage = new ProcessTriage();
   questionnaireResponse = new QuestionnaireResponse();

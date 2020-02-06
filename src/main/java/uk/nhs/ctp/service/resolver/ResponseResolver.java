@@ -9,7 +9,7 @@ import uk.nhs.ctp.service.dto.SettingsDTO;
 
 public interface ResponseResolver {
 
-	CdssResult resolve(Resource resource, CdssSupplier cdssSupplier, SettingsDTO settings, Long patientId);
+	CdssResult resolve(Resource resource, CdssSupplier cdssSupplier, SettingsDTO settings, String patientId);
 
 	// TODO: These should be refactored into separate components
 	RequestGroup getResult(GuidanceResponse guidanceResponse);

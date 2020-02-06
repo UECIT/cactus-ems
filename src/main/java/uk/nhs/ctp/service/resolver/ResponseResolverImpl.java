@@ -43,7 +43,7 @@ public class ResponseResolverImpl implements ResponseResolver {
   private SwitchTriggerResolver switchTriggerResolver;
 
   @Override
-  public CdssResult resolve(Resource resource, CdssSupplier cdssSupplier, SettingsDTO settings, Long patientId) {
+  public CdssResult resolve(Resource resource, CdssSupplier cdssSupplier, SettingsDTO settings, String patientId) {
     GuidanceResponse guidanceResponse = resourceExtractor.extractGuidanceResponse(resource);
     List<Resource> extractedResources = resourceExtractor.extractResources(resource, cdssSupplier);
 
