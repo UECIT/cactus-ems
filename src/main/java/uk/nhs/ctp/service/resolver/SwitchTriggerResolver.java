@@ -14,7 +14,7 @@ public class SwitchTriggerResolver {
   private final CdssService cdssService;
   private final SearchParametersTransformer searchParametersTransformer;
 
-  public String getSwitchTrigger(GuidanceResponse guidanceResponse, SettingsDTO settingsDTO, Long patientId) {
+  public String getSwitchTrigger(GuidanceResponse guidanceResponse, SettingsDTO settingsDTO, String patientId) {
 
     var dataRequirements = guidanceResponse.getDataRequirement();
 

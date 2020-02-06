@@ -21,20 +21,20 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DataRequirement;
 import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementCodeFilterComponent;
 import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementDateFilterComponent;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.stereotype.Component;
-import uk.nhs.ctp.entities.PatientEntity;
-import uk.nhs.ctp.repos.PatientRepository;
+import uk.nhs.ctp.service.GenericResourceLocator;
 import uk.nhs.ctp.service.dto.SettingsDTO;
 
 @Component
 @AllArgsConstructor
 public class SearchParametersTransformer {
 
-  private PatientRepository patientService;
+  private GenericResourceLocator resourceLocator;
 
   public SearchParameters transform(List<DataRequirement> dataRequirements,
       SettingsDTO settingsDTO,
-      Long patientId) {
+      String patientId) {
 
     var builder = SearchParameters.builder()
         .query("triage")
@@ -53,10 +53,15 @@ public class SearchParametersTransformer {
     }
 
     if (patientId != null) {
-      PatientEntity patient = patientService.findById(patientId);
+      Patient patient = resourceLocator.findResource(patientId);
 
-      builder.contextValue("gender", CS_GENDER, patient.getGender())
-          .contextValue("age", SNOMED, ageCodeFromDate(patient.getDateOfBirth()));
+      if (patient.hasGender()) {
+        builder.contextValue("gender", CS_GENDER, patient.getGender().toCode());
+      }
+
+      if (patient.hasBirthDate()) {
+        builder.contextValue("age", SNOMED, ageCodeFromDate(patient.getBirthDate()));
+      }
     }
 
     return builder.build();

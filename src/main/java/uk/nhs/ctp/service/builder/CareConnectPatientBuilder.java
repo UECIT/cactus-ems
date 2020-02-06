@@ -55,13 +55,13 @@ public class CareConnectPatientBuilder {
 
   private void addGP(CareConnectPatient patient, PatientEntity patientEntity) {
     // TODO add to entity
-    patient.addGeneralPractitioner(referenceService.buildRef(ResourceType.Practitioner, 1));
+    patient.addGeneralPractitioner(referenceService.buildRef(ResourceType.Practitioner, "gp"));
   }
 
   private void addPharmacy(CareConnectPatient patient,
       PatientEntity patientEntity) {
     // TODO add to entity
-    patient.setNominatedPharmacy(referenceService.buildRef(ResourceType.Organization, 1));
+    patient.setNominatedPharmacy(referenceService.buildRef(ResourceType.Organization, "erp"));
   }
 
   private void addTelecom(CareConnectPatient patient, PatientEntity patientEntity) {

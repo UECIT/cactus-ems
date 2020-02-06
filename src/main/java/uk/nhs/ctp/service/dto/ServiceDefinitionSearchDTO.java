@@ -6,7 +6,7 @@ import lombok.Data;
 public class ServiceDefinitionSearchDTO {
 
   private Long caseId;
-  private Long patientId;
+  private String patientId;
   private SettingsDTO settings;
 
 }

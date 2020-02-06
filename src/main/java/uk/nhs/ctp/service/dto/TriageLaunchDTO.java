@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class TriageLaunchDTO {
 
-	private Long patientId;
+	private String patientId;
 	private Long cdssSupplierId;
 	private String serviceDefinitionId;
 	private SettingsDTO settings;

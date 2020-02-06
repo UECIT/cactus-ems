@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -42,16 +41,6 @@ public class StorageService implements IResourceLocator {
 
   public <T extends Resource> T findResource(String id, Class<T> clazz) {
     return fhirClient.read().resource(clazz).withUrl(id).execute();
-  }
-
-  public <T extends Resource> List<T> findResources(String searchUrl, Class<T> clazz) {
-    return fhirClient.search()
-        .byUrl(clazz.getSimpleName() + searchUrl)
-        .returnBundle(Bundle.class)
-        .execute()
-        .getEntry().stream()
-        .map(entry -> clazz.cast(entry.getResource()))
-        .collect(Collectors.toList());
   }
 
   public IBaseResource findResource(String id) {

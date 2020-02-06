@@ -18,13 +18,14 @@ import org.hl7.fhir.dstu3.model.DataRequirement;
 import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementCodeFilterComponent;
 import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementDateFilterComponent;
 import org.hl7.fhir.dstu3.model.DateTimeType;
+import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.nhs.ctp.entities.PatientEntity;
-import uk.nhs.ctp.repos.PatientRepository;
+import uk.nhs.ctp.service.GenericResourceLocator;
 import uk.nhs.ctp.service.dto.CodeDTO;
 import uk.nhs.ctp.service.dto.SettingsDTO;
 
@@ -34,11 +35,11 @@ public class SearchParametersTransformerTest {
   private SearchParametersTransformer searchParametersTransformer;
 
   @Mock
-  private PatientRepository patientService;
+  private GenericResourceLocator resourceLocator;
 
   @Before
   public void setup() {
-    searchParametersTransformer = new SearchParametersTransformer(patientService);
+    searchParametersTransformer = new SearchParametersTransformer(resourceLocator);
   }
 
   @Test
@@ -88,16 +89,16 @@ public class SearchParametersTransformerTest {
   @Test
   public void createSearchParametersFromChildPatient() {
 
-    long patientId = 3L;
-    PatientEntity patientEntity = new PatientEntity();
+    String patientId = "3";
+    Patient patient = new Patient();
 
     LocalDate fifteenYearsOld = LocalDate.now().minusYears(15);
-    patientEntity.setDateOfBirth(Date.from(fifteenYearsOld.atStartOfDay()
+    patient.setBirthDate(Date.from(fifteenYearsOld.atStartOfDay()
       .atZone(ZoneId.systemDefault())
       .toInstant()));
-    patientEntity.setGender("male");
+    patient.setGender(AdministrativeGender.MALE);
 
-    when(patientService.findById(patientId)).thenReturn(patientEntity);
+    when(resourceLocator.findResource(patientId)).thenReturn(patient);
 
     SearchParameters searchParameters = searchParametersTransformer
         .transform(emptyList(), null, patientId);
@@ -109,16 +110,16 @@ public class SearchParametersTransformerTest {
   @Test
   public void createSearchParametersFromAdultPatient() {
 
-    long patientId = 3L;
-    PatientEntity patientEntity = new PatientEntity();
+    String patientId = "3";
+    Patient patient = new Patient();
 
     LocalDate twentyThreeYearsOld = LocalDate.now().minusYears(23);
-    patientEntity.setDateOfBirth(Date.from(twentyThreeYearsOld.atStartOfDay()
+    patient.setBirthDate(Date.from(twentyThreeYearsOld.atStartOfDay()
         .atZone(ZoneId.systemDefault())
         .toInstant()));
-    patientEntity.setGender("female");
+    patient.setGender(AdministrativeGender.FEMALE);
 
-    when(patientService.findById(patientId)).thenReturn(patientEntity);
+    when(resourceLocator.findResource(patientId)).thenReturn(patient);
 
     SearchParameters searchParameters = searchParametersTransformer
         .transform(emptyList(), null, patientId);

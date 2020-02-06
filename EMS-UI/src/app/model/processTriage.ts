@@ -9,7 +9,7 @@ export class ProcessTriage {
   serviceDefinitionId: String;
   settings: Settings;
   amendingPrevious: boolean;
-  patientId: number;
+  patientId: string;
 }
 
 export class QuestionnaireResponse {

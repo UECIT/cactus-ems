@@ -12,6 +12,6 @@ public class CdssRequestDTO {
 	private TriageQuestion[] questionResponse;
 	private SettingsDTO settings;
 	private Boolean amendingPrevious;
-	private Long patientId;
+	private String patientId;
 
 }

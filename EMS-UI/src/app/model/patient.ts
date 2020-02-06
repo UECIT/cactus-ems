@@ -3,7 +3,7 @@ export class Patient {
   dateOfBirth: string;
   firstName: string;
   gender: string;
-  id: number;
+  id: string;
   lastName: string;
   homePhone: string;
   mobile: string;

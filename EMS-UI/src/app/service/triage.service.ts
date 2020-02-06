@@ -29,7 +29,7 @@ export class TriageService {
   constructor(private http: HttpClient, private sessionStorage: SessionStorage) {
   }
 
-  getQuestionnaire(patientId: number): Observable<Questionnaire> {
+  getQuestionnaire(patientId: string): Observable<Questionnaire> {
     this.launchTriage.patientId = patientId;
     this.launchTriage.serviceDefinitionId = this.sessionStorage['serviceDefinitionId'];
     this.launchTriage.cdssSupplierId = Number.parseInt(

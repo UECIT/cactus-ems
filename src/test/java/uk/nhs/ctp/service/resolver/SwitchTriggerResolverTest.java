@@ -63,13 +63,13 @@ public class SwitchTriggerResolverTest {
     supplier.setServiceDefinitions(Collections.singletonList(serviceDefinition));
     List<CdssSupplierDTO> returnedSuppliers = Collections
         .singletonList(new CdssSupplierDTO(supplier));
-    when(searchParametersTransformer.transform(dataRequirements, settingsDTO, 3L))
+    when(searchParametersTransformer.transform(dataRequirements, settingsDTO, "3"))
         .thenReturn(searchParameters);
     when(cdssService.queryServiceDefinitions(searchParameters))
         .thenReturn(returnedSuppliers);
 
     String newServiceDef = switchTriggerResolver
-        .getSwitchTrigger(guidanceResponse, settingsDTO, 3L);
+        .getSwitchTrigger(guidanceResponse, settingsDTO, "3");
 
     assertThat(newServiceDef, is("4/theredirect"));
   }

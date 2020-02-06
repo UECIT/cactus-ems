@@ -3,7 +3,7 @@ export * from './case';
 export * from './cdssSupplier';
 export * from './changePassword';
 export * from './dos';
-export * from './extension';
+export {Extension} from './extension';
 export * from './launchTriage';
 export * from './login';
 export * from './patient';
