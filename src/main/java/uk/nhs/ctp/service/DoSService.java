@@ -1,15 +1,16 @@
 package uk.nhs.ctp.service;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.HealthcareService;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,19 +18,19 @@ import uk.nhs.ctp.service.dto.HealthcareServiceDTO;
 import uk.nhs.ctp.transform.HealthcareServiceInTransformer;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class DoSService {
+
 	@Value("${dos.server}")
 	private String dosServer;
 
-	private FhirContext fhirContext;
-	private HealthcareServiceInTransformer healthcareServiceInTransformer;
-	private IGenericClient fhirClient;
+	@Value("${ems.server}")
+	private String emsServer;
 
-	public DoSService(FhirContext fhirContext, HealthcareServiceInTransformer healthcareServiceInTransformer, IGenericClient fhirClient) {
-		this.fhirContext = fhirContext;
-		this.healthcareServiceInTransformer = healthcareServiceInTransformer;
-		this.fhirClient = fhirClient;
-	}
+	private final FhirContext fhirContext;
+	private final HealthcareServiceInTransformer healthcareServiceInTransformer;
+	private final IGenericClient fhirClient;
 
 	public List<HealthcareServiceDTO> getDoS(String referralRequestRef) {
 
@@ -38,8 +39,21 @@ public class DoSService {
 				.withUrl(referralRequestRef)
 				.execute();
 
-		return fhirContext.newRestfulClient(IRestfulClient.class, dosServer)
-				.searchForHealthcareServices(referralRequest)
+		return Stream.of(dosServer, emsServer + "/fhir")
+				.flatMap(dos -> callDos(dos, referralRequest))
+				.collect(Collectors.toList());
+
+	}
+
+	private Stream<HealthcareServiceDTO> callDos(String dos, ReferralRequest referralRequest) {
+		try {
+			return fhirContext.newRestfulGenericClient(dos)
+				.operation()
+				.onType(HealthcareService.class)
+				.named("$check-services")
+				.withParameter(Parameters.class, "referralRequest", referralRequest)
+				.returnResourceType(Bundle.class)
+				.execute()
 				.getEntry()
 				.stream()
 				.map(entry -> {
@@ -50,20 +64,17 @@ public class DoSService {
 						resource.setId(entry.getFullUrl());
 					} else if (resource.hasId()) {
 						IdType fullId = resource.getIdElement()
-								.withServerBase(dosServer, resource.getResourceType().name());
+								.withServerBase(dos, resource.getResourceType().name());
 						resource.setId(fullId);
 					}
 
 					return resource;
 				})
-				.map(healthcareServiceInTransformer::transform)
-				.collect(Collectors.toList());
+				.map(healthcareServiceInTransformer::transform);
+		} catch (Exception e) {
+			log.warn("Error calling DOS: " + dos, e);
+			return Stream.empty();
+		}
 
-	}
-
-	interface IRestfulClient extends ca.uhn.fhir.rest.client.api.IRestfulClient {
-		@Operation(name = "$check-services", type = org.hl7.fhir.dstu3.model.HealthcareService.class)
-		Bundle searchForHealthcareServices(
-				@OperationParam(name = "referralRequest") ReferralRequest referralRequest);
 	}
 }

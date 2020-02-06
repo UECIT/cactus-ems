@@ -1,9 +1,7 @@
 package uk.nhs.ctp.service;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,10 +34,25 @@ public class ReferenceService {
     return new Reference(buildId(resourceType, id));
   }
 
+  /**
+   * @deprecated use {@link #fetch(Reference, IResourceLocator, IdType)}
+   */
+  @Deprecated
   public IBaseResource fetch(Reference reference, IResourceLocator storageService) {
     if (reference.getResource() != null) {
       return reference.getResource();
     }
     return storageService.findResource(reference.getReference());
+  }
+
+  public IBaseResource fetch(Reference reference, IResourceLocator storageService, IdType parentId) {
+    if (reference.getResource() != null) {
+      return reference.getResource();
+    }
+    IdType idType = new IdType(reference.getReference());
+    if (!idType.isAbsolute()) {
+      idType = idType.withServerBase(parentId.getBaseUrl(), idType.getResourceType());
+    }
+    return storageService.findResource(idType.getValue());
   }
 }

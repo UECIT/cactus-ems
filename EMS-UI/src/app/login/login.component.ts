@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Login } from '../model/login';
 import { LoginService } from '../service/login.service';
-import { Router } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { AppState } from '../app.state';
+import { Router, ActivatedRoute } from '@angular/router';
 import { SessionStorage } from 'h5webstorage';
 
 @Component({
@@ -18,6 +16,7 @@ export class LoginComponent implements OnInit {
 
   constructor(
     private loginService: LoginService,
+    private route: ActivatedRoute,
     public router: Router,
     private sessionStorage: SessionStorage
   ) {}
@@ -36,7 +35,9 @@ export class LoginComponent implements OnInit {
           this.sessionStorage.setItem('auth_token', authorizationResponseHeader);
           sessionStorage.setItem('auth_token', authorizationResponseHeader);
           this.loginService.authSub.next(true);
-          this.router.navigate(['/main']);
+          this.router.navigate(['/main'], {
+            queryParams: this.route.snapshot.queryParams
+          });
         }
       },
       error => {

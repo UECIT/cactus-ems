@@ -1,6 +1,13 @@
+<div class="section col-sm-12 text-center" *ngIf="encounterReportInput">
+    Encounter report received from: {{encounterReportInput.encounterId}}
+    <button mat-icon-button matTooltip="{{encounterReportInput.observations}}" (click)="viewEncounterReportInfo()"><mat-icon>info</mat-icon></button>
+</div>
+
 <!-- Patient selection -->
 <patient-selection
+    [disabled]="encounterReportInput"
     [patients]="patients"
+    [selectedPatient]="selectedPatient"
     (onChange)="addPatientToStore($event)">
 </patient-selection>
 
@@ -87,8 +94,8 @@
 </div>
 
 <div class="launchSection">
-  <button mat-button class="btn btn-primary btn-block launch" (click)="triage()"
-    [disabled]="disableLaunch()">Launch
+  <button mat-button class="btn btn-primary btn-block launch" (click)="triage()" [disabled]="disableLaunch()">
+    {{ encounterReportInput ? 'Continue Triage' : 'Start Triage' }}
   </button>
 </div>
 

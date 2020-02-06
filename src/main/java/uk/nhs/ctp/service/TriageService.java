@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.net.ConnectException;
 import lombok.AllArgsConstructor;
 import org.hl7.fhir.dstu3.model.GuidanceResponse;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -11,15 +12,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.entities.AuditRecord;
-import uk.nhs.ctp.entities.Cases;
+import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.service.dto.CdssRequestDTO;
 import uk.nhs.ctp.service.dto.CdssResponseDTO;
 import uk.nhs.ctp.service.dto.CdssResult;
+import uk.nhs.ctp.service.dto.EncounterReportInput;
 import uk.nhs.ctp.service.dto.TriageLaunchDTO;
 import uk.nhs.ctp.service.dto.TriageQuestion;
 import uk.nhs.ctp.service.factory.ReferencingContextFactory;
 import uk.nhs.ctp.service.resolver.ResponseResolver;
+import uk.nhs.ctp.transform.CaseObservationTransformer;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
 
 @Service
@@ -34,9 +37,10 @@ public class TriageService {
   private ResponseService responseService;
   private AuditService auditService;
   private CdssSupplierService cdssSupplierService;
+  private EncounterService encounterService;
+  private CaseObservationTransformer caseObservationTransformer;
   private ReferencingContextFactory referencingContextFactory;
   private ResponseResolver responseResolver;
-  private EncounterService encounterService;
 
   /**
    * Creates case from test case scenario and patient details and launches first triage request
@@ -48,18 +52,34 @@ public class TriageService {
   public CdssResponseDTO launchTriage(TriageLaunchDTO requestDetails)
       throws ConnectException, JsonProcessingException, FHIRException {
 
-    Cases triageCase = caseService.createCase(
+    Long caseId = caseService.createCase(
         requestDetails.getPatientId(),
-        requestDetails.getSettings().getPractitioner().getId());
+        requestDetails.getSettings().getPractitioner().getId()
+    ).getId();
+    String encounterId = requestDetails.getEncounterId();
+    if (encounterId != null) {
+      updateCaseFromEncounterReport(caseId, encounterId);
+    }
 
     CdssRequestDTO cdssRequest = new CdssRequestDTO();
-    cdssRequest.setCaseId(triageCase.getId());
+    cdssRequest.setCaseId(caseId);
     cdssRequest.setCdssSupplierId(requestDetails.getCdssSupplierId());
     cdssRequest.setServiceDefinitionId(requestDetails.getServiceDefinitionId());
     cdssRequest.setSettings(requestDetails.getSettings());
     cdssRequest.setPatientId(requestDetails.getPatientId());
 
     return processTriageRequest(cdssRequest);
+  }
+
+  private void updateCaseFromEncounterReport(Long caseId, String encounterId) {
+    //TODO: This could be moved out when we have more than observations
+    //TODO: Ideally we cached the ER somewhere, for now we fetch it again
+    EncounterReportInput encounterReportInput = encounterService
+        .getEncounterReport(new IdType(encounterId));
+    encounterReportInput.getObservations().forEach(obs -> {
+      CaseObservation caseObservation = caseObservationTransformer.transform(obs);
+      caseService.addObservation(caseId, caseObservation);
+    });
   }
 
   /**

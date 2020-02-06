@@ -1,5 +1,6 @@
+import { ReportService } from 'src/app/service/report.service';
 import {Component, OnInit} from '@angular/core';
-import {Router} from '@angular/router';
+import {Router, ActivatedRoute} from '@angular/router';
 import {MatSnackBar} from '@angular/material';
 import {Store} from '@ngrx/store';
 import {ToastrService} from 'ngx-toastr';
@@ -11,7 +12,8 @@ import {
   SelectService,
   Code,
   Settings,
-  Practitioner
+  Practitioner,
+  EncounterReportInput
 } from '../model';
 import {PatientService, CdssService, TriageService, PractitionerService} from '../service';
 import {AppState} from '../app.state';
@@ -41,17 +43,20 @@ export class MainComponent implements OnInit {
   settings: Code[];
   jurisdictions: Code[];
   selectionModeOptions: any[];
+  encounterReportInput: EncounterReportInput;
 
   constructor(
       public router: Router,
-      private patientService: PatientService,
       private store: Store<AppState>,
-      private cdssSupplierService: CdssService,
-      private triageService: TriageService,
       private practitionerService: PractitionerService,
       public snackBar: MatSnackBar,
       private sessionStorage: SessionStorage,
-      private toastr: ToastrService
+      private toastr: ToastrService,
+      private route: ActivatedRoute,
+      private cdssSupplierService: CdssService,
+      private triageService: TriageService,
+      private patientService: PatientService,
+      private reportService: ReportService
   ) {
   }
 
@@ -62,7 +67,20 @@ export class MainComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.getPatients();
+    let encounterId = this.route.snapshot.queryParamMap.get("encounterId");
+    if (encounterId) {
+      this.getEncounterReport(encounterId)
+        .then(er => {
+          this.encounterReportInput = er;
+          this.sessionStorage.setItem('encounterHandover', JSON.stringify(er));
+          this.getPatients();
+        });
+
+    }
+    else {
+      this.sessionStorage.removeItem("encounterHandover");
+      this.getPatients()
+    }
     this.getCdssSuppliers();
     this.getRoles();
     this.getSettings();
@@ -80,6 +98,10 @@ export class MainComponent implements OnInit {
     this.openSnackBar();
 
     this.sessionStorage.setItem('triageItems', '[]');
+  }
+
+  getEncounterReport(encounterId) {
+    return this.reportService.getEncounterReport(encounterId);
   }
 
   openSnackBar() {
@@ -106,7 +128,14 @@ export class MainComponent implements OnInit {
 
   async getPatients() {
     this.patients = await this.patientService.getAllPatients().toPromise();
-    this.selectedPatient = this.patients[0];
+
+    if (this.encounterReportInput) {
+      let patientId = +this.encounterReportInput.patientId.split("/").slice(-1)[0]; //Assume last thing is the ID
+      this.selectedPatient = this.patients.find(patient => patient.id === patientId);
+    }
+    else {
+      this.selectedPatient = this.patients[0];
+    }
     this.store.dispatch(new PatientActions.AddPatient(this.selectedPatient));
   }
 
@@ -255,8 +284,6 @@ export class MainComponent implements OnInit {
       var settings: Settings = this.sessionStorage['settings'];
       request.settings = settings;
 
-      var patient: Patient = this.sessionStorage['patient']
-      
       const selectedSDs = await this.triageService.selectServiceDefinitions(request);
 
       if (selectedSDs.length > 0) {

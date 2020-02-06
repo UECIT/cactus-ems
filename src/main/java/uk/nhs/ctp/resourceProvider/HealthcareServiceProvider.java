@@ -23,7 +23,7 @@ public class HealthcareServiceProvider implements IResourceProvider {
 
   @Read
   public HealthcareService get(@IdParam IdType id) {
-    return healthcareServiceService.get(id.toString());
+    return healthcareServiceService.get(id);
   }
 
   @Operation(name = "$check-services", type = HealthcareService.class)
@@ -31,7 +31,7 @@ public class HealthcareServiceProvider implements IResourceProvider {
       @OperationParam(name = "referralRequest") ReferralRequest referralRequest) {
 
     Bundle bundle = new Bundle();
-    healthcareServiceService.getAll().stream()
+    healthcareServiceService.getAll(referralRequest.getContext()).stream()
         .map(service -> new BundleEntryComponent().setResource(service))
         .forEach(bundle::addEntry);
     return bundle;

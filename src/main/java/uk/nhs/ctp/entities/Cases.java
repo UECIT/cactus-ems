@@ -90,12 +90,19 @@ public class Cases {
   @Column(name = "case_timestamp")
   private Date timestamp;
 
-  @OneToOne(mappedBy = "caseEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToOne(mappedBy = "caseEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   protected ReferralRequestEntity referralRequest;
 
   public void setReferralRequest(ReferralRequestEntity referralRequest) {
+    if (referralRequest == null) {
+      if (this.referralRequest != null) {
+        this.referralRequest.caseEntity = null;
+      }
+    }
+    else {
+      referralRequest.caseEntity = this;
+    }
     this.referralRequest = referralRequest;
-    referralRequest.caseEntity = this;
   }
 
   public void addMedication(CaseMedication medication) {

@@ -23,6 +23,7 @@ import uk.nhs.ctp.service.dto.CdssResponseDTO;
 import uk.nhs.ctp.service.dto.CdssResult;
 import uk.nhs.ctp.service.factory.ReferencingContextFactory;
 import uk.nhs.ctp.service.resolver.ResponseResolver;
+import uk.nhs.ctp.transform.CaseObservationTransformer;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TriageServiceTest {
@@ -55,7 +56,13 @@ public class TriageServiceTest {
   private EncounterService encounterService;
 
   @Mock
+  private CaseObservationTransformer caseObservationTransformer;
+
+  @Mock
   private ResponseResolver responseResolver;
+
+  @Mock
+  private ReferenceService referenceService;
 
   CdssResult mockCdssResult;
   CdssResponseDTO mockCdssResponseDTO;
@@ -71,9 +78,10 @@ public class TriageServiceTest {
         responseService,
         auditService,
         cdssSupplierService,
+        encounterService,
+        caseObservationTransformer,
         referencingContextFactory,
-        responseResolver,
-        encounterService
+        responseResolver
     ));
 
     triageService = new TriageService(
@@ -83,9 +91,10 @@ public class TriageServiceTest {
         responseService,
         auditService,
         cdssSupplierService,
+        encounterService,
+        caseObservationTransformer,
         referencingContextFactory,
-        responseResolver,
-				encounterService
+        responseResolver
     );
 
     mockCdssResult = mock(CdssResult.class);

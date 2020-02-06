@@ -4,23 +4,21 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.stereotype.Component;
-import uk.nhs.ctp.entities.ReferralRequestEntity;
-import uk.nhs.ctp.repos.ReferralRequestRepository;
 import uk.nhs.ctp.service.EncounterService;
 import uk.nhs.ctp.service.ReferenceService;
 import uk.nhs.ctp.service.StorageService;
-import uk.nhs.ctp.transform.ReferralRequestEntityTransformer;
 
 @Component
 @AllArgsConstructor
@@ -29,15 +27,13 @@ public class EncounterProvider implements IResourceProvider {
   private StorageService storageService;
   private EncounterService encounterService;
   private ReferenceService referenceService;
-  private ReferralRequestRepository referralRequestRepository;
-  private ReferralRequestEntityTransformer referralRequestEntityTransformer;
+
 
   @Operation(name = "$UEC-Report", idempotent = true, type = Encounter.class)
   public Bundle getEncounterReport(@IdParam IdType encounterIdType) {
 
     Bundle bundle = new Bundle();
     bundle.setType(BundleType.DOCUMENT);
-
     Long encounterIdLong = encounterIdType.getIdPartAsLong();
     Encounter encounter = encounterService.getEncounter(encounterIdLong);
     String encounterRefString = referenceService.buildId(ResourceType.Encounter, encounterIdLong);
@@ -52,16 +48,18 @@ public class EncounterProvider implements IResourceProvider {
             .buildId(ResourceType.Patient, patient.getIdElement().getIdPartAsLong()))
         .setResource(patient);
 
-    ReferralRequestEntity referralRequestEntity = referralRequestRepository
-        .findByCaseEntity_Id(encounterIdLong);
-    if (referralRequestEntity != null) {
-      ReferralRequest referralRequest = referralRequestEntityTransformer
-          .transform(referralRequestEntity);
-      bundle.addEntry()
+    encounterService.getReferralRequestForEncounter(encounterIdLong)
+      .ifPresent(referralRequest -> bundle.addEntry()
           .setFullUrl(
-              referenceService.buildId(ResourceType.ReferralRequest, referralRequestEntity.getId()))
-          .setResource(referralRequest);
-    }
+              referenceService.buildId(ResourceType.ReferralRequest, referralRequest.getId()))
+          .setResource(referralRequest));
+
+    List<Observation> observations = encounterService.getObservationsForEncounter(encounterIdLong);
+    observations.stream()
+        .map(obs -> new BundleEntryComponent()
+              .setFullUrl(referenceService.buildId(ResourceType.Observation, obs.getIdElement().getIdPartAsLong()))
+              .setResource(obs))
+        .forEach(bundle::addEntry);
 
     return bundle;
   }

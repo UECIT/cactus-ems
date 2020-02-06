@@ -78,6 +78,10 @@ export class TriageComponent implements OnInit {
       .getQuestionnaire(this.patientId)
       .toPromise();
     this.getCaseAndSupplierName(this.questionnaire.caseId);
+    if (this.questionnaire.switchTrigger != null) {
+      this.triage.caseId = this.questionnaire.caseId;
+      this.redirect(false);
+    }
   }
 
   async processTriage(switchCdss: boolean, back: boolean, selectedTriage: ProcessTriage) {
@@ -182,21 +186,7 @@ export class TriageComponent implements OnInit {
     }
 
     if (this.questionnaire.switchTrigger != null) {
-      this.oldServiceDefinition = this.sessionStorage['serviceDefinitionId'];
-      this.sessionStorage.setItem(
-        'serviceDefinitionId',
-        this.questionnaire.switchTrigger.split('/').pop()
-      );
-      this.newServiceDefinition = this.sessionStorage['serviceDefinitionId'];
-      this.triage.questionResponse = null;
-      this.triage.serviceDefinitionId = this.sessionStorage['serviceDefinitionId'];
-      this.triage.cdssSupplierId = Number.parseInt(
-          this.questionnaire.switchTrigger.split('/').shift());
-      this.questionnaire = await this.triageService.processTriage(
-        this.triage,
-        back
-      );
-      this.openDialog();
+      this.redirect(back);
     }
 
     // reset the value.
@@ -237,6 +227,24 @@ export class TriageComponent implements OnInit {
       this.amendingPrevious = true;
     }
     return true;
+  }
+
+  async redirect(back) {
+      this.oldServiceDefinition = this.sessionStorage['serviceDefinitionId'];
+      this.sessionStorage.setItem(
+        'serviceDefinitionId',
+        this.questionnaire.switchTrigger.split('/').pop()
+      );
+      this.newServiceDefinition = this.sessionStorage['serviceDefinitionId'];
+      this.triage.questionResponse = null;
+      this.triage.serviceDefinitionId = this.sessionStorage['serviceDefinitionId'];
+      this.triage.cdssSupplierId = Number.parseInt(
+          this.questionnaire.switchTrigger.split('/').shift());
+      this.questionnaire = await this.triageService.processTriage(
+        this.triage,
+        back
+      );
+      this.openDialog();
   }
 
   // Get the case that was create when we started the triage process.

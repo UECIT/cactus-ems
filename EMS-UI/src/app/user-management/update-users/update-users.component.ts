@@ -85,7 +85,7 @@ export class UpdateUsersComponent implements OnInit, OnDestroy {
       },
       error => {
         if (error.status === 401) {
-          this.loginService.logout(null);
+          this.loginService.logout(null, null);
         } else {
           this.error = true;
           this.errorMessage =
@@ -120,7 +120,7 @@ export class UpdateUsersComponent implements OnInit, OnDestroy {
       },
       error => {
         if (error.status === 401) {
-          this.loginService.logout(null);
+          this.loginService.logout(null, null);
         } else {
           this.updateError = true;
           this.updateErrorMessage = 'Error updating user.';

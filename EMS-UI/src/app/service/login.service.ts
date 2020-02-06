@@ -4,7 +4,7 @@ import { Login } from '../model/login';
 import { environment } from '../../environments/environment';
 import { Subject, Observable } from 'rxjs';
 import * as jwt_decode from 'jwt-decode';
-import { Router } from '@angular/router';
+import { Router, Params } from '@angular/router';
 import { SessionStorage } from 'h5webstorage';
 
 const httpOptions = {
@@ -25,12 +25,12 @@ export class LoginService {
     return this.http.post(url, login, { observe: 'response' });
   }
 
-  logout(returnUrl: string) {
+  logout(returnUrl: string, params: Params) {
     this.sessionStorage.removeItem('auth_token');
     this.authSub.next(true);
     if (returnUrl != null) {
       this.router.navigate(['/login'], {
-        queryParams: { returnUrl: returnUrl }
+        queryParams: params
       });
     } else {
       this.router.navigate(['/login']);

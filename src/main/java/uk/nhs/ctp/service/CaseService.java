@@ -8,9 +8,7 @@ import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CareConnectPatient;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Immunization;
@@ -20,7 +18,6 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.entities.CaseImmunization;
@@ -36,6 +33,7 @@ import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.repos.PatientRepository;
 import uk.nhs.ctp.repos.TestScenarioRepository;
 import uk.nhs.ctp.service.builder.CareConnectPatientBuilder;
+import uk.nhs.ctp.transform.CaseObservationTransformer;
 import uk.nhs.ctp.service.dto.CdssResult;
 import uk.nhs.ctp.transform.ReferralRequestTransformer;
 import uk.nhs.ctp.utils.ErrorHandlingUtils;
@@ -50,6 +48,7 @@ public class CaseService {
   private TestScenarioRepository testScenarioRepository;
   private StorageService storageService;
   private CareConnectPatientBuilder careConnectPatientBuilder;
+  private CaseObservationTransformer caseObservationTransformer;
   private ReferralRequestService referralRequestService;
   private ReferralRequestTransformer referralRequestTransformer;
 
@@ -165,12 +164,14 @@ public class CaseService {
         log.info("Storing referral request");
         ReferralRequestEntity referralRequestEntity = referralRequestTransformer
             .transform(evaluateResponse.getReferralRequest());
+        triageCase.setReferralRequest(null);
+        caseRepository.saveAndFlush(triageCase);
         triageCase.setReferralRequest(referralRequestEntity);
       }
 
     });
 
-    return caseRepository.save(triageCase);
+    return caseRepository.saveAndFlush(triageCase);
   }
 
   private void updateQuestionnaireResponse(Cases triageCase, QuestionnaireResponse response) {
@@ -239,7 +240,7 @@ public class CaseService {
           .equalsIgnoreCase(currentObs.getCode().getCoding().get(0).getCode())) {
         log.info("Amending Observation for case " + triageCase.getId());
 
-        updateObservationCoding(currentObs, observation);
+        caseObservationTransformer.updateObservationCoding(currentObs, observation);
         observation.setTimestamp(new Date());
 
         amended = true;
@@ -248,7 +249,7 @@ public class CaseService {
 
     if (!amended) {
       log.info("Adding Observation for case " + triageCase.getId());
-      triageCase.addObservation(createCaseObservation(currentObs));
+      triageCase.addObservation(caseObservationTransformer.transform(currentObs));
     }
   }
 
@@ -282,24 +283,10 @@ public class CaseService {
     caseImmunization.setDisplay(coding.getDisplay());
   }
 
-  /**
-   * Create CaseObservation from Observation resource
-   *
-   * @param observation {@link Observation}
-   * @return {@link CaseObservation}
-   */
-  protected CaseObservation createCaseObservation(Observation observation) {
-    CaseObservation caseObservation = new CaseObservation();
-
-    updateObservationCoding(observation, caseObservation);
-
-    // Try to set dataAbsenseReason here
-    Coding dataAbsentReason = observation.getDataAbsentReason().getCodingFirstRep();
-    caseObservation.setDataAbsentCode(dataAbsentReason.getCode());
-    caseObservation.setDataAbsentDisplay(dataAbsentReason.getDisplay());
-    caseObservation.setTimestamp(new Date());
-
-    return caseObservation;
+  public void addObservation(Long caseId, CaseObservation observation) {
+    Cases existingCase = caseRepository.findOne(caseId);
+    existingCase.addObservation(observation);
+    caseRepository.save(existingCase);
   }
 
   /**
@@ -320,41 +307,6 @@ public class CaseService {
     caseParameter.setTimestamp(new Date());
 
     return caseParameter;
-  }
-
-  /**
-   * Update the coding a for a given observation
-   *
-   * @param observation
-   * @param caseObservation
-   */
-  private void updateObservationCoding(Observation observation, CaseObservation caseObservation) {
-    Coding coding = observation.getCode().getCodingFirstRep();
-    caseObservation.setSystem(coding.getSystem());
-    caseObservation.setCode(coding.getCode());
-    caseObservation.setDisplay(coding.getDisplay());
-
-    if (!observation.hasValue()) {
-      caseObservation.setValueCode(null);
-      caseObservation.setValueSystem(null);
-      caseObservation.setValueDisplay(null);
-    } else if (observation.getValue() instanceof BooleanType) {
-      boolean value = observation.getValueBooleanType().booleanValue();
-      caseObservation.setValueSystem("boolean");
-      caseObservation.setValueCode(value ? "true" : "false");
-    } else if (observation.getValue() instanceof StringType) {
-      String value = observation.getValueStringType().getValue();
-      caseObservation.setValueSystem("string");
-      caseObservation.setValueCode(value);
-    } else if (observation.getValue() instanceof CodeableConcept) {
-      Coding valueCoding = observation.getValueCodeableConcept().getCodingFirstRep();
-      caseObservation.setValueSystem(valueCoding.getSystem());
-      caseObservation.setValueCode(valueCoding.getCode());
-      caseObservation.setDisplay(valueCoding.getDisplay());
-    } else {
-      log.error("Unable assign an observation value of type {}", observation.getValue().fhirType());
-    }
-
   }
 
   /**
