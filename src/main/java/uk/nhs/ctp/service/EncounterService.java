@@ -11,6 +11,7 @@ import javax.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Observation;
@@ -25,6 +26,7 @@ import uk.nhs.ctp.entities.ReferralRequestEntity;
 import uk.nhs.ctp.repos.AuditRecordRepository;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.repos.ReferralRequestRepository;
+import uk.nhs.ctp.service.dto.ConditionDTO;
 import uk.nhs.ctp.service.dto.EncounterReportInput;
 import uk.nhs.ctp.transform.EncounterTransformer;
 import uk.nhs.ctp.transform.ObservationTransformer;
@@ -88,4 +90,5 @@ public class EncounterService {
         .observations(observations)
         .build();
   }
+
 }

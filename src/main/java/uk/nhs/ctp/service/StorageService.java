@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.service.resolver.reference.IResourceLocator;
 
@@ -43,9 +44,10 @@ public class StorageService implements IResourceLocator {
     return fhirClient.read().resource(clazz).withUrl(id).execute();
   }
 
-  public IBaseResource findResource(String id) {
-    IdType idType = new IdType(id);
-    return fhirClient.read()
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T extends IBaseResource> T findResource(IIdType idType) {
+    return (T) fhirClient.read()
         .resource(idType.getResourceType())
         .withId(idType)
         .execute();

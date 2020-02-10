@@ -27,7 +27,7 @@ public class ConditionDTOTransformer implements Transformer<Condition, Condition
     List<String> evidence = condition.getEvidence().stream()
         .map(ConditionEvidenceComponent::getDetail)
         .flatMap(detail -> detail.stream()
-            .map(ref -> referenceService.fetch(ref, resourceLocator, condition.getIdElement()))
+            .map(ref -> resourceLocator.<IBaseResource>findResource(ref, condition.getIdElement()))
             .map(this::getStringValue))
         .collect(Collectors.toList());
 
@@ -45,8 +45,7 @@ public class ConditionDTOTransformer implements Transformer<Condition, Condition
   private String getStringValue(IBaseResource evidence) {
     if (evidence instanceof Observation) {
       return observationString((Observation) evidence);
-    }
-    else if (evidence instanceof QuestionnaireResponse) {
+    } else if (evidence instanceof QuestionnaireResponse) {
       return questionnaireResponseString((QuestionnaireResponse) evidence);
     }
     throw new IllegalArgumentException("Unexpected evidence detail type " + evidence.getClass());

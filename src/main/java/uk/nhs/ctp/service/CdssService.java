@@ -47,7 +47,6 @@ public class CdssService {
 
   private final CdssSupplierRepository cdssSupplierRepository;
   private final AuditService auditService;
-  private final IParser fhirParser;
   private final FhirContext fhirContext;
 
   private HttpHeaders headers;
@@ -56,12 +55,10 @@ public class CdssService {
   public CdssService(
       CdssSupplierRepository cdssSupplierRepository,
       AuditService auditService,
-      IParser fhirParser,
       RestTemplate restTemplate,
       FhirContext fhirContext) {
     this.cdssSupplierRepository = cdssSupplierRepository;
     this.auditService = auditService;
-    this.fhirParser = fhirParser;
     this.restTemplate = restTemplate;
     this.fhirContext = fhirContext;
 
@@ -84,6 +81,7 @@ public class CdssService {
       Long caseId,
       ReferencingContext referencingContext) throws JsonProcessingException {
 
+    IParser fhirParser = fhirContext.newJsonParser();
     String requestBody = fhirParser.encodeResourceToString(parameters);
 
     GuidanceResponse response = fhirContext.newRestfulGenericClient(getBaseUrl(cdssSupplierId))
@@ -110,6 +108,7 @@ public class CdssService {
         + SystemConstants.SERVICE_DEFINITION + "/" + serviceDefId + "/";
     String responseBody = sendHttpRequest(url, HttpMethod.GET, new HttpEntity<>(headers));
 
+    IParser fhirParser = fhirContext.newJsonParser();
     return (ServiceDefinition) fhirParser.parseResource(responseBody);
   }
 
@@ -135,6 +134,7 @@ public class CdssService {
     try {
       String responseBody = sendHttpRequest(url, HttpMethod.GET,
           new HttpEntity<>(headers));
+      IParser fhirParser = fhirContext.newJsonParser();
       Bundle bundle = (Bundle) fhirParser.parseResource(responseBody);
 
       List<ServiceDefinitionDTO> serviceDefinitions = bundle.getEntry().stream()
@@ -196,7 +196,8 @@ public class CdssService {
     auditService
         .updateAuditEntry(caseId, getBaseUrl(cdssSupplierId) + questionnaireRef, responseBody);
 
-    return (Questionnaire) fhirParser.parseResource(responseBody);
+    IParser fhirParser = fhirContext.newJsonParser();
+    return fhirParser.parseResource(Questionnaire.class, responseBody);
   }
 
   private String sendHttpRequest(String url, HttpMethod httpMethod, HttpEntity<String> request) {

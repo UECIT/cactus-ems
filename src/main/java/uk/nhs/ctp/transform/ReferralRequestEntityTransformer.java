@@ -1,5 +1,6 @@
 package uk.nhs.ctp.transform;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import lombok.AllArgsConstructor;
 import org.apache.commons.collections4.Transformer;
@@ -13,10 +14,11 @@ import uk.nhs.ctp.entities.ReferralRequestEntity;
 public class ReferralRequestEntityTransformer implements
     Transformer<ReferralRequestEntity, ReferralRequest> {
 
-  IParser fhirParser;
+  FhirContext fhirContext;
 
   @Override
   public ReferralRequest transform(ReferralRequestEntity referralRequestEntity) {
+    IParser fhirParser = fhirContext.newJsonParser();
     ReferralRequest referralRequest = fhirParser
         .parseResource(ReferralRequest.class, referralRequestEntity.getResource());
 

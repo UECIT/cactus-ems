@@ -42,8 +42,8 @@ public class PatientController {
   @GetMapping
   public @ResponseBody
   PatientDTO getPatient(@RequestParam String patientRef, @RequestParam String encounterRef) {
-    Patient patientResource = (Patient)referenceService
-        .fetch(new Reference(patientRef), resourceLocator, new IdType(encounterRef));
+    Patient patientResource = resourceLocator
+        .findResource(new Reference(patientRef), new IdType(encounterRef));
     return patientTransformer.transform(patientResource);
   }
 }

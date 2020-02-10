@@ -18,6 +18,7 @@ import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.entities.CaseImmunization;
@@ -148,10 +149,13 @@ public class CaseService {
       }
 
       // Store referral request
-      if (evaluateResponse.getReferralRequest() != null) {
+      ReferralRequest referralRequest = evaluateResponse.getReferralRequest();
+      if (referralRequest != null) {
         log.info("Storing referral request");
+        ReferralRequest absoluteReferralRequest = referralRequestService
+            .makeAbsolute(referralRequest);
         ReferralRequestEntity referralRequestEntity = referralRequestTransformer
-            .transform(evaluateResponse.getReferralRequest());
+            .transform(absoluteReferralRequest);
         triageCase.setReferralRequest(null);
         caseRepository.saveAndFlush(triageCase);
         triageCase.setReferralRequest(referralRequestEntity);

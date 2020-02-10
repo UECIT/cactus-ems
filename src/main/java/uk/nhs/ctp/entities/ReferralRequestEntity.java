@@ -13,6 +13,7 @@ import javax.persistence.Lob;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import lombok.Data;
+import lombok.ToString;
 
 @Entity
 @Table(name = "referral_request")
@@ -26,6 +27,7 @@ public class ReferralRequestEntity {
   @JsonIgnore
   @OneToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = "case_id")
+  @ToString.Exclude()
   protected Cases caseEntity;
 
   @Lob
