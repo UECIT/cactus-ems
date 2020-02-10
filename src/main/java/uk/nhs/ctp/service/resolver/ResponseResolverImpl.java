@@ -38,12 +38,12 @@ import uk.nhs.ctp.utils.ResourceProviderUtils;
 public class ResponseResolverImpl implements ResponseResolver {
 
   private ResourceExtractor resourceExtractor;
-  private IParser fhirParser;
   private FhirContext fhirContext;
   private SwitchTriggerResolver switchTriggerResolver;
 
   @Override
-  public CdssResult resolve(Resource resource, CdssSupplier cdssSupplier, SettingsDTO settings, String patientId) {
+  public CdssResult resolve(Resource resource, CdssSupplier cdssSupplier, SettingsDTO settings,
+      String patientId) {
     GuidanceResponse guidanceResponse = resourceExtractor.extractGuidanceResponse(resource);
     List<Resource> extractedResources = resourceExtractor.extractResources(resource, cdssSupplier);
 
@@ -54,12 +54,14 @@ public class ResponseResolverImpl implements ResponseResolver {
     cdssResult.setOutputData(getOutputData(guidanceResponse));
     cdssResult.setSessionId(getSessionID(guidanceResponse));
     cdssResult.setContained(guidanceResponse.getContained());
-    cdssResult.setServiceDefinitionId(guidanceResponse.getModule().getReferenceElement().getIdPart());
+    cdssResult
+        .setServiceDefinitionId(guidanceResponse.getModule().getReferenceElement().getIdPart());
 
     switch (guidanceResponse.getStatus()) {
       case SUCCESS:
         cdssResult.setResult(getResult(guidanceResponse));
-        cdssResult.setSwitchTrigger(switchTriggerResolver.getSwitchTrigger(guidanceResponse, settings, patientId));
+        cdssResult.setSwitchTrigger(
+            switchTriggerResolver.getSwitchTrigger(guidanceResponse, settings, patientId));
         break;
       case DATAREQUESTED:
       case DATAREQUIRED:
@@ -71,7 +73,8 @@ public class ResponseResolverImpl implements ResponseResolver {
             guidanceResponse.getEvaluationMessageFirstRep().getReference()));
         break;
       default:
-        throw new EMSException(HttpStatus.INTERNAL_SERVER_ERROR, "Error parsing guidance response status: " + guidanceResponse.getStatus());
+        throw new EMSException(HttpStatus.INTERNAL_SERVER_ERROR,
+            "Error parsing guidance response status: " + guidanceResponse.getStatus());
     }
 
     cdssResult.setReferralRequest(
@@ -91,16 +94,15 @@ public class ResponseResolverImpl implements ResponseResolver {
     List<String> references;
     if (resource instanceof ActivityDefinition) {
       ActivityDefinition activityDefinition = (ActivityDefinition) resource;
-      references = Collections.singletonList((activityDefinition).getLibraryFirstRep().getReference());
-    }
-    else if (resource instanceof ReferralRequest) {
+      references = Collections
+          .singletonList((activityDefinition).getLibraryFirstRep().getReference());
+    } else if (resource instanceof ReferralRequest) {
       ReferralRequest referralRequest = (ReferralRequest) resource;
       references = Arrays.asList(
           referralRequest.getBasedOnFirstRep().getReference(),
           referralRequest.getRelevantHistoryFirstRep().getReference()
       );
-    }
-    else {
+    } else {
       return;
     }
 
@@ -203,12 +205,12 @@ public class ResponseResolverImpl implements ResponseResolver {
 
       if (requirement.getValueSetStringType() != null) {
         return requirement.getValueSetStringType().getValueAsString();
-      }
-      else if (requirement.getValueSetReference() != null) {
+      } else if (requirement.getValueSetReference() != null) {
         return requirement.getValueSetReference().getReference();
       }
 
     } else if (guidanceResponse.getStatus().equals(GuidanceResponseStatus.DATAREQUIRED)) {
+      IParser fhirParser = fhirContext.newJsonParser();
       throw new EMSException(HttpStatus.INTERNAL_SERVER_ERROR,
           "Invalid guidance response: " + fhirParser.encodeResourceToString(guidanceResponse));
     }

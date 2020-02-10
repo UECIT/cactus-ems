@@ -9,58 +9,113 @@ import lombok.AllArgsConstructor;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
+import org.hl7.fhir.dstu3.model.CarePlan;
+import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Observation;
-import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.service.EncounterService;
+import uk.nhs.ctp.service.GenericResourceLocator;
 import uk.nhs.ctp.service.ReferenceService;
-import uk.nhs.ctp.service.StorageService;
 
 @Component
 @AllArgsConstructor
 public class EncounterProvider implements IResourceProvider {
 
-  private StorageService storageService;
+  private GenericResourceLocator resourceLocator;
   private EncounterService encounterService;
   private ReferenceService referenceService;
 
 
   @Operation(name = "$UEC-Report", idempotent = true, type = Encounter.class)
-  public Bundle getEncounterReport(@IdParam IdType encounterIdType) {
+  public Bundle getEncounterReport(@IdParam IdType encounterId) {
 
     Bundle bundle = new Bundle();
     bundle.setType(BundleType.DOCUMENT);
-    Long encounterIdLong = encounterIdType.getIdPartAsLong();
-    Encounter encounter = encounterService.getEncounter(encounterIdLong);
-    String encounterRefString = referenceService.buildId(ResourceType.Encounter, encounterIdLong);
+    Long caseId = encounterId.getIdPartAsLong();
+
+    addEncounter(bundle, caseId);
+    addReferralRequest(bundle, caseId);
+    addObservations(bundle, caseId);
+    addCarePlans(bundle, caseId);
+
+    return bundle;
+  }
+
+  /**
+   * Dereference a resource (potentially external) and add to bundle
+   *
+   * @param bundle    the output bundle
+   * @param reference the resource to fetch
+   * @param parentId  fetch resource relative to this parent
+   */
+  private <T extends Resource> T addResource(Bundle bundle, Reference reference, IIdType parentId) {
+
+    if (parentId != null && parentId.hasBaseUrl()) {
+      referenceService.resolve(parentId.getBaseUrl(), reference);
+    }
+
+    String fullUrl = referenceService.buildId(reference.getReferenceElement());
+
+    @SuppressWarnings("unchecked")
+    T resource = reference.getResource() != null ?
+        (T) reference.getResource() :
+        resourceLocator.findResource(fullUrl);
+
+    bundle.addEntry()
+        .setFullUrl(fullUrl)
+        .setResource(resource);
+    return resource;
+  }
+
+  private void addReferralRequest(Bundle bundle, Long caseId) {
+    encounterService.getReferralRequestForEncounter(caseId)
+        .ifPresent(referralRequest -> {
+          bundle.addEntry()
+              .setFullUrl(
+                  referenceService.buildId(ResourceType.ReferralRequest, referralRequest.getId()))
+              .setResource(referralRequest);
+
+          // Dereference primary concern (Conditions)
+          referralRequest.getReasonReference()
+              .forEach(reference -> addResource(bundle, reference, referralRequest.getIdElement()));
+
+          // Dereference secondary concerns (Conditions)
+          referralRequest.getSupportingInfo()
+              .forEach(reference -> addResource(bundle, reference, referralRequest.getIdElement()));
+        });
+  }
+
+  private Encounter addEncounter(Bundle bundle, Long caseId) {
+    Encounter encounter = encounterService.getEncounter(caseId);
+    String encounterRefString = referenceService.buildId(ResourceType.Encounter, caseId);
     bundle.addEntry(new BundleEntryComponent()
         .setFullUrl(encounterRefString)
         .setResource(encounter));
 
-    Patient patient = storageService
-        .findResource(encounter.getSubject().getReference(), Patient.class);
-    bundle.addEntry()
-        .setFullUrl(referenceService.buildId(patient.getIdElement()))
-        .setResource(patient);
+    // Add patient
+    addResource(bundle, encounter.getSubject(), encounter.getIdElement());
+    return encounter;
+  }
 
-    encounterService.getReferralRequestForEncounter(encounterIdLong)
-      .ifPresent(referralRequest -> bundle.addEntry()
-          .setFullUrl(
-              referenceService.buildId(ResourceType.ReferralRequest, referralRequest.getId()))
-          .setResource(referralRequest));
-
-    List<Observation> observations = encounterService.getObservationsForEncounter(encounterIdLong);
+  private void addObservations(Bundle bundle, Long caseId) {
+    List<Observation> observations = encounterService.getObservationsForEncounter(caseId);
     observations.stream()
         .map(obs -> new BundleEntryComponent()
-              .setFullUrl(referenceService.buildId(ResourceType.Observation, obs.getIdElement().getIdPartAsLong()))
-              .setResource(obs))
+            .setFullUrl(referenceService
+                .buildId(ResourceType.Observation, obs.getIdElement().getIdPartAsLong()))
+            .setResource(obs))
         .forEach(bundle::addEntry);
+  }
 
-    return bundle;
+  private void addCarePlans(Bundle bundle, Long caseId) {
+    // TODO
   }
 
   @Read

@@ -1,5 +1,6 @@
 package uk.nhs.ctp.controllers;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Collection;
@@ -32,7 +33,7 @@ public class ReportController {
   private final ReportService reportService;
   private final EncounterService encounterService;
   private final EncounterReportInputTransformer encounterReportInputTransformer;
-  private final IParser fhirParser;
+  private final FhirContext fhirContext;
 
   @Value("${reports.enabled}")
   private Boolean reportsEnabled;
@@ -48,7 +49,7 @@ public class ReportController {
       @RequestBody ReportRequestDTO reportRequestDTO)
       throws JAXBException, JsonProcessingException {
 
-    reportRequestDTO.setFhirParser(fhirParser);
+    reportRequestDTO.setFhirContext(fhirContext);
     return reportService.generateReports(reportRequestDTO);
   }
 

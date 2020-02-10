@@ -1,12 +1,10 @@
 package uk.nhs.ctp.config;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
-import java.util.Arrays;
 import org.hl7.fhir.dstu3.model.CareConnectCarePlan;
 import org.hl7.fhir.dstu3.model.CareConnectCareTeam;
 import org.hl7.fhir.dstu3.model.CareConnectCondition;
@@ -55,33 +53,6 @@ public class FHIRConfig {
       }
     });
     return fhirClient;
-  }
-
-  @Bean
-  public IParser fhirParser() {
-    IParser fhirParser = fhirContext().newJsonParser();
-    fhirParser.setServerBaseUrl(fhirServer);
-    fhirParser.setPreferTypes(Arrays.asList(
-        CareConnectCarePlan.class,
-        CareConnectCareTeam.class,
-//        CareConnectCondition.class, TODO: NCTH-462
-        CareConnectEncounter.class,
-        CareConnectEpisodeOfCare.class,
-        CareConnectHealthcareService.class,
-        CareConnectLocation.class,
-        CareConnectMedication.class,
-        CareConnectMedicationRequest.class,
-        CareConnectObservation.class,
-        CareConnectOrganization.class,
-        CareConnectPatient.class,
-        CareConnectPractitioner.class,
-        CareConnectProcedure.class,
-        CareConnectProcedureRequest.class,
-        CareConnectRelatedPerson.class,
-        CareConnectSpecimen.class
-    ));
-
-    return fhirParser;
   }
 
   @Bean

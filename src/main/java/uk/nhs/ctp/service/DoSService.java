@@ -62,7 +62,7 @@ public class DoSService {
 					// Establish full URL of resource
 					if (entry.hasFullUrl()) {
 						resource.setId(entry.getFullUrl());
-					} else if (resource.hasId()) {
+					} else if (resource.hasId() && !resource.getIdElement().isAbsolute()) {
 						IdType fullId = resource.getIdElement()
 								.withServerBase(dos, resource.getResourceType().name());
 						resource.setId(fullId);
