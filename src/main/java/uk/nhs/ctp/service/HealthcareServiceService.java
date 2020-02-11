@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.exception.EMSException;
-import uk.nhs.ctp.registry.HealthcareServiceRegistry;
+import uk.nhs.ctp.registry.Registry;
 import uk.nhs.ctp.service.dto.HealthcareServiceDTO;
 import uk.nhs.ctp.transform.HealthcareServiceOutTransformer;
 import uk.nhs.ctp.utils.ErrorHandlingUtils;
@@ -23,7 +23,7 @@ import uk.nhs.ctp.utils.ErrorHandlingUtils;
 @RequiredArgsConstructor
 public class HealthcareServiceService {
 
-  private final HealthcareServiceRegistry healthcareServiceRegistry;
+  private final Registry<HealthcareServiceDTO> healthcareServiceRegistry;
   private final HealthcareServiceOutTransformer healthcareServiceTransformer;
 
   @Value("${ems.frontend}")

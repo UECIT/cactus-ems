@@ -4,26 +4,25 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import lombok.AllArgsConstructor;
-import org.hl7.fhir.dstu3.model.CareConnectPractitioner;
+import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.stereotype.Component;
-import uk.nhs.ctp.service.PractitionerService;
+import uk.nhs.ctp.service.AppointmentService;
 
-@AllArgsConstructor
 @Component
-public class PractitionerProvider implements IResourceProvider {
+@AllArgsConstructor
+public class AppointmentProvider implements IResourceProvider {
 
-  private final PractitionerService practitionerService;
+  private final AppointmentService appointmentService;
 
   @Read
-  public CareConnectPractitioner getPractitioner(@IdParam IdType id) {
-    return practitionerService.get(id);
+  public Appointment getAppointment(@IdParam IdType id) {
+    return appointmentService.get(id);
   }
 
   @Override
   public Class<? extends IBaseResource> getResourceType() {
-    return Practitioner.class;
+    return Appointment.class;
   }
 }

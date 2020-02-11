@@ -5,11 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.hl7.fhir.dstu3.model.GuidanceResponse;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.RequestGroup;
 import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.entities.CdssSupplier;
+import uk.nhs.ctp.service.ReferenceService;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
 
 @Component
@@ -17,6 +20,7 @@ import uk.nhs.ctp.utils.ResourceProviderUtils;
 public class GuidanceResponseResourceExtractor {
 
 	private FhirContext fhirContext;
+	private ReferenceService referenceService;
 	
 	public List<Resource> extractResources(GuidanceResponse guidanceResponse, CdssSupplier cdssSupplier) {
 		List<Resource> resources = new ArrayList<>();
@@ -28,21 +32,23 @@ public class GuidanceResponseResourceExtractor {
 			
 			requestGroup = requestGroup == null ? ResourceProviderUtils.getResource(fhirContext,
 					baseUrl, RequestGroup.class, guidanceResponse.getResult().getReference()) : requestGroup;
+			var requestBaseUrl = requestGroup.getIdElement().getBaseUrl();
+			referenceService.resolveRelative(requestBaseUrl, requestGroup);
 
-			final String requestBaseUrl = requestGroup.getIdElement().getBaseUrl();
 
-			requestGroup.getAction().forEach(child -> {
-				try {
-					String reference = child.getResource().getReference();
-					Class<? extends Resource> resourceClass = ResourceProviderUtils.getResourceType(reference);
-					Resource resource = ResourceProviderUtils.getResource(fhirContext, requestBaseUrl, resourceClass, reference);
-					resources.add(resource);
-				} catch (Exception e) {
-				}
-			});
+			for (var child : requestGroup.getAction()) {
+				String reference = child.getResource().getReference();
+				String resourceTypeName = new IdType(reference).getResourceType();
+				Class<? extends IBaseResource> resourceClass =
+						fhirContext.getResourceDefinition(resourceTypeName).getImplementingClass();
+				IBaseResource resource = ResourceProviderUtils
+						.getResource(fhirContext, requestBaseUrl, resourceClass, reference);
+				referenceService.resolveRelative(requestBaseUrl, resource);
+				resources.add((Resource) resource);
+			}
 		}
 		
-		if(guidanceResponse.hasOutputParameters()) {
+		if (guidanceResponse.hasOutputParameters()) {
 			try {
 				Parameters parameters = ResourceProviderUtils.getResource(
 						fhirContext, cdssSupplier.getBaseUrl(), Parameters.class, 

@@ -1,7 +1,6 @@
 package uk.nhs.ctp.service;
 
-import static uk.nhs.ctp.utils.ResourceProviderUtils.getResource;
-import static uk.nhs.ctp.utils.ResourceProviderUtils.getResources;
+import static uk.nhs.ctp.utils.ResourceProviderUtils.*;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.util.List;

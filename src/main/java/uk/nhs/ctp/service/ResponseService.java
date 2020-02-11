@@ -49,7 +49,10 @@ public class ResponseService {
 	 * @param cdssSupplierId CDSS supplier ID
 	 * @return {@link CdssResponseDTO}
 	 */
-	public CdssResponseDTO buildResponse(CdssResult cdssResult, Questionnaire questionnaire, Long caseId,
+	public CdssResponseDTO buildResponse(
+			CdssResult cdssResult,
+			Questionnaire questionnaire,
+			Long caseId,
 			Long cdssSupplierId) throws FHIRException {
 		CdssResponseDTO response = new CdssResponseDTO();
 

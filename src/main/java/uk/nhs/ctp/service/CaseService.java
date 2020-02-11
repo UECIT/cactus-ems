@@ -19,6 +19,7 @@ import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -51,6 +52,7 @@ public class CaseService {
   private CaseObservationTransformer caseObservationTransformer;
   private ReferralRequestService referralRequestService;
   private ReferralRequestTransformer referralRequestTransformer;
+  private ReferenceService referenceService;
 
   /**
    * Create new case from patient ID
@@ -369,6 +371,8 @@ public class CaseService {
     ReferralRequestEntity referralRequestEntity = triageCase.getReferralRequest();
     referralRequestService.update(referralRequestEntity, referralRequest -> {
       referralRequest.setRecipient(Collections.singletonList(serviceRef));
+      referralRequest.addSupportingInfo(
+          referenceService.buildRef(ResourceType.Appointment, "example-appointment"));
     });
 
     caseRepository.saveAndFlush(triageCase);
