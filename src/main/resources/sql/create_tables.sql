@@ -3,6 +3,7 @@ USE cdss_decoupling;
 /* Destroy all existing data */
 DROP TABLE IF EXISTS cdss_decoupling.test_scenario;
 DROP TABLE IF EXISTS cdss_decoupling.patient;
+DROP TABLE IF EXISTS cdss_decoupling.case_carePlan;
 DROP TABLE IF EXISTS cdss_decoupling.case_immunization;
 DROP TABLE IF EXISTS cdss_decoupling.case_observation;
 DROP TABLE IF EXISTS cdss_decoupling.case_medication;
@@ -14,6 +15,7 @@ DROP TABLE IF EXISTS cdss_decoupling.users;
 DROP TABLE IF EXISTS cdss_decoupling.user_roles;
 DROP TABLE IF EXISTS cdss_decoupling.service_definition;
 DROP TABLE IF EXISTS cdss_decoupling.cdss_supplier;
+DROP TABLE IF EXISTS cdss_decoupling.referral_request;
 DROP TABLE IF EXISTS cdss_decoupling.audit_entry;
 DROP TABLE IF EXISTS cdss_decoupling.audit_record;
 
@@ -125,6 +127,15 @@ CREATE TABLE cdss_decoupling.cases
     PRIMARY KEY (id),
     FOREIGN KEY (party_id) REFERENCES cdss_decoupling.party (id),
     FOREIGN KEY (skillset_id) REFERENCES cdss_decoupling.skillset (id)
+);
+
+CREATE TABLE cdss_decoupling.case_carePlan
+(
+    `id`        bigint(20) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `reference` varchar(255) DEFAULT NULL,
+    `timestamp` date         DEFAULT NULL,
+    `case_id`   bigint(20)   DEFAULT NULL,
+    FOREIGN KEY (`case_id`) REFERENCES `cases` (`id`)
 );
 
 CREATE TABLE cdss_decoupling.case_immunization
