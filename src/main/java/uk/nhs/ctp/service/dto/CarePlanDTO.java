@@ -23,7 +23,7 @@ public class CarePlanDTO {
 	private ArrayList<ActivityDTO> activities;
 	private ArrayList<SupportingInfoDTO> supportingInfo;
 	private ArrayList<NotesDTO> notes;
-	
+
 	public CarePlanDTO(CarePlan carePlan) {
 		super();
 

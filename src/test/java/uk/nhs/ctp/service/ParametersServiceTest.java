@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.CareConnectPatient;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
@@ -24,7 +25,6 @@ import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
-import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
@@ -42,6 +42,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.nhs.ctp.entities.AuditRecord;
 import uk.nhs.ctp.entities.CaseImmunization;
@@ -66,7 +67,7 @@ public class ParametersServiceTest {
   @InjectMocks
   private ParametersService parametersService;
 
-  @Mock
+  @MockBean
   private CaseRepository mockCaseRepository;
   @Mock
   private AuditService mockAuditService;
@@ -445,7 +446,7 @@ public class ParametersServiceTest {
 
     assertNotNull(observation);
     assertEquals(ObservationStatus.FINAL, observation.getStatus());
-    assertNull(observation.getId());
+    assertNotNull(observation.getId());
     assertNotNull(observation.getCode());
     assertEquals(1, observation.getCode().getCoding().size());
     assertEquals("Test Observation", observation.getCode().getCodingFirstRep().getDisplay());
@@ -497,7 +498,7 @@ public class ParametersServiceTest {
 
     assertEquals(1, requestIdParams.size());
     assertNotNull(requestIdParams.get(0).getValue());
-    assertEquals("1", requestIdParams.get(0).getValue().primitiveValue());
+    assertNotNull(UUID.fromString(requestIdParams.get(0).getValue().primitiveValue()));
   }
 
 

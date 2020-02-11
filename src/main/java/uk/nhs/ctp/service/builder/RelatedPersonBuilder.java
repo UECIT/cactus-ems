@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class RelatedPersonBuilder {
 
-  public CareConnectRelatedPerson build(ParametersParameterComponent context) {
+  public CareConnectRelatedPerson build() {
     // TODO build an appropriate record from the context
     CareConnectRelatedPerson person = new CareConnectRelatedPerson();
     person.addAddress()
