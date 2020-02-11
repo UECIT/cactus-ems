@@ -4,13 +4,13 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import com.google.common.base.Preconditions;
 import java.util.List;
+import javax.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
-import org.hl7.fhir.dstu3.model.CarePlan;
-import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Observation;
@@ -20,6 +20,9 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.stereotype.Component;
+import uk.nhs.ctp.entities.CaseCarePlan;
+import uk.nhs.ctp.entities.Cases;
+import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.EncounterService;
 import uk.nhs.ctp.service.GenericResourceLocator;
 import uk.nhs.ctp.service.ReferenceService;
@@ -31,9 +34,11 @@ public class EncounterProvider implements IResourceProvider {
   private GenericResourceLocator resourceLocator;
   private EncounterService encounterService;
   private ReferenceService referenceService;
+  private CaseRepository caseRepository;
 
 
   @Operation(name = "$UEC-Report", idempotent = true, type = Encounter.class)
+  @Transactional
   public Bundle getEncounterReport(@IdParam IdType encounterId) {
 
     Bundle bundle = new Bundle();
@@ -114,8 +119,15 @@ public class EncounterProvider implements IResourceProvider {
         .forEach(bundle::addEntry);
   }
 
-  private void addCarePlans(Bundle bundle, Long caseId) {
-    // TODO
+  @Transactional
+  public void addCarePlans(Bundle bundle, Long caseId) {
+    Cases caseEntity = caseRepository.getOne(caseId);
+    for (CaseCarePlan carePlan : caseEntity.getCarePlans()) {
+      Reference reference = new Reference(carePlan.getReference());
+      Preconditions.checkArgument(reference.getReferenceElement().isAbsolute(),
+          "CarePlan must have absolute reference");
+      addResource(bundle, reference, null);
+    }
   }
 
   @Read

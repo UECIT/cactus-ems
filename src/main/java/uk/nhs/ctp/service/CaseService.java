@@ -5,6 +5,7 @@ import static com.google.common.collect.MoreCollectors.onlyElement;
 import com.google.common.base.Preconditions;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -19,8 +20,10 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
+import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.springframework.stereotype.Service;
+import uk.nhs.ctp.entities.CaseCarePlan;
 import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
@@ -128,9 +131,36 @@ public class CaseService {
     log.info("Updating case for " + triageCase.getId());
 
     triageCase.setSessionId(sessionId);
+    triageCase.setReferralRequest(null);
+    caseRepository.saveAndFlush(triageCase);
+
+    // Store referral request
+    ReferralRequest referralRequest = evaluateResponse.getReferralRequest();
+    if (referralRequest != null) {
+      log.info("Storing referral request");
+      ReferralRequest absoluteReferralRequest = referralRequestService
+          .makeAbsolute(referralRequest);
+      ReferralRequestEntity referralRequestEntity = referralRequestTransformer
+          .transform(absoluteReferralRequest);
+      triageCase.setReferralRequest(referralRequestEntity);
+    }
+
+    // Store references to CarePlans
+    if (evaluateResponse.hasCareAdvice()) {
+      Date now = new Date();
+      List<CaseCarePlan> carePlans = triageCase.getCarePlans();
+      carePlans.clear();
+
+      evaluateResponse.getCareAdvice().stream()
+          .map(dto -> CaseCarePlan.builder()
+              .reference(dto.getId())
+              .timestamp(now)
+              .build())
+          .forEach(carePlans::add);
+    }
 
     // Store output data
-    evaluateResponse.getOutputData().forEach(resource -> {
+    for (Resource resource : evaluateResponse.getOutputData()) {
       if (resource instanceof Observation) {
         updateObservation(triageCase, (Observation) resource);
       } else if (resource instanceof Immunization) {
@@ -147,21 +177,7 @@ public class CaseService {
         // TODO add code here to deal with storing any items that do not match the above
         log.warn("Unsupported outputParameter type: {}" + resource.getResourceType().name());
       }
-
-      // Store referral request
-      ReferralRequest referralRequest = evaluateResponse.getReferralRequest();
-      if (referralRequest != null) {
-        log.info("Storing referral request");
-        ReferralRequest absoluteReferralRequest = referralRequestService
-            .makeAbsolute(referralRequest);
-        ReferralRequestEntity referralRequestEntity = referralRequestTransformer
-            .transform(absoluteReferralRequest);
-        triageCase.setReferralRequest(null);
-        caseRepository.saveAndFlush(triageCase);
-        triageCase.setReferralRequest(referralRequestEntity);
-      }
-
-    });
+    }
 
     return caseRepository.saveAndFlush(triageCase);
   }

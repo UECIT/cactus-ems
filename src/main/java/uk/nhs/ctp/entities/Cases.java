@@ -83,6 +83,10 @@ public class Cases {
   @JoinColumn(name = "case_id")
   private List<QuestionResponse> questionResponses = new ArrayList<>();
 
+  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+  @JoinColumn(name = "case_id")
+  private List<CaseCarePlan> carePlans = new ArrayList<>();
+
   @Column(name = "session_id")
   private String sessionId;
 
