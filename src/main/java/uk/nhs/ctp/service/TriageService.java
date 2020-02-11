@@ -218,7 +218,7 @@ public class TriageService {
     }
     Questionnaire questionnaire = null;
     if (!cdssResult.hasResult() && cdssResult.hasQuestionnaire()) {
-      // TODO GetResouce out of contained
+      // TODO GetResource out of contained
       questionnaire = ResourceProviderUtils
           .getResource(cdssResult.getContained(), Questionnaire.class);
       questionnaire = questionnaire == null ? cdssService

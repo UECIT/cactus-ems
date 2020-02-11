@@ -99,8 +99,7 @@ public class ComponentOfDocumentDecorator implements OneOneOneDecorator {
 				request.getReferralRequest().getContained(), Bundle.class);
 		
 		Composition composition = ResourceProviderUtils.getResource(resourceBundle, Composition.class);
-		CareConnectEncounter encounter = 
-				ResourceProviderUtils.getResource(composition.getEncounter().getResource(), CareConnectEncounter.class);
+		var encounter = (CareConnectEncounter) composition.getEncounter().getResource();
 		
 		COCDTP146232GB01EncounterParticipant encounterParticipant = 
 				participantTemplateResolver.resolve(encounter.getSubject().getResource(), request);

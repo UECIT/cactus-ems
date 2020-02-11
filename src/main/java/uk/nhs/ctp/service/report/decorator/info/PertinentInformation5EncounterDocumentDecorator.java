@@ -60,10 +60,9 @@ public class PertinentInformation5EncounterDocumentDecorator implements Ambulanc
 	public void decorate(REPCMT200001GB02AmbulanceRequest document, ReportRequestDTO request) {
 		
 		Composition composition = ResourceProviderUtils.getResource(request.getBundle(), Composition.class);
-		CareConnectEncounter fhirEncounter = ResourceProviderUtils.getResource(
-				composition.getEncounter().getResource(), CareConnectEncounter.class);
-		CareConnectRelatedPerson fhirInformant = ResourceProviderUtils.getResource(
-				request.getReferralRequest().getRequester().getAgent().getResource(), CareConnectRelatedPerson.class);
+		var fhirEncounter = (CareConnectEncounter) composition.getEncounter().getResource();
+		var fhirInformant = (CareConnectRelatedPerson)
+				request.getReferralRequest().getRequester().getAgent().getResource();
 		
 		REPCMT200001GB02PertinentInformation encounter = document.getPertinentInformation5();
 		encounter.setTypeCode(encounter.getTypeCode());

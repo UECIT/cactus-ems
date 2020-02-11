@@ -18,7 +18,8 @@ public class TrackerDocumentDecorator implements OneOneOneDecorator {
 	
 	@Override
 	public void decorate(POCDMT200001GB02ClinicalDocument document, ReportRequestDTO request) {
-		document.getTracker().add(templateResolver.resolve(ResourceProviderUtils.getResource(
-				request.getBundle(), CareConnectPatient.class).getGeneralPractitionerFirstRep().getResource(), request));
+		document.getTracker().add(templateResolver.resolve(
+				ResourceProviderUtils.getResource(request.getBundle(), CareConnectPatient.class)
+						.getGeneralPractitionerFirstRep().getResource(), request));
 	}
 }

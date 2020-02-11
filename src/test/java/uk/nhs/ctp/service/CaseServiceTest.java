@@ -67,6 +67,8 @@ public class CaseServiceTest {
   private GenericResourceLocator resourceLocator;
   @Mock
   private StorageService storageService;
+  @Mock
+  private ReferenceService referenceService;
 
   @Mock
   private CaseObservationTransformer caseObservationTransformer;
@@ -106,7 +108,8 @@ public class CaseServiceTest {
         storageService,
         caseObservationTransformer,
         referralRequestService,
-        referralRequestTransformer
+        referralRequestTransformer,
+        referenceService
     ));
 
     MockitoAnnotations.initMocks(this);

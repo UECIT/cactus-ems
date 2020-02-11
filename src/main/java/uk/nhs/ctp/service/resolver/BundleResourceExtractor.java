@@ -19,7 +19,7 @@ public class BundleResourceExtractor {
 	public List<Resource> extractResources(Bundle resource) {
 		return resource.getEntry().stream()
 				.map(BundleEntryComponent::getResource)
-				.filter(r -> ResourceProviderUtils.getResource(r, GuidanceResponse.class) == null)
+				.filter(r -> !(r instanceof GuidanceResponse))
 				.collect(Collectors.toList());
 	}
 

@@ -2,10 +2,8 @@ package uk.nhs.ctp.registry;
 
 import java.util.Collections;
 import java.util.List;
-import org.springframework.stereotype.Component;
 import uk.nhs.ctp.service.dto.HealthcareServiceDTO;
 
-@Component
 public class HealthcareServiceRegistry implements Registry<HealthcareServiceDTO> {
 
   public List<HealthcareServiceDTO> getAll() {

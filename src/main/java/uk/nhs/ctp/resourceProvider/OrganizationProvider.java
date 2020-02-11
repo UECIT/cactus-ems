@@ -19,7 +19,7 @@ public class OrganizationProvider implements IResourceProvider {
 
   @Read
   public CareConnectOrganization getOrganization(@IdParam IdType id) {
-    return organisationService.get(id.getIdPart());
+    return organisationService.get(id);
   }
 
   @Override

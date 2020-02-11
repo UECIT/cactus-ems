@@ -11,7 +11,6 @@ import org.hl7.fhir.dstu3.model.HumanName;
 
 import uk.nhs.ctp.service.report.decorator.mapping.template.encompassingencounter.participant.AbstractPersonWithOrganizationUniversalTemplateMapper;
 import uk.nhs.ctp.service.report.org.hl7.v3.AssignedEntityAware;
-import uk.nhs.ctp.utils.ResourceProviderUtils;
 
 public abstract class PatientToPersonWithOrganizationUniversalTemplateMapper<CONTAINER extends AssignedEntityAware>
 		extends AbstractPersonWithOrganizationUniversalTemplateMapper<CareConnectPatient, CONTAINER> {
@@ -38,8 +37,7 @@ public abstract class PatientToPersonWithOrganizationUniversalTemplateMapper<CON
 
 	@Override
 	protected CareConnectOrganization getOrganization(CareConnectPatient patient) {
-		CareConnectPractitioner gp = ResourceProviderUtils.getResource(
-				patient.getGeneralPractitionerFirstRep().getResource(), CareConnectPractitioner.class);
+		var gp = (CareConnectPractitioner) patient.getGeneralPractitionerFirstRep().getResource();
 		
 		CareConnectOrganization organization = new CareConnectOrganization();
 		organization.setAddress(gp.getAddress());

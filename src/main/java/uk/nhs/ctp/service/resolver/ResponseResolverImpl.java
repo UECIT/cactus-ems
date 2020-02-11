@@ -1,16 +1,19 @@
 package uk.nhs.ctp.service.resolver;
 
-import static uk.nhs.ctp.utils.ResourceProviderUtils.getResource;
+import static uk.nhs.ctp.utils.ResourceProviderUtils.*;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
+import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.model.CareConnectCarePlan;
 import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementCodeFilterComponent;
@@ -28,10 +31,10 @@ import org.springframework.stereotype.Component;
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.exception.EMSException;
+import uk.nhs.ctp.service.ReferenceService;
 import uk.nhs.ctp.service.dto.CarePlanDTO;
 import uk.nhs.ctp.service.dto.CdssResult;
 import uk.nhs.ctp.service.dto.SettingsDTO;
-import uk.nhs.ctp.utils.ResourceProviderUtils;
 
 @AllArgsConstructor
 @Component
@@ -40,16 +43,18 @@ public class ResponseResolverImpl implements ResponseResolver {
   private ResourceExtractor resourceExtractor;
   private FhirContext fhirContext;
   private SwitchTriggerResolver switchTriggerResolver;
+  private ReferenceService referenceService;
 
   @Override
   public CdssResult resolve(Resource resource, CdssSupplier cdssSupplier, SettingsDTO settings,
       String patientId) {
     GuidanceResponse guidanceResponse = resourceExtractor.extractGuidanceResponse(resource);
+    referenceService.resolveRelative(cdssSupplier.getBaseUrl(), guidanceResponse);
+
     List<Resource> extractedResources = resourceExtractor.extractResources(resource, cdssSupplier);
 
     CdssResult cdssResult = new CdssResult();
-    extractedResources
-        .forEach(child -> addContained(child, cdssSupplier, guidanceResponse));
+    extractedResources.forEach(child -> addContained(child, cdssSupplier, guidanceResponse));
 
     cdssResult.setOutputData(getOutputData(guidanceResponse));
     cdssResult.setSessionId(getSessionID(guidanceResponse));
@@ -81,8 +86,7 @@ public class ResponseResolverImpl implements ResponseResolver {
         getResource(guidanceResponse.getContained(), ReferralRequest.class));
 
     cdssResult.setCareAdvice(
-        ResourceProviderUtils
-            .getResources(guidanceResponse.getContained(), CareConnectCarePlan.class)
+        getResources(guidanceResponse.getContained(), CareConnectCarePlan.class)
             .stream().map(CarePlanDTO::new).collect(Collectors.toList()));
 
     return cdssResult;
@@ -93,12 +97,11 @@ public class ResponseResolverImpl implements ResponseResolver {
     guidanceResponse.addContained(resource);
     List<String> references;
     if (resource instanceof ActivityDefinition) {
-      ActivityDefinition activityDefinition = (ActivityDefinition) resource;
-      references = Collections
-          .singletonList((activityDefinition).getLibraryFirstRep().getReference());
+      var activityDefinition = (ActivityDefinition) resource;
+      references = singletonList((activityDefinition).getLibraryFirstRep().getReference());
     } else if (resource instanceof ReferralRequest) {
-      ReferralRequest referralRequest = (ReferralRequest) resource;
-      references = Arrays.asList(
+      var referralRequest = (ReferralRequest) resource;
+      references = asList(
           referralRequest.getBasedOnFirstRep().getReference(),
           referralRequest.getRelevantHistoryFirstRep().getReference()
       );
@@ -108,64 +111,49 @@ public class ResponseResolverImpl implements ResponseResolver {
 
     references.forEach(childReference -> {
       if (childReference != null) {
-        guidanceResponse.addContained(getResource(fhirContext,
-            cdssSupplier.getBaseUrl(), ResourceProviderUtils.getResourceType(childReference),
+        guidanceResponse.addContained(
+            getResource(fhirContext,
+            cdssSupplier.getBaseUrl(),
+            getResourceType(childReference),
             childReference));
       }
     });
   }
 
   private List<Resource> getOutputData(GuidanceResponse guidanceResponse) {
-    List<Resource> outputResources = new ArrayList<>();
+    return Optional.ofNullable(guidanceResponse.getOutputParameters().getResource())
+        .or(() ->
+            guidanceResponse.getContained()
+              .stream()
+              .filter(Parameters.class::isInstance)
+              .findFirst())
+        .map(parameters -> castToType(parameters, Parameters.class))
+        .map(Parameters::getParameter)
+        .map(Collection::stream)
+        .map(param -> param.map(this::wrapInParameters))
+        .orElse(Stream.empty())
+        .collect(Collectors.toUnmodifiableList());
+  }
 
-    Parameters parameters = new Parameters();
-    if (guidanceResponse.hasOutputParameters()
-        && guidanceResponse.getOutputParameters().getResource() != null) {
-      parameters = ResourceProviderUtils
-          .castToType(guidanceResponse.getOutputParameters().getResource(), Parameters.class);
-
-    }
-    if (guidanceResponse.hasOutputParameters()
-        && guidanceResponse.getOutputParameters().getResource() == null) {
-      for (Resource resource : guidanceResponse.getContained()) {
-        if (resource instanceof Parameters) {
-          parameters = ResourceProviderUtils.castToType(resource, Parameters.class);
-        }
-      }
-    }
-
-    // Get extra "Output Parameters" and store them somewhere
-    for (ParametersParameterComponent parameter : parameters.getParameter()) {
-      if (parameter.getName().equalsIgnoreCase(SystemConstants.OUTPUT_DATA)
-          && parameter.getResource() != null) {
-        // if the parameter is outputData and contains a resource
-        outputResources.add(parameter.getResource());
-      } else {
-        // if the parameter is anything else
-        Parameters tempParameters = new Parameters();
-        tempParameters.addParameter(parameter);
-        outputResources.add(tempParameters);
-      }
+  public Parameters wrapInParameters(ParametersParameterComponent parameter) {
+    if (parameter.getName().equalsIgnoreCase(SystemConstants.OUTPUT_DATA)
+        && parameter.getResource() != null) {
+      return (Parameters) parameter.getResource();
     }
 
-    return outputResources;
+    var wrappingParameters = new Parameters();
+    wrappingParameters.addParameter(parameter);
+    return wrappingParameters;
   }
 
   public String getSessionID(GuidanceResponse guidanceResponse) {
-    try {
-      if (guidanceResponse.hasOutputParameters()
-          && guidanceResponse.getOutputParameters().getResource() != null) {
-        Parameters parameters = ResourceProviderUtils
-            .castToType(guidanceResponse.getOutputParameters().getResource(), Parameters.class);
-
-        ParametersParameterComponent sessionIdParameter = ResourceProviderUtils
-            .getParameterByName(parameters.getParameter(), "sessionId");
-        return sessionIdParameter.getValue().primitiveValue();
-      }
-    } catch (Exception e) {
-      return null;
-    }
-    return null;
+    return Optional.ofNullable(guidanceResponse.getOutputParameters().getResource())
+        .map(parameters -> castToType(parameters, Parameters.class))
+        .map(Parameters::getParameter)
+        .map(parameters -> getParameterByName(parameters, "sessionId"))
+        .map(ParametersParameterComponent::getValue)
+        .map(Base::primitiveValue)
+        .orElse(null);
   }
 
   @Override
@@ -173,20 +161,18 @@ public class ResponseResolverImpl implements ResponseResolver {
 
     if (guidanceResponse.hasResult() && guidanceResponse.getResult().getResource() != null) {
       // get RequestGroup resource out of the result
-      RequestGroup requestGroup = ResourceProviderUtils
-          .castToType(guidanceResponse.getResult().getResource(),
-              RequestGroup.class);
-      return requestGroup;
-    } else if (guidanceResponse.hasResult()) {
+      return castToType(guidanceResponse.getResult().getResource(), RequestGroup.class);
+    }
+
+    if (guidanceResponse.hasResult()) {
       RequestGroup requestGroup = new RequestGroup();
       for (Resource resource : guidanceResponse.getContained()) {
         if (resource instanceof ReferralRequest) {
-          ReferralRequest referralRequest = ResourceProviderUtils
-              .castToType(resource, ReferralRequest.class);
+          ReferralRequest referralRequest = castToType(resource, ReferralRequest.class);
           requestGroup.addAction().setResource(new Reference(referralRequest));
         }
         if (resource instanceof CarePlan) {
-          CarePlan carePlan = ResourceProviderUtils.castToType(resource, CarePlan.class);
+          CarePlan carePlan = castToType(resource, CarePlan.class);
           requestGroup.addAction().setResource(new Reference(carePlan));
         }
       }
