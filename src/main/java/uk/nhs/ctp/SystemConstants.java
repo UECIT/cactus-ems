@@ -1,10 +1,14 @@
 package uk.nhs.ctp;
 
+import org.apache.commons.lang3.time.FastDateFormat;
+
 public final class SystemConstants {
 
 	/*
 	 * Constants for building FHIR resources
 	 */
+
+	public static final FastDateFormat DATE_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd");
 
 	public static final String DESCRIPTION_ID = "descriptionId";
 	public static final String DESCRIPTION_DISPLAY = "descriptionDisplay";
