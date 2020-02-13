@@ -1,18 +1,14 @@
 package uk.nhs.ctp.service;
 
-import static uk.nhs.ctp.SystemConstants.DATE_FORMAT;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
-import java.util.TreeMap;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hl7.fhir.dstu3.model.CareConnectObservation;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -23,30 +19,29 @@ import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
-import org.hl7.fhir.dstu3.model.Person;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.SystemURL;
 import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
-import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.CaseParameter;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.enums.Language;
+import uk.nhs.ctp.enums.UserType;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.builder.ReferenceBuilder;
+import uk.nhs.ctp.service.builder.RelatedPersonBuilder;
 import uk.nhs.ctp.service.dto.CodeDTO;
-import uk.nhs.ctp.service.dto.PersonDTO;
 import uk.nhs.ctp.service.dto.SettingsDTO;
 import uk.nhs.ctp.service.dto.TriageQuestion;
 import uk.nhs.ctp.service.factory.ReferenceBuilderFactory;
 import uk.nhs.ctp.transform.ObservationTransformer;
-import uk.nhs.ctp.transform.PersonTransformer;
 import uk.nhs.ctp.utils.ErrorHandlingUtils;
 
 @Service
@@ -54,13 +49,18 @@ import uk.nhs.ctp.utils.ErrorHandlingUtils;
 @Slf4j
 public class ParametersService {
 
+  private static Set<String> validInitiatingPersonTypes =
+      Set.of("Patient", "RelatedPerson", "Practitioner");
+  private static Set<String> validReceivingPersonTypes =
+      Set.of("Patient", "RelatedPerson");
+
   private CaseRepository caseRepository;
   private ReferenceBuilderFactory referenceBuilderFactory;
   private AuditService auditService;
   private ReferenceService referenceService;
   private ObservationTransformer observationTransformer;
   private QuestionnaireService questionnaireService;
-  private PersonTransformer personTransformer;
+  private RelatedPersonBuilder relatedPersonBuilder;
 
   Parameters getEvaluateParameters(
       Long caseId,
@@ -80,35 +80,129 @@ public class ParametersService {
       throw new NullPointerException("Could not find an audit record for case " + caseId);
     }
 
+    Reference patientRef = new Reference(caseEntity.getPatientId());
+
     Builder builder = new Builder()
         .setRequestId(UUID.randomUUID().toString())
         .setEncounter(caseId)
-        .setPatient(caseEntity.getPatientId())
+        .setPatient(patientRef)
         .setContext(caseEntity)
+        .setSetting(settings.getSetting())
+        .addQuestionnaireResponses(
+            questionnaireService.updateEncounterResponses(
+                caseEntity, questionnaireId, questionResponse, amending, referenceBuilder));
 
-        // Add user context information
-        .setUserType(settings.getUserType())
-        .setUserLanguage(settings.getUserLanguage())
-        .setUserTaskContext(settings.getUserTaskContext())
-        .setInitiatingPerson(settings.getInitiatingPerson())
-        .setReceivingPerson(settings.getReceivingPerson())
-        .setRecipientType(settings.getRecipientType())
-        .setRecipientLanguage(settings.getUserLanguage())
-        .setSetting(settings.getSetting());
+    addPeople(builder, patientRef, settings);
+    addInputData(caseEntity, builder);
+    addInputParameters(caseEntity, builder);
 
-    builder.addQuestionnaireResponses(
-        questionnaireService.updateEncounterResponses(
-            caseEntity, questionnaireId, questionResponse, amending, referenceBuilder));
+    return builder.build();
+  }
 
+  private void addInputData(Cases caseEntity, Builder builder) {
     getObservations(caseEntity).forEach(builder::addInputData);
     getImmunizations(caseEntity).forEach(builder::addInputData);
     getMedications(caseEntity).forEach(builder::addInputData);
+  }
 
-    // Add extra parameters
-    // TODO review this in more detail - not sent by CDS?
-    addParameterInputData(caseEntity, builder);
+  private void addPeople(Builder builder, Reference patientRef, SettingsDTO settings) {
 
-    return builder.build();
+    UserType userType = UserType.fromCode(settings.getUserType().getCode());
+
+    builder
+        .setUserType(userType)
+        .setUserLanguage(settings.getUserLanguage())
+        .setUserTaskContext(settings.getUserTaskContext());
+
+    switch (userType) {
+      case PATIENT:
+        builder
+            .setInitiatingPerson(patientRef)
+            .setReceivingPerson(patientRef)
+            .setRecipientType(UserType.PATIENT)
+            .setRecipientLanguage(settings.getRecipientLanguage());
+        break;
+      case RELATED_PERSON:
+        // TODO get related person from frontend
+        Reference relatedPersonRef = new Reference(relatedPersonBuilder.build(patientRef));
+        builder
+            .setInitiatingPerson(relatedPersonRef)
+            .setReceivingPerson(relatedPersonRef)
+            .setRecipientType(UserType.RELATED_PERSON)
+            .setRecipientLanguage(settings.getRecipientLanguage());
+        break;
+      case PRACTITIONER:
+        Preconditions.checkNotNull(settings.getPractitioner(), "No practitioner specified");
+        Reference practitionerRef = new Reference(
+            new IdType(ResourceType.Practitioner.name(), settings.getPractitioner().getId()));
+
+        // TODO allow selection of recipient as either patient or related person
+        builder
+            .setInitiatingPerson(practitionerRef)
+            .setReceivingPerson(patientRef)
+            .setRecipientType(UserType.PATIENT)
+            .setRecipientLanguage(settings.getRecipientLanguage());
+
+        break;
+    }
+  }
+
+  private ArrayList<Immunization> getImmunizations(Cases caseEntity) {
+    // TODO support sending as reference or resource - NCTH-450
+    ArrayList<Immunization> immunizations = new ArrayList<>();
+
+    if (!caseEntity.getImmunizations().isEmpty()) {
+      for (CaseImmunization immunizationEntity : caseEntity.getImmunizations()) {
+        Immunization immunization = new Immunization()
+            .setStatus(Immunization.ImmunizationStatus.COMPLETED)
+            .setVaccineCode(new CodeableConcept().addCoding(new Coding(SystemURL.SNOMED,
+                immunizationEntity.getCode(), immunizationEntity.getDisplay())))
+            .setNotGiven(immunizationEntity.getNotGiven());
+
+        immunizations.add(immunization);
+      }
+    }
+
+    return immunizations;
+  }
+
+  private ArrayList<MedicationAdministration> getMedications(Cases caseEntity) {
+    // TODO support sending as reference or resource - NCTH-450
+    ArrayList<MedicationAdministration> medications = new ArrayList<>();
+    for (CaseMedication medicationEntity : caseEntity.getMedications()) {
+      MedicationAdministration medication = new MedicationAdministration()
+          .setStatus(MedicationAdministrationStatus.COMPLETED)
+          .setMedication(new CodeableConcept().addCoding(new Coding(SystemURL.SNOMED,
+              medicationEntity.getCode(), medicationEntity.getDisplay())))
+          .setNotGiven(medicationEntity.getNotGiven());
+
+      medications.add(medication);
+    }
+
+    return medications;
+  }
+
+  private Stream<Observation> getObservations(Cases caseEntity) {
+    // TODO support sending as reference or resource - NCTH-450
+//    return caseEntity.getObservations().stream()
+//        .map(o -> referenceService.buildRef(ResourceType.Observation, o.getId()));
+    return caseEntity.getObservations().stream()
+        .map(observationTransformer::transform);
+  }
+
+  private void addInputParameters(Cases caseEntity, Builder builder) {
+    // TODO review this in more detail. Non outputData output parameters are included here
+    if (!caseEntity.getParameters().isEmpty()) {
+      Parameters inputParameters = new Parameters();
+      builder.addParameter(SystemConstants.INPUT_PARAMETERS)
+          .setResource(inputParameters);
+
+      for (CaseParameter parameterEntity : caseEntity.getParameters()) {
+        inputParameters.addParameter()
+            .setName(parameterEntity.getName())
+            .setValue(new StringType(parameterEntity.getValue()));
+      }
+    }
   }
 
   private class Builder {
@@ -123,7 +217,53 @@ public class ParametersService {
     }
 
     public Parameters build() {
+      validate();
       return parameters;
+    }
+
+    public void validate() {
+      validate(SystemConstants.REQUEST_ID)
+          .checkSingle()
+          .checkType(IIdType.class);
+
+      for (ParametersParameterComponent parameter : parameterNames
+          .get(SystemConstants.INPUT_DATA)) {
+        if (parameter.getResource() != null) {
+          log.warn("Found embedded resource in inputData of type {}",
+              parameter.getResource().getResourceType());
+        }
+      }
+
+      validate(SystemConstants.PATIENT)
+          .checkSingle()
+          .checkReferenceType(ResourceType.Patient);
+
+      validate(SystemConstants.ENCOUNTER)
+          .checkSingle()
+          .checkReferenceType(ResourceType.Encounter);
+
+      validate(SystemConstants.INITIATINGPERSON)
+          .checkSingle()
+          .checkReferenceType(ResourceType.Patient, ResourceType.RelatedPerson,
+              ResourceType.Practitioner);
+
+      validate(SystemConstants.USERTYPE)
+          .checkSingle()
+          .checkCodeableConcept(validInitiatingPersonTypes);
+
+      validate(SystemConstants.RECEIVINGPERSON)
+          .checkSingle()
+          .checkReferenceType(ResourceType.Patient, ResourceType.RelatedPerson);
+
+      validate(SystemConstants.SETTING)
+          .checkSingle();
+
+      validate("settingContext")
+          .checkAbsent();
+    }
+
+    private Validator<Set<ParametersParameterComponent>> validate(String parameter) {
+      return new Validator<>(parameterNames.get(parameter), parameter);
     }
 
     private ParametersParameterComponent addParameter(String name) {
@@ -174,9 +314,12 @@ public class ParametersService {
       return this;
     }
 
-    public Builder setPatient(String patientId) {
+    public Builder setPatient(Reference patient) {
+      Preconditions.checkArgument(patient.getReferenceElement().getResourceType().equals("Patient"),
+          "Reference must be of type Patient");
+
       addUniqueParameter(SystemConstants.PATIENT)
-          .setValue(new Reference(patientId));
+          .setValue(patient);
       return this;
     }
 
@@ -188,38 +331,37 @@ public class ParametersService {
       return this;
     }
 
-    public Builder setInitiatingPerson(PersonDTO personDto) {
-      Person person = personTransformer.transform(personDto);
-
+    public Builder setInitiatingPerson(Reference reference) {
       addUniqueParameter(SystemConstants.INITIATINGPERSON)
-          .setResource(person);
-
+          .setValue(reference);
       return this;
     }
 
-    public Builder setReceivingPerson(PersonDTO personDTO) {
-      Person person = personTransformer.transform(personDTO);
-
+    public Builder setReceivingPerson(Reference reference) {
       addUniqueParameter(SystemConstants.RECEIVINGPERSON)
-          .setResource(person);
+          .setValue(reference);
 
       return this;
     }
 
-    public Builder setUserType(CodeDTO typeCodeDTO) {
-      CodeableConcept typeCode = toSnomedCode(typeCodeDTO);
+    public Builder setUserType(UserType userType) {
+      Preconditions.checkArgument(
+          validInitiatingPersonTypes.contains(userType.getValue()),
+          "User type must be one of " + validInitiatingPersonTypes);
 
       addUniqueParameter(SystemConstants.USERTYPE)
-          .setValue(typeCode);
+          .setValue(userType.toCodeableConcept());
 
       return this;
     }
 
-    public Builder setRecipientType(CodeDTO typeCodeDTO) {
-      CodeableConcept typeCode = toSnomedCode(typeCodeDTO);
+    public Builder setRecipientType(UserType recipientType) {
+      Preconditions.checkArgument(
+          validReceivingPersonTypes.contains(recipientType.getValue()),
+          "Recipient type must be one of " + validReceivingPersonTypes);
 
       addUniqueParameter(SystemConstants.RECIPIENTTYPE)
-          .setValue(typeCode);
+          .setValue(recipientType.toCodeableConcept());
 
       return this;
     }
@@ -268,81 +410,12 @@ public class ParametersService {
 
       return this;
     }
-  }
 
-  private ArrayList<Immunization> getImmunizations(Cases caseEntity) {
-    ArrayList<Immunization> immunizations = new ArrayList<>();
+    public Builder addInputData(Reference reference) {
+      addParameter(SystemConstants.INPUT_DATA)
+          .setValue(reference);
 
-    if (!caseEntity.getImmunizations().isEmpty()) {
-      for (CaseImmunization immunizationEntity : caseEntity.getImmunizations()) {
-        Immunization immunization = new Immunization()
-            .setStatus(Immunization.ImmunizationStatus.COMPLETED)
-            .setVaccineCode(new CodeableConcept().addCoding(new Coding(SystemURL.SNOMED,
-                immunizationEntity.getCode(), immunizationEntity.getDisplay())))
-            .setNotGiven(immunizationEntity.getNotGiven());
-
-        immunizations.add(immunization);
-      }
-    }
-
-    return immunizations;
-  }
-
-  private ArrayList<MedicationAdministration> getMedications(Cases caseEntity) {
-    ArrayList<MedicationAdministration> medications = new ArrayList<>();
-    if (!caseEntity.getMedications().isEmpty()) {
-      for (CaseMedication medicationEntity : caseEntity.getMedications()) {
-        MedicationAdministration medication = new MedicationAdministration()
-            .setStatus(MedicationAdministrationStatus.COMPLETED)
-            .setMedication(new CodeableConcept().addCoding(new Coding(SystemURL.SNOMED,
-                medicationEntity.getCode(), medicationEntity.getDisplay())))
-            .setNotGiven(medicationEntity.getNotGiven());
-
-        medications.add(medication);
-      }
-    }
-
-    return medications;
-  }
-
-  private Collection<Observation> getObservations(Cases caseEntity) {
-
-    var observations = new TreeMap<CodeableConcept, Observation>(
-        Comparator.comparing((CodeableConcept a) -> a.getCodingFirstRep().getCode())
-            .thenComparing(a -> a.getCodingFirstRep().getSystem())
-    );
-
-    // Patient observations
-    Observation genderObservation = new CareConnectObservation()
-        .setStatus(Observation.ObservationStatus.FINAL)
-        .setCode(
-            new CodeableConcept().addCoding(new Coding(SystemURL.SNOMED, "263495000", "Gender")))
-        .setIssued(caseEntity.getTimestamp())
-        .setValue(new StringType(caseEntity.getGender()));
-    observations.put(genderObservation.getCode(), genderObservation);
-
-    Observation ageObservation = new CareConnectObservation()
-        .setStatus(Observation.ObservationStatus.FINAL)
-        .setCode(new CodeableConcept().addCoding(new Coding(SystemURL.SNOMED, "397669002", "Age")))
-        .setIssued(caseEntity.getTimestamp())
-        .setValue(new StringType(DATE_FORMAT.format(caseEntity.getDateOfBirth())));
-    observations.put(ageObservation.getCode(), ageObservation);
-
-    // CDSS Observations
-    for (CaseObservation oe : caseEntity.getObservations()) {
-      Observation observation = observationTransformer.transform(oe);
-      observations.put(observation.getCode(), observation);
-    }
-
-    return observations.values();
-  }
-
-  private void addParameterInputData(Cases caseEntity, Builder builder) {
-    if (!caseEntity.getParameters().isEmpty()) {
-      for (CaseParameter parameterEntity : caseEntity.getParameters()) {
-        builder.addParameter(parameterEntity.getName())
-            .setValue(new StringType(parameterEntity.getValue()));
-      }
+      return this;
     }
   }
 }

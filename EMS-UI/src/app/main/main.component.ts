@@ -40,6 +40,7 @@ export class MainComponent implements OnInit {
   serviceDefinitionMode = 'automated';
   availableServiceDefinitions: CdssSupplier[];
   roles: Code[];
+  selectedRole: string;
   settings: Code[];
   jurisdictions: Code[];
   selectionModeOptions: any[];
@@ -147,21 +148,21 @@ export class MainComponent implements OnInit {
     this.roles = [
       {
         'id': 1,
-        'description': 'Clinical',
-        'code': '103GC0700X',
-        'display': 'Clinical'
+        'description': 'Patient',
+        'code': 'Patient',
+        'display': 'Patient'
       },
       {
         'id': 2,
-        'description': 'Urgent',
-        'code': '261QU0200X',
-        'display': 'Call Handler'
+        'description': 'Related Person',
+        'code': 'RelatedPerson',
+        'display': 'Related Person'
       },
       {
         'id': 3,
-        'description': 'Patient',
-        'code': 'PA',
-        'display': 'Patient'
+        'description': 'Practitioner',
+        'code': 'Practitioner',
+        'display': 'Practitioner'
       }
     ];
   }
@@ -179,6 +180,12 @@ export class MainComponent implements OnInit {
         'description': 'Phone call',
         'code': 'phone',
         'display': 'Phone call'
+      },
+      {
+        'id': 3,
+        'description': 'Clinical',
+        'code': 'clinical',
+        'display': 'Clinical'
       }
     ];
   }
@@ -226,9 +233,10 @@ export class MainComponent implements OnInit {
   }
 
   addRoleToStore(role: Code) {
-    var settings: Settings = this.sessionStorage['settings'];
+    const settings: Settings = this.sessionStorage['settings'];
     settings.userType = role;
     this.sessionStorage.setItem('settings', JSON.stringify(settings));
+    this.selectedRole = role.code;
     this.autoSelectServiceDefinition(false);
   }
 

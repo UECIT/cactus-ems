@@ -120,11 +120,12 @@ public class QuestionnaireService {
       }
 
       // Select 1st or 3rd party source
+      Reference patientRef = new Reference(caseEntity.getPatientId());
       if (caseEntity.getParty().getCode().equals("1")) {
-        questionnaireResponse.setSource(new Reference(caseEntity.getPatientId()));
+        questionnaireResponse.setSource(patientRef);
       } else {
         // TODO replace with referenced resource (this will be contained)
-        CareConnectRelatedPerson relatedPerson = relatedPersonBuilder.build();
+        CareConnectRelatedPerson relatedPerson = relatedPersonBuilder.build(patientRef);
         questionnaireResponse.setSource(referenceBuilder.getReference(relatedPerson));
       }
 

@@ -1,6 +1,7 @@
 package uk.nhs.ctp.service;
 
 import static com.google.common.collect.MoreCollectors.onlyElement;
+import static uk.nhs.ctp.SystemConstants.DATE_FORMAT;
 
 import com.google.common.base.Preconditions;
 import java.util.Collections;
@@ -18,11 +19,12 @@ import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.SystemConstants;
+import uk.nhs.ctp.SystemURL;
 import uk.nhs.ctp.entities.CaseCarePlan;
 import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
@@ -116,6 +118,23 @@ public class CaseService {
     triageCase.setSkillset(testScenario.getSkillset());
     triageCase.setParty(testScenario.getParty());
     triageCase.setTimestamp(new Date());
+
+    // Patient observations
+    CaseObservation genderObservation = new CaseObservation();
+    genderObservation.setSystem(SystemURL.SNOMED);
+    genderObservation.setCode("263495000");
+    genderObservation.setDisplay("Gender");
+    genderObservation.setValueSystem("string");
+    genderObservation.setValueCode(triageCase.getGender());
+    triageCase.addObservation(genderObservation);
+
+    CaseObservation ageObservation = new CaseObservation();
+    ageObservation.setSystem(SystemURL.SNOMED);
+    ageObservation.setCode("397669002");
+    ageObservation.setDisplay("Age");
+    ageObservation.setValueSystem("string");
+    ageObservation.setValueCode(DATE_FORMAT.format(triageCase.getDateOfBirth()));
+    triageCase.addObservation(ageObservation);
   }
 
   /**
