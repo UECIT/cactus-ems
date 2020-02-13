@@ -1,22 +1,23 @@
 package uk.nhs.ctp.service.builder;
 
 import java.util.Date;
-
 import org.hl7.fhir.dstu3.model.Address.AddressType;
 import org.hl7.fhir.dstu3.model.Address.AddressUse;
+import org.hl7.fhir.dstu3.model.CareConnectRelatedPerson;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointUse;
-import org.hl7.fhir.dstu3.model.CareConnectRelatedPerson;
-import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.springframework.stereotype.Component;
 
 @Component
 public class RelatedPersonBuilder {
 
-  public CareConnectRelatedPerson build() {
+  public CareConnectRelatedPerson build(Reference patient) {
     // TODO build an appropriate record from the context
     CareConnectRelatedPerson person = new CareConnectRelatedPerson();
+    person.setPatient(patient);
+
     person.addAddress()
         .setUse(AddressUse.HOME)
         .setType(AddressType.BOTH)

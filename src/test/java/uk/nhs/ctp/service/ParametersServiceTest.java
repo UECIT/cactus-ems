@@ -165,11 +165,11 @@ public class ParametersServiceTest {
     settings = new SettingsDTO();
 
     settings.setInitiatingPerson(personDto);
-    settings.setUserType(codeDto);
+    settings.setUserType(new CodeDTO("Patient", "Patient"));
     settings.setUserLanguage(languageDto);
     settings.setUserTaskContext(codeDto);
     settings.setReceivingPerson(personDto);
-    settings.setRecipientType(codeDto);
+    settings.setRecipientType(new CodeDTO("Patient", "Patient"));
     settings.setRecipientLanguage(languageDto);
     settings.setSetting(codeDto);
 
