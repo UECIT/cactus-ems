@@ -14,16 +14,15 @@ import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Immunization;
 import org.hl7.fhir.dstu3.model.MedicationAdministration;
 import org.hl7.fhir.dstu3.model.Observation;
-import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.springframework.stereotype.Service;
+import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.entities.CaseCarePlan;
 import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
@@ -162,22 +161,20 @@ public class CaseService {
     }
 
     // Store output data
-    for (Resource resource : evaluateResponse.getOutputData()) {
-      if (resource instanceof Observation) {
-        updateObservation(triageCase, (Observation) resource);
-      } else if (resource instanceof Immunization) {
-        updateImmunization(triageCase, (Immunization) resource);
-      } else if (resource instanceof MedicationAdministration) {
-        updateMedication(triageCase, (MedicationAdministration) resource);
-      } else if (resource instanceof QuestionnaireResponse) {
-        updateQuestionnaireResponse(triageCase, (QuestionnaireResponse) resource);
-      } else if (resource instanceof Parameters) {
-        Parameters currentParameters = (Parameters) resource;
-        ParametersParameterComponent currentParameter = currentParameters.getParameterFirstRep();
-        triageCase.addParameter(createCaseParameter(currentParameter));
+    for (ParametersParameterComponent parameter : evaluateResponse.getOutputData().getParameter()) {
+      var resource = parameter.getResource();
+      if (SystemConstants.OUTPUT_DATA.equals(parameter.getName())) {
+        if (resource instanceof Observation) {
+          updateObservation(triageCase, (Observation) resource);
+        } else if (resource instanceof Immunization) {
+          updateImmunization(triageCase, (Immunization) resource);
+        } else if (resource instanceof MedicationAdministration) {
+          updateMedication(triageCase, (MedicationAdministration) resource);
+        } else if (resource instanceof QuestionnaireResponse) {
+          updateQuestionnaireResponse(triageCase, (QuestionnaireResponse) resource);
+        }
       } else {
-        // TODO add code here to deal with storing any items that do not match the above
-        log.warn("Unsupported outputParameter type: {}" + resource.getResourceType().name());
+        triageCase.addParameter(createCaseParameter(parameter));
       }
     }
 
@@ -185,6 +182,7 @@ public class CaseService {
   }
 
   private void updateQuestionnaireResponse(Cases triageCase, QuestionnaireResponse response) {
+    //noinspection UnstableApiUsage
     QuestionResponse existingResponse = triageCase.getQuestionResponses().stream()
         .filter(answer -> answer.getQuestionnaireId()
             .equals(response.getQuestionnaire().getReference().split("/")[1]))
@@ -225,12 +223,11 @@ public class CaseService {
 
   private void updateImmunization(Cases triageCase, Immunization resource) {
     boolean amended = false;
-    Immunization currentImm = resource;
     for (CaseImmunization immunisation : triageCase.getImmunizations()) {
       if (immunisation.getCode()
-          .equalsIgnoreCase(currentImm.getVaccineCode().getCodingFirstRep().getCode())) {
+          .equalsIgnoreCase(resource.getVaccineCode().getCodingFirstRep().getCode())) {
         log.info("Amending Immunisation for case " + triageCase.getId());
-        updateImmunisationCoding(currentImm, immunisation);
+        updateImmunisationCoding(resource, immunisation);
         immunisation.setTimestamp(new Date());
 
         amended = true;

@@ -219,15 +219,6 @@
                 <p *ngIf="careAdvice.system"><strong>System:</strong>  {{ careAdvice.system}}</p>
                 <p *ngIf="careAdvice.code"><strong>Code:</strong>  {{ careAdvice.code}}</p>
                 <p *ngIf="careAdvice.text"><strong>Text:</strong> {{ careAdvice.text}}</p>
-                <p *ngIf="careAdvice.activities"><strong>Activities:</strong></p>
-                <ul *ngFor="let activity of careAdvice.activities">
-                  <li *ngIf="activity.description">
-                    <strong>Description:</strong> {{ activity.description}}</li>
-                  <li *ngIf="activity.display"><strong>Display:</strong> {{ activity.display}}</li>
-                  <li *ngIf="activity.system"><strong>System:</strong> {{ activity.system}}</li>
-                  <li *ngIf="activity.code"><strong>Code:</strong> {{ activity.code}}</li>
-                  <li *ngIf="activity.text"><strong>Text:</strong> {{ activity.text}}</li>
-                </ul>
                 <p *ngIf="careAdvice.supportingInfo"><strong>SupportingInfo:</strong></p>
                 <ul *ngFor="let info of careAdvice.supportingInfo">
                   <li *ngIf="info.reference"><strong>Reference:</strong> {{ info.reference}}</li>
@@ -292,16 +283,6 @@
                 <p *ngIf="careAdvice.system"><strong>System:</strong>  {{ careAdvice.system}}</p>
                 <p *ngIf="careAdvice.code"><strong>Code:</strong>  {{ careAdvice.code}}</p>
                 <p *ngIf="careAdvice.text"><strong>Text:</strong> {{ careAdvice.text}}</p>
-
-                <p *ngIf="careAdvice.activities"><strong>Activities:</strong></p>
-                <ul *ngFor="let activity of careAdvice.activities">
-                  <li *ngIf="activity.description">
-                    <strong>Description:</strong> {{ activity.description}}</li>
-                  <li *ngIf="activity.display"><strong>Display:</strong> {{ activity.display}}</li>
-                  <li *ngIf="activity.system"><strong>System:</strong> {{ activity.system}}</li>
-                  <li *ngIf="activity.code"><strong>Code:</strong> {{ activity.code}}</li>
-                  <li *ngIf="activity.text"><strong>Text:</strong> {{ activity.text}}</li>
-                </ul>
 
                 <p *ngIf="careAdvice.supportingInfo"><strong>SupportingInfo:</strong></p>
                 <ul *ngFor="let info of careAdvice.supportingInfo">

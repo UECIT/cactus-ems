@@ -15,6 +15,7 @@ import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.Immunization;
 import org.hl7.fhir.dstu3.model.MedicationAdministration;
 import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.junit.Before;
@@ -28,6 +29,7 @@ import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
@@ -96,8 +98,8 @@ public class CaseServiceTest {
   PatientEntity patient;
   Cases triageCase;
 
-  List<Resource> resourcesObservationsOnly, resourcesImmunizationsOnly, resourcesMedicationsOnly,
-      resourcesMultiple, resourcesUnknownType;
+  List<Resource> resourcesObservationsOnly, resourcesImmunizationsOnly, resourcesUnknownType;
+  Parameters resourcesMedicationsOnly, resourcesMultiple;
 
   @Before
   public void setup() {
@@ -125,16 +127,19 @@ public class CaseServiceTest {
 
     resourcesObservationsOnly = new ArrayList<>();
     resourcesImmunizationsOnly = new ArrayList<>();
-    resourcesMedicationsOnly = new ArrayList<>();
-    resourcesMultiple = new ArrayList<>();
+    resourcesMedicationsOnly = new Parameters();
+    resourcesMultiple = new Parameters();
     resourcesUnknownType = new ArrayList<>();
 
     resourcesObservationsOnly.add(observation);
     resourcesImmunizationsOnly.add(immunization);
-    resourcesMedicationsOnly.add(medication);
-    resourcesMultiple.add(observation);
-    resourcesMultiple.add(immunization);
-    resourcesMultiple.add(medication);
+    resourcesMedicationsOnly.addParameter()
+        .setResource(medication)
+        .setName(SystemConstants.OUTPUT_DATA);
+    resourcesMultiple.addParameter().setResource(observation);
+    resourcesMultiple.addParameter().setResource(immunization);
+    resourcesMultiple.addParameter().setResource(medication);
+    resourcesMultiple.getParameter().forEach(p -> p.setName(SystemConstants.OUTPUT_DATA));
     resourcesUnknownType.add(condition);
 
     when(mockPatientRepository.findOne(1L)).thenReturn(patient);

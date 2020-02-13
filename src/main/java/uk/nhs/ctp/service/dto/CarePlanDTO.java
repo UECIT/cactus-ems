@@ -20,7 +20,6 @@ public class CarePlanDTO {
 	private String text;
 	private String status;
 
-	private ArrayList<ActivityDTO> activities;
 	private ArrayList<SupportingInfoDTO> supportingInfo;
 	private ArrayList<NotesDTO> notes;
 
@@ -36,15 +35,6 @@ public class CarePlanDTO {
 		if (carePlan.getTitle() != null) {
 			this.setTitle(carePlan.getTitle());
 		}
-
-		// Add an "ActivityDTO" to the "CarePlanDTO" and populate with the information below.
-		ArrayList<ActivityDTO> activities = new ArrayList<>();
-		for (CarePlanActivityComponent carePlanActivityComponent : carePlan.getActivity()) {
-			ActivityDTO activityDTO = new ActivityDTO(carePlanActivityComponent);
-			activities.add(activityDTO);
-		}
-
-		this.setActivities(activities);
 
 		if (carePlan.getDescription() != null) {
 			this.setDescription(carePlan.getDescription());
