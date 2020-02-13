@@ -6,11 +6,9 @@ import static java.util.Collections.singletonList;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.Base;
@@ -28,7 +26,6 @@ import org.hl7.fhir.dstu3.model.RequestGroup;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.exception.EMSException;
 import uk.nhs.ctp.service.ReferenceService;
@@ -120,30 +117,15 @@ public class ResponseResolverImpl implements ResponseResolver {
     });
   }
 
-  private List<Resource> getOutputData(GuidanceResponse guidanceResponse) {
-    return Optional.ofNullable(guidanceResponse.getOutputParameters().getResource())
-        .or(() ->
-            guidanceResponse.getContained()
-              .stream()
-              .filter(Parameters.class::isInstance)
-              .findFirst())
-        .map(parameters -> castToType(parameters, Parameters.class))
-        .map(Parameters::getParameter)
-        .map(Collection::stream)
-        .map(param -> param.map(this::wrapInParameters))
-        .orElse(Stream.empty())
-        .collect(Collectors.toUnmodifiableList());
-  }
-
-  public Parameters wrapInParameters(ParametersParameterComponent parameter) {
-    if (parameter.getName().equalsIgnoreCase(SystemConstants.OUTPUT_DATA)
-        && parameter.getResource() != null) {
-      return (Parameters) parameter.getResource();
+  private Parameters getOutputData(GuidanceResponse guidanceResponse) {
+    // TODO: outputParameters could be a reference
+    // TODO: things inside it could be references too
+    var parameters = (Parameters) guidanceResponse.getOutputParameters().getResource();
+    if (parameters == null) {
+      return new Parameters();
     }
 
-    var wrappingParameters = new Parameters();
-    wrappingParameters.addParameter(parameter);
-    return wrappingParameters;
+    return parameters;
   }
 
   public String getSessionID(GuidanceResponse guidanceResponse) {

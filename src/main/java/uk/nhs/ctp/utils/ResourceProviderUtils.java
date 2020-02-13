@@ -42,7 +42,7 @@ public class ResourceProviderUtils {
 			String parameterName) {
 
 		var filteredParameters = getParametersByName(parameters, parameterName);
-		if (filteredParameters == null) {
+		if (filteredParameters == null || filteredParameters.size() == 0) {
 			return null;
 		}
 
@@ -72,7 +72,7 @@ public class ResourceProviderUtils {
 				new InvalidRequestException("Invalid parameter type in request body. Should be " + type.toString()),
 				SystemCode.BAD_REQUEST, IssueType.INVALID);
 	}
-	
+
 	public <T extends Resource> T getResource(List<Resource> resources, Class<T> resourceClass) {
 		return resources.stream()
         .filter(resourceClass::isInstance)

@@ -4,6 +4,7 @@ import java.util.List;
 import lombok.Data;
 import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.RequestGroup;
 import org.hl7.fhir.dstu3.model.Resource;
@@ -11,7 +12,7 @@ import org.hl7.fhir.dstu3.model.Resource;
 @Data
 public class CdssResult {
 
-  private List<Resource> outputData;
+  private Parameters outputData;
   private RequestGroup result;
   private String questionnaireRef;
   private String serviceDefinitionId;
@@ -23,7 +24,7 @@ public class CdssResult {
   private OperationOutcome operationOutcome;
 
   public boolean hasOutputData() {
-    return CollectionUtils.isNotEmpty(this.outputData);
+    return !this.outputData.getParameter().isEmpty();
   }
 
   public boolean hasResult() {

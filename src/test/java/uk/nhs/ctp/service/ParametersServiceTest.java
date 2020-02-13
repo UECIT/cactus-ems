@@ -154,18 +154,23 @@ public class ParametersServiceTest {
     personDto.setGender("male");
     personDto.setName("Joe Bloggs");
     personDto.setTelecom("0123 123 1234");
+
     CodeDTO codeDto = new CodeDTO();
     codeDto.setCode("158974003");
     codeDto.setDisplay("Call Handler");
+
+    CodeDTO languageDto = new CodeDTO();
+    languageDto.setCode("en");
+
     settings = new SettingsDTO();
 
     settings.setInitiatingPerson(personDto);
     settings.setUserType(codeDto);
-    settings.setUserLanguage(codeDto);
+    settings.setUserLanguage(languageDto);
     settings.setUserTaskContext(codeDto);
     settings.setReceivingPerson(personDto);
     settings.setRecipientType(codeDto);
-    settings.setRecipientLanguage(codeDto);
+    settings.setRecipientLanguage(languageDto);
     settings.setSetting(codeDto);
 
     referencingContext = new ReferencingContext(ReferencingType.ContainedReferences);
