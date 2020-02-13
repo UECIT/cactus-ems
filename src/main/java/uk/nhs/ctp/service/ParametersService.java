@@ -36,9 +36,9 @@ import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.CaseParameter;
-import uk.nhs.ctp.entities.Cases;
+import uk.nhs.ctp.entities.EncounterEntity;
 import uk.nhs.ctp.enums.Language;
-import uk.nhs.ctp.repos.CaseRepository;
+import uk.nhs.ctp.repos.EncounterRepository;
 import uk.nhs.ctp.service.builder.ReferenceBuilder;
 import uk.nhs.ctp.service.dto.CodeDTO;
 import uk.nhs.ctp.service.dto.PersonDTO;
@@ -54,7 +54,7 @@ import uk.nhs.ctp.utils.ErrorHandlingUtils;
 @Slf4j
 public class ParametersService {
 
-  private CaseRepository caseRepository;
+  private EncounterRepository encounterRepository;
   private ReferenceBuilderFactory referenceBuilderFactory;
   private AuditService auditService;
   private ReferenceService referenceService;
@@ -72,7 +72,7 @@ public class ParametersService {
   ) {
 
     ReferenceBuilder referenceBuilder = referenceBuilderFactory.load(referencingContext);
-    Cases caseEntity = caseRepository.findOne(caseId);
+    EncounterEntity caseEntity = encounterRepository.findFirstByIdVersion_IdOrderByIdVersion_VersionDesc(caseId);
 
     ErrorHandlingUtils.checkEntityExists(caseEntity, "Case");
     var caseAudit = auditService.getAuditRecordByCase(caseId);
@@ -153,7 +153,7 @@ public class ParametersService {
       return this;
     }
 
-    public Builder setContext(Cases caseEntity) {
+    public Builder setContext(EncounterEntity caseEntity) {
       Parameters inputParamsResource = new Parameters();
 
       inputParamsResource.addParameter().setName(SystemConstants.CONTEXT)
@@ -270,7 +270,7 @@ public class ParametersService {
     }
   }
 
-  private ArrayList<Immunization> getImmunizations(Cases caseEntity) {
+  private ArrayList<Immunization> getImmunizations(EncounterEntity caseEntity) {
     ArrayList<Immunization> immunizations = new ArrayList<>();
 
     if (!caseEntity.getImmunizations().isEmpty()) {
@@ -288,7 +288,7 @@ public class ParametersService {
     return immunizations;
   }
 
-  private ArrayList<MedicationAdministration> getMedications(Cases caseEntity) {
+  private ArrayList<MedicationAdministration> getMedications(EncounterEntity caseEntity) {
     ArrayList<MedicationAdministration> medications = new ArrayList<>();
     if (!caseEntity.getMedications().isEmpty()) {
       for (CaseMedication medicationEntity : caseEntity.getMedications()) {
@@ -305,7 +305,7 @@ public class ParametersService {
     return medications;
   }
 
-  private Collection<Observation> getObservations(Cases caseEntity) {
+  private Collection<Observation> getObservations(EncounterEntity caseEntity) {
 
     var observations = new TreeMap<CodeableConcept, Observation>(
         Comparator.comparing((CodeableConcept a) -> a.getCodingFirstRep().getCode())
@@ -337,7 +337,7 @@ public class ParametersService {
     return observations.values();
   }
 
-  private void addParameterInputData(Cases caseEntity, Builder builder) {
+  private void addParameterInputData(EncounterEntity caseEntity, Builder builder) {
     if (!caseEntity.getParameters().isEmpty()) {
       for (CaseParameter parameterEntity : caseEntity.getParameters()) {
         builder.addParameter(parameterEntity.getName())

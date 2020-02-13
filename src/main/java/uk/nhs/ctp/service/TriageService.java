@@ -55,7 +55,7 @@ public class TriageService {
     Long caseId = caseService.createCase(
         requestDetails.getPatientId(),
         requestDetails.getSettings().getPractitioner().getId()
-    ).getId();
+    ).getIdVersion().getId();
     String encounterId = requestDetails.getEncounterId();
     if (encounterId != null) {
       updateCaseFromEncounterReport(caseId, encounterId);

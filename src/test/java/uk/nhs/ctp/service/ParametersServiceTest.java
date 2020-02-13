@@ -48,11 +48,12 @@ import uk.nhs.ctp.entities.AuditRecord;
 import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
-import uk.nhs.ctp.entities.Cases;
+import uk.nhs.ctp.entities.EncounterEntity;
+import uk.nhs.ctp.entities.IdVersion;
 import uk.nhs.ctp.entities.Party;
 import uk.nhs.ctp.entities.Skillset;
 import uk.nhs.ctp.enums.ReferencingType;
-import uk.nhs.ctp.repos.CaseRepository;
+import uk.nhs.ctp.repos.EncounterRepository;
 import uk.nhs.ctp.service.dto.CodeDTO;
 import uk.nhs.ctp.service.dto.PersonDTO;
 import uk.nhs.ctp.service.dto.SettingsDTO;
@@ -68,13 +69,13 @@ public class ParametersServiceTest {
   private ParametersService parametersService;
 
   @MockBean
-  private CaseRepository mockCaseRepository;
+  private EncounterRepository mockEncounterRepository;
   @Mock
   private AuditService mockAuditService;
   @Mock
   private StorageService mockStorageService;
 
-  private Cases caseWithNoData, caseWithObservation, caseWithImmunization, caseWithMedication, caseWithData;
+  private EncounterEntity caseWithNoData, caseWithObservation, caseWithImmunization, caseWithMedication, caseWithData;
   private CaseObservation caseObservation;
   private CaseImmunization caseImmunization;
   private CaseMedication caseMedication;
@@ -129,7 +130,7 @@ public class ParametersServiceTest {
     caseWithData.addObservation(caseObservation);
 
     caseAudit = new AuditRecord();
-    caseAudit.setCaseId(1L);
+    caseAudit.setEncounterId(1L);
     caseAudit.setTriageComplete(false);
     caseAudit.setCreatedDate(new Date());
 
@@ -189,7 +190,8 @@ public class ParametersServiceTest {
 
   @Test
   public void testParametersCreatedCorrectlyWithNoCaseDataStored() {
-    when(mockCaseRepository.findOne(1L)).thenReturn(caseWithNoData);
+    when(mockEncounterRepository.findFirstByIdVersion_IdOrderByIdVersion_VersionDesc(1L))
+        .thenReturn(caseWithNoData);
     when(mockAuditService.getAuditRecordByCase(1L)).thenReturn(caseAudit);
 
     Parameters parameters = parametersService.getEvaluateParameters(
@@ -213,7 +215,8 @@ public class ParametersServiceTest {
   @Test
   public void testParametersCreatedCorrectlyWithNoCaseDataStoredAndQuestionAnswered()
       throws FHIRException {
-    when(mockCaseRepository.findOne(1L)).thenReturn(caseWithNoData);
+    when(mockEncounterRepository.findFirstByIdVersion_IdOrderByIdVersion_VersionDesc(1L))
+        .thenReturn(caseWithNoData);
     when(mockAuditService.getAuditRecordByCase(1L)).thenReturn(caseAudit);
 
     Parameters parameters = parametersService.getEvaluateParameters(
@@ -246,7 +249,8 @@ public class ParametersServiceTest {
 
   @Test
   public void testParametersCreatedCorrectlyWithCaseImmunizationStored() {
-    when(mockCaseRepository.findOne(1L)).thenReturn(caseWithImmunization);
+    when(mockEncounterRepository.findFirstByIdVersion_IdOrderByIdVersion_VersionDesc(1L))
+        .thenReturn(caseWithImmunization);
     when(mockAuditService.getAuditRecordByCase(1L)).thenReturn(caseAudit);
 
     Parameters parameters = parametersService.getEvaluateParameters(
@@ -279,7 +283,8 @@ public class ParametersServiceTest {
 
   @Test
   public void testParametersCreatedCorrectlyWithCaseMedicationStored() throws FHIRException {
-    when(mockCaseRepository.findOne(1L)).thenReturn(caseWithMedication);
+    when(mockEncounterRepository.findFirstByIdVersion_IdOrderByIdVersion_VersionDesc(1L))
+        .thenReturn(caseWithMedication);
     when(mockAuditService.getAuditRecordByCase(1L)).thenReturn(caseAudit);
 
     Parameters parameters = parametersService.getEvaluateParameters(
@@ -312,7 +317,8 @@ public class ParametersServiceTest {
 
   @Test
   public void testParametersCreatedCorrectlyWithCaseObservationStored() throws FHIRException {
-    when(mockCaseRepository.findOne(1L)).thenReturn(caseWithObservation);
+    when(mockEncounterRepository.findFirstByIdVersion_IdOrderByIdVersion_VersionDesc(1L))
+        .thenReturn(caseWithObservation);
     when(mockAuditService.getAuditRecordByCase(1L)).thenReturn(caseAudit);
 
     Parameters parameters = parametersService.getEvaluateParameters(
@@ -346,7 +352,8 @@ public class ParametersServiceTest {
   @Test
   public void testParametersCreatedCorrectlyWithCaseDataStoredAndQuestionAnswered()
       throws FHIRException {
-    when(mockCaseRepository.findOne(1L)).thenReturn(caseWithData);
+    when(mockEncounterRepository.findFirstByIdVersion_IdOrderByIdVersion_VersionDesc(1L))
+        .thenReturn(caseWithData);
     when(mockAuditService.getAuditRecordByCase(1L)).thenReturn(caseAudit);
 
     Parameters parameters = parametersService.getEvaluateParameters(
@@ -560,8 +567,8 @@ public class ParametersServiceTest {
     assertEquals(patient.getReference(), "Patient/1");
   }
 
-  private Cases newCase() {
-    Cases testCase = new Cases();
+  private EncounterEntity newCase() {
+    EncounterEntity testCase = new EncounterEntity();
 
     Party party = new Party();
     party.setCode("1");
@@ -571,7 +578,7 @@ public class ParametersServiceTest {
     skillset.setCode("CL");
     skillset.setDescription("Clinician");
 
-    testCase.setId(1L);
+    testCase.setIdVersion(new IdVersion(1L, 1L));
     testCase.setPatientId("Patient/1");
     testCase.setGender("male");
     testCase.setFirstName("John");

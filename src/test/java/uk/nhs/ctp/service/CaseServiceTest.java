@@ -31,11 +31,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
-import uk.nhs.ctp.entities.Cases;
+import uk.nhs.ctp.entities.EncounterEntity;
+import uk.nhs.ctp.entities.IdVersion;
 import uk.nhs.ctp.entities.PatientEntity;
 import uk.nhs.ctp.entities.ReferralRequestEntity;
 import uk.nhs.ctp.entities.TestScenario;
-import uk.nhs.ctp.repos.CaseRepository;
+import uk.nhs.ctp.repos.EncounterRepository;
 import uk.nhs.ctp.repos.PatientRepository;
 import uk.nhs.ctp.repos.TestScenarioRepository;
 import uk.nhs.ctp.service.builder.CareConnectPatientBuilder;
@@ -58,7 +59,7 @@ public class CaseServiceTest {
   private CareConnectPatientBuilder careConnectPatientBuilder;
 
   @Mock
-  private CaseRepository mockCaseRepository;
+  private EncounterRepository mockEncounterRepository;
   @Mock
   private PatientRepository mockPatientRepository;
   @Mock
@@ -94,7 +95,7 @@ public class CaseServiceTest {
   private CaseService spyCaseService;
 
   PatientEntity patient;
-  Cases triageCase;
+  EncounterEntity triageCase;
 
   List<Resource> resourcesObservationsOnly, resourcesImmunizationsOnly, resourcesMedicationsOnly,
       resourcesMultiple, resourcesUnknownType;
@@ -102,7 +103,7 @@ public class CaseServiceTest {
   @Before
   public void setup() {
     spyCaseService = spy(new CaseService(
-        mockCaseRepository,
+        mockEncounterRepository,
         mockTestScenarioRepository,
         resourceLocator,
         storageService,
@@ -119,8 +120,8 @@ public class CaseServiceTest {
     patient.setLastName("Bloggs");
     patient.setGender("male");
 
-    triageCase = new Cases();
-    triageCase.setId(1L);
+    triageCase = new EncounterEntity();
+    triageCase.setIdVersion(new IdVersion(1L, 1L));
     triageCase.setPatientId("Patient/1");
 
     resourcesObservationsOnly = new ArrayList<>();
@@ -139,8 +140,9 @@ public class CaseServiceTest {
 
     when(mockPatientRepository.findOne(1L)).thenReturn(patient);
     when(mockTestScenarioRepository.findByPatientId(1L)).thenReturn(testScenario);
-    when(mockCaseRepository.findOne(1L)).thenReturn(triageCase);
-    when(mockCaseRepository.save(any(Cases.class))).thenReturn(triageCase);
+    when(mockEncounterRepository.findFirstByIdVersion_IdOrderByIdVersion_VersionDesc(1L))
+        .thenReturn(triageCase);
+    when(mockEncounterRepository.save(any(EncounterEntity.class))).thenReturn(triageCase);
     when(observation.getValue()).thenReturn(new BooleanType(true));
     when(caseObservationTransformer.transform(observation)).thenReturn(caseObservation);
     doReturn(caseImmunization).when(spyCaseService).createCaseImmunization(immunization);
@@ -189,7 +191,7 @@ public class CaseServiceTest {
         .transform(new ReferralRequest());
     triageCase.setReferralRequest(referralRequestEntity);
 
-    Cases cases = spyCaseService.updateSelectedService(1L, "HealthcareService/5");
+    EncounterEntity cases = spyCaseService.updateSelectedService(1L, "HealthcareService/5");
     referralRequestEntity = cases.getReferralRequest();
     ReferralRequest referralRequest = referralRequestEntityTransformer
         .transform(referralRequestEntity);

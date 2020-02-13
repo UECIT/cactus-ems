@@ -11,7 +11,6 @@ import lombok.AllArgsConstructor;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
-import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Reference;
@@ -21,8 +20,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.entities.CaseCarePlan;
-import uk.nhs.ctp.entities.Cases;
-import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.EncounterService;
 import uk.nhs.ctp.service.GenericResourceLocator;
 import uk.nhs.ctp.service.ReferenceService;
@@ -34,10 +31,8 @@ public class EncounterProvider implements IResourceProvider {
   private GenericResourceLocator resourceLocator;
   private EncounterService encounterService;
   private ReferenceService referenceService;
-  private CaseRepository caseRepository;
 
-
-  @Operation(name = "$UEC-Report", idempotent = true, type = Encounter.class)
+  @Operation(name = "$UEC-Report", idempotent = true, type = org.hl7.fhir.dstu3.model.Encounter.class)
   @Transactional
   public Bundle getEncounterReport(@IdParam IdType encounterId) {
 
@@ -97,8 +92,8 @@ public class EncounterProvider implements IResourceProvider {
         });
   }
 
-  private Encounter addEncounter(Bundle bundle, Long caseId) {
-    Encounter encounter = encounterService.getEncounter(caseId);
+  private org.hl7.fhir.dstu3.model.Encounter addEncounter(Bundle bundle, Long caseId) {
+    org.hl7.fhir.dstu3.model.Encounter encounter = encounterService.getEncounter(caseId, null);
     String encounterRefString = referenceService.buildId(ResourceType.Encounter, caseId);
     bundle.addEntry(new BundleEntryComponent()
         .setFullUrl(encounterRefString)
@@ -119,10 +114,9 @@ public class EncounterProvider implements IResourceProvider {
         .forEach(bundle::addEntry);
   }
 
-  @Transactional
   public void addCarePlans(Bundle bundle, Long caseId) {
-    Cases caseEntity = caseRepository.getOne(caseId);
-    for (CaseCarePlan carePlan : caseEntity.getCarePlans()) {
+    List<CaseCarePlan> carePlans = encounterService.getCarePlansForEncounter(caseId);
+    for (CaseCarePlan carePlan : carePlans) {
       Reference reference = new Reference(carePlan.getReference());
       Preconditions.checkArgument(reference.getReferenceElement().isAbsolute(),
           "CarePlan must have absolute reference");
@@ -130,13 +124,13 @@ public class EncounterProvider implements IResourceProvider {
     }
   }
 
-  @Read
-  public Encounter getEncounter(@IdParam IdType id) {
-    return encounterService.getEncounter(id.getIdPartAsLong());
+  @Read(version = true)
+  public org.hl7.fhir.dstu3.model.Encounter getEncounter(@IdParam IdType id) {
+    return encounterService.getEncounter(id.getIdPartAsLong(), id.getVersionIdPartAsLong());
   }
 
   @Override
   public Class<? extends IBaseResource> getResourceType() {
-    return Encounter.class;
+    return org.hl7.fhir.dstu3.model.Encounter.class;
   }
 }

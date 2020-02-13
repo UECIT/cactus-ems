@@ -11,8 +11,8 @@ import org.hl7.fhir.dstu3.model.codesystems.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.nhs.ctp.entities.Cases;
-import uk.nhs.ctp.repos.CaseRepository;
+import uk.nhs.ctp.entities.EncounterEntity;
+import uk.nhs.ctp.repos.EncounterRepository;
 import uk.nhs.ctp.service.DoSService;
 import uk.nhs.ctp.service.dto.DoSRequestDTO;
 import uk.nhs.ctp.service.dto.HealthcareServiceDTO;
@@ -27,7 +27,7 @@ public class DoSReportService implements Reportable {
 	private DoSService dosService;
 	
 	@Autowired 
-	private CaseRepository caseRepository;
+	private EncounterRepository encounterRepository;
 	
 	@Value("${ems.search.distance:25}")
 	private int searchDistance;
@@ -38,7 +38,7 @@ public class DoSReportService implements Reportable {
 	@Override
 	public ReportsDTO generate(ReportRequestDTO request) throws JAXBException, JsonProcessingException {
 		
-		Cases caseEntity = caseRepository.findOne(request.getCaseId());
+		EncounterEntity caseEntity = encounterRepository.findFirstByIdVersion_IdOrderByIdVersion_VersionDesc(request.getCaseId());
 		
 		List<HealthcareServiceDTO> dosResponse =
 				dosService.getDoS(request.getReferralRequest().getId());
@@ -48,7 +48,7 @@ public class DoSReportService implements Reportable {
 				mapper.writeValueAsString(dosResponse), ReportType.DOS, ContentType.JSON);
 	}
 	
-	private DoSRequestDTO createDoSRequest(Cases caseEntity, ReferralRequest referralRequest) {
+	private DoSRequestDTO createDoSRequest(EncounterEntity caseEntity, ReferralRequest referralRequest) {
 		DoSRequestDTO dosRequest = new DoSRequestDTO();
 		
 		dosRequest.deriveGender(caseEntity.getGender());

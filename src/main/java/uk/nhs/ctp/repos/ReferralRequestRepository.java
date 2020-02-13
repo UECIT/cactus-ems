@@ -6,5 +6,5 @@ import uk.nhs.ctp.entities.ReferralRequestEntity;
 
 @Repository
 public interface ReferralRequestRepository extends JpaRepository<ReferralRequestEntity, Long> {
-  ReferralRequestEntity findByCaseEntity_Id(Long caseId);
+  ReferralRequestEntity findByEncounterEntity_Id(Long caseId); // Needs to Be ID and Version (Currently throwing PropertyReferenceException)
 }

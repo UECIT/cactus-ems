@@ -18,12 +18,12 @@ public interface AuditRecordRepository extends JpaRepository<AuditRecord, Long> 
 //	@Query("SELECT a FROM audit_record a WHERE a.case_id = :caseId")
 //    public AuditRecord findByCaseId(@Param("caseId") Long caseId);
 
-	AuditRecord findByCaseId(Long caseId);
+	AuditRecord findByEncounterId(Long encounterId);
 
-	@Query("SELECT NEW uk.nhs.ctp.service.search.AuditSearchResultDTO(c.id, c.firstName, c.lastName, c.timestamp) " +
-		   "FROM Cases c  " +
-		   "WHERE c.id IN (" +
-		   "	SELECT ar.caseId FROM AuditRecord ar " +
+	@Query("SELECT NEW uk.nhs.ctp.service.search.AuditSearchResultDTO(e.id, e.firstName, e.lastName, e.timestamp) " +
+		   "FROM EncounterEntity e  " +
+		   "WHERE e.id IN (" +
+		   "	SELECT ar.encounterId FROM AuditRecord ar " +
 		   "	WHERE (:from IS NULL OR createdDate > :from) " +
 		   "	AND (:to IS NULL OR createdDate < :to) " +
 		   "	AND (:includeClosed = TRUE OR closedDate IS NULL) " +

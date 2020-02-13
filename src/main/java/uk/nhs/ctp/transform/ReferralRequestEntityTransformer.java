@@ -2,11 +2,13 @@ package uk.nhs.ctp.transform;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import java.util.StringJoiner;
 import lombok.AllArgsConstructor;
 import org.apache.commons.collections4.Transformer;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.springframework.stereotype.Service;
+import uk.nhs.ctp.entities.IdVersion;
 import uk.nhs.ctp.entities.ReferralRequestEntity;
 
 @Service
@@ -27,9 +29,16 @@ public class ReferralRequestEntityTransformer implements
       referralRequest.setId("ReferralRequest/" + referralRequestEntity.getId());
     }
 
-    if (referralRequestEntity.getCaseEntity() != null) {
-      Reference caseRef = new Reference(
-          "Encounter/" + referralRequestEntity.getCaseEntity().getId());
+    if (referralRequestEntity.getEncounterEntity() != null) {
+      IdVersion idVersion = referralRequestEntity.getEncounterEntity().getIdVersion();
+      String refString = new StringJoiner("/")
+          .add("Encounter")
+          .add(idVersion.getId().toString())
+          .add("_history")
+          .add(idVersion.getVersion().toString())
+          .toString();
+
+      Reference caseRef = new Reference(refString);
       referralRequest.setContext(caseRef);
     }
 

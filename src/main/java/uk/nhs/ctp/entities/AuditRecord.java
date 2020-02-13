@@ -23,7 +23,7 @@ public class AuditRecord {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
   @Column(name = "case_id")
-  private Long caseId;
+  private Long encounterId;
   @Column(name = "triage_complete")
   private boolean triageComplete;
   @Column(name = "created_date")

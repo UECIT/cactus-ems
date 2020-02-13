@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import uk.nhs.ctp.entities.Cases;
-import uk.nhs.ctp.repos.CaseRepository;
+import uk.nhs.ctp.entities.EncounterEntity;
+import uk.nhs.ctp.repos.EncounterRepository;
 import uk.nhs.ctp.service.CaseService;
 import uk.nhs.ctp.service.CdssService;
 import uk.nhs.ctp.service.TriageService;
@@ -34,7 +34,7 @@ public class CaseController {
 
   private final CdssService cdssService;
   private final TriageService triageService;
-  private final CaseRepository caseRepository;
+  private final EncounterRepository encounterRepository;
   private final CaseService caseService;
 
   private final SearchParametersTransformer searchParametersTransformer;
@@ -69,13 +69,13 @@ public class CaseController {
 
   @GetMapping(path = "/{id}")
   public @ResponseBody
-  Cases getCase(@PathVariable Long id) {
-    return caseRepository.findOne(id);
+  EncounterEntity getCase(@PathVariable Long id) {
+    return encounterRepository.findFirstByIdVersion_IdOrderByIdVersion_VersionDesc(id);
   }
 
   @PutMapping(path = "/selectedService")
   public @ResponseBody
-  Cases updateSelectedService(@RequestBody SelectedServiceRequestDTO requestDTO) {
+  EncounterEntity updateSelectedService(@RequestBody SelectedServiceRequestDTO requestDTO) {
     return caseService.updateSelectedService(requestDTO.getCaseId(), requestDTO.getSelectedServiceId());
   }
 }

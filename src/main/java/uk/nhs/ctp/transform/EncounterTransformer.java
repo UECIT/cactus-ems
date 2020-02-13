@@ -5,14 +5,14 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Duration;
-import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.Encounter.EncounterStatus;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.entities.AuditRecord;
-import uk.nhs.ctp.entities.Cases;
+import uk.nhs.ctp.entities.EncounterEntity;
 import uk.nhs.ctp.enums.ParticipationType;
 import uk.nhs.ctp.service.ReferenceService;
 
@@ -22,13 +22,14 @@ public class EncounterTransformer {
 
   private final ReferenceService referenceService;
 
-  public Encounter transform(Cases caseEntity, AuditRecord audit) {
-    var encounter = new Encounter();
-
-    encounter.setId(caseEntity.getId().toString());
+  public org.hl7.fhir.dstu3.model.Encounter transform(EncounterEntity caseEntity, AuditRecord audit) {
+    var encounter = new org.hl7.fhir.dstu3.model.Encounter();
+    String id = caseEntity.getIdVersion().getId().toString();
+    String version = caseEntity.getIdVersion().getVersion().toString();
+    encounter.setId(new IdType(id).withVersion(version));
     encounter.setSubject(new Reference(caseEntity.getPatientId()));
 
-    var participant = new Encounter.EncounterParticipantComponent();
+    var participant = new org.hl7.fhir.dstu3.model.Encounter.EncounterParticipantComponent();
     participant.addType(ParticipationType.PPRF.toCodeableConcept());
     participant.addType(ParticipationType.ADM.toCodeableConcept());
     participant.addType(ParticipationType.DIS.toCodeableConcept());

@@ -29,11 +29,11 @@ import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.CaseParameter;
-import uk.nhs.ctp.entities.Cases;
+import uk.nhs.ctp.entities.EncounterEntity;
 import uk.nhs.ctp.entities.QuestionResponse;
 import uk.nhs.ctp.entities.ReferralRequestEntity;
 import uk.nhs.ctp.entities.TestScenario;
-import uk.nhs.ctp.repos.CaseRepository;
+import uk.nhs.ctp.repos.EncounterRepository;
 import uk.nhs.ctp.repos.TestScenarioRepository;
 import uk.nhs.ctp.service.dto.CdssResult;
 import uk.nhs.ctp.transform.CaseObservationTransformer;
@@ -45,7 +45,7 @@ import uk.nhs.ctp.utils.ErrorHandlingUtils;
 @Slf4j
 public class CaseService {
 
-  private CaseRepository caseRepository;
+  private EncounterRepository encounterRepository;
   private TestScenarioRepository testScenarioRepository;
   private GenericResourceLocator resourceLocator;
   private StorageService storageService;
@@ -58,9 +58,9 @@ public class CaseService {
    * Create new case from patient ID
    *
    * @param patientId {@link Long}
-   * @return {@link Cases}
+   * @return {@link EncounterEntity}
    */
-  public Cases createCase(String patientId, String practitionerId) {
+  public EncounterEntity createCase(String patientId, String practitionerId) {
     // TODO use test scenario provided by EMS UI
     TestScenario testScenario = testScenarioRepository.findByPatientId(1L);
     ErrorHandlingUtils.checkEntityExists(testScenario, "Test Scenario");
@@ -70,7 +70,7 @@ public class CaseService {
   /**
    * Create new case from patient resource reference
    */
-  public Cases createCase(String patientRef, String practitionerId, TestScenario testScenario) {
+  public EncounterEntity createCase(String patientRef, String practitionerId, TestScenario testScenario) {
     String resourceType = new Reference(patientRef).getReferenceElement().getResourceType();
     Preconditions.checkArgument(resourceType.equalsIgnoreCase("Patient"),
         "Case must be created with a Patient resource");
@@ -82,20 +82,20 @@ public class CaseService {
   /**
    * Create new case from patient resource
    */
-  public Cases createCase(Patient patient, String practitionerId, TestScenario testScenario) {
+  public EncounterEntity createCase(Patient patient, String practitionerId, TestScenario testScenario) {
 
     log.info("Creating case for patient: " + patient.getNameFirstRep().getNameAsSingleString());
 
-    Cases triageCase = new Cases();
+    EncounterEntity triageCase = new EncounterEntity();
     triageCase.setPatientId(patient.getId());
     triageCase.setPractitionerId(practitionerId);
     setCaseDetails(triageCase, patient, testScenario);
 
     // Store a mostly empty encounter record for future reference
-    return caseRepository.saveAndFlush(triageCase);
+    return encounterRepository.saveAndFlush(triageCase);
   }
 
-  private void setCaseDetails(Cases triageCase, Patient patient,
+  private void setCaseDetails(EncounterEntity triageCase, Patient patient,
       TestScenario testScenario) {
     HumanName name = patient.getNameFirstRep();
     triageCase.setFirstName(name.getGivenAsSingleString());
@@ -124,17 +124,17 @@ public class CaseService {
    *
    * @param caseId           {@link Long}
    * @param evaluateResponse results of a request to ServiceDefinition/[id]/$evaluate
-   * @return {@link Cases}
+   * @return {@link EncounterEntity}
    */
-  public Cases updateCase(Long caseId, CdssResult evaluateResponse, String sessionId) {
-    Cases triageCase = caseRepository.findOne(caseId);
+  public EncounterEntity updateCase(Long caseId, CdssResult evaluateResponse, String sessionId) {
+    EncounterEntity triageCase = encounterRepository.findFirstByIdVersion_IdOrderByIdVersion_VersionDesc(caseId);
     ErrorHandlingUtils.checkEntityExists(triageCase, "Case");
 
-    log.info("Updating case for " + triageCase.getId());
+    log.info("Updating case for " + triageCase.getIdVersion());
 
     triageCase.setSessionId(sessionId);
     triageCase.setReferralRequest(null);
-    caseRepository.saveAndFlush(triageCase);
+    encounterRepository.saveAndFlush(triageCase);
 
     // Store referral request
     ReferralRequest referralRequest = evaluateResponse.getReferralRequest();
@@ -181,10 +181,10 @@ public class CaseService {
       }
     }
 
-    return caseRepository.saveAndFlush(triageCase);
+    return encounterRepository.saveAndFlush(triageCase);
   }
 
-  private void updateQuestionnaireResponse(Cases triageCase, QuestionnaireResponse response) {
+  private void updateQuestionnaireResponse(EncounterEntity triageCase, QuestionnaireResponse response) {
     QuestionResponse existingResponse = triageCase.getQuestionResponses().stream()
         .filter(answer -> answer.getQuestionnaireId()
             .equals(response.getQuestionnaire().getReference().split("/")[1]))
@@ -200,13 +200,13 @@ public class CaseService {
     }
   }
 
-  private void updateMedication(Cases triageCase, MedicationAdministration currentMed) {
+  private void updateMedication(EncounterEntity triageCase, MedicationAdministration currentMed) {
     boolean amended = false;
     for (CaseMedication medicationAdmin : triageCase.getMedications()) {
       try {
         if (medicationAdmin.getCode().equalsIgnoreCase(
             currentMed.getMedicationCodeableConcept().getCodingFirstRep().getCode())) {
-          log.info("Amending Medication for case " + triageCase.getId());
+          log.info("Amending Medication for case " + triageCase.getIdVersion());
           updateMedicationCoding(currentMed, medicationAdmin);
           medicationAdmin.setTimestamp(new Date());
 
@@ -218,18 +218,18 @@ public class CaseService {
     }
 
     if (!amended) {
-      log.info("Adding Medication for case " + triageCase.getId());
+      log.info("Adding Medication for case " + triageCase.getIdVersion());
       triageCase.addMedication(createCaseMedication(currentMed));
     }
   }
 
-  private void updateImmunization(Cases triageCase, Immunization resource) {
+  private void updateImmunization(EncounterEntity triageCase, Immunization resource) {
     boolean amended = false;
     Immunization currentImm = resource;
     for (CaseImmunization immunisation : triageCase.getImmunizations()) {
       if (immunisation.getCode()
           .equalsIgnoreCase(currentImm.getVaccineCode().getCodingFirstRep().getCode())) {
-        log.info("Amending Immunisation for case " + triageCase.getId());
+        log.info("Amending Immunisation for case " + triageCase.getIdVersion());
         updateImmunisationCoding(currentImm, immunisation);
         immunisation.setTimestamp(new Date());
 
@@ -238,17 +238,17 @@ public class CaseService {
     }
 
     if (!amended) {
-      log.info("Adding Immunization for case " + triageCase.getId());
+      log.info("Adding Immunization for case " + triageCase.getIdVersion());
       triageCase.addImmunization(createCaseImmunization(resource));
     }
   }
 
-  private void updateObservation(Cases triageCase, Observation currentObs) {
+  private void updateObservation(EncounterEntity triageCase, Observation currentObs) {
     boolean amended = false;
     for (CaseObservation observation : triageCase.getObservations()) {
       if (observation.getCode()
           .equalsIgnoreCase(currentObs.getCode().getCoding().get(0).getCode())) {
-        log.info("Amending Observation for case " + triageCase.getId());
+        log.info("Amending Observation for case " + triageCase.getIdVersion());
 
         caseObservationTransformer.updateObservationCoding(currentObs, observation);
         observation.setTimestamp(new Date());
@@ -258,7 +258,7 @@ public class CaseService {
     }
 
     if (!amended) {
-      log.info("Adding Observation for case " + triageCase.getId());
+      log.info("Adding Observation for case " + triageCase.getIdVersion());
       triageCase.addObservation(caseObservationTransformer.transform(currentObs));
     }
   }
@@ -294,9 +294,9 @@ public class CaseService {
   }
 
   public void addObservation(Long caseId, CaseObservation observation) {
-    Cases existingCase = caseRepository.findOne(caseId);
+    EncounterEntity existingCase = encounterRepository.findFirstByIdVersion_IdOrderByIdVersion_VersionDesc(caseId);
     existingCase.addObservation(observation);
-    caseRepository.save(existingCase);
+    encounterRepository.save(existingCase);
   }
 
   /**
@@ -355,11 +355,11 @@ public class CaseService {
     }
   }
 
-  public Cases updateSelectedService(Long caseId, String selectedServiceId) {
-    Cases triageCase = caseRepository.findOne(caseId);
+  public EncounterEntity updateSelectedService(Long caseId, String selectedServiceId) {
+    EncounterEntity triageCase = encounterRepository.findFirstByIdVersion_IdOrderByIdVersion_VersionDesc(caseId);
     ErrorHandlingUtils.checkEntityExists(triageCase, "Case");
 
-    log.info("Setting selected HealthcareService for case " + triageCase.getId());
+    log.info("Setting selected HealthcareService for case " + triageCase.getIdVersion());
 
     Reference serviceRef = new Reference(selectedServiceId);
     Preconditions.checkArgument(
@@ -375,7 +375,7 @@ public class CaseService {
           referenceService.buildRef(ResourceType.Appointment, "example-appointment"));
     });
 
-    caseRepository.saveAndFlush(triageCase);
+    encounterRepository.saveAndFlush(triageCase);
     return triageCase;
   }
 }

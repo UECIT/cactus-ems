@@ -40,13 +40,13 @@ public class AuditService {
   public AuditRecord createNewAudit(Long caseId) {
 
     // check if audit already exists and create if not.
-    AuditRecord currentAuditRecord = auditRepository.findByCaseId(caseId);
+    AuditRecord currentAuditRecord = auditRepository.findByEncounterId(caseId);
     if (currentAuditRecord != null) {
       return currentAuditRecord;
     } else {
       AuditRecord newAuditRecord = new AuditRecord();
       // update standard fields......
-      newAuditRecord.setCaseId(caseId);
+      newAuditRecord.setEncounterId(caseId);
       newAuditRecord.setTriageComplete(false);
       newAuditRecord.setCreatedDate(new Date());
       newAuditRecord.setAuditEntries(new ArrayList<>());
@@ -83,7 +83,7 @@ public class AuditService {
       throws JsonProcessingException {
 
     // check auditRecord exists
-    AuditRecord newAuditRecord = auditRepository.findByCaseId(caseId);
+    AuditRecord newAuditRecord = auditRepository.findByEncounterId(caseId);
 
     // create audit Entry and add it to the audit record.
     AuditEntry newAuditEntry = newAuditRecord.getAuditEntries()
@@ -100,7 +100,7 @@ public class AuditService {
 
   public AuditRecord createAuditEntry(Long caseId, String request, String response,
       AuditEntryType auditEntryType) throws JsonProcessingException {
-    AuditRecord currentAuditRecord = auditRepository.findByCaseId(caseId);
+    AuditRecord currentAuditRecord = auditRepository.findByEncounterId(caseId);
     AuditEntry newAuditEntry = new AuditEntry();
     newAuditEntry.setType(auditEntryType);
     newAuditEntry.setCreatedDate(new Date());
@@ -132,7 +132,7 @@ public class AuditService {
   }
 
   public AuditRecord getAuditRecordByCase(Long caseId) {
-    return auditRepository.findByCaseId(caseId);
+    return auditRepository.findByEncounterId(caseId);
   }
 
   public List<AuditEntry> getAuditEntries(Long caseId, AuditEntryType... types) {

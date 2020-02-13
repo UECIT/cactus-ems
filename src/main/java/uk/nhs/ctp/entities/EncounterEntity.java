@@ -6,12 +6,11 @@ import java.util.Date;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -21,13 +20,12 @@ import javax.persistence.TemporalType;
 import lombok.Data;
 
 @Entity
-@Table(name = "cases")
+@Table(name = "encounter")
 @Data
-public class Cases {
+public class EncounterEntity {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  @EmbeddedId
+  private IdVersion idVersion;
 
   @Column
   private String patientId;
@@ -64,27 +62,45 @@ public class Cases {
   private Skillset skillset;
 
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-  @JoinColumn(name = "case_id")
+  @JoinColumns({
+      @JoinColumn(name = "encounter_id"),
+      @JoinColumn(name = "encounter_version")
+  })
   private List<CaseImmunization> immunizations = new ArrayList<>();
 
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-  @JoinColumn(name = "case_id")
+  @JoinColumns({
+      @JoinColumn(name = "encounter_id"),
+      @JoinColumn(name = "encounter_version")
+  })
   private List<CaseObservation> observations = new ArrayList<>();
 
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-  @JoinColumn(name = "case_id")
+  @JoinColumns({
+      @JoinColumn(name = "encounter_id"),
+      @JoinColumn(name = "encounter_version")
+  })
   private List<CaseMedication> medications = new ArrayList<>();
 
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-  @JoinColumn(name = "case_id")
+  @JoinColumns({
+      @JoinColumn(name = "encounter_id"),
+      @JoinColumn(name = "encounter_version")
+  })
   private List<CaseParameter> parameters = new ArrayList<>();
 
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-  @JoinColumn(name = "case_id")
+  @JoinColumns({
+      @JoinColumn(name = "encounter_id"),
+      @JoinColumn(name = "encounter_version")
+  })
   private List<QuestionResponse> questionResponses = new ArrayList<>();
 
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-  @JoinColumn(name = "case_id")
+  @JoinColumns({
+      @JoinColumn(name = "encounter_id"),
+      @JoinColumn(name = "encounter_version")
+  })
   private List<CaseCarePlan> carePlans = new ArrayList<>();
 
   @Column(name = "session_id")
@@ -100,11 +116,11 @@ public class Cases {
   public void setReferralRequest(ReferralRequestEntity referralRequest) {
     if (referralRequest == null) {
       if (this.referralRequest != null) {
-        this.referralRequest.caseEntity = null;
+        this.referralRequest.encounterEntity = null;
       }
     }
     else {
-      referralRequest.caseEntity = this;
+      referralRequest.encounterEntity = this;
     }
     this.referralRequest = referralRequest;
   }

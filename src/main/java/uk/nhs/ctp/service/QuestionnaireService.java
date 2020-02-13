@@ -22,9 +22,9 @@ import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Type;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import uk.nhs.ctp.entities.Cases;
+import uk.nhs.ctp.entities.EncounterEntity;
 import uk.nhs.ctp.entities.QuestionResponse;
-import uk.nhs.ctp.repos.CaseRepository;
+import uk.nhs.ctp.repos.EncounterRepository;
 import uk.nhs.ctp.service.attachment.AttachmentService;
 import uk.nhs.ctp.service.builder.ReferenceBuilder;
 import uk.nhs.ctp.service.builder.RelatedPersonBuilder;
@@ -34,7 +34,7 @@ import uk.nhs.ctp.service.dto.TriageQuestion;
 @AllArgsConstructor
 public class QuestionnaireService {
 
-  private CaseRepository caseRepository;
+  private EncounterRepository encounterRepository;
   private AttachmentService attachmentService;
   private StorageService storageService;
   private RelatedPersonBuilder relatedPersonBuilder;
@@ -79,7 +79,7 @@ public class QuestionnaireService {
   }
 
   @Nonnull
-  private List<QuestionnaireResponse> getExistingResponses(Cases caseEntity) {
+  private List<QuestionnaireResponse> getExistingResponses(EncounterEntity caseEntity) {
 
     // Get reference to all questionnaire responses for this case
     if (caseEntity.getQuestionResponses() == null) {
@@ -100,7 +100,7 @@ public class QuestionnaireService {
    * @return List of all persisted {@link QuestionnaireResponse}s for this encounter
    */
   public List<QuestionnaireResponse> updateEncounterResponses(
-      Cases caseEntity, String questionnaireId, TriageQuestion[] questionResponse,
+      EncounterEntity caseEntity, String questionnaireId, TriageQuestion[] questionResponse,
       Boolean amending, ReferenceBuilder referenceBuilder) {
 
     List<QuestionnaireResponse> questionnaireResponses = getExistingResponses(caseEntity);
@@ -154,7 +154,7 @@ public class QuestionnaireService {
             .build();
 
         caseEntity.addQuestionResponse(questionResponseEntity);
-        caseRepository.save(caseEntity);
+        encounterRepository.save(caseEntity);
         questionnaireResponses.add(questionnaireResponse);
       }
 

@@ -9,6 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
 import javax.persistence.Lob;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -26,16 +27,19 @@ public class ReferralRequestEntity {
 
   @JsonIgnore
   @OneToOne(optional = false, fetch = FetchType.LAZY)
-  @JoinColumn(name = "case_id")
+  @JoinColumns({
+      @JoinColumn(name = "encounter_id"),
+      @JoinColumn(name = "encounter_version")
+  })
   @ToString.Exclude()
-  protected Cases caseEntity;
+  protected EncounterEntity encounterEntity;
 
   @Lob
   @Column
   @JsonRawValue
   private String resource;
 
-  public void setCaseEntity(Cases caseEntity) {
-    caseEntity.setReferralRequest(this);
+  public void setEncounterEntity(EncounterEntity encounterEntity) {
+    encounterEntity.setReferralRequest(this);
   }
 }
