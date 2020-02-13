@@ -5,6 +5,8 @@ import {DosService} from 'src/app/service/dos.service';
 import {HealthcareService} from 'src/app/model/dos';
 import {TriageService} from "../../service/triage.service";
 import {ToastrService} from "ngx-toastr";
+import {AppState} from 'src/app/app.state';
+import {Store} from '@ngrx/store';
 
 @Component({
   selector: 'app-dos-display',
@@ -17,20 +19,23 @@ export class DosDisplayComponent {
 
   response: HealthcareService[];
   selectedService: HealthcareService;
+  patientId: string;
   error: object;
 
   constructor(
       private dosService: DosService,
       private triageService: TriageService,
       private toastr: ToastrService,
-      public dialog: MatDialog) {
+      public dialog: MatDialog,
+      store: Store<AppState>) {
+    store.select('patient').subscribe(({ id }) => this.patientId = id);
   }
 
   async getDosResponse() {
     this.response = null;
     this.error = null;
     await this.dosService
-    .getDosResponse(this.referralRequest)
+    .getDosResponse(this.referralRequest, this.patientId)
     .toPromise()
     .then(
         response => {

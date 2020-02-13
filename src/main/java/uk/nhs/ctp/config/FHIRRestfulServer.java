@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.cors.CorsConfiguration;
+import uk.nhs.ctp.resourceProvider.CheckServicesProvider;
 
 @WebServlet(urlPatterns = {"/fhir/*"}, displayName = "FHIR Server")
 @Configuration
@@ -24,11 +25,14 @@ public class FHIRRestfulServer extends RestfulServer {
   private static final long serialVersionUID = 1L;
 
   private List<IResourceProvider> providers;
+  private CheckServicesProvider checkServicesProvider;
   private FhirContext fhirContext;
 
 	@PostConstruct
 	public void setResourceProviders() {
+
 		setResourceProviders(providers);
+		setProviders(checkServicesProvider);
 	}
 
   @Override
