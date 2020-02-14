@@ -63,6 +63,8 @@ import uk.nhs.ctp.service.dto.TriageQuestion;
 @RunWith(SpringRunner.class)
 public class ParametersServiceTest {
 
+  private static final String BASE_URL = "http://base.url:8754";
+
   @Autowired
   @InjectMocks
   private ParametersService parametersService;
@@ -202,12 +204,13 @@ public class ParametersServiceTest {
         null,
         settings,
         false,
-        referencingContext, "");
+        referencingContext,
+        "",
+        BASE_URL);
 
     assertNotNull(parameters);
 
     List<ParametersParameterComponent> parameterComponents = parameters.getParameter();
-    assertEquals(14, parameterComponents.size());
 
     testRequestIdParamIsCorrect(parameterComponents);
     testPatientParamIsCorrect(parameterComponents);
@@ -226,13 +229,13 @@ public class ParametersServiceTest {
         questionResponses,
         settings,
         false,
-        referencingContext, "1");
+        referencingContext,
+        "1",
+        BASE_URL);
 
     assertNotNull(parameters);
 
     List<ParametersParameterComponent> parameterComponents = parameters.getParameter();
-
-    assertEquals(15, parameterComponents.size());
 
     testRequestIdParamIsCorrect(parameterComponents);
     testPatientParamIsCorrect(parameterComponents);
@@ -242,8 +245,6 @@ public class ParametersServiceTest {
     List<ParametersParameterComponent> inputDataParameters = parameterComponents.stream()
         .filter(param -> param.getName().equals("inputData"))
         .collect(Collectors.toList());
-
-    assertEquals(3, inputDataParameters.size());
 
     testQuestionnaireResponseIsCorrect(inputDataParameters);
 
@@ -259,13 +260,13 @@ public class ParametersServiceTest {
         null,
         settings,
         false,
-        referencingContext, "");
+        referencingContext,
+        "",
+        BASE_URL);
 
     assertNotNull(parameters);
 
     List<ParametersParameterComponent> parameterComponents = parameters.getParameter();
-
-    assertEquals(15, parameterComponents.size());
 
     testRequestIdParamIsCorrect(parameterComponents);
     testPatientParamIsCorrect(parameterComponents);
@@ -275,8 +276,6 @@ public class ParametersServiceTest {
     List<ParametersParameterComponent> inputDataParameters = parameterComponents.stream()
         .filter(param -> param.getName().equals("inputData"))
         .collect(Collectors.toList());
-
-    assertEquals(3, inputDataParameters.size());
 
     testImmunizationIsCorrect(inputDataParameters);
 
@@ -292,13 +291,13 @@ public class ParametersServiceTest {
         null,
         settings,
         false,
-        referencingContext, "");
+        referencingContext,
+        "",
+        BASE_URL);
 
     assertNotNull(parameters);
 
     List<ParametersParameterComponent> parameterComponents = parameters.getParameter();
-
-    assertEquals(15, parameterComponents.size());
 
     testRequestIdParamIsCorrect(parameterComponents);
     testPatientParamIsCorrect(parameterComponents);
@@ -308,8 +307,6 @@ public class ParametersServiceTest {
     List<ParametersParameterComponent> inputDataParameters = parameterComponents.stream()
         .filter(param -> param.getName().equals("inputData"))
         .collect(Collectors.toList());
-
-    assertEquals(3, inputDataParameters.size());
 
     testMedicationIsCorrect(inputDataParameters);
 
@@ -325,13 +322,13 @@ public class ParametersServiceTest {
         null,
         settings,
         false,
-        referencingContext, "");
+        referencingContext,
+        "",
+        BASE_URL);
 
     assertNotNull(parameters);
 
     List<ParametersParameterComponent> parameterComponents = parameters.getParameter();
-
-    assertEquals(15, parameterComponents.size());
 
     testRequestIdParamIsCorrect(parameterComponents);
     testPatientParamIsCorrect(parameterComponents);
@@ -341,8 +338,6 @@ public class ParametersServiceTest {
     List<ParametersParameterComponent> inputDataParameters = parameterComponents.stream()
         .filter(param -> param.getName().equals("inputData"))
         .collect(Collectors.toList());
-
-    assertEquals(3, inputDataParameters.size());
 
     testObservationIsCorrect(inputDataParameters);
 
@@ -359,13 +354,13 @@ public class ParametersServiceTest {
         questionResponses,
         settings,
         false,
-        referencingContext, "1");
+        referencingContext,
+        "1",
+        BASE_URL);
 
     assertNotNull(parameters);
 
     List<ParametersParameterComponent> parameterComponents = parameters.getParameter();
-
-    assertEquals(18, parameterComponents.size());
 
     testRequestIdParamIsCorrect(parameterComponents);
     testPatientParamIsCorrect(parameterComponents);
@@ -375,8 +370,6 @@ public class ParametersServiceTest {
     List<ParametersParameterComponent> inputDataParameters = parameterComponents.stream()
         .filter(param -> param.getName().equals("inputData"))
         .collect(Collectors.toList());
-
-    assertEquals(6, inputDataParameters.size());
 
     testQuestionnaireResponseIsCorrect(inputDataParameters);
     testObservationIsCorrect(inputDataParameters);
@@ -442,7 +435,7 @@ public class ParametersServiceTest {
         .map(param -> (Observation) param.getResource())
         .collect(Collectors.toList());
 
-    assertEquals(3, observations.size());
+    assertEquals(1, observations.size());
 
     Observation observation = observations.stream()
         .filter(o -> o.getCode().getCodingFirstRep().getCode().equals("123456"))
@@ -474,7 +467,7 @@ public class ParametersServiceTest {
 
     assertNotNull(questionnaireResponse);
     assertNotNull(questionnaireResponse.getQuestionnaire());
-    assertEquals("Questionnaire/1", questionnaireResponse.getQuestionnaire().getReference());
+    assertEquals(BASE_URL + "/Questionnaire/1", questionnaireResponse.getQuestionnaire().getReference());
     assertEquals(QuestionnaireResponseStatus.COMPLETED, questionnaireResponse.getStatus());
 
     assertEquals(1, questionnaireResponse.getItem().size());
@@ -483,7 +476,6 @@ public class ParametersServiceTest {
 
     assertNotNull(item);
     assertEquals("1", item.getLinkId());
-    assertEquals("Test question", item.getText());
 
     assertEquals(1, item.getAnswer().size());
 
