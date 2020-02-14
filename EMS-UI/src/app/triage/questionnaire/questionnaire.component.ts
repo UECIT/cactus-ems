@@ -22,7 +22,6 @@ export class QuestionnaireComponent implements OnInit {
   @Input() questionnaire: Questionnaire;
   @Input() answerSelected: QuestionResponse[];
   @Input() questionnaireResponse: QuestionnaireResponse;
-  @Input() amendingPrevious: Boolean;
   @Output() answerSelectedChange = new EventEmitter<QuestionResponse[]>();
 
   freeText: Map<string, string>;

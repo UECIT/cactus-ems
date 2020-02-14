@@ -177,8 +177,10 @@ public class TriageService {
    * @throws JsonProcessingException
    */
   protected CdssResult evaluateServiceDefinition(CdssRequestDTO requestDetails)
-      throws ConnectException, JsonProcessingException {
-    var referencingContext = referencingContextFactory.load(requestDetails.getCdssSupplierId());
+      throws JsonProcessingException {
+    CdssSupplier cdssSupplier = cdssSupplierService
+        .getCdssSupplier(requestDetails.getCdssSupplierId());
+    var referencingContext = referencingContextFactory.load(cdssSupplier);
 
     Parameters request = parametersService.getEvaluateParameters(
         requestDetails.getCaseId(),
@@ -186,7 +188,8 @@ public class TriageService {
         requestDetails.getSettings(),
         requestDetails.getAmendingPrevious(),
         referencingContext,
-        requestDetails.getQuestionnaireId());
+        requestDetails.getQuestionnaireId(),
+        cdssSupplier.getBaseUrl());
 
     GuidanceResponse response = cdssService.evaluateServiceDefinition(
         request,
@@ -194,9 +197,6 @@ public class TriageService {
         requestDetails.getServiceDefinitionId(),
         requestDetails.getCaseId(),
         referencingContext);
-
-    CdssSupplier cdssSupplier = cdssSupplierService
-        .getCdssSupplier(requestDetails.getCdssSupplierId());
 
     return responseResolver.resolve(response, cdssSupplier, requestDetails.getSettings(),
         requestDetails.getPatientId());

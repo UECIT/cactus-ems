@@ -2,6 +2,7 @@ package uk.nhs.ctp.service.factory;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
+import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.service.CdssSupplierService;
 import uk.nhs.ctp.service.ReferencingContext;
 
@@ -11,9 +12,7 @@ public class ReferencingContextFactory {
 
   private CdssSupplierService cdssSupplierService;
 
-  public ReferencingContext load(Long cdssSupplierId) {
-    var cdss = cdssSupplierService.getCdssSupplier(cdssSupplierId);
-
+  public ReferencingContext load(CdssSupplier cdss) {
     return new ReferencingContext(cdss.getReferencingType());
   }
 }

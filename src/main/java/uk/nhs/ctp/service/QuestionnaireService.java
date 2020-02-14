@@ -1,6 +1,7 @@
 package uk.nhs.ctp.service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -38,6 +39,7 @@ public class QuestionnaireService {
   private AttachmentService attachmentService;
   private StorageService storageService;
   private RelatedPersonBuilder relatedPersonBuilder;
+  private ReferenceService referenceService;
 
   private Type getAnswerValue(TriageQuestion triageQuestion) {
     switch (triageQuestion.getQuestionType().toUpperCase()) {
@@ -101,65 +103,73 @@ public class QuestionnaireService {
    */
   public List<QuestionnaireResponse> updateEncounterResponses(
       Cases caseEntity, String questionnaireId, TriageQuestion[] questionResponse,
-      Boolean amending, ReferenceBuilder referenceBuilder) {
+      Boolean amending, ReferenceBuilder referenceBuilder, String supplierBaseUrl) {
 
     List<QuestionnaireResponse> questionnaireResponses = getExistingResponses(caseEntity);
 
-    if (questionResponse != null) {
-
-      // Build FHIR response object from TriageQuestion DTOs
-      QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse()
-          .setQuestionnaire(new Reference(new IdType(ResourceType.Questionnaire.name(),
-              questionnaireId.replace("#", ""))));
-
-      for (TriageQuestion triageQuestion : questionResponse) {
-        questionnaireResponse.addItem()
-            .setLinkId(triageQuestion.getQuestionId())
-            .setText(triageQuestion.getQuestion())
-            .addAnswer().setValue(getAnswerValue(triageQuestion));
-      }
-
-      // Select 1st or 3rd party source
-      Reference patientRef = new Reference(caseEntity.getPatientId());
-      if (caseEntity.getParty().getCode().equals("1")) {
-        questionnaireResponse.setSource(patientRef);
-      } else {
-        // TODO replace with referenced resource (this will be contained)
-        CareConnectRelatedPerson relatedPerson = relatedPersonBuilder.build(patientRef);
-        questionnaireResponse.setSource(referenceBuilder.getReference(relatedPerson));
-      }
-
-      // Look for an existing response for this questionnaire
-      var qr = questionnaireResponses.stream()
-          .filter(equalQuestionnaireIds(questionnaireId))
-          .findFirst();
-
-      if (qr.isPresent() && amending) {
-
-        // Amend existing response
-        qr.get()
-            .setStatus(QuestionnaireResponseStatus.AMENDED)
-            .setItem(questionnaireResponse.getItem());
-
-        storageService.updateExternal(qr.get());
-
-      } else if (qr.isEmpty()) {
-
-        // Create new response
-        questionnaireResponse.setStatus(QuestionnaireResponseStatus.COMPLETED);
-        String qrRef = storageService.storeExternal(questionnaireResponse);
-
-        QuestionResponse questionResponseEntity = QuestionResponse.builder()
-            .reference(qrRef)
-            .questionnaireId(questionnaireId)
-            .build();
-
-        caseEntity.addQuestionResponse(questionResponseEntity);
-        caseRepository.save(caseEntity);
-        questionnaireResponses.add(questionnaireResponse);
-      }
-
+    if (questionResponse == null) {
+      return questionnaireResponses;
     }
+
+    // remove questionId part from questionnaireId if present
+    questionnaireId = questionnaireId.split("#")[0];
+    var questionnaireRef = referenceService.buildRef(
+        supplierBaseUrl,
+        ResourceType.Questionnaire,
+        questionnaireId);
+    var patientRef = referenceService.buildRef(new IdType(caseEntity.getPatientId()));
+    QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse()
+        .setQuestionnaire(questionnaireRef)
+        .setSubject(patientRef)
+        .setContext(referenceService.buildRef(ResourceType.Encounter, caseEntity.getId()))
+        .setAuthored(new Date());
+
+    for (TriageQuestion triageQuestion : questionResponse) {
+      questionnaireResponse.addItem()
+          .setSubject(patientRef)
+          .setLinkId(triageQuestion.getQuestionId())
+          .addAnswer().setValue(getAnswerValue(triageQuestion));
+    }
+
+    // Select 1st or 3rd party source
+    if (caseEntity.getParty().getCode().equals("1")) {
+        questionnaireResponse.setSource(patientRef);
+    } else {
+      // TODO replace with referenced resource (this will be contained)
+        CareConnectRelatedPerson relatedPerson = relatedPersonBuilder.build(patientRef);
+      questionnaireResponse.setSource(referenceBuilder.getReference(relatedPerson));
+    }
+
+    // Look for an existing response for this questionnaire
+    var qr = questionnaireResponses.stream()
+        .filter(equalQuestionnaireIds(questionnaireId))
+        .findFirst();
+
+    if (qr.isPresent() && amending) {
+
+      // Amend existing response
+      qr.get()
+          .setStatus(QuestionnaireResponseStatus.AMENDED)
+          .setItem(questionnaireResponse.getItem());
+
+      storageService.updateExternal(qr.get());
+
+    } else if (qr.isEmpty()) {
+
+      // Create new response
+      questionnaireResponse.setStatus(QuestionnaireResponseStatus.COMPLETED);
+      String qrRef = storageService.storeExternal(questionnaireResponse);
+
+      QuestionResponse questionResponseEntity = QuestionResponse.builder()
+          .reference(qrRef)
+          .questionnaireId(questionnaireId)
+          .build();
+
+      caseEntity.addQuestionResponse(questionResponseEntity);
+      caseRepository.save(caseEntity);
+      questionnaireResponses.add(questionnaireResponse);
+    }
+
     return questionnaireResponses;
   }
 

@@ -2,6 +2,7 @@ package uk.nhs.ctp.service;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.FhirTerser;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -26,14 +27,23 @@ public class ReferenceService {
 
   private final FhirContext fhirContext;
 
+  private URI getFullEmsServerUrl() {
+    return UriComponentsBuilder.fromUriString(emsServer).pathSegment("fhir").build().toUri();
+  }
+
   public String buildId(ResourceType resourceType, long id) {
     return buildId(resourceType, Long.toString(id));
   }
 
   public String buildId(ResourceType resourceType, String id) {
-    return UriComponentsBuilder.fromUriString(emsServer)
-        .pathSegment("fhir", resourceType.name(), id)
-        .build().toUriString();
+    return buildId(getFullEmsServerUrl(), resourceType,id);
+  }
+
+  public String buildId(URI base, ResourceType resourceType, String id) {
+    return UriComponentsBuilder.fromUri(base)
+        .pathSegment(resourceType.name(), id)
+        .build()
+        .toUriString();
   }
 
   /**
@@ -52,6 +62,14 @@ public class ReferenceService {
 
   public Reference buildRef(ResourceType resourceType, String id) {
     return new Reference(buildId(resourceType, id));
+  }
+
+  public Reference buildRef(IIdType idElement) {
+    return new Reference(buildId(idElement));
+  }
+
+  public Reference buildRef(String baseUrl, ResourceType resourceType, String id) {
+    return new Reference(buildId(URI.create(baseUrl), resourceType, id));
   }
 
   public void resolve(String baseUrl, List<? extends IBaseReference> references) {

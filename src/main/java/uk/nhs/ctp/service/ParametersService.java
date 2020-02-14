@@ -68,7 +68,8 @@ public class ParametersService {
       SettingsDTO settings,
       Boolean amending,
       ReferencingContext referencingContext,
-      String questionnaireId
+      String questionnaireId,
+      String supplierBaseUrl
   ) {
 
     ReferenceBuilder referenceBuilder = referenceBuilderFactory.load(referencingContext);
@@ -88,9 +89,8 @@ public class ParametersService {
         .setPatient(patientRef)
         .setContext(caseEntity)
         .setSetting(settings.getSetting())
-        .addQuestionnaireResponses(
-            questionnaireService.updateEncounterResponses(
-                caseEntity, questionnaireId, questionResponse, amending, referenceBuilder));
+        .addQuestionnaireResponses(questionnaireService.updateEncounterResponses(
+        caseEntity, questionnaireId, questionResponse, amending, referenceBuilder, supplierBaseUrl));
 
     addPeople(builder, patientRef, settings);
     addInputData(caseEntity, builder);
