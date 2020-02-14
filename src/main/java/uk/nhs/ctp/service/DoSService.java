@@ -11,6 +11,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.HealthcareService;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -32,26 +33,32 @@ public class DoSService {
 	private final HealthcareServiceInTransformer healthcareServiceInTransformer;
 	private final IGenericClient fhirClient;
 
-	public List<HealthcareServiceDTO> getDoS(String referralRequestRef) {
+	public List<HealthcareServiceDTO> getDoS(String referralRequestRef, String patientRef) {
 
 		ReferralRequest referralRequest = fhirClient.read()
 				.resource(ReferralRequest.class)
 				.withUrl(referralRequestRef)
 				.execute();
 
+		Patient patient = fhirClient.read()
+				.resource(Patient.class)
+				.withUrl(patientRef)
+				.execute();
+
 		return Stream.of(dosServer, emsServer + "/fhir")
-				.flatMap(dos -> callDos(dos, referralRequest))
+				.flatMap(dos -> callDos(dos, referralRequest, patient))
 				.collect(Collectors.toList());
 
 	}
 
-	private Stream<HealthcareServiceDTO> callDos(String dos, ReferralRequest referralRequest) {
+	private Stream<HealthcareServiceDTO> callDos(String dos, ReferralRequest referralRequest, Patient patient) {
 		try {
 			return fhirContext.newRestfulGenericClient(dos)
 				.operation()
-				.onType(HealthcareService.class)
+				.onServer()
 				.named("$check-services")
 				.withParameter(Parameters.class, "referralRequest", referralRequest)
+					.andParameter("patient", patient)
 				.returnResourceType(Bundle.class)
 				.execute()
 				.getEntry()

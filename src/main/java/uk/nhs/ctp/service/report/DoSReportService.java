@@ -41,7 +41,7 @@ public class DoSReportService implements Reportable {
 		Cases caseEntity = caseRepository.findOne(request.getCaseId());
 		
 		List<HealthcareServiceDTO> dosResponse =
-				dosService.getDoS(request.getReferralRequest().getId());
+				dosService.getDoS(request.getReferralRequest().getId(), null);
 
 		
 		return new ReportsDTO(mapper.writeValueAsString(createDoSRequest(caseEntity, request.getReferralRequest())), 
