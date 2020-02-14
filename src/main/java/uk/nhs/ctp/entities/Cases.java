@@ -67,8 +67,7 @@ public class Cases {
   @JoinColumn(name = "case_id")
   private List<CaseImmunization> immunizations = new ArrayList<>();
 
-  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-  @JoinColumn(name = "case_id")
+  @OneToMany(mappedBy = "caseEntity", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<CaseObservation> observations = new ArrayList<>();
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -119,6 +118,7 @@ public class Cases {
 
   public void addObservation(CaseObservation observation) {
     this.observations.add(observation);
+    observation.setCaseEntity(this);
   }
 
   public void addParameter(CaseParameter parameter) {

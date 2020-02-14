@@ -4,15 +4,18 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import lombok.Data;
+import lombok.ToString;
 
 @Entity
 @Table(name = "case_observation")
@@ -24,8 +27,9 @@ public class CaseObservation {
   private Long id;
 
   @JsonIgnore
-  @ManyToOne
+  @ManyToOne(optional = false)
   @JoinColumn(name = "case_id")
+  @ToString.Exclude()
   private Cases caseEntity;
 
   @Column(name = "system")
