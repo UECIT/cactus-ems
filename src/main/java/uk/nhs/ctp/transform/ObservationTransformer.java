@@ -12,6 +12,7 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.entities.CaseObservation;
+import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.service.ReferenceService;
 
 @Component
@@ -22,11 +23,13 @@ public class ObservationTransformer implements Transformer<CaseObservation, Obse
 
   @Override
   public Observation transform(CaseObservation caseObservation) {
-    Observation observation = new Observation()
+    var observation = new Observation()
         .setStatus(ObservationStatus.FINAL)
         .setIssued(caseObservation.getTimestamp())
-        .setCode(new CodeableConcept()
-          .addCoding(new Coding(caseObservation.getSystem(), caseObservation.getCode(), caseObservation.getDisplay())));
+        .setCode(new CodeableConcept().addCoding(new Coding(
+            caseObservation.getSystem(),
+            caseObservation.getCode(),
+            caseObservation.getDisplay())));
 
     switch (StringUtils.defaultString(caseObservation.getValueSystem(), "")) {
       case "boolean":
@@ -36,21 +39,26 @@ public class ObservationTransformer implements Transformer<CaseObservation, Obse
         observation.setValue(new StringType(caseObservation.getValueCode()));
         break;
       default:
-        observation.setValue(
-            new CodeableConcept().addCoding(new Coding(
-                caseObservation.getValueSystem(),
-                caseObservation.getValueCode(),
-                caseObservation.getValueDisplay())
-            ));
+        observation.setValue(new CodeableConcept().addCoding(new Coding(
+            caseObservation.getValueSystem(),
+            caseObservation.getValueCode(),
+            caseObservation.getValueDisplay())));
     }
 
     if (caseObservation.getDataAbsentCode() != null && caseObservation.getDataAbsentDisplay() != null) {
-      observation
-          .setDataAbsentReason(new CodeableConcept().addCoding(new Coding(
-              caseObservation.getDataAbsentSystem(),
-              caseObservation.getDataAbsentCode(),
-              caseObservation.getDataAbsentDisplay())));
+      observation.setDataAbsentReason(new CodeableConcept().addCoding(new Coding(
+          caseObservation.getDataAbsentSystem(),
+          caseObservation.getDataAbsentCode(),
+          caseObservation.getDataAbsentDisplay())));
     }
+
+    Cases caseEntity = caseObservation.getCaseEntity();
+    if (caseEntity != null) {
+      observation.setContext(referenceService.buildRef(ResourceType.Encounter, caseEntity.getId()));
+      observation.setSubject(
+          referenceService.buildRef(ResourceType.Patient, caseEntity.getPatientId()));
+    }
+
     observation.setId(referenceService.buildId(ResourceType.Observation, caseObservation.getId()));
 
     return observation;
