@@ -63,27 +63,27 @@ public class Cases {
   @JoinColumn(name = "skillset_id")
   private Skillset skillset;
 
-  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "case_id")
   private List<CaseImmunization> immunizations = new ArrayList<>();
 
-  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "case_id")
   private List<CaseObservation> observations = new ArrayList<>();
 
-  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "case_id")
   private List<CaseMedication> medications = new ArrayList<>();
 
-  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "case_id")
   private List<CaseParameter> parameters = new ArrayList<>();
 
-  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "case_id")
   private List<QuestionResponse> questionResponses = new ArrayList<>();
 
-  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "case_id")
   private List<CaseCarePlan> carePlans = new ArrayList<>();
 
