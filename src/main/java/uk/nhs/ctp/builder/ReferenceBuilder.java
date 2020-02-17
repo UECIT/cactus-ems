@@ -1,4 +1,4 @@
-package uk.nhs.ctp.service.builder;
+package uk.nhs.ctp.builder;
 
 import static org.springframework.util.StringUtils.isEmpty;
 

@@ -1,0 +1,11 @@
+{
+  "id": "ergp",
+  "name": "East Road General Practitioner",
+  "identifiers": [
+    {
+      "value": "1236458",
+      "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+      "type": "oc"
+    }
+  ]
+}

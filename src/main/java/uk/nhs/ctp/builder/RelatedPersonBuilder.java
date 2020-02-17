@@ -1,4 +1,4 @@
-package uk.nhs.ctp.service.builder;
+package uk.nhs.ctp.builder;
 
 import java.util.Date;
 import org.hl7.fhir.dstu3.model.Address.AddressType;
