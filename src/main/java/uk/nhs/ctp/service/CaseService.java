@@ -7,6 +7,7 @@ import com.google.common.base.Preconditions;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import javax.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -144,6 +145,7 @@ public class CaseService {
    * @param evaluateResponse results of a request to ServiceDefinition/[id]/$evaluate
    * @return {@link Cases}
    */
+  @Transactional
   public Cases updateCase(Long caseId, CdssResult evaluateResponse, String sessionId) {
     Cases triageCase = caseRepository.findOne(caseId);
     ErrorHandlingUtils.checkEntityExists(triageCase, "Case");
@@ -204,7 +206,7 @@ public class CaseService {
     //noinspection UnstableApiUsage
     QuestionResponse existingResponse = triageCase.getQuestionResponses().stream()
         .filter(answer -> answer.getQuestionnaireId()
-            .equals(response.getQuestionnaire().getReference().split("/")[1]))
+            .equals(response.getQuestionnaire().getReferenceElement().getIdPart()))
         .collect(onlyElement());
 
     response.setId(existingResponse.getReference());
@@ -270,6 +272,7 @@ public class CaseService {
         observation.setTimestamp(new Date());
 
         amended = true;
+        break;
       }
     }
 

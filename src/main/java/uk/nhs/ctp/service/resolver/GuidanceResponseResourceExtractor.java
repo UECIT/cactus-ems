@@ -54,7 +54,8 @@ public class GuidanceResponseResourceExtractor {
 						fhirContext, cdssSupplier.getBaseUrl(), Parameters.class, 
 							guidanceResponse.getOutputParameters().getReference());
 				
-				resources.add(parameters);
+//				resources.add(parameters);
+				guidanceResponse.getOutputParameters().setResource(parameters);
 			} catch (Exception e) {
 			}
 		}
