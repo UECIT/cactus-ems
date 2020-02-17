@@ -62,6 +62,7 @@ import { TriageSelectionComponent } from './main/triage-selection/triage-selecti
 import { PatientSelectionComponent } from './main/patient-selection/patient-selection.component';
 import { ReferralRequestComponent, ConditionDialog } from './triage/referral-request/referral-request.component';
 import { PractitionerSelectionComponent } from './main/practitioner-selection/practitioner-selection.component';
+import { EnvironmentService } from './service/environment.service';
 
 export function hljsLanguages() {
   return [
@@ -144,6 +145,7 @@ export function hljsLanguages() {
     AuditService,
     ResourceService,
     ReportService,
+    EnvironmentService,
     {provide: MAT_DATE_LOCALE, useValue: 'en-GB'}],
   bootstrap: [AppComponent]
 })

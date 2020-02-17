@@ -1,5 +1,4 @@
-<div class="u377_div col-12" *ngIf="isLoggedIn">
-
+<div class="menuBar" [style.background-color]="colour" *ngIf="isLoggedIn">
   <button class="homeButton" mat-button routerLink="/main">Home</button>
   <button class="homeButton" mat-button [matMenuTriggerFor]="account">Account</button>
   <mat-menu #account="matMenu" [overlapTrigger]="false">
