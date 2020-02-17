@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import uk.nhs.ctp.enums.ReferencingType;
 import uk.nhs.ctp.service.ReferencingContext;
 import uk.nhs.ctp.service.StorageService;
-import uk.nhs.ctp.service.builder.ReferenceBuilder;
+import uk.nhs.ctp.builder.ReferenceBuilder;
 
 @Component
 @AllArgsConstructor

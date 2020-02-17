@@ -1,4 +1,4 @@
-package uk.nhs.ctp.service.builder;
+package uk.nhs.ctp.builder;
 
 import java.util.Date;
 import lombok.AllArgsConstructor;
@@ -56,6 +56,7 @@ public class CareConnectPatientBuilder {
   private void addGP(CareConnectPatient patient, PatientEntity patientEntity) {
     // TODO add to entity
     patient.addGeneralPractitioner(referenceService.buildRef(ResourceType.Practitioner, "gp"));
+    patient.addGeneralPractitioner(referenceService.buildRef(ResourceType.Organization, "ergp"));
   }
 
   private void addPharmacy(CareConnectPatient patient,
@@ -65,13 +66,13 @@ public class CareConnectPatientBuilder {
   }
 
   private void addTelecom(CareConnectPatient patient, PatientEntity patientEntity) {
-    int rank = 1;
+    int rank = 0;
     if (StringUtils.isNotEmpty(patientEntity.getHomePhone())) {
       patient.addTelecom()
           .setSystem(ContactPointSystem.PHONE)
           .setValue(patientEntity.getHomePhone())
           .setUse(ContactPointUse.HOME)
-          .setRank(rank++)
+          .setRank(++rank)
           .setPeriod(new Period().setStart(new Date()).setEnd(new Date()));
     }
 
@@ -80,7 +81,7 @@ public class CareConnectPatientBuilder {
           .setSystem(ContactPointSystem.PHONE)
           .setValue(patientEntity.getMobile())
           .setUse(ContactPointUse.MOBILE)
-          .setRank(rank++)
+          .setRank(++rank)
           .setPeriod(new Period().setStart(new Date()).setEnd(new Date()));
     }
 
@@ -89,7 +90,7 @@ public class CareConnectPatientBuilder {
           .setSystem(ContactPointSystem.EMAIL)
           .setValue(patientEntity.getEmail())
           .setUse(ContactPointUse.HOME)
-          .setRank(rank++)
+          .setRank(++rank)
           .setPeriod(new Period().setStart(new Date()).setEnd(new Date()));
     }
   }

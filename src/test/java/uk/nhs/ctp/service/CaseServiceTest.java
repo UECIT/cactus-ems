@@ -40,7 +40,7 @@ import uk.nhs.ctp.entities.TestScenario;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.repos.PatientRepository;
 import uk.nhs.ctp.repos.TestScenarioRepository;
-import uk.nhs.ctp.service.builder.CareConnectPatientBuilder;
+import uk.nhs.ctp.builder.CareConnectPatientBuilder;
 import uk.nhs.ctp.transform.CaseObservationTransformer;
 import uk.nhs.ctp.service.dto.CdssResult;
 import uk.nhs.ctp.transform.ReferralRequestEntityTransformer;

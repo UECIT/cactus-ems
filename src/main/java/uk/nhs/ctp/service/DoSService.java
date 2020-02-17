@@ -7,16 +7,16 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.HealthcareService;
-import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.service.dto.HealthcareServiceDTO;
-import uk.nhs.ctp.transform.HealthcareServiceInTransformer;
+import uk.nhs.ctp.transform.CheckServicesRequestTransformer;
+import uk.nhs.ctp.transform.CheckServicesResponseTransformer;
+import uk.nhs.ctp.transform.bundle.CheckServicesRequestBundle;
+import uk.nhs.ctp.transform.bundle.CheckServicesResponseBundle;
 
 @Service
 @Slf4j
@@ -30,58 +30,46 @@ public class DoSService {
 	private String emsServer;
 
 	private final FhirContext fhirContext;
-	private final HealthcareServiceInTransformer healthcareServiceInTransformer;
 	private final IGenericClient fhirClient;
+	private final CheckServicesRequestTransformer requestTransformer;
+	private final CheckServicesResponseTransformer responseTransformer;
 
 	public List<HealthcareServiceDTO> getDoS(String referralRequestRef, String patientRef) {
 
-		ReferralRequest referralRequest = fhirClient.read()
+		var referralRequest = fhirClient.read()
 				.resource(ReferralRequest.class)
 				.withUrl(referralRequestRef)
 				.execute();
 
-		Patient patient = fhirClient.read()
+		var patient = fhirClient.read()
 				.resource(Patient.class)
 				.withUrl(patientRef)
 				.execute();
 
+		var requestBundle = CheckServicesRequestBundle.builder()
+				.referralRequest(referralRequest)
+				.patient(patient)
+				.build();
+
 		return Stream.of(dosServer, emsServer + "/fhir")
-				.flatMap(dos -> callDos(dos, referralRequest, patient))
+				.map(dos -> new CheckServicesResponseBundle(dos, callDos(dos, requestBundle)))
+				.flatMap(responseTransformer::transform)
 				.collect(Collectors.toList());
 
 	}
 
-	private Stream<HealthcareServiceDTO> callDos(String dos, ReferralRequest referralRequest, Patient patient) {
+	private Parameters callDos(String dos, CheckServicesRequestBundle bundle) {
 		try {
 			return fhirContext.newRestfulGenericClient(dos)
-				.operation()
-				.onServer()
-				.named("$check-services")
-				.withParameter(Parameters.class, "referralRequest", referralRequest)
-					.andParameter("patient", patient)
-				.returnResourceType(Bundle.class)
-				.execute()
-				.getEntry()
-				.stream()
-				.map(entry -> {
-					HealthcareService resource = (HealthcareService) entry.getResource();
-
-					// Establish full URL of resource
-					if (entry.hasFullUrl()) {
-						resource.setId(entry.getFullUrl());
-					} else if (resource.hasId() && !resource.getIdElement().isAbsolute()) {
-						IdType fullId = resource.getIdElement()
-								.withServerBase(dos, resource.getResourceType().name());
-						resource.setId(fullId);
-					}
-
-					return resource;
-				})
-				.map(healthcareServiceInTransformer::transform);
+					.operation()
+					.onServer()
+					.named("$check-services")
+					.withParameters(requestTransformer.transform(bundle))
+					.returnResourceType(Parameters.class)
+					.execute();
 		} catch (Exception e) {
 			log.warn("Error calling DOS: " + dos, e);
-			return Stream.empty();
+			return null;
 		}
-
 	}
 }

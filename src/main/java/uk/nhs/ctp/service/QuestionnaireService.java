@@ -27,8 +27,8 @@ import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.entities.QuestionResponse;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.attachment.AttachmentService;
-import uk.nhs.ctp.service.builder.ReferenceBuilder;
-import uk.nhs.ctp.service.builder.RelatedPersonBuilder;
+import uk.nhs.ctp.builder.ReferenceBuilder;
+import uk.nhs.ctp.builder.RelatedPersonBuilder;
 import uk.nhs.ctp.service.dto.TriageQuestion;
 
 @Service
