@@ -11,4 +11,5 @@ export class Patient {
   title: string;
   email: string;
   language: string;
+  nhsNumber: string
 }
