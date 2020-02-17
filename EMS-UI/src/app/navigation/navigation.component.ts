@@ -1,3 +1,4 @@
+import { EnvironmentService } from './../service/environment.service';
 import { Component, OnInit } from '@angular/core';
 import { LoginService } from '../service/login.service';
 import { Router } from '@angular/router';
@@ -14,14 +15,20 @@ export class NavigationComponent implements OnInit {
   isAdmin: boolean;
   username: string;
   tokenInfo: Token;
+  colour: string;
 
-  constructor(private loginService: LoginService, public router: Router, private sessionStorage: SessionStorage) {}
+  constructor(
+    private loginService: LoginService,
+    private environmentService: EnvironmentService, 
+    public router: Router, 
+    private sessionStorage: SessionStorage) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     this.checkLoginStatus();
     this.loginService.watchAuthToken().subscribe((loggedIn: boolean) => {
       this.checkLoginStatus();
     });
+    this.colour = await this.environmentService.getBackgroundColour();
   }
 
   logoff() {
