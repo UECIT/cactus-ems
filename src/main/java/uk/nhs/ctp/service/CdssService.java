@@ -13,6 +13,7 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
 import javax.validation.constraints.NotNull;
+import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.GuidanceResponse;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -41,6 +42,7 @@ import uk.nhs.ctp.service.dto.ServiceDefinitionDTO;
 import uk.nhs.ctp.service.search.SearchParameters;
 
 @Service
+@Slf4j
 public class CdssService {
 
   private static final Logger LOG = LoggerFactory.getLogger(CdssService.class);
@@ -78,12 +80,12 @@ public class CdssService {
       Parameters parameters,
       Long cdssSupplierId,
       String serviceDefinitionId,
-      Long caseId,
-      ReferencingContext referencingContext) throws JsonProcessingException {
+      Long caseId
+  ) throws JsonProcessingException {
 
     IParser fhirParser = fhirContext.newJsonParser();
     String requestBody = fhirParser.encodeResourceToString(parameters);
-
+    log.info("Request: {}", requestBody);
     GuidanceResponse response = fhirContext.newRestfulGenericClient(getBaseUrl(cdssSupplierId))
         .operation()
         .onInstance(new IdType(SystemConstants.SERVICE_DEFINITION, serviceDefinitionId))
@@ -93,6 +95,7 @@ public class CdssService {
         .execute();
 
     var responseBody = fhirParser.encodeResourceToString(response);
+    log.info("Response: {}", responseBody);
     auditService.createAuditEntry(caseId, requestBody, responseBody, AuditEntryType.RESULT);
     return response;
   }

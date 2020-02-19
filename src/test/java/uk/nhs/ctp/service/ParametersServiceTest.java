@@ -206,7 +206,8 @@ public class ParametersServiceTest {
         false,
         referencingContext,
         "",
-        BASE_URL);
+        BASE_URL,
+        UUID.randomUUID().toString());
 
     assertNotNull(parameters);
 
@@ -231,7 +232,8 @@ public class ParametersServiceTest {
         false,
         referencingContext,
         "1",
-        BASE_URL);
+        BASE_URL,
+        UUID.randomUUID().toString());
 
     assertNotNull(parameters);
 
@@ -262,7 +264,8 @@ public class ParametersServiceTest {
         false,
         referencingContext,
         "",
-        BASE_URL);
+        BASE_URL,
+        UUID.randomUUID().toString());
 
     assertNotNull(parameters);
 
@@ -293,7 +296,8 @@ public class ParametersServiceTest {
         false,
         referencingContext,
         "",
-        BASE_URL);
+        BASE_URL,
+        UUID.randomUUID().toString());
 
     assertNotNull(parameters);
 
@@ -324,7 +328,8 @@ public class ParametersServiceTest {
         false,
         referencingContext,
         "",
-        BASE_URL);
+        BASE_URL,
+        UUID.randomUUID().toString());
 
     assertNotNull(parameters);
 
@@ -356,7 +361,8 @@ public class ParametersServiceTest {
         false,
         referencingContext,
         "1",
-        BASE_URL);
+        BASE_URL,
+        UUID.randomUUID().toString());
 
     assertNotNull(parameters);
 
