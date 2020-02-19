@@ -62,7 +62,7 @@ public class TriageServiceTest {
   private ResponseResolver responseResolver;
 
   @Mock
-  private ReferenceService referenceService;
+  private EvaluateService evaluateService;
 
   CdssResult mockCdssResult;
   CdssResponseDTO mockCdssResponseDTO;
@@ -74,27 +74,21 @@ public class TriageServiceTest {
     spyTriageService = spy(new TriageService(
         caseService,
         cdssService,
-        parametersService,
         responseService,
         auditService,
-        cdssSupplierService,
         encounterService,
-        caseObservationTransformer,
-        referencingContextFactory,
-        responseResolver
+        evaluateService,
+        caseObservationTransformer
     ));
 
     triageService = new TriageService(
         caseService,
         cdssService,
-        parametersService,
         responseService,
         auditService,
-        cdssSupplierService,
         encounterService,
-        caseObservationTransformer,
-        referencingContextFactory,
-        responseResolver
+        evaluateService,
+        caseObservationTransformer
     );
 
     mockCdssResult = mock(CdssResult.class);
@@ -109,10 +103,10 @@ public class TriageServiceTest {
 
   @Test
   public void testSecondRequestMadeTwiceWhenNoResultOrDataRequirementReturned()
-      throws ConnectException, JsonProcessingException, FHIRException {
+      throws Exception {
     doReturn(mockCdssResult)
-        .when(spyTriageService)
-        .updateCaseUsingCdss(mockCdssRequestDTO);
+        .when(evaluateService)
+        .evaluate(mockCdssRequestDTO);
     when(mockCdssResult.isInProgress())
         .thenReturn(true)
         .thenReturn(false);
@@ -122,16 +116,16 @@ public class TriageServiceTest {
 
     spyTriageService.processTriageRequest(mockCdssRequestDTO);
 
-    verify(spyTriageService, times(2)).updateCaseUsingCdss(mockCdssRequestDTO);
+    verify(evaluateService, times(2)).evaluate(mockCdssRequestDTO);
 
   }
 
   @Test
   public void testNoSecondRequestMadeOnceWhenResultInProgress()
-      throws ConnectException, JsonProcessingException, FHIRException {
+      throws Exception {
     doReturn(mockCdssResult)
-        .when(spyTriageService)
-        .updateCaseUsingCdss(mockCdssRequestDTO);
+        .when(evaluateService)
+        .evaluate(mockCdssRequestDTO);
     when(mockCdssResult.isInProgress())
         .thenReturn(false);
     doReturn(mockCdssResponseDTO)
@@ -140,7 +134,7 @@ public class TriageServiceTest {
 
     spyTriageService.processTriageRequest(mockCdssRequestDTO);
 
-    verify(spyTriageService, times(1)).updateCaseUsingCdss(mockCdssRequestDTO);
+    verify(evaluateService, times(1)).evaluate(mockCdssRequestDTO);
 
   }
 

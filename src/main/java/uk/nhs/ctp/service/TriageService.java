@@ -3,44 +3,34 @@ package uk.nhs.ctp.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.net.ConnectException;
 import lombok.AllArgsConstructor;
-import org.hl7.fhir.dstu3.model.GuidanceResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.entities.AuditRecord;
 import uk.nhs.ctp.entities.CaseObservation;
-import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.service.dto.CdssRequestDTO;
 import uk.nhs.ctp.service.dto.CdssResponseDTO;
 import uk.nhs.ctp.service.dto.CdssResult;
 import uk.nhs.ctp.service.dto.EncounterReportInput;
 import uk.nhs.ctp.service.dto.TriageLaunchDTO;
 import uk.nhs.ctp.service.dto.TriageQuestion;
-import uk.nhs.ctp.service.factory.ReferencingContextFactory;
-import uk.nhs.ctp.service.resolver.ResponseResolver;
 import uk.nhs.ctp.transform.CaseObservationTransformer;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class TriageService {
-
-  private static final Logger LOG = LoggerFactory.getLogger(TriageService.class);
 
   private CaseService caseService;
   private CdssService cdssService;
-  private ParametersService parametersService;
   private ResponseService responseService;
   private AuditService auditService;
-  private CdssSupplierService cdssSupplierService;
   private EncounterService encounterService;
+  private EvaluateService evaluateService;
   private CaseObservationTransformer caseObservationTransformer;
-  private ReferencingContextFactory referencingContextFactory;
-  private ResponseResolver responseResolver;
 
   /**
    * Creates case from test case scenario and patient details and launches first triage request
@@ -49,8 +39,7 @@ public class TriageService {
    * @return response {@link CdssResponseDTO}
    * @throws JsonProcessingException
    */
-  public CdssResponseDTO launchTriage(TriageLaunchDTO requestDetails)
-      throws ConnectException, JsonProcessingException, FHIRException {
+  public CdssResponseDTO launchTriage(TriageLaunchDTO requestDetails) throws Exception {
 
     Long caseId = caseService.createCase(
         requestDetails.getPatientId(),
@@ -58,6 +47,7 @@ public class TriageService {
     ).getId();
     String encounterId = requestDetails.getEncounterId();
     if (encounterId != null) {
+      log.info("Continuing triage journey for encounter {}", encounterId);
       updateCaseFromEncounterReport(caseId, encounterId);
     }
 
@@ -89,16 +79,14 @@ public class TriageService {
    * @return response {@link CdssResponseDTO}
    * @throws JsonProcessingException
    */
-  public CdssResponseDTO processTriageRequest(CdssRequestDTO requestDetails)
-      throws ConnectException, JsonProcessingException, FHIRException {
+  public CdssResponseDTO processTriageRequest(CdssRequestDTO requestDetails) throws Exception {
 
     Long caseId = requestDetails.getCaseId();
-    LOG.info("Processing triage for case " + caseId);
 
     // start audit
     AuditRecord auditRecord = auditService.createNewAudit(caseId);
 
-    CdssResult cdssResult = updateCaseUsingCdss(requestDetails);
+    CdssResult cdssResult =  evaluateService.evaluate(requestDetails);
 
     CdssResponseDTO cdssResponse = buildResponseDtoFromResult(cdssResult,
         caseId,
@@ -109,7 +97,7 @@ public class TriageService {
 
     if (cdssResult.isInProgress()) {
       requestDetails.setQuestionResponse(null);
-      cdssResult = updateCaseUsingCdss(requestDetails);
+      cdssResult =  evaluateService.evaluate(requestDetails);
 
       // Add Audit Record
       cdssResponse = buildResponseDtoFromResult(cdssResult, caseId,
@@ -129,14 +117,13 @@ public class TriageService {
    * @throws JsonProcessingException
    */
   public CdssResponseDTO processTriageAmendRequest(CdssRequestDTO requestDetails)
-      throws ConnectException, JsonProcessingException, FHIRException {
+      throws Exception {
 
     Long caseId = requestDetails.getCaseId();
-    LOG.info("Amending triage for case " + caseId);
 
     // start audit
     AuditRecord auditRecord = auditService.createNewAudit(caseId);
-    CdssResult cdssResult = evaluateServiceDefinition(requestDetails);
+    CdssResult cdssResult = evaluateService.evaluate(requestDetails);
 
     // Add Audit Record
     CdssResponseDTO cdssResponse = buildAmendResponseDtoFromResult(
@@ -146,60 +133,6 @@ public class TriageService {
         .updateAuditEntry(auditRecord, requestDetails, cdssResponse, cdssResult.getContained());
 
     return cdssResponse;
-  }
-
-  /**
-   * Executes ServiceDefinition $evaluate operation and stores any output data in the DB
-   *
-   * @param requestDetails {@link CdssRequestDTO}
-   * @return {@link CdssResult}
-   * @throws JsonProcessingException
-   */
-  protected CdssResult updateCaseUsingCdss(CdssRequestDTO requestDetails)
-      throws ConnectException, JsonProcessingException {
-
-    CdssResult cdssResult = evaluateServiceDefinition(requestDetails);
-
-    if (cdssResult.hasOutputData() || cdssResult.getSessionId() != null) {
-      Long caseId = requestDetails.getCaseId();
-      LOG.info("Update case for " + caseId);
-      caseService.updateCase(caseId, cdssResult, cdssResult.getSessionId());
-    }
-
-    return cdssResult;
-  }
-
-  /**
-   * Executes ServiceDefinition $evaluate operation
-   *
-   * @param requestDetails {@link CdssRequestDTO}
-   * @return {@link CdssResult}
-   * @throws JsonProcessingException
-   */
-  protected CdssResult evaluateServiceDefinition(CdssRequestDTO requestDetails)
-      throws JsonProcessingException {
-    CdssSupplier cdssSupplier = cdssSupplierService
-        .getCdssSupplier(requestDetails.getCdssSupplierId());
-    var referencingContext = referencingContextFactory.load(cdssSupplier);
-
-    Parameters request = parametersService.getEvaluateParameters(
-        requestDetails.getCaseId(),
-        requestDetails.getQuestionResponse(),
-        requestDetails.getSettings(),
-        requestDetails.getAmendingPrevious(),
-        referencingContext,
-        requestDetails.getQuestionnaireId(),
-        cdssSupplier.getBaseUrl());
-
-    GuidanceResponse response = cdssService.evaluateServiceDefinition(
-        request,
-        requestDetails.getCdssSupplierId(),
-        requestDetails.getServiceDefinitionId(),
-        requestDetails.getCaseId(),
-        referencingContext);
-
-    return responseResolver.resolve(response, cdssSupplier, requestDetails.getSettings(),
-        requestDetails.getPatientId());
   }
 
   /**

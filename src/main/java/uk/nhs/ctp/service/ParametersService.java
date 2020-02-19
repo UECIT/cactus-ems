@@ -5,7 +5,6 @@ import com.google.common.collect.HashMultimap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +27,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.SystemURL;
+import uk.nhs.ctp.builder.ReferenceBuilder;
+import uk.nhs.ctp.builder.RelatedPersonBuilder;
 import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseParameter;
@@ -35,8 +36,6 @@ import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.enums.Language;
 import uk.nhs.ctp.enums.UserType;
 import uk.nhs.ctp.repos.CaseRepository;
-import uk.nhs.ctp.builder.ReferenceBuilder;
-import uk.nhs.ctp.builder.RelatedPersonBuilder;
 import uk.nhs.ctp.service.dto.CodeDTO;
 import uk.nhs.ctp.service.dto.SettingsDTO;
 import uk.nhs.ctp.service.dto.TriageQuestion;
@@ -69,7 +68,8 @@ public class ParametersService {
       Boolean amending,
       ReferencingContext referencingContext,
       String questionnaireId,
-      String supplierBaseUrl
+      String supplierBaseUrl,
+      String requestId
   ) {
 
     ReferenceBuilder referenceBuilder = referenceBuilderFactory.load(referencingContext);
@@ -84,7 +84,7 @@ public class ParametersService {
     Reference patientRef = new Reference(caseEntity.getPatientId());
 
     Builder builder = new Builder()
-        .setRequestId(UUID.randomUUID().toString())
+        .setRequestId(requestId)
         .setEncounter(caseId)
         .setPatient(patientRef)
         .setContext(caseEntity)

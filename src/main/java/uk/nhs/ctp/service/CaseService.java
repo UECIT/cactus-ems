@@ -10,6 +10,7 @@ import java.util.List;
 import javax.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.HumanName;
@@ -149,9 +150,6 @@ public class CaseService {
   public Cases updateCase(Long caseId, CdssResult evaluateResponse, String sessionId) {
     Cases triageCase = caseRepository.findOne(caseId);
     ErrorHandlingUtils.checkEntityExists(triageCase, "Case");
-
-    log.info("Updating case for " + triageCase.getId());
-
     triageCase.setSessionId(sessionId);
     triageCase.setReferralRequest(null);
     caseRepository.saveAndFlush(triageCase);
@@ -225,7 +223,7 @@ public class CaseService {
       try {
         if (medicationAdmin.getCode().equalsIgnoreCase(
             currentMed.getMedicationCodeableConcept().getCodingFirstRep().getCode())) {
-          log.info("Amending Medication for case " + triageCase.getId());
+          log.info("Amending Medication {} for case {}", medicationAdmin.getCode(), triageCase.getId());
           updateMedicationCoding(currentMed, medicationAdmin);
           medicationAdmin.setTimestamp(new Date());
 
@@ -237,7 +235,7 @@ public class CaseService {
     }
 
     if (!amended) {
-      log.info("Adding Medication for case " + triageCase.getId());
+      log.info("Adding Medication {} for case {}", currentMed.getMedicationCodeableConcept().getCodingFirstRep(), triageCase.getId());
       triageCase.addMedication(createCaseMedication(currentMed));
     }
   }
@@ -247,7 +245,7 @@ public class CaseService {
     for (CaseImmunization immunisation : triageCase.getImmunizations()) {
       if (immunisation.getCode()
           .equalsIgnoreCase(resource.getVaccineCode().getCodingFirstRep().getCode())) {
-        log.info("Amending Immunisation for case " + triageCase.getId());
+        log.info("Amending Immunisation {} for case {}", immunisation.getCode(), triageCase.getId());
         updateImmunisationCoding(resource, immunisation);
         immunisation.setTimestamp(new Date());
 
@@ -256,7 +254,7 @@ public class CaseService {
     }
 
     if (!amended) {
-      log.info("Adding Immunization for case " + triageCase.getId());
+      log.info("Adding Immunization {} for case {}", resource.getVaccineCode().getCodingFirstRep(), triageCase.getId());
       triageCase.addImmunization(createCaseImmunization(resource));
     }
   }
@@ -266,7 +264,10 @@ public class CaseService {
     for (CaseObservation observation : triageCase.getObservations()) {
       if (observation.getCode()
           .equalsIgnoreCase(currentObs.getCode().getCoding().get(0).getCode())) {
-        log.info("Amending Observation for case " + triageCase.getId());
+        log.info("Amending Observation {}-{} for case {}",
+            observation.getDisplay(),
+            ObjectUtils.defaultIfNull(observation.getValueDisplay(), observation.getValueCode()),
+            triageCase.getId());
 
         caseObservationTransformer.updateObservationCoding(currentObs, observation);
         observation.setTimestamp(new Date());
@@ -277,8 +278,12 @@ public class CaseService {
     }
 
     if (!amended) {
-      log.info("Adding Observation for case " + triageCase.getId());
-      triageCase.addObservation(caseObservationTransformer.transform(currentObs));
+      CaseObservation caseObs = caseObservationTransformer.transform(currentObs);
+      log.info("Adding Observation {}-{} for case {}",
+          caseObs.getDisplay(),
+          caseObs.getValueDisplay(),
+          triageCase.getId());
+      triageCase.addObservation(caseObs);
     }
   }
 
