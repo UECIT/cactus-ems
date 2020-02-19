@@ -6,7 +6,9 @@ import java.util.Collection;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class Validator<T> {
 
@@ -43,7 +45,16 @@ public class Validator<T> {
 
   public Validator<Reference> checkReferenceType(ResourceType... validTypes) {
     Validator<Reference> ref = checkType(Reference.class);
-    ResourceType refType = ResourceType.fromCode(ref.value.getReferenceElement().getResourceType());
+    ResourceType refType = null;
+    if (ref.value.hasReferenceElement()) {
+      refType = ResourceType.fromCode(ref.value.getReferenceElement().getResourceType());
+    }
+    else {
+      IBaseResource resource = ref.value.getResource();
+      if (resource instanceof Resource) {
+        refType = ResourceType.fromCode(((Resource) resource).fhirType());
+      }
+    }
     Preconditions.checkState(Arrays.asList(validTypes).contains(refType),
         "Expected %s to be reference to %s", name, validTypes);
     return ref;

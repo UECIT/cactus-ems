@@ -64,7 +64,7 @@ public class SearchParametersTransformerTest {
     CodeDTO jurisdiction = new CodeDTO();
     jurisdiction.setCode("GB");
     CodeDTO userType = new CodeDTO();
-    userType.setCode("patient");
+    userType.setCode("Patient");
     CodeDTO setting = new CodeDTO();
     setting.setCode("online");
     CodeDTO task = new CodeDTO();
@@ -81,7 +81,7 @@ public class SearchParametersTransformerTest {
     assertThat(searchParameters.getQuery(), is("triage"));
     assertThat(searchParameters.getJurisdiction(), is("GB"));
     assertThat(searchParameters.getContextValueCode(),
-        containsInAnyOrder("user$http://hl7.org/fhir/valueset-provider-taxonomy.html|patient",
+        containsInAnyOrder("user$http://hl7.org/fhir/valueset-provider-taxonomy.html|Patient",
             "setting$http://hl7.org/fhir/valueset-provider-taxonomy.html|online", "task$cdss/supplier/stub|example"));
 
   }

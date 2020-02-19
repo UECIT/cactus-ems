@@ -23,6 +23,8 @@ import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementCodeFilterCompone
 import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementDateFilterComponent;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.stereotype.Component;
+import uk.nhs.ctp.enums.Setting;
+import uk.nhs.ctp.enums.UserType;
 import uk.nhs.ctp.service.GenericResourceLocator;
 import uk.nhs.ctp.service.dto.SettingsDTO;
 
@@ -46,7 +48,10 @@ public class SearchParametersTransformer {
         .observationTriggers(transformObservationTriggers(dataRequirements));
 
     if (settingsDTO != null) {
-      builder.contextValue("user", CS_PROVIDER_TAXONOMY, settingsDTO.getUserType().getCode())
+      UserType initiatingType = Setting.fromCode(settingsDTO.getSetting().getCode()) == Setting.ONLINE
+          ? UserType.fromCode(settingsDTO.getUserType().getCode())
+          : UserType.PRACTITIONER;
+      builder.contextValue("user", CS_PROVIDER_TAXONOMY, initiatingType.getValue())
           .contextValue("setting", CS_PROVIDER_TAXONOMY, settingsDTO.getSetting().getCode())
           .contextValue("task", CS_CDS_STUB, settingsDTO.getUserTaskContext().getCode())
           .jurisdiction(settingsDTO.getJurisdiction().getCode());

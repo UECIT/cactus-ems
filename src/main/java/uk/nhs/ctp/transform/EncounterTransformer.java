@@ -28,13 +28,15 @@ public class EncounterTransformer {
     encounter.setId(caseEntity.getId().toString());
     encounter.setSubject(new Reference(caseEntity.getPatientId()));
 
-    var participant = new Encounter.EncounterParticipantComponent();
-    participant.addType(ParticipationType.PPRF.toCodeableConcept());
-    participant.addType(ParticipationType.ADM.toCodeableConcept());
-    participant.addType(ParticipationType.DIS.toCodeableConcept());
-    participant.setIndividual(
-        referenceService.buildRef(ResourceType.Practitioner, caseEntity.getPractitionerId()));
-    encounter.addParticipant(participant);
+    if (caseEntity.getPractitionerId() != null) {
+      var participant = new Encounter.EncounterParticipantComponent();
+      participant.addType(ParticipationType.PPRF.toCodeableConcept());
+      participant.addType(ParticipationType.ADM.toCodeableConcept());
+      participant.addType(ParticipationType.DIS.toCodeableConcept());
+      participant.setIndividual(
+          referenceService.buildRef(ResourceType.Practitioner, caseEntity.getPractitionerId()));
+      encounter.addParticipant(participant);
+    }
 
     // Add fields provided by audit
     if (audit != null) {
