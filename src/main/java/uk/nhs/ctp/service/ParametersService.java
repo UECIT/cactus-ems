@@ -34,6 +34,7 @@ import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseParameter;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.enums.Language;
+import uk.nhs.ctp.enums.Setting;
 import uk.nhs.ctp.enums.UserType;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.dto.CodeDTO;
@@ -107,43 +108,41 @@ public class ParametersService {
 
   private void addPeople(Builder builder, Reference patientRef, SettingsDTO settings) {
 
-    UserType userType = UserType.fromCode(settings.getUserType().getCode());
+    Setting setting = Setting.fromCode(settings.getSetting().getCode());
+    // Settings of phone call or face to face imply the practitioner is the initiating person
+    UserType initiatingType = setting == Setting.ONLINE
+        ? UserType.fromCode(settings.getUserType().getCode())
+        : UserType.PRACTITIONER;
+
+    UserType receivingType = initiatingType != UserType.PRACTITIONER
+        ? initiatingType
+        : UserType.fromCode(settings.getUserType().getCode());
+
+    Reference relatedPersonRef = new Reference(relatedPersonBuilder.build(patientRef));
 
     builder
-        .setUserType(userType)
+        .setUserType(initiatingType)
+        .setRecipientType(receivingType)
         .setUserLanguage(settings.getUserLanguage())
+        .setRecipientLanguage(settings.getRecipientLanguage())
         .setUserTaskContext(settings.getUserTaskContext());
 
-    switch (userType) {
+    switch (initiatingType) {
       case PATIENT:
-        builder
-            .setInitiatingPerson(patientRef)
-            .setReceivingPerson(patientRef)
-            .setRecipientType(UserType.PATIENT)
-            .setRecipientLanguage(settings.getRecipientLanguage());
+        builder.setInitiatingAndReceiving(patientRef);
         break;
       case RELATED_PERSON:
         // TODO get related person from frontend
-        Reference relatedPersonRef = new Reference(relatedPersonBuilder.build(patientRef));
-        builder
-            .setInitiatingPerson(relatedPersonRef)
-            .setReceivingPerson(relatedPersonRef)
-            .setRecipientType(UserType.RELATED_PERSON)
-            .setRecipientLanguage(settings.getRecipientLanguage());
+        builder.setInitiatingAndReceiving(relatedPersonRef);
         break;
       case PRACTITIONER:
         Preconditions.checkNotNull(settings.getPractitioner(), "No practitioner specified");
-        Reference practitionerRef = new Reference(
-            new IdType(ResourceType.Practitioner.name(), settings.getPractitioner().getId()));
-
-        // TODO allow selection of recipient as either patient or related person
-        builder
-            .setInitiatingPerson(practitionerRef)
-            .setReceivingPerson(patientRef)
-            .setRecipientType(UserType.PATIENT)
-            .setRecipientLanguage(settings.getRecipientLanguage());
-
+        builder.setInitiatingPerson(
+            referenceService.buildRef(ResourceType.Practitioner, settings.getPractitioner().getId()));
+        builder.setReceivingPerson(UserType.PATIENT.equals(receivingType) ? patientRef : relatedPersonRef);
         break;
+      default:
+        throw new IllegalStateException("Unexpected value: " + initiatingType);
     }
   }
 
@@ -342,6 +341,10 @@ public class ParametersService {
           .setValue(reference);
 
       return this;
+    }
+
+    public Builder setInitiatingAndReceiving(Reference reference) {
+      return setInitiatingPerson(reference).setReceivingPerson(reference);
     }
 
     public Builder setUserType(UserType userType) {

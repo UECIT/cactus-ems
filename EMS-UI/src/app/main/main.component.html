@@ -11,26 +11,25 @@
     (onChange)="addPatientToStore($event)">
 </patient-selection>
 
-<!-- Role selection -->
-<triage-selection
-    [title]="'Select User Type'"
-    [options]="roles"
-    (onChange)="addRoleToStore($event)">
-</triage-selection>
-
-<!-- Practitioner selection -->
-<!-- *ngIf="selectedRole === 'Practitioner'" -->
-<practitioner-selection
-    [practitioners]="practitioners"
-    (onChange)="addPractitionerToStore($event)">
-</practitioner-selection>
-
 <!-- Setting selection -->
 <triage-selection
   [title]="'Select Setting Context'"
   [options]="settings"
   (onChange)="addSettingToStore($event)">
 </triage-selection>
+
+<!-- Role selection -->
+<triage-selection
+    [title]="isPractitioner() ? 'Select Receiving User Type' : 'Select User Type'"
+    [options]="roles"
+    (onChange)="addRoleToStore($event)">
+</triage-selection>
+
+<!-- Practitioner selection -->
+<practitioner-selection *ngIf="isPractitioner()" 
+    [practitioners]="practitioners"
+    (onChange)="addPractitionerToStore($event)">
+</practitioner-selection>
 
 <!-- Jurisdiction selection -->
 <triage-selection

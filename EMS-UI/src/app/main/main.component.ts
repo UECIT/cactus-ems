@@ -41,10 +41,13 @@ export class MainComponent implements OnInit {
   availableServiceDefinitions: CdssSupplier[];
   roles: Code[];
   selectedRole: string;
+  selectedSetting: string;
   settings: Code[];
   jurisdictions: Code[];
   selectionModeOptions: any[];
   encounterReportInput: EncounterReportInput;
+
+  setup: boolean = true;
 
   constructor(
       public router: Router,
@@ -69,36 +72,42 @@ export class MainComponent implements OnInit {
 
   ngOnInit() {
     let encounterId = this.route.snapshot.queryParamMap.get("encounterId");
-    if (encounterId) {
-      this.getEncounterReport(encounterId)
-        .then(er => {
-          this.encounterReportInput = er;
-          this.sessionStorage.setItem('encounterHandover', JSON.stringify(er));
-          this.getPatients(this.encounterReportInput.patientId, this.encounterReportInput.encounterId);
-        });
 
-    }
-    else {
-      this.sessionStorage.removeItem("encounterHandover");
-      this.getPatients()
-    }
-    this.getCdssSuppliers();
-    this.getRoles();
-    this.getSettings();
-    this.getJurisdictions();
-    this.getPractitioners();
-    this.getSelectionModeOptions();
-
-    var settings: Settings = this.sessionStorage['settings'];
-    settings.jurisdiction = this.jurisdictions[0];
-    settings.setting = this.settings[0];
-    settings.userType = this.roles[0];
-    this.sessionStorage.setItem('settings', JSON.stringify(settings));
-
-    this.autoSelectServiceDefinition(false);
-    this.openSnackBar();
-
-    this.sessionStorage.setItem('triageItems', '[]');
+    let setup = new Promise(async (resolve) => {
+      if (encounterId) {
+        this.getEncounterReport(encounterId)
+          .then(er => {
+            this.encounterReportInput = er;
+            this.sessionStorage.setItem('encounterHandover', JSON.stringify(er));
+            this.getPatients(this.encounterReportInput.patientId, this.encounterReportInput.encounterId);
+          });
+  
+      }
+      else {
+        this.sessionStorage.removeItem("encounterHandover");
+        this.getPatients()
+      }
+      this.getCdssSuppliers();
+      this.getRoles();
+      this.getSettings();
+      this.getJurisdictions();
+      this.getSelectionModeOptions();
+  
+      var settings: Settings = this.sessionStorage['settings'];
+      settings.jurisdiction = this.jurisdictions[0];
+      settings.setting = this.settings[0];
+      settings.userType = this.roles[0];
+      await this.getPractitioners();
+        settings.practitioner = this.practitioners[0];
+      this.sessionStorage.setItem('settings', JSON.stringify(settings));
+  
+      this.autoSelectServiceDefinition(true);
+      this.openSnackBar();
+  
+      this.sessionStorage.setItem('triageItems', '[]');
+      resolve();
+    });
+    setup.then(() => this.setup = false);
   }
 
   getEncounterReport(encounterId) {
@@ -144,29 +153,6 @@ export class MainComponent implements OnInit {
     this.cdssSuppliers = await this.cdssSupplierService.getCdssSuppliers().toPromise();
   }
 
-  getRoles() {
-    this.roles = [
-      {
-        'id': 1,
-        'description': 'Patient',
-        'code': 'Patient',
-        'display': 'Patient'
-      },
-      {
-        'id': 2,
-        'description': 'Related Person',
-        'code': 'RelatedPerson',
-        'display': 'Related Person'
-      },
-      {
-        'id': 3,
-        'description': 'Practitioner',
-        'code': 'Practitioner',
-        'display': 'Practitioner'
-      }
-    ];
-  }
-
   getSettings() {
     this.settings = [
       {
@@ -183,9 +169,27 @@ export class MainComponent implements OnInit {
       },
       {
         'id': 3,
-        'description': 'Clinical',
+        'description': 'Face to face',
         'code': 'clinical',
-        'display': 'Clinical'
+        'display': 'Face to face'
+      }
+    ];
+    this.selectedSetting = this.settings[0].code;
+  }
+
+  getRoles() {
+    this.roles = [
+      {
+        'id': 1,
+        'description': 'Patient',
+        'code': 'Patient',
+        'display': 'Patient'
+      },
+      {
+        'id': 2,
+        'description': 'Related Person',
+        'code': 'RelatedPerson',
+        'display': 'Related Person'
       }
     ];
   }
@@ -244,6 +248,7 @@ export class MainComponent implements OnInit {
     var settings: Settings = this.sessionStorage['settings'];
     settings.setting = setting;
     this.sessionStorage.setItem('settings', JSON.stringify(settings));
+    this.selectedSetting = setting.code;
     this.autoSelectServiceDefinition(false);
   }
 
@@ -277,7 +282,7 @@ export class MainComponent implements OnInit {
   }
 
   async autoSelectServiceDefinition(force: boolean) {
-    if (this.serviceDefinitionMode === 'automated' || force) {
+    if ((this.serviceDefinitionMode === 'automated' && !this.setup) || force) {
       this.serviceDefinitionMode = 'automated';
 
       // Request available SDs for the current patient (or no known patient)
@@ -306,5 +311,10 @@ export class MainComponent implements OnInit {
   // NCTH-269: Unsure which field should be displayed, for now falling back to ID
   getServiceDefinitionText(serviceDefinition: ServiceDefinition) {
     return serviceDefinition.description || serviceDefinition.serviceDefinitionId;
+  }
+
+ // Phone call/face to face implies practitioner as initiating person
+  isPractitioner() {
+    return this.selectedSetting !== 'online';
   }
 }

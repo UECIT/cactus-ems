@@ -55,6 +55,7 @@ import uk.nhs.ctp.enums.ReferencingType;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.dto.CodeDTO;
 import uk.nhs.ctp.service.dto.PersonDTO;
+import uk.nhs.ctp.service.dto.PractitionerDTO;
 import uk.nhs.ctp.service.dto.SettingsDTO;
 import uk.nhs.ctp.service.dto.TriageOption;
 import uk.nhs.ctp.service.dto.TriageQuestion;
@@ -158,7 +159,7 @@ public class ParametersServiceTest {
     personDto.setTelecom("0123 123 1234");
 
     CodeDTO codeDto = new CodeDTO();
-    codeDto.setCode("158974003");
+    codeDto.setCode("phone");
     codeDto.setDisplay("Call Handler");
 
     CodeDTO languageDto = new CodeDTO();
@@ -166,14 +167,12 @@ public class ParametersServiceTest {
 
     settings = new SettingsDTO();
 
-    settings.setInitiatingPerson(personDto);
     settings.setUserType(new CodeDTO("Patient", "Patient"));
     settings.setUserLanguage(languageDto);
     settings.setUserTaskContext(codeDto);
-    settings.setReceivingPerson(personDto);
-    settings.setRecipientType(new CodeDTO("Patient", "Patient"));
     settings.setRecipientLanguage(languageDto);
     settings.setSetting(codeDto);
+    settings.setPractitioner(new PractitionerDTO("1L", "Bob Wilkins"));
 
     referencingContext = new ReferencingContext(ReferencingType.ContainedReferences);
 
