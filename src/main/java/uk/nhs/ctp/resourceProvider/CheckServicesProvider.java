@@ -10,10 +10,12 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.stereotype.Component;
+import uk.nhs.ctp.builder.ParametersBuilder;
 import uk.nhs.ctp.service.HealthcareServiceService;
 
 
@@ -35,18 +37,16 @@ public class CheckServicesProvider {
       @OperationParam(name = "inputParameters", max = 1) Parameters inputParameters
   ) {
 
-    Bundle returnedServices = new Bundle();
+    var returnedServices = new Parameters();
     healthcareServiceService.getAll(referralRequest.getContext()).stream()
-        .map(service -> new BundleEntryComponent().setResource(service))
-        .forEach(returnedServices::addEntry);
+        .map(service -> new ParametersParameterComponent()
+            .setName(service.getId())
+            .addPart()
+            .setName("service")
+            .setResource(service))
+        .forEach(returnedServices::addParameter);
 
-    var outputParameters = new Parameters();
-
-    var wrappingParameters = new Parameters();
-    wrappingParameters.addParameter().setName("return").setResource(returnedServices);
-    wrappingParameters.addParameter().setName("outputParameters").setResource(outputParameters);
-
-    return wrappingParameters;
+    return new ParametersBuilder().add("services", returnedServices).build();
   }
 
 }
