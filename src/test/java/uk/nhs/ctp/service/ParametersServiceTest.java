@@ -49,9 +49,6 @@ import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.Cases;
-import uk.nhs.ctp.entities.Party;
-import uk.nhs.ctp.entities.Skillset;
-import uk.nhs.ctp.enums.ReferencingType;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.dto.CodeDTO;
 import uk.nhs.ctp.service.dto.PersonDTO;
@@ -85,7 +82,6 @@ public class ParametersServiceTest {
   private Calendar calendar;
   private TriageQuestion[] questionResponses;
   private SettingsDTO settings;
-  private ReferencingContext referencingContext;
 
   @Before
   public void setup() {
@@ -174,8 +170,6 @@ public class ParametersServiceTest {
     settings.setSetting(codeDto);
     settings.setPractitioner(new PractitionerDTO("1L", "Bob Wilkins"));
 
-    referencingContext = new ReferencingContext(ReferencingType.ContainedReferences);
-
     when(mockStorageService.findResource("Patient/1", CareConnectPatient.class))
         .thenReturn(newPatient());
     when(mockStorageService.storeExternal(any())).thenAnswer(new Answer<>() {
@@ -203,7 +197,6 @@ public class ParametersServiceTest {
         null,
         settings,
         false,
-        referencingContext,
         "",
         BASE_URL,
         UUID.randomUUID().toString());
@@ -214,7 +207,6 @@ public class ParametersServiceTest {
 
     testRequestIdParamIsCorrect(parameterComponents);
     testPatientParamIsCorrect(parameterComponents);
-    testContextParamsAreCorrect(parameterComponents);
 
   }
 
@@ -229,7 +221,6 @@ public class ParametersServiceTest {
         questionResponses,
         settings,
         false,
-        referencingContext,
         "1",
         BASE_URL,
         UUID.randomUUID().toString());
@@ -240,7 +231,6 @@ public class ParametersServiceTest {
 
     testRequestIdParamIsCorrect(parameterComponents);
     testPatientParamIsCorrect(parameterComponents);
-    testContextParamsAreCorrect(parameterComponents);
 
     //Get inputData parameters
     List<ParametersParameterComponent> inputDataParameters = parameterComponents.stream()
@@ -261,7 +251,6 @@ public class ParametersServiceTest {
         null,
         settings,
         false,
-        referencingContext,
         "",
         BASE_URL,
         UUID.randomUUID().toString());
@@ -272,7 +261,6 @@ public class ParametersServiceTest {
 
     testRequestIdParamIsCorrect(parameterComponents);
     testPatientParamIsCorrect(parameterComponents);
-    testContextParamsAreCorrect(parameterComponents);
 
     //Get inputData parameters
     List<ParametersParameterComponent> inputDataParameters = parameterComponents.stream()
@@ -293,7 +281,6 @@ public class ParametersServiceTest {
         null,
         settings,
         false,
-        referencingContext,
         "",
         BASE_URL,
         UUID.randomUUID().toString());
@@ -304,7 +291,6 @@ public class ParametersServiceTest {
 
     testRequestIdParamIsCorrect(parameterComponents);
     testPatientParamIsCorrect(parameterComponents);
-    testContextParamsAreCorrect(parameterComponents);
 
     //Get inputData parameters
     List<ParametersParameterComponent> inputDataParameters = parameterComponents.stream()
@@ -325,7 +311,6 @@ public class ParametersServiceTest {
         null,
         settings,
         false,
-        referencingContext,
         "",
         BASE_URL,
         UUID.randomUUID().toString());
@@ -336,7 +321,6 @@ public class ParametersServiceTest {
 
     testRequestIdParamIsCorrect(parameterComponents);
     testPatientParamIsCorrect(parameterComponents);
-    testContextParamsAreCorrect(parameterComponents);
 
     //Get inputData parameters
     List<ParametersParameterComponent> inputDataParameters = parameterComponents.stream()
@@ -358,7 +342,6 @@ public class ParametersServiceTest {
         questionResponses,
         settings,
         false,
-        referencingContext,
         "1",
         BASE_URL,
         UUID.randomUUID().toString());
@@ -369,7 +352,6 @@ public class ParametersServiceTest {
 
     testRequestIdParamIsCorrect(parameterComponents);
     testPatientParamIsCorrect(parameterComponents);
-    testContextParamsAreCorrect(parameterComponents);
 
     //Get inputData parameters
     List<ParametersParameterComponent> inputDataParameters = parameterComponents.stream()
@@ -503,52 +485,6 @@ public class ParametersServiceTest {
     assertNotNull(UUID.fromString(requestIdParams.get(0).getValue().primitiveValue()));
   }
 
-
-  private void testContextParamsAreCorrect(List<ParametersParameterComponent> parameterComponents) {
-    //Get parameter "inputParameters"
-    List<ParametersParameterComponent> inputParams = parameterComponents.stream()
-        .filter(param -> param.getName().equals("inputParameters"))
-        .collect(Collectors.toList());
-
-    //Check not null and has resource
-    assertEquals(1, inputParams.size());
-    assertNotNull(inputParams.get(0).getResource());
-
-    //Get inputParameters
-    Parameters inputParamsResource = (Parameters) inputParams.get(0).getResource();
-
-    List<ParametersParameterComponent> inputParamComponents = inputParamsResource.getParameter();
-
-    //Check inputParameters has 1 parameter - "context"
-    assertEquals(1, inputParamComponents.size());
-    assertEquals("context", inputParamComponents.get(0).getName());
-
-    List<ParametersParameterComponent> contextParams = inputParamComponents.get(0).getPart();
-
-    //Check context parameters has two parameters
-    assertEquals(2, contextParams.size());
-
-    List<ParametersParameterComponent> skillsetParams = contextParams.stream()
-        .filter(param -> param.getName().equals("skillset"))
-        .collect(Collectors.toList());
-
-    assertEquals(1, skillsetParams.size());
-    assertNotNull(skillsetParams.get(0).getValue());
-
-    //Check skillset parameter is correct
-    assertEquals("CL", skillsetParams.get(0).getValue().primitiveValue());
-
-    List<ParametersParameterComponent> partyParams = contextParams.stream()
-        .filter(param -> param.getName().equals("party"))
-        .collect(Collectors.toList());
-
-    assertEquals(1, partyParams.size());
-    assertNotNull(partyParams.get(0).getValue());
-
-    //Check party parameter is correct
-    assertEquals("1", partyParams.get(0).getValue().primitiveValue());
-  }
-
   private void testPatientParamIsCorrect(List<ParametersParameterComponent> parameterComponents) {
     List<ParametersParameterComponent> patientParams = parameterComponents.stream()
         .filter(param -> param.getName().equals("patient"))
@@ -565,14 +501,6 @@ public class ParametersServiceTest {
   private Cases newCase() {
     Cases testCase = new Cases();
 
-    Party party = new Party();
-    party.setCode("1");
-    party.setDescription("1st Party");
-
-    Skillset skillset = new Skillset();
-    skillset.setCode("CL");
-    skillset.setDescription("Clinician");
-
     testCase.setId(1L);
     testCase.setPatientId("Patient/1");
     testCase.setGender("male");
@@ -581,8 +509,6 @@ public class ParametersServiceTest {
     testCase.setDateOfBirth(calendar.getTime());
     testCase.setAddress("Test address");
     testCase.setNhsNumber("9476719915");
-    testCase.setParty(party);
-    testCase.setSkillset(skillset);
     testCase.setTimestamp(calendar.getTime());
 
     return testCase;

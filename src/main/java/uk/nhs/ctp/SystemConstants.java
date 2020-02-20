@@ -16,8 +16,6 @@ public final class SystemConstants {
 	public static final String OUTPUT_DATA = "outputData";
 	public static final String INPUT_PARAMETERS = "inputParameters";
 	public static final String CONTEXT = "context";
-	public static final String PARTY = "party";
-	public static final String SKILLSET = "skillset";
 	public static final String PATIENT = "patient";
 
 	// initiatingPerson, userType, userLanguage, userTaskContext, receivingPerson,

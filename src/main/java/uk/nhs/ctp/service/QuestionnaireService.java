@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import lombok.AllArgsConstructor;
 import org.hl7.fhir.dstu3.model.BooleanType;
-import org.hl7.fhir.dstu3.model.CareConnectRelatedPerson;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.CoordinateResource;
 import org.hl7.fhir.dstu3.model.DateTimeType;
@@ -23,12 +22,11 @@ import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Type;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import uk.nhs.ctp.builder.RelatedPersonBuilder;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.entities.QuestionResponse;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.attachment.AttachmentService;
-import uk.nhs.ctp.builder.ReferenceBuilder;
-import uk.nhs.ctp.builder.RelatedPersonBuilder;
 import uk.nhs.ctp.service.dto.TriageQuestion;
 
 @Service
@@ -103,7 +101,7 @@ public class QuestionnaireService {
    */
   public List<QuestionnaireResponse> updateEncounterResponses(
       Cases caseEntity, String questionnaireId, TriageQuestion[] questionResponse,
-      Boolean amending, ReferenceBuilder referenceBuilder, String supplierBaseUrl) {
+      Boolean amending, Reference source, String supplierBaseUrl) {
 
     List<QuestionnaireResponse> questionnaireResponses = getExistingResponses(caseEntity);
 
@@ -131,14 +129,7 @@ public class QuestionnaireService {
           .addAnswer().setValue(getAnswerValue(triageQuestion));
     }
 
-    // Select 1st or 3rd party source
-    if (caseEntity.getParty().getCode().equals("1")) {
-        questionnaireResponse.setSource(patientRef);
-    } else {
-      // TODO replace with referenced resource (this will be contained)
-        CareConnectRelatedPerson relatedPerson = relatedPersonBuilder.build(patientRef);
-      questionnaireResponse.setSource(referenceBuilder.getReference(relatedPerson));
-    }
+    questionnaireResponse.setSource(source);
 
     // Look for an existing response for this questionnaire
     var qr = questionnaireResponses.stream()

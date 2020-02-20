@@ -1,15 +1,12 @@
 USE cdss_decoupling;
 
 /* Destroy all existing data */
-DROP TABLE IF EXISTS cdss_decoupling.test_scenario;
 DROP TABLE IF EXISTS cdss_decoupling.patient;
 DROP TABLE IF EXISTS cdss_decoupling.case_carePlan;
 DROP TABLE IF EXISTS cdss_decoupling.case_immunization;
 DROP TABLE IF EXISTS cdss_decoupling.case_observation;
 DROP TABLE IF EXISTS cdss_decoupling.case_medication;
 DROP TABLE IF EXISTS cdss_decoupling.cases;
-DROP TABLE IF EXISTS cdss_decoupling.skillset;
-DROP TABLE IF EXISTS cdss_decoupling.party;
 DROP TABLE IF EXISTS cdss_decoupling.user_cdss_supplier;
 DROP TABLE IF EXISTS cdss_decoupling.users;
 DROP TABLE IF EXISTS cdss_decoupling.user_roles;
@@ -67,35 +64,6 @@ CREATE TABLE cdss_decoupling.patient
     PRIMARY KEY (id)
 );
 
-CREATE TABLE cdss_decoupling.skillset
-(
-    id          BIGINT       NOT NULL AUTO_INCREMENT,
-    code        VARCHAR(250) NOT NULL,
-    description VARCHAR(255) NOT NULL,
-    PRIMARY KEY (id)
-);
-
-CREATE TABLE cdss_decoupling.party
-(
-    id          BIGINT       NOT NULL AUTO_INCREMENT,
-    code        VARCHAR(250) NOT NULL,
-    description VARCHAR(255) NOT NULL,
-    PRIMARY KEY (id)
-);
-
-CREATE TABLE cdss_decoupling.test_scenario
-(
-    id                BIGINT       NOT NULL AUTO_INCREMENT,
-    patient_id        BIGINT       NULL,
-    party_id          BIGINT       NULL,
-    skillset_id       BIGINT       NULL,
-    test_case_summary VARCHAR(255) NULL,
-    PRIMARY KEY (id),
-    FOREIGN KEY (patient_id) REFERENCES cdss_decoupling.patient (id),
-    FOREIGN KEY (party_id) REFERENCES cdss_decoupling.party (id),
-    FOREIGN KEY (skillset_id) REFERENCES cdss_decoupling.skillset (id)
-);
-
 create table cdss_decoupling.referral_request
 (
     id       BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -118,15 +86,11 @@ CREATE TABLE cdss_decoupling.cases
     mobile         VARCHAR(255) NULL,
     email          VARCHAR(255) NULL,
     nhs_number     VARCHAR(10)  NULL,
-    skillset_id    BIGINT       NULL,
-    party_id       BIGINT       NULL,
     session_id     VARCHAR(2500),
     case_timestamp DATETIME     NULL,
     patientId      VARCHAR(255) NULL,
     practitionerId VARCHAR(255) NULL,
-    PRIMARY KEY (id),
-    FOREIGN KEY (party_id) REFERENCES cdss_decoupling.party (id),
-    FOREIGN KEY (skillset_id) REFERENCES cdss_decoupling.skillset (id)
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE cdss_decoupling.case_carePlan

@@ -30,19 +30,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.nhs.ctp.SystemConstants;
+import uk.nhs.ctp.builder.CareConnectPatientBuilder;
 import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.entities.PatientEntity;
 import uk.nhs.ctp.entities.ReferralRequestEntity;
-import uk.nhs.ctp.entities.TestScenario;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.repos.PatientRepository;
-import uk.nhs.ctp.repos.TestScenarioRepository;
-import uk.nhs.ctp.builder.CareConnectPatientBuilder;
-import uk.nhs.ctp.transform.CaseObservationTransformer;
 import uk.nhs.ctp.service.dto.CdssResult;
+import uk.nhs.ctp.transform.CaseObservationTransformer;
 import uk.nhs.ctp.transform.ReferralRequestEntityTransformer;
 import uk.nhs.ctp.transform.ReferralRequestTransformer;
 
@@ -64,8 +62,6 @@ public class CaseServiceTest {
   @Mock
   private PatientRepository mockPatientRepository;
   @Mock
-  private TestScenarioRepository mockTestScenarioRepository;
-  @Mock
   private GenericResourceLocator resourceLocator;
   @Mock
   private StorageService storageService;
@@ -75,8 +71,6 @@ public class CaseServiceTest {
   @Mock
   private CaseObservationTransformer caseObservationTransformer;
 
-  @Mock
-  TestScenario testScenario;
   @Mock
   Observation observation;
   @Mock
@@ -105,7 +99,6 @@ public class CaseServiceTest {
   public void setup() {
     spyCaseService = spy(new CaseService(
         mockCaseRepository,
-        mockTestScenarioRepository,
         resourceLocator,
         storageService,
         caseObservationTransformer,
@@ -143,7 +136,6 @@ public class CaseServiceTest {
     resourcesUnknownType.add(condition);
 
     when(mockPatientRepository.findOne(1L)).thenReturn(patient);
-    when(mockTestScenarioRepository.findByPatientId(1L)).thenReturn(testScenario);
     when(mockCaseRepository.findOne(1L)).thenReturn(triageCase);
     when(mockCaseRepository.save(any(Cases.class))).thenReturn(triageCase);
     when(observation.getValue()).thenReturn(new BooleanType(true));
