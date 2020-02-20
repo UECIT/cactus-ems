@@ -23,12 +23,15 @@ export class NavigationComponent implements OnInit {
     public router: Router, 
     private sessionStorage: SessionStorage) {}
 
-  async ngOnInit() {
+  ngOnInit() {
     this.checkLoginStatus();
     this.loginService.watchAuthToken().subscribe((loggedIn: boolean) => {
       this.checkLoginStatus();
+      if (loggedIn) {
+        this.environmentService.getBackgroundColour()
+        .then(res => this.colour = res);
+      }
     });
-    this.colour = await this.environmentService.getBackgroundColour();
   }
 
   logoff() {
