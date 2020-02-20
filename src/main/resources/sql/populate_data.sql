@@ -7,30 +7,6 @@ VALUES
  (4, "Miss", "Hatty", "Bloggs", "1949-09-07", "female", "9476719918", "Flat 3, 123 A Road", "London", "W1 123", "020 123 456", "0700 123 456", "hatty.bloggs@example.com", "en"),
  (5, "Miss", "John", "Bloggs", "1967-09-07", "male", "9476719919", "Flat 3, 123 A Road", "London", "W1 123", "020 123 456", "0700 123 456", "john.bloggs@example.com", "en"),
  (6, "Miss", "Karen", "Bloggs", "1985-09-07", "female", "9476719920", "Flat 3, 123 A Road", "London", "W1 123", "020 123 456", "0700 123 456", "karen.bloggs@example.com", "en");
-
-INSERT INTO
- cdss_decoupling.skillset (id, code, description) 
-VALUES
- (1, 'CH', 'Call Handler'),
- (2, 'CL', 'Clinician'),
- (3, 'MH', 'Mental Health Specialist'),
- (4, 'PA', 'Patient');
-
-INSERT INTO
- cdss_decoupling.party (id, code, description) 
-VALUES
- (1, '1', '1st Party'),
- (2, '3', '3rd Party');
-
-INSERT INTO
- cdss_decoupling.test_scenario (id, patient_id, party_id, skillset_id, test_case_summary) 
-VALUES
- (1, 1, 2, 1, 'Scenario 1'),
- (2, 2, 1, 1, 'Scenario 2'),
- (3, 3, 1, 4, 'Scenario 3'),
- (4, 4, 1, 1, 'Scenario 4'),
- (5, 5, 1, 1, 'Scenario 5'),
- (6, 6, 1, 1, 'Scenario 6');
  
 INSERT INTO
  cdss_decoupling.users (username, name, password, enabled, role) 

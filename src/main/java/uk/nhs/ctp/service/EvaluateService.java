@@ -11,7 +11,6 @@ import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.logging.LogContext;
 import uk.nhs.ctp.service.dto.CdssRequestDTO;
 import uk.nhs.ctp.service.dto.CdssResult;
-import uk.nhs.ctp.service.factory.ReferencingContextFactory;
 import uk.nhs.ctp.service.resolver.ResponseResolver;
 
 @Service
@@ -24,7 +23,6 @@ public class EvaluateService {
   private final CdssService cdssService;
   private final CaseService caseService;
 
-  private final ReferencingContextFactory referencingContextFactory;
   private final ResponseResolver responseResolver;
 
   /**
@@ -57,7 +55,6 @@ public class EvaluateService {
       CdssSupplier cdssSupplier, String requestId)
       throws JsonProcessingException {
 
-    var referencingContext = referencingContextFactory.load(cdssSupplier);
     var caseId = requestDetails.getCaseId();
 
     Parameters request = parametersService.getEvaluateParameters(
@@ -65,7 +62,6 @@ public class EvaluateService {
         requestDetails.getQuestionResponse(),
         requestDetails.getSettings(),
         requestDetails.getAmendingPrevious(),
-        referencingContext,
         requestDetails.getQuestionnaireId(),
         cdssSupplier.getBaseUrl(),
         requestId

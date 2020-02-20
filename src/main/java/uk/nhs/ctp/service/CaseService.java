@@ -35,9 +35,7 @@ import uk.nhs.ctp.entities.CaseParameter;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.entities.QuestionResponse;
 import uk.nhs.ctp.entities.ReferralRequestEntity;
-import uk.nhs.ctp.entities.TestScenario;
 import uk.nhs.ctp.repos.CaseRepository;
-import uk.nhs.ctp.repos.TestScenarioRepository;
 import uk.nhs.ctp.service.dto.CdssResult;
 import uk.nhs.ctp.transform.CaseObservationTransformer;
 import uk.nhs.ctp.transform.ReferralRequestTransformer;
@@ -49,7 +47,6 @@ import uk.nhs.ctp.utils.ErrorHandlingUtils;
 public class CaseService {
 
   private CaseRepository caseRepository;
-  private TestScenarioRepository testScenarioRepository;
   private GenericResourceLocator resourceLocator;
   private StorageService storageService;
   private CaseObservationTransformer caseObservationTransformer;
@@ -57,49 +54,33 @@ public class CaseService {
   private ReferralRequestTransformer referralRequestTransformer;
   private ReferenceService referenceService;
 
-  /**
-   * Create new case from patient ID
-   *
-   * @param patientId {@link Long}
-   * @return {@link Cases}
-   */
-  public Cases createCase(String patientId, String practitionerId) {
-    // TODO use test scenario provided by EMS UI
-    TestScenario testScenario = testScenarioRepository.findByPatientId(1L);
-    ErrorHandlingUtils.checkEntityExists(testScenario, "Test Scenario");
-    return createCase(patientId, practitionerId, testScenario);
-  }
 
-  /**
-   * Create new case from patient resource reference
-   */
-  public Cases createCase(String patientRef, String practitionerId, TestScenario testScenario) {
+  public Cases createCase(String patientRef, String practitionerId) {
     String resourceType = new Reference(patientRef).getReferenceElement().getResourceType();
     Preconditions.checkArgument(resourceType.equalsIgnoreCase("Patient"),
         "Case must be created with a Patient resource");
 
     Patient patientResource = resourceLocator.findResource(patientRef);
-    return createCase(patientResource, practitionerId, testScenario);
+    return createCase(patientResource, practitionerId);
   }
 
   /**
    * Create new case from patient resource
    */
-  public Cases createCase(Patient patient, String practitionerId, TestScenario testScenario) {
+  public Cases createCase(Patient patient, String practitionerId) {
 
     log.info("Creating case for patient: " + patient.getNameFirstRep().getNameAsSingleString());
 
     Cases triageCase = new Cases();
     triageCase.setPatientId(patient.getId());
     triageCase.setPractitionerId(practitionerId);
-    setCaseDetails(triageCase, patient, testScenario);
+    setCaseDetails(triageCase, patient);
 
     // Store a mostly empty encounter record for future reference
     return caseRepository.saveAndFlush(triageCase);
   }
 
-  private void setCaseDetails(Cases triageCase, Patient patient,
-      TestScenario testScenario) {
+  private void setCaseDetails(Cases triageCase, Patient patient) {
     HumanName name = patient.getNameFirstRep();
     triageCase.setFirstName(name.getGivenAsSingleString());
     triageCase.setLastName(name.getFamily());
@@ -116,9 +97,6 @@ public class CaseService {
       triageCase.setGender(patient.getGender().toCode());
     }
     triageCase.setDateOfBirth(patient.getBirthDate());
-
-    triageCase.setSkillset(testScenario.getSkillset());
-    triageCase.setParty(testScenario.getParty());
     triageCase.setTimestamp(new Date());
 
     // Patient observations

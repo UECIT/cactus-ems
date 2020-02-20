@@ -12,7 +12,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -54,14 +53,6 @@ public class Cases {
 
   @Column(name = "nhs_number")
   private String nhsNumber;
-
-  @ManyToOne
-  @JoinColumn(name = "party_id")
-  private Party party;
-
-  @ManyToOne
-  @JoinColumn(name = "skillset_id")
-  private Skillset skillset;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "case_id")

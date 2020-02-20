@@ -2,6 +2,7 @@ package uk.nhs.ctp.service;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Iterables;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -27,8 +28,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.SystemURL;
-import uk.nhs.ctp.builder.ReferenceBuilder;
-import uk.nhs.ctp.builder.RelatedPersonBuilder;
 import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseParameter;
@@ -40,7 +39,6 @@ import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.dto.CodeDTO;
 import uk.nhs.ctp.service.dto.SettingsDTO;
 import uk.nhs.ctp.service.dto.TriageQuestion;
-import uk.nhs.ctp.service.factory.ReferenceBuilderFactory;
 import uk.nhs.ctp.transform.ObservationTransformer;
 import uk.nhs.ctp.utils.ErrorHandlingUtils;
 
@@ -55,25 +53,20 @@ public class ParametersService {
       Set.of("Patient", "RelatedPerson");
 
   private CaseRepository caseRepository;
-  private ReferenceBuilderFactory referenceBuilderFactory;
   private AuditService auditService;
   private ReferenceService referenceService;
   private ObservationTransformer observationTransformer;
   private QuestionnaireService questionnaireService;
-  private RelatedPersonBuilder relatedPersonBuilder;
 
   Parameters getEvaluateParameters(
       Long caseId,
       TriageQuestion[] questionResponse,
       SettingsDTO settings,
       Boolean amending,
-      ReferencingContext referencingContext,
       String questionnaireId,
       String supplierBaseUrl,
       String requestId
   ) {
-
-    ReferenceBuilder referenceBuilder = referenceBuilderFactory.load(referencingContext);
     Cases caseEntity = caseRepository.findOne(caseId);
 
     ErrorHandlingUtils.checkEntityExists(caseEntity, "Case");
@@ -82,20 +75,16 @@ public class ParametersService {
       throw new NullPointerException("Could not find an audit record for case " + caseId);
     }
 
-    Reference patientRef = new Reference(caseEntity.getPatientId());
-
     Builder builder = new Builder()
         .setRequestId(requestId)
         .setEncounter(caseId)
-        .setPatient(patientRef)
-        .setContext(caseEntity)
-        .setSetting(settings.getSetting())
-        .addQuestionnaireResponses(questionnaireService.updateEncounterResponses(
-        caseEntity, questionnaireId, questionResponse, amending, referenceBuilder, supplierBaseUrl));
+        .setPatient(new Reference(caseEntity.getPatientId()))
+        .setSetting(settings.getSetting());
 
-    addPeople(builder, patientRef, settings);
+    addPeople(builder, caseEntity.getPatientId(), settings);
     addInputData(caseEntity, builder);
     addInputParameters(caseEntity, builder);
+    addQuestionnaireResponses(builder, caseEntity, questionnaireId, questionResponse, amending, supplierBaseUrl);
 
     return builder.build();
   }
@@ -106,7 +95,7 @@ public class ParametersService {
     getMedications(caseEntity).forEach(builder::addInputData);
   }
 
-  private void addPeople(Builder builder, Reference patientRef, SettingsDTO settings) {
+  private void addPeople(Builder builder, String patientId, SettingsDTO settings) {
 
     Setting setting = Setting.fromCode(settings.getSetting().getCode());
     // Settings of phone call or face to face imply the practitioner is the initiating person
@@ -118,7 +107,9 @@ public class ParametersService {
         ? initiatingType
         : UserType.fromCode(settings.getUserType().getCode());
 
-    Reference relatedPersonRef = new Reference(relatedPersonBuilder.build(patientRef));
+    Reference patientRef = new Reference(patientId);
+    //Assume RelatedPerson.id = patient.id
+    Reference relatedPersonRef = referenceService.buildRef(ResourceType.RelatedPerson, new IdType(patientId).getIdPart());
 
     builder
         .setUserType(initiatingType)
@@ -144,6 +135,22 @@ public class ParametersService {
       default:
         throw new IllegalStateException("Unexpected value: " + initiatingType);
     }
+  }
+
+  private void addQuestionnaireResponses(
+      Builder builder,
+      Cases caseEntity,
+      String questionnaireId,
+      TriageQuestion[] questionResponse,
+      Boolean amending,
+      String supplierBaseUrl
+  ) {
+    Reference responseSource = (Reference)builder.getUnique(SystemConstants.RECEIVINGPERSON).getValue();
+    List<QuestionnaireResponse> questionnaireResponses = questionnaireService
+        .updateEncounterResponses(
+            caseEntity, questionnaireId, questionResponse, amending, responseSource,
+            supplierBaseUrl);
+    builder.addQuestionnaireResponses(questionnaireResponses);
   }
 
   private ArrayList<Immunization> getImmunizations(Cases caseEntity) {
@@ -292,20 +299,6 @@ public class ParametersService {
       return this;
     }
 
-    public Builder setContext(Cases caseEntity) {
-      Parameters inputParamsResource = new Parameters();
-
-      inputParamsResource.addParameter().setName(SystemConstants.CONTEXT)
-          .addPart(new ParametersParameterComponent().setName(SystemConstants.PARTY)
-              .setValue(new StringType(caseEntity.getParty().getCode())))
-          .addPart(new ParametersParameterComponent().setName(SystemConstants.SKILLSET)
-              .setValue(new StringType(caseEntity.getSkillset().getCode())));
-
-      addUniqueParameter(SystemConstants.INPUT_PARAMETERS)
-          .setResource(inputParamsResource);
-      return this;
-    }
-
     public Builder setEncounter(Long caseId) {
       addUniqueParameter(SystemConstants.ENCOUNTER)
           .setValue(referenceService.buildRef(ResourceType.Encounter, caseId));
@@ -419,6 +412,10 @@ public class ParametersService {
           .setValue(reference);
 
       return this;
+    }
+
+    public ParametersParameterComponent getUnique(String name) {
+      return Iterables.getOnlyElement(parameterNames.get(name));
     }
   }
 }
