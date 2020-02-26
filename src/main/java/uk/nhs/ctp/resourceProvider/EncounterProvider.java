@@ -12,6 +12,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Encounter;
+import org.hl7.fhir.dstu3.model.Encounter.DiagnosisComponent;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Reference;
@@ -60,7 +61,7 @@ public class EncounterProvider implements IResourceProvider {
    * @param reference the resource to fetch
    * @param parentId  fetch resource relative to this parent
    */
-  private <T extends Resource> T addResource(Bundle bundle, Reference reference, IIdType parentId) {
+  private Resource addResource(Bundle bundle, Reference reference, IIdType parentId) {
 
     if (parentId != null && parentId.hasBaseUrl()) {
       referenceService.resolve(parentId.getBaseUrl(), reference);
@@ -68,9 +69,8 @@ public class EncounterProvider implements IResourceProvider {
 
     String fullUrl = referenceService.buildId(reference.getReferenceElement());
 
-    @SuppressWarnings("unchecked")
-    T resource = reference.getResource() != null ?
-        (T) reference.getResource() :
+    Resource resource = reference.getResource() != null ?
+        (Resource) reference.getResource() :
         resourceLocator.findResource(fullUrl);
 
     bundle.addEntry()
@@ -106,6 +106,10 @@ public class EncounterProvider implements IResourceProvider {
 
     // Add patient
     addResource(bundle, encounter.getSubject(), encounter.getIdElement());
+    // Add diagnosis
+    encounter.getDiagnosis().stream()
+        .map(DiagnosisComponent::getCondition)
+        .forEach(reference -> addResource(bundle, reference, encounter.getIdElement()));
     return encounter;
   }
 
