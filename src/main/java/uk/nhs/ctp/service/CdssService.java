@@ -1,18 +1,14 @@
 package uk.nhs.ctp.service;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import java.net.ConnectException;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSession;
 import javax.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.GuidanceResponse;
@@ -22,20 +18,11 @@ import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.ServiceDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.entities.CdssSupplier;
-import uk.nhs.ctp.enums.AuditEntryType;
-import uk.nhs.ctp.exception.EMSException;
 import uk.nhs.ctp.repos.CdssSupplierRepository;
 import uk.nhs.ctp.service.dto.CdssSupplierDTO;
 import uk.nhs.ctp.service.dto.ServiceDefinitionDTO;
@@ -43,61 +30,34 @@ import uk.nhs.ctp.service.search.SearchParameters;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class CdssService {
 
   private static final Logger LOG = LoggerFactory.getLogger(CdssService.class);
 
   private final CdssSupplierRepository cdssSupplierRepository;
-  private final AuditService auditService;
   private final FhirContext fhirContext;
-
-  private HttpHeaders headers;
-  private RestTemplate restTemplate;
-
-  public CdssService(
-      CdssSupplierRepository cdssSupplierRepository,
-      AuditService auditService,
-      RestTemplate restTemplate,
-      FhirContext fhirContext) {
-    this.cdssSupplierRepository = cdssSupplierRepository;
-    this.auditService = auditService;
-    this.restTemplate = restTemplate;
-    this.fhirContext = fhirContext;
-
-    headers = new HttpHeaders();
-    headers.setContentType(MediaType.valueOf(SystemConstants.APPLICATION_FHIR_JSON));
-    headers.add("Authorization", SystemConstants.AUTH_TOKEN);
-  }
 
   /**
    * Sends request to CDSS Supplier (ServiceDefintion $evaluate).
    *
    * @param parameters Request Body {@link Parameters}
    * @return {@link GuidanceResponse}
-   * @throws JsonProcessingException
    */
   public GuidanceResponse evaluateServiceDefinition(
       Parameters parameters,
       Long cdssSupplierId,
-      String serviceDefinitionId,
-      Long caseId
-  ) throws JsonProcessingException {
+      String serviceDefinitionId
+  ) {
 
-    IParser fhirParser = fhirContext.newJsonParser();
-    String requestBody = fhirParser.encodeResourceToString(parameters);
-    log.info("Request: {}", requestBody);
-    GuidanceResponse response = fhirContext.newRestfulGenericClient(getBaseUrl(cdssSupplierId))
+    IGenericClient fhirClient = fhirContext.newRestfulGenericClient(getBaseUrl(cdssSupplierId));
+    return fhirClient
         .operation()
         .onInstance(new IdType(SystemConstants.SERVICE_DEFINITION, serviceDefinitionId))
         .named(SystemConstants.EVALUATE)
         .withParameters(parameters)
         .returnResourceType(GuidanceResponse.class)
         .execute();
-
-    var responseBody = fhirParser.encodeResourceToString(response);
-    log.info("Response: {}", responseBody);
-    auditService.createAuditEntry(caseId, requestBody, responseBody, AuditEntryType.RESULT);
-    return response;
   }
 
   /**
@@ -107,12 +67,12 @@ public class CdssService {
    * @throws ca.uhn.fhir.parser.DataFormatException
    */
   public ServiceDefinition getServiceDefinition(String serviceDefId, String cdssSupplierId) {
-    String url = getBaseUrl(Long.valueOf(cdssSupplierId)) + "/"
-        + SystemConstants.SERVICE_DEFINITION + "/" + serviceDefId + "/";
-    String responseBody = sendHttpRequest(url, HttpMethod.GET, new HttpEntity<>(headers));
-
-    IParser fhirParser = fhirContext.newJsonParser();
-    return (ServiceDefinition) fhirParser.parseResource(responseBody);
+    String baseUrl = getBaseUrl(Long.valueOf(cdssSupplierId));
+    return fhirContext.newRestfulGenericClient(baseUrl)
+        .read()
+        .resource(ServiceDefinition.class)
+        .withId(serviceDefId)
+        .execute();
   }
 
   /**
@@ -131,14 +91,15 @@ public class CdssService {
   public CdssSupplierDTO queryServiceDefinitions(
       @NotNull CdssSupplier supplier, @NotNull SearchParameters parameters) {
 
+    String baseUrl = supplier.getBaseUrl();
     String url = buildSearchUrl(
-        String.format("%s/ServiceDefinition", supplier.getBaseUrl()), parameters);
+        String.format("%s/ServiceDefinition", baseUrl), parameters);
     CdssSupplierDTO supplierDTO = new CdssSupplierDTO(supplier);
     try {
-      String responseBody = sendHttpRequest(url, HttpMethod.GET,
-          new HttpEntity<>(headers));
-      IParser fhirParser = fhirContext.newJsonParser();
-      Bundle bundle = (Bundle) fhirParser.parseResource(responseBody);
+      Bundle bundle = fhirContext.newRestfulGenericClient(baseUrl).search()
+          .byUrl(url)
+          .returnBundle(Bundle.class)
+          .execute();
 
       List<ServiceDefinitionDTO> serviceDefinitions = bundle.getEntry().stream()
           .map(entry -> (ServiceDefinition) entry.getResource())
@@ -187,44 +148,13 @@ public class CdssService {
    *
    * @param questionnaireRef Questionnaire Reference {@link String}
    * @return {@link Questionnaire}
-   * @throws JsonProcessingException
    */
-  public Questionnaire getQuestionnaire(Long cdssSupplierId, String questionnaireRef, Long caseId)
-      throws ConnectException, JsonProcessingException {
+  public Questionnaire getQuestionnaire(Long cdssSupplierId, String questionnaireRef) {
 
-    String responseBody = sendHttpRequest(getBaseUrl(cdssSupplierId) + questionnaireRef,
-        HttpMethod.GET,
-        new HttpEntity<>(headers));
-
-    auditService
-        .updateAuditEntry(caseId, getBaseUrl(cdssSupplierId) + questionnaireRef, responseBody);
-
-    IParser fhirParser = fhirContext.newJsonParser();
-    return fhirParser.parseResource(Questionnaire.class, responseBody);
+    return fhirContext.newRestfulGenericClient(getBaseUrl(cdssSupplierId)).read()
+        .resource(Questionnaire.class)
+        .withId(questionnaireRef)
+        .execute();
   }
 
-  private String sendHttpRequest(String url, HttpMethod httpMethod, HttpEntity<String> request) {
-
-    HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-
-      public boolean verify(String hostname, SSLSession sslSession) {
-        return hostname.equals("localhost");
-      }
-    });
-
-    LOG.info("Sent a " + httpMethod + " request to " + url);
-    try {
-      ResponseEntity<String> response = restTemplate
-          .exchange(url, httpMethod, request, String.class);
-
-      if (response.getStatusCode() == HttpStatus.OK) {
-        return response.getBody();
-      } else {
-        throw new EMSException(response.getStatusCode(), response.getBody());
-      }
-    } catch (Exception e) {
-      System.out.println(e.getMessage());
-      throw new EMSException(HttpStatus.INTERNAL_SERVER_ERROR, "Error communicating with CDSS", e);
-    }
-  }
 }

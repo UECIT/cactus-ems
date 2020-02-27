@@ -12,7 +12,7 @@ import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.springframework.stereotype.Component;
-import uk.nhs.ctp.service.StorageService;
+import uk.nhs.ctp.service.fhir.StorageService;
 import uk.nhs.ctp.service.dto.ReferralRequestDTO;
 
 @Component

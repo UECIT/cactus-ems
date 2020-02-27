@@ -1,14 +1,12 @@
 package uk.nhs.ctp.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import java.net.ConnectException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.springframework.stereotype.Service;
-import uk.nhs.ctp.entities.AuditRecord;
 import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.service.dto.CdssRequestDTO;
 import uk.nhs.ctp.service.dto.CdssResponseDTO;
@@ -37,7 +35,7 @@ public class TriageService {
    *
    * @param requestDetails {@link TriageLaunchDTO}
    * @return response {@link CdssResponseDTO}
-   * @throws JsonProcessingException
+   * @throws Exception
    */
   public CdssResponseDTO launchTriage(TriageLaunchDTO requestDetails) throws Exception {
 
@@ -84,26 +82,21 @@ public class TriageService {
     Long caseId = requestDetails.getCaseId();
 
     // start audit
-    AuditRecord auditRecord = auditService.createNewAudit(caseId);
+    auditService.setCaseId(caseId);
 
-    CdssResult cdssResult =  evaluateService.evaluate(requestDetails);
+    CdssResult cdssResult = evaluateService.evaluate(requestDetails);
 
     CdssResponseDTO cdssResponse = buildResponseDtoFromResult(cdssResult,
         caseId,
         requestDetails.getCdssSupplierId());
 
-    auditService
-        .updateAuditEntry(auditRecord, requestDetails, cdssResponse, cdssResult.getContained());
-
     if (cdssResult.isInProgress()) {
       requestDetails.setQuestionResponse(null);
-      cdssResult =  evaluateService.evaluate(requestDetails);
+      cdssResult = evaluateService.evaluate(requestDetails);
 
       // Add Audit Record
       cdssResponse = buildResponseDtoFromResult(cdssResult, caseId,
           requestDetails.getCdssSupplierId());
-      auditService
-          .updateAuditEntry(auditRecord, requestDetails, cdssResponse, cdssResult.getContained());
     }
 
     return cdssResponse;
@@ -122,15 +115,12 @@ public class TriageService {
     Long caseId = requestDetails.getCaseId();
 
     // start audit
-    AuditRecord auditRecord = auditService.createNewAudit(caseId);
+    auditService.setCaseId(caseId);
     CdssResult cdssResult = evaluateService.evaluate(requestDetails);
 
-    // Add Audit Record
     CdssResponseDTO cdssResponse = buildAmendResponseDtoFromResult(
         cdssResult, caseId, requestDetails.getCdssSupplierId(),
         requestDetails.getQuestionResponse());
-    auditService
-        .updateAuditEntry(auditRecord, requestDetails, cdssResponse, cdssResult.getContained());
 
     return cdssResponse;
   }
@@ -141,11 +131,10 @@ public class TriageService {
    * @param cdssResult {@link CdssResult}
    * @param caseId     {@link Long}
    * @return {@link CdssRequestDTO}
-   * @throws JsonProcessingException
    */
-  protected CdssResponseDTO buildResponseDtoFromResult(CdssResult cdssResult, Long caseId,
-      Long cdssSupplierId)
-      throws ConnectException, JsonProcessingException, FHIRException {
+  protected CdssResponseDTO buildResponseDtoFromResult(
+      CdssResult cdssResult, Long caseId, Long cdssSupplierId)
+      throws FHIRException {
     if (cdssResult == null) {
       throw new NullPointerException("CdssResult is empty");
     }
@@ -155,7 +144,7 @@ public class TriageService {
       questionnaire = ResourceProviderUtils
           .getResource(cdssResult.getContained(), Questionnaire.class);
       questionnaire = questionnaire == null ? cdssService
-          .getQuestionnaire(cdssSupplierId, cdssResult.getQuestionnaireRef(), caseId)
+          .getQuestionnaire(cdssSupplierId, cdssResult.getQuestionnaireRef())
           : questionnaire;
     }
     return responseService.buildResponse(cdssResult, questionnaire, caseId, cdssSupplierId);
@@ -168,12 +157,11 @@ public class TriageService {
    * @param caseId            {@link Long}
    * @param previousQuestions
    * @return {@link CdssRequestDTO}
-   * @throws JsonProcessingException
    */
-  protected CdssResponseDTO buildAmendResponseDtoFromResult(CdssResult cdssResult, Long caseId,
-      Long cdssSupplierId,
-      TriageQuestion[] previousQuestions)
-      throws ConnectException, JsonProcessingException, FHIRException {
+  protected CdssResponseDTO buildAmendResponseDtoFromResult(
+      CdssResult cdssResult, Long caseId,
+      Long cdssSupplierId, TriageQuestion[] previousQuestions)
+      throws FHIRException {
     if (cdssResult == null) {
       throw new NullPointerException("CdssResult is empty");
     }
@@ -181,7 +169,7 @@ public class TriageService {
 
     if (!cdssResult.hasResult() && cdssResult.hasQuestionnaire()) {
       questionnaire = cdssService.getQuestionnaire(cdssSupplierId,
-          "Questionnaire/" + previousQuestions[0].getQuestionnaireId(), caseId);
+          "Questionnaire/" + previousQuestions[0].getQuestionnaireId());
     }
     return responseService
         .buildAmendResponse(cdssResult, questionnaire, caseId, cdssSupplierId, previousQuestions);

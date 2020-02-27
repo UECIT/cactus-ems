@@ -37,6 +37,9 @@ import uk.nhs.ctp.entities.QuestionResponse;
 import uk.nhs.ctp.entities.ReferralRequestEntity;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.dto.CdssResult;
+import uk.nhs.ctp.service.fhir.GenericResourceLocator;
+import uk.nhs.ctp.service.fhir.ReferenceService;
+import uk.nhs.ctp.service.fhir.StorageService;
 import uk.nhs.ctp.transform.CaseObservationTransformer;
 import uk.nhs.ctp.transform.ReferralRequestTransformer;
 import uk.nhs.ctp.utils.ErrorHandlingUtils;
@@ -97,7 +100,7 @@ public class CaseService {
       triageCase.setGender(patient.getGender().toCode());
     }
     triageCase.setDateOfBirth(patient.getBirthDate());
-    triageCase.setTimestamp(new Date());
+    triageCase.setCreatedDate(new Date());
 
     // Patient observations
     CaseObservation genderObservation = new CaseObservation();
@@ -175,6 +178,11 @@ public class CaseService {
       }
     }
 
+    if (evaluateResponse.getResult() != null && evaluateResponse.getSwitchTrigger() == null) {
+      triageCase.setTriageComplete(true);
+      triageCase.setClosedDate(new Date());
+    }
+
     return caseRepository.saveAndFlush(triageCase);
   }
 
@@ -201,7 +209,8 @@ public class CaseService {
       try {
         if (medicationAdmin.getCode().equalsIgnoreCase(
             currentMed.getMedicationCodeableConcept().getCodingFirstRep().getCode())) {
-          log.info("Amending Medication {} for case {}", medicationAdmin.getCode(), triageCase.getId());
+          log.info("Amending Medication {} for case {}", medicationAdmin.getCode(),
+              triageCase.getId());
           updateMedicationCoding(currentMed, medicationAdmin);
           medicationAdmin.setTimestamp(new Date());
 
@@ -213,7 +222,8 @@ public class CaseService {
     }
 
     if (!amended) {
-      log.info("Adding Medication {} for case {}", currentMed.getMedicationCodeableConcept().getCodingFirstRep(), triageCase.getId());
+      log.info("Adding Medication {} for case {}",
+          currentMed.getMedicationCodeableConcept().getCodingFirstRep(), triageCase.getId());
       triageCase.addMedication(createCaseMedication(currentMed));
     }
   }
@@ -223,7 +233,8 @@ public class CaseService {
     for (CaseImmunization immunisation : triageCase.getImmunizations()) {
       if (immunisation.getCode()
           .equalsIgnoreCase(resource.getVaccineCode().getCodingFirstRep().getCode())) {
-        log.info("Amending Immunisation {} for case {}", immunisation.getCode(), triageCase.getId());
+        log.info("Amending Immunisation {} for case {}", immunisation.getCode(),
+            triageCase.getId());
         updateImmunisationCoding(resource, immunisation);
         immunisation.setTimestamp(new Date());
 
@@ -232,7 +243,8 @@ public class CaseService {
     }
 
     if (!amended) {
-      log.info("Adding Immunization {} for case {}", resource.getVaccineCode().getCodingFirstRep(), triageCase.getId());
+      log.info("Adding Immunization {} for case {}", resource.getVaccineCode().getCodingFirstRep(),
+          triageCase.getId());
       triageCase.addImmunization(createCaseImmunization(resource));
     }
   }

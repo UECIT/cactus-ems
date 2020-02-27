@@ -1,4 +1,4 @@
-package uk.nhs.ctp.service.resolver;
+package uk.nhs.ctp.service.fhir;
 
 import org.hl7.fhir.dstu3.model.GuidanceResponse;
 import org.hl7.fhir.dstu3.model.RequestGroup;

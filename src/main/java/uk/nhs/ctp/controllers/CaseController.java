@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.repos.CaseRepository;
+import uk.nhs.ctp.service.AuditService;
 import uk.nhs.ctp.service.CaseService;
 import uk.nhs.ctp.service.CdssService;
 import uk.nhs.ctp.service.TriageService;
@@ -36,19 +37,22 @@ public class CaseController {
   private final TriageService triageService;
   private final CaseRepository caseRepository;
   private final CaseService caseService;
+  private final AuditService auditService;
 
   private final SearchParametersTransformer searchParametersTransformer;
 
   @PostMapping(path = "/")
   public @ResponseBody
   CdssResponseDTO launchTriage(@RequestBody TriageLaunchDTO requestDTO) throws Exception {
-    return triageService.launchTriage(requestDTO);
+    CdssResponseDTO response = triageService.launchTriage(requestDTO);
+    auditService.setCaseId(response.getCaseId());
+    return response;
   }
 
   @PostMapping(path = "/serviceDefinitions")
   public @ResponseBody
   List<CdssSupplierDTO> getServiceDefinitions(@RequestBody ServiceDefinitionSearchDTO requestDTO) {
-
+    auditService.setCaseId(requestDTO.getCaseId());
     var params = searchParametersTransformer
         .transform(emptyList(), requestDTO.getSettings(), requestDTO.getPatientId());
 
@@ -58,12 +62,14 @@ public class CaseController {
   @PutMapping(path = "/")
   public @ResponseBody
   CdssResponseDTO sendTriageRequest(@RequestBody CdssRequestDTO requestDTO) throws Exception {
+    auditService.setCaseId(requestDTO.getCaseId());
     return triageService.processTriageRequest(requestDTO);
   }
 
   @PutMapping(path = "/back")
   public @ResponseBody
   CdssResponseDTO amendTriageRequest(@RequestBody CdssRequestDTO requestDTO) throws Exception {
+    auditService.setCaseId(requestDTO.getCaseId());
     return triageService.processTriageAmendRequest(requestDTO);
   }
 
@@ -76,6 +82,8 @@ public class CaseController {
   @PutMapping(path = "/selectedService")
   public @ResponseBody
   Cases updateSelectedService(@RequestBody SelectedServiceRequestDTO requestDTO) {
-    return caseService.updateSelectedService(requestDTO.getCaseId(), requestDTO.getSelectedServiceId());
+    auditService.setCaseId(requestDTO.getCaseId());
+    return caseService
+        .updateSelectedService(requestDTO.getCaseId(), requestDTO.getSelectedServiceId());
   }
 }

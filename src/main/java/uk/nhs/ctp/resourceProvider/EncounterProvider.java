@@ -24,8 +24,8 @@ import uk.nhs.ctp.entities.CaseCarePlan;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.EncounterService;
-import uk.nhs.ctp.service.GenericResourceLocator;
-import uk.nhs.ctp.service.ReferenceService;
+import uk.nhs.ctp.service.fhir.GenericResourceLocator;
+import uk.nhs.ctp.service.fhir.ReferenceService;
 
 @Component
 @AllArgsConstructor

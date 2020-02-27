@@ -1,4 +1,4 @@
-package uk.nhs.ctp.service;
+package uk.nhs.ctp.service.fhir;
 
 import java.util.ArrayList;
 import java.util.List;

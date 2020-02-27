@@ -11,7 +11,7 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.builder.RelatedPersonBuilder;
-import uk.nhs.ctp.service.ReferenceService;
+import uk.nhs.ctp.service.fhir.ReferenceService;
 
 @Component
 @AllArgsConstructor

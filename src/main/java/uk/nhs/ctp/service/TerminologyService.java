@@ -35,14 +35,10 @@ public class TerminologyService {
 	@Value("${ems.terminology.service.url.conceptmap.target}")
 	private String terminologyServiceUrlConceptMapTarget;
 
-	private IGenericClient client;
-
 	@Autowired
 	private FhirContext fhirContext;
 
 	public CVNPfITCodedplainRequired getCode(String sourceSystem, String targetSystem, String code) {
-		client = fhirContext.newRestfulGenericClient(terminologyServiceUrl);
-
 		// STEP1 get the valueSet that is tied to the sourceSystem via search
 		ValueSet valueSet = getValueSet(sourceSystem);
 		// STEP2 perform the ConceptMap Search
@@ -51,9 +47,13 @@ public class TerminologyService {
 		return conceptMap != null ? getTargetCode(code, targetSystem, conceptMap):null;
 	}
 
+	private IGenericClient getClient() {
+		return fhirContext.newRestfulGenericClient(terminologyServiceUrl);
+	}
+
 	private ValueSet getValueSet(String sourceSystem) {
 		String ValueSetSearch = terminologyServiceValueSetUrl + "?" + terminologyServiceValueSetRef + sourceSystem;
-		Bundle valueSetBundle = (Bundle) client.search().byUrl(ValueSetSearch).execute();
+		Bundle valueSetBundle = (Bundle) getClient().search().byUrl(ValueSetSearch).execute();
 		ValueSet valueSet = valueSetBundle.hasEntry() ? (ValueSet) valueSetBundle.getEntryFirstRep().getResource():null;
 		return valueSet;
 	}
@@ -61,7 +61,7 @@ public class TerminologyService {
 	private ConceptMap getConceptMap(String targetSystem, ValueSet valueSet) {
 		String ConceptMapSearch = terminologyServiceConceptMapUrl + "?" + terminologyServiceUrlConceptMapSource
 				+ valueSet.getUrl() + "&" + terminologyServiceUrlConceptMapTarget + targetSystem;
-		Bundle conceptMapBundle = (Bundle) client.search().byUrl(ConceptMapSearch).execute();
+		Bundle conceptMapBundle = (Bundle) getClient().search().byUrl(ConceptMapSearch).execute();
 		ConceptMap conceptMap = conceptMapBundle.hasEntry() ? (ConceptMap) conceptMapBundle.getEntryFirstRep().getResource(): null;
 		return conceptMap;
 	}

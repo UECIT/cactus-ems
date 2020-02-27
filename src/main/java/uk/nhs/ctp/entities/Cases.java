@@ -81,11 +81,17 @@ public class Cases {
   private String sessionId;
 
   @Temporal(TemporalType.TIMESTAMP)
-  @Column(name = "case_timestamp")
-  private Date timestamp;
+  @Column(name = "created_date")
+  private Date createdDate;
+
+  @Column(name = "closed_date")
+  private Date closedDate;
 
   @OneToOne(mappedBy = "caseEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   protected ReferralRequestEntity referralRequest;
+
+  @Column(name = "triage_complete")
+  private boolean triageComplete;
 
   public void setReferralRequest(ReferralRequestEntity referralRequest) {
     if (referralRequest == null) {

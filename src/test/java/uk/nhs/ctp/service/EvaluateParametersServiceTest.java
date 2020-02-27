@@ -35,8 +35,6 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -44,7 +42,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.nhs.ctp.entities.AuditRecord;
 import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
@@ -56,37 +53,32 @@ import uk.nhs.ctp.service.dto.PractitionerDTO;
 import uk.nhs.ctp.service.dto.SettingsDTO;
 import uk.nhs.ctp.service.dto.TriageOption;
 import uk.nhs.ctp.service.dto.TriageQuestion;
+import uk.nhs.ctp.service.fhir.StorageService;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
-public class ParametersServiceTest {
+public class EvaluateParametersServiceTest {
 
   private static final String BASE_URL = "http://base.url:8754";
 
   @Autowired
-  @InjectMocks
-  private ParametersService parametersService;
+  private EvaluateParametersService evaluateParametersService;
 
   @MockBean
   private CaseRepository mockCaseRepository;
-  @Mock
-  private AuditService mockAuditService;
-  @Mock
+  @MockBean
   private StorageService mockStorageService;
 
   private Cases caseWithNoData, caseWithObservation, caseWithImmunization, caseWithMedication, caseWithData;
   private CaseObservation caseObservation;
   private CaseImmunization caseImmunization;
   private CaseMedication caseMedication;
-  private AuditRecord caseAudit;
   private Calendar calendar;
   private TriageQuestion[] questionResponses;
   private SettingsDTO settings;
 
   @Before
   public void setup() {
-    MockitoAnnotations.initMocks(this);
-
     calendar = Calendar.getInstance();
     calendar.set(2018, Calendar.JUNE, 3);
 
@@ -126,11 +118,6 @@ public class ParametersServiceTest {
     caseWithData.addImmunization(caseImmunization);
     caseWithData.addMedication(caseMedication);
     caseWithData.addObservation(caseObservation);
-
-    caseAudit = new AuditRecord();
-    caseAudit.setCaseId(1L);
-    caseAudit.setTriageComplete(false);
-    caseAudit.setCreatedDate(new Date());
 
     var questionResponsesTemp = new ArrayList<TriageQuestion>();
 
@@ -190,9 +177,8 @@ public class ParametersServiceTest {
   @Test
   public void testParametersCreatedCorrectlyWithNoCaseDataStored() {
     when(mockCaseRepository.findOne(1L)).thenReturn(caseWithNoData);
-    when(mockAuditService.getAuditRecordByCase(1L)).thenReturn(caseAudit);
 
-    Parameters parameters = parametersService.getEvaluateParameters(
+    Parameters parameters = evaluateParametersService.getEvaluateParameters(
         1L,
         null,
         settings,
@@ -214,9 +200,8 @@ public class ParametersServiceTest {
   public void testParametersCreatedCorrectlyWithNoCaseDataStoredAndQuestionAnswered()
       throws FHIRException {
     when(mockCaseRepository.findOne(1L)).thenReturn(caseWithNoData);
-    when(mockAuditService.getAuditRecordByCase(1L)).thenReturn(caseAudit);
 
-    Parameters parameters = parametersService.getEvaluateParameters(
+    Parameters parameters = evaluateParametersService.getEvaluateParameters(
         1L,
         questionResponses,
         settings,
@@ -244,9 +229,8 @@ public class ParametersServiceTest {
   @Test
   public void testParametersCreatedCorrectlyWithCaseImmunizationStored() {
     when(mockCaseRepository.findOne(1L)).thenReturn(caseWithImmunization);
-    when(mockAuditService.getAuditRecordByCase(1L)).thenReturn(caseAudit);
 
-    Parameters parameters = parametersService.getEvaluateParameters(
+    Parameters parameters = evaluateParametersService.getEvaluateParameters(
         1L,
         null,
         settings,
@@ -274,9 +258,8 @@ public class ParametersServiceTest {
   @Test
   public void testParametersCreatedCorrectlyWithCaseMedicationStored() throws FHIRException {
     when(mockCaseRepository.findOne(1L)).thenReturn(caseWithMedication);
-    when(mockAuditService.getAuditRecordByCase(1L)).thenReturn(caseAudit);
 
-    Parameters parameters = parametersService.getEvaluateParameters(
+    Parameters parameters = evaluateParametersService.getEvaluateParameters(
         1L,
         null,
         settings,
@@ -304,9 +287,8 @@ public class ParametersServiceTest {
   @Test
   public void testParametersCreatedCorrectlyWithCaseObservationStored() throws FHIRException {
     when(mockCaseRepository.findOne(1L)).thenReturn(caseWithObservation);
-    when(mockAuditService.getAuditRecordByCase(1L)).thenReturn(caseAudit);
 
-    Parameters parameters = parametersService.getEvaluateParameters(
+    Parameters parameters = evaluateParametersService.getEvaluateParameters(
         1L,
         null,
         settings,
@@ -335,9 +317,8 @@ public class ParametersServiceTest {
   public void testParametersCreatedCorrectlyWithCaseDataStoredAndQuestionAnswered()
       throws FHIRException {
     when(mockCaseRepository.findOne(1L)).thenReturn(caseWithData);
-    when(mockAuditService.getAuditRecordByCase(1L)).thenReturn(caseAudit);
 
-    Parameters parameters = parametersService.getEvaluateParameters(
+    Parameters parameters = evaluateParametersService.getEvaluateParameters(
         1L,
         questionResponses,
         settings,
@@ -454,7 +435,8 @@ public class ParametersServiceTest {
 
     assertNotNull(questionnaireResponse);
     assertNotNull(questionnaireResponse.getQuestionnaire());
-    assertEquals(BASE_URL + "/Questionnaire/1", questionnaireResponse.getQuestionnaire().getReference());
+    assertEquals(BASE_URL + "/Questionnaire/1",
+        questionnaireResponse.getQuestionnaire().getReference());
     assertEquals(QuestionnaireResponseStatus.COMPLETED, questionnaireResponse.getStatus());
 
     assertEquals(1, questionnaireResponse.getItem().size());
@@ -509,7 +491,9 @@ public class ParametersServiceTest {
     testCase.setDateOfBirth(calendar.getTime());
     testCase.setAddress("Test address");
     testCase.setNhsNumber("9476719915");
-    testCase.setTimestamp(calendar.getTime());
+    testCase.setCreatedDate(calendar.getTime());
+    testCase.setTriageComplete(false);
+    testCase.setCreatedDate(new Date());
 
     return testCase;
   }

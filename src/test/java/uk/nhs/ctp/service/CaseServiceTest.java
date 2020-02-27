@@ -11,6 +11,8 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.BooleanType;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.Immunization;
 import org.hl7.fhir.dstu3.model.MedicationAdministration;
@@ -30,7 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.nhs.ctp.SystemConstants;
-import uk.nhs.ctp.builder.CareConnectPatientBuilder;
 import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
@@ -40,6 +41,9 @@ import uk.nhs.ctp.entities.ReferralRequestEntity;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.repos.PatientRepository;
 import uk.nhs.ctp.service.dto.CdssResult;
+import uk.nhs.ctp.service.fhir.GenericResourceLocator;
+import uk.nhs.ctp.service.fhir.ReferenceService;
+import uk.nhs.ctp.service.fhir.StorageService;
 import uk.nhs.ctp.transform.CaseObservationTransformer;
 import uk.nhs.ctp.transform.ReferralRequestEntityTransformer;
 import uk.nhs.ctp.transform.ReferralRequestTransformer;
@@ -54,8 +58,6 @@ public class CaseServiceTest {
   private ReferralRequestTransformer referralRequestTransformer;
   @Autowired
   private ReferralRequestEntityTransformer referralRequestEntityTransformer;
-  @Autowired
-  private CareConnectPatientBuilder careConnectPatientBuilder;
 
   @Mock
   private CaseRepository mockCaseRepository;
@@ -74,15 +76,11 @@ public class CaseServiceTest {
   @Mock
   Observation observation;
   @Mock
-  Immunization immunization;
-  @Mock
   CaseObservation caseObservation;
   @Mock
   CaseImmunization caseImmunization;
   @Mock
   CaseMedication caseMedication;
-  @Mock
-  MedicationAdministration medication;
   @Mock
   Condition condition;
 
@@ -91,6 +89,8 @@ public class CaseServiceTest {
 
   PatientEntity patient;
   Cases triageCase;
+  Immunization immunization;
+  MedicationAdministration medication;
 
   List<Resource> resourcesObservationsOnly, resourcesImmunizationsOnly, resourcesUnknownType;
   Parameters resourcesMedicationsOnly, resourcesMultiple;
@@ -125,10 +125,18 @@ public class CaseServiceTest {
     resourcesUnknownType = new ArrayList<>();
 
     resourcesObservationsOnly.add(observation);
+
+    CodeableConcept concept = new CodeableConcept()
+        .addCoding(new Coding("system", "code", "display"));
+
+    immunization = new Immunization().setVaccineCode(concept);
     resourcesImmunizationsOnly.add(immunization);
+
+    medication = new MedicationAdministration().setMedication(concept);
     resourcesMedicationsOnly.addParameter()
         .setResource(medication)
         .setName(SystemConstants.OUTPUT_DATA);
+
     resourcesMultiple.addParameter().setResource(observation);
     resourcesMultiple.addParameter().setResource(immunization);
     resourcesMultiple.addParameter().setResource(medication);

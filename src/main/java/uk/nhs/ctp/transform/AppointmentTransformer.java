@@ -9,7 +9,7 @@ import org.hl7.fhir.dstu3.model.Appointment.ParticipationStatus;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.model.Appointment;
-import uk.nhs.ctp.service.ReferenceService;
+import uk.nhs.ctp.service.fhir.ReferenceService;
 
 @Component
 @RequiredArgsConstructor

@@ -15,7 +15,7 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.builder.ParametersBuilder;
-import uk.nhs.ctp.service.GenericResourceLocator;
+import uk.nhs.ctp.service.fhir.GenericResourceLocator;
 import uk.nhs.ctp.transform.bundle.CheckServicesRequestBundle;
 
 @Component

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import uk.nhs.ctp.service.AuditService;
 import uk.nhs.ctp.service.DoSService;
 import uk.nhs.ctp.service.dto.HealthcareServiceDTO;
 

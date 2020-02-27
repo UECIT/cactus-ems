@@ -1,4 +1,4 @@
-package uk.nhs.ctp.service.resolver;
+package uk.nhs.ctp.service.fhir;
 
 import static uk.nhs.ctp.utils.ResourceProviderUtils.*;
 import static java.util.Arrays.asList;
@@ -28,7 +28,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.exception.EMSException;
-import uk.nhs.ctp.service.ReferenceService;
 import uk.nhs.ctp.service.dto.CarePlanDTO;
 import uk.nhs.ctp.service.dto.CdssResult;
 import uk.nhs.ctp.service.dto.SettingsDTO;

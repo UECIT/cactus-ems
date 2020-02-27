@@ -5,8 +5,8 @@ import static org.springframework.util.StringUtils.isEmpty;
 import lombok.AllArgsConstructor;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
-import uk.nhs.ctp.service.ReferencingContext;
-import uk.nhs.ctp.service.StorageService;
+import uk.nhs.ctp.service.fhir.ReferencingContext;
+import uk.nhs.ctp.service.fhir.StorageService;
 
 @AllArgsConstructor
 public class ReferenceBuilder {

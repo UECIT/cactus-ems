@@ -7,7 +7,7 @@ import org.hl7.fhir.dstu3.model.Practitioner.PractitionerQualificationComponent;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.model.Practitioner;
-import uk.nhs.ctp.service.ReferenceService;
+import uk.nhs.ctp.service.fhir.ReferenceService;
 
 @Component
 @RequiredArgsConstructor

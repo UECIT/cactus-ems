@@ -11,7 +11,7 @@ import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.logging.LogContext;
 import uk.nhs.ctp.service.dto.CdssRequestDTO;
 import uk.nhs.ctp.service.dto.CdssResult;
-import uk.nhs.ctp.service.resolver.ResponseResolver;
+import uk.nhs.ctp.service.fhir.ResponseResolver;
 
 @Service
 @Slf4j
@@ -19,7 +19,7 @@ import uk.nhs.ctp.service.resolver.ResponseResolver;
 public class EvaluateService {
 
   private final CdssSupplierService cdssSupplierService;
-  private final ParametersService parametersService;
+  private final EvaluateParametersService evaluateParametersService;
   private final CdssService cdssService;
   private final CaseService caseService;
 
@@ -57,7 +57,7 @@ public class EvaluateService {
 
     var caseId = requestDetails.getCaseId();
 
-    Parameters request = parametersService.getEvaluateParameters(
+    Parameters request = evaluateParametersService.getEvaluateParameters(
         caseId,
         requestDetails.getQuestionResponse(),
         requestDetails.getSettings(),
@@ -70,8 +70,7 @@ public class EvaluateService {
     GuidanceResponse response = cdssService.evaluateServiceDefinition(
         request,
         requestDetails.getCdssSupplierId(),
-        requestDetails.getServiceDefinitionId(),
-        caseId
+        requestDetails.getServiceDefinitionId()
     );
 
     CdssResult result = responseResolver

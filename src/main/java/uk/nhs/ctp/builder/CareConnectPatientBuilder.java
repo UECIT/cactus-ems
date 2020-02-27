@@ -21,7 +21,7 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.entities.PatientEntity;
 import uk.nhs.ctp.enums.Language;
-import uk.nhs.ctp.service.ReferenceService;
+import uk.nhs.ctp.service.fhir.ReferenceService;
 
 @Component
 @AllArgsConstructor

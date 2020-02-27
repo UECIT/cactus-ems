@@ -28,6 +28,8 @@ import uk.nhs.ctp.entities.QuestionResponse;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.attachment.AttachmentService;
 import uk.nhs.ctp.service.dto.TriageQuestion;
+import uk.nhs.ctp.service.fhir.ReferenceService;
+import uk.nhs.ctp.service.fhir.StorageService;
 
 @Service
 @AllArgsConstructor

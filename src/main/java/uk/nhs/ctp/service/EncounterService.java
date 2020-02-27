@@ -1,5 +1,6 @@
 package uk.nhs.ctp.service;
 
+// Wildcard import required for Lombok UtilityClass
 import static uk.nhs.ctp.utils.ResourceProviderUtils.*;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -17,11 +18,9 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.springframework.stereotype.Service;
-import uk.nhs.ctp.entities.AuditRecord;
 import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.entities.ReferralRequestEntity;
-import uk.nhs.ctp.repos.AuditRecordRepository;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.repos.ReferralRequestRepository;
 import uk.nhs.ctp.service.dto.EncounterReportInput;
@@ -37,15 +36,13 @@ public class EncounterService {
   private EncounterTransformer encounterTransformer;
   private ObservationTransformer observationTransformer;
   private CaseRepository caseRepository;
-  private AuditRecordRepository auditRecordRepository;
   private ReferralRequestRepository referralRequestRepository;
   private ReferralRequestEntityTransformer referralRequestEntityTransformer;
   private FhirContext fhirContext;
 
   public Encounter getEncounter(Long caseId) {
     Cases triageCase = caseRepository.findOne(caseId);
-    AuditRecord auditRecord = auditRecordRepository.findByCaseId(caseId);
-    Encounter encounter = encounterTransformer.transform(triageCase, auditRecord);
+    Encounter encounter = encounterTransformer.transform(triageCase);
     encounter.setId(caseId.toString());
     return encounter;
   }

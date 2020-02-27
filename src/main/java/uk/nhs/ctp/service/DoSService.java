@@ -30,11 +30,12 @@ public class DoSService {
 	private String emsServer;
 
 	private final FhirContext fhirContext;
-	private final IGenericClient fhirClient;
 	private final CheckServicesRequestTransformer requestTransformer;
 	private final CheckServicesResponseTransformer responseTransformer;
 
 	public List<HealthcareServiceDTO> getDoS(String referralRequestRef, String patientRef) {
+
+		IGenericClient fhirClient = fhirContext.newRestfulGenericClient(emsServer);
 
 		var referralRequest = fhirClient.read()
 				.resource(ReferralRequest.class)
