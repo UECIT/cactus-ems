@@ -22,7 +22,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import uk.nhs.ctp.enums.AuditEntryType;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.dto.ReportType;
 import uk.nhs.ctp.service.dto.ReportsDTO;
@@ -62,10 +61,6 @@ public class ReportService {
       }
 
     }
-
-    auditService.createAuditEntry(
-        request.getCaseId(), mapper.writeValueAsString(request), mapper.writeValueAsString(reports),
-        AuditEntryType.REPORT);
 
     return reports;
   }

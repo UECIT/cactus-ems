@@ -1,4 +1,4 @@
-package uk.nhs.ctp.service;
+package uk.nhs.ctp.service.fhir;
 
 import java.net.MalformedURLException;
 import java.net.URL;

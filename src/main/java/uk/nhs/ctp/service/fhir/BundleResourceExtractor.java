@@ -1,4 +1,4 @@
-package uk.nhs.ctp.service.resolver;
+package uk.nhs.ctp.service.fhir;
 
 import java.util.List;
 import java.util.stream.Collectors;

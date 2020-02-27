@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import uk.nhs.ctp.service.ResourceService;
+import uk.nhs.ctp.service.fhir.ResourceService;
 
 @CrossOrigin
 @RestController

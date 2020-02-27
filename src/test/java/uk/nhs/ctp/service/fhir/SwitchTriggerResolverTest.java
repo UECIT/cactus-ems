@@ -1,4 +1,4 @@
-package uk.nhs.ctp.service.resolver;
+package uk.nhs.ctp.service.fhir;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;

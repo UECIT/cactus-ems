@@ -1,4 +1,4 @@
-package uk.nhs.ctp.service.resolver.reference;
+package uk.nhs.ctp.service.fhir;
 
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Reference;

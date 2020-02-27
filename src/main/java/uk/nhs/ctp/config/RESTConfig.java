@@ -1,35 +1,43 @@
 package uk.nhs.ctp.config;
 
-import org.springframework.beans.factory.annotation.Value;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.boot.web.client.RestTemplateCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.client.BufferingClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
+@RequiredArgsConstructor
 public class RESTConfig {
 
-  @Value("${blob.server}")
-  private String blobServer;
+  private final List<ClientHttpRequestInterceptor> clientInterceptors;
 
-  @Value("${blob.server.auth.token}")
-  private String blobServerAuthToken;
+  @Bean
+  public RestTemplateCustomizer restTemplateCustomizer() {
+    return restTemplate -> {
+      restTemplate.setRequestFactory(
+          new BufferingClientHttpRequestFactory(new SimpleClientHttpRequestFactory()));
+
+      for (ClientHttpRequestInterceptor interceptor : clientInterceptors) {
+        restTemplate.getInterceptors().add(interceptor);
+      }
+    };
+  }
 
   @Bean
   public RestTemplate restTemplate(RestTemplateBuilder builder) {
-    return builder.build();
+    RestTemplate restTemplate = builder.build();
+    return restTemplate;
   }
 
   @Bean
   public RestTemplate blobRestTemplate(RestTemplateBuilder builder) {
     RestTemplate restTemplate = builder.build();
-    restTemplate.getInterceptors().add((request, body, execution) -> {
-      if (request.getURI().toString().startsWith(blobServer)) {
-        request.getHeaders().set(HttpHeaders.AUTHORIZATION, blobServerAuthToken);
-      }
-      return execution.execute(request, body);
-    });
     return restTemplate;
   }
 

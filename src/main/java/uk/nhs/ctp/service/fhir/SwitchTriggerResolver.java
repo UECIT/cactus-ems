@@ -1,4 +1,4 @@
-package uk.nhs.ctp.service.resolver;
+package uk.nhs.ctp.service.fhir;
 
 import lombok.AllArgsConstructor;
 import org.hl7.fhir.dstu3.model.GuidanceResponse;

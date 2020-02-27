@@ -39,13 +39,14 @@ import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.dto.CodeDTO;
 import uk.nhs.ctp.service.dto.SettingsDTO;
 import uk.nhs.ctp.service.dto.TriageQuestion;
+import uk.nhs.ctp.service.fhir.ReferenceService;
 import uk.nhs.ctp.transform.ObservationTransformer;
 import uk.nhs.ctp.utils.ErrorHandlingUtils;
 
 @Service
 @AllArgsConstructor
 @Slf4j
-public class ParametersService {
+public class EvaluateParametersService {
 
   private static Set<String> validInitiatingPersonTypes =
       Set.of("Patient", "RelatedPerson", "Practitioner");
@@ -70,11 +71,6 @@ public class ParametersService {
     Cases caseEntity = caseRepository.findOne(caseId);
 
     ErrorHandlingUtils.checkEntityExists(caseEntity, "Case");
-    var caseAudit = auditService.getAuditRecordByCase(caseId);
-    if (caseAudit == null) {
-      throw new NullPointerException("Could not find an audit record for case " + caseId);
-    }
-
     Builder builder = new Builder()
         .setRequestId(requestId)
         .setEncounter(caseId)

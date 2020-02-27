@@ -9,6 +9,7 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.entities.ReferralRequestEntity;
+import uk.nhs.ctp.service.fhir.ReferenceService;
 import uk.nhs.ctp.transform.ReferralRequestEntityTransformer;
 
 @Service

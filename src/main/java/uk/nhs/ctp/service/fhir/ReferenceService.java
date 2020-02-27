@@ -1,4 +1,4 @@
-package uk.nhs.ctp.service;
+package uk.nhs.ctp.service.fhir;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.FhirTerser;

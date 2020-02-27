@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 import uk.nhs.ctp.entities.CaseObservation;
 
 @Repository
-public interface CaseDataRepository extends JpaRepository<CaseObservation, Long> {
+public interface ObservationRepository extends JpaRepository<CaseObservation, Long> {
 }

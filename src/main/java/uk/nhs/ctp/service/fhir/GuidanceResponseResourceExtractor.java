@@ -1,4 +1,4 @@
-package uk.nhs.ctp.service.resolver;
+package uk.nhs.ctp.service.fhir;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.util.ArrayList;
@@ -12,7 +12,6 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.entities.CdssSupplier;
-import uk.nhs.ctp.service.ReferenceService;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
 
 @Component

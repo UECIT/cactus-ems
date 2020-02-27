@@ -28,12 +28,12 @@ public class FHIRRestfulServer extends RestfulServer {
   private CheckServicesProvider checkServicesProvider;
   private FhirContext fhirContext;
 
-	@PostConstruct
-	public void setResourceProviders() {
+  @PostConstruct
+  public void setResourceProviders() {
 
-		setResourceProviders(providers);
-		setProviders(checkServicesProvider);
-	}
+    setResourceProviders(providers);
+    setProviders(checkServicesProvider);
+  }
 
   @Override
   protected void initialize() throws ServletException {

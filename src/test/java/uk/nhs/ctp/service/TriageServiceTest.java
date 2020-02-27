@@ -22,7 +22,7 @@ import uk.nhs.ctp.service.dto.CdssRequestDTO;
 import uk.nhs.ctp.service.dto.CdssResponseDTO;
 import uk.nhs.ctp.service.dto.CdssResult;
 import uk.nhs.ctp.service.factory.ReferencingContextFactory;
-import uk.nhs.ctp.service.resolver.ResponseResolver;
+import uk.nhs.ctp.service.fhir.ResponseResolver;
 import uk.nhs.ctp.transform.CaseObservationTransformer;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -41,7 +41,7 @@ public class TriageServiceTest {
   private AuditService auditService;
 
   @Mock
-  private ParametersService parametersService;
+  private EvaluateParametersService evaluateParametersService;
 
   @Mock
   private CdssSupplierService cdssSupplierService;
@@ -153,14 +153,14 @@ public class TriageServiceTest {
         .thenReturn(true);
     when(mockCdssResult.getQuestionnaireRef())
         .thenReturn("Questionnaire/1");
-    when(cdssService.getQuestionnaire(1L, "Questionnaire/1", 1L))
+    when(cdssService.getQuestionnaire(1L, "Questionnaire/1"))
         .thenReturn(mockQuestionnaire);
     when(responseService.buildResponse(mockCdssResult, mockQuestionnaire, 1L, 1L))
         .thenReturn(mockCdssResponseDTO);
 
     triageService.buildResponseDtoFromResult(mockCdssResult, 1L, 1L);
 
-    verify(cdssService, times(1)).getQuestionnaire(1L, "Questionnaire/1", 1L);
+    verify(cdssService, times(1)).getQuestionnaire(1L, "Questionnaire/1");
   }
 
   @Test
@@ -175,7 +175,7 @@ public class TriageServiceTest {
 
     triageService.buildResponseDtoFromResult(mockCdssResult, 1L, 1L);
 
-    verify(cdssService, times(0)).getQuestionnaire(anyLong(), anyString(), anyLong());
+    verify(cdssService, times(0)).getQuestionnaire(anyLong(), anyString());
   }
 
   @Test
@@ -190,7 +190,7 @@ public class TriageServiceTest {
 
     triageService.buildResponseDtoFromResult(mockCdssResult, 1L, 1L);
 
-    verify(cdssService, times(0)).getQuestionnaire(anyLong(), anyString(), anyLong());
+    verify(cdssService, times(0)).getQuestionnaire(anyLong(), anyString());
   }
 
 }

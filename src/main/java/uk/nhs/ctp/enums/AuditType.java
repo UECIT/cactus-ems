@@ -1,5 +1,5 @@
 package uk.nhs.ctp.enums;
 
-public enum AuditEntryType {
+public enum AuditType {
 	INTIALREQUEST, REQUEST, RESULT, REPORT;
 }

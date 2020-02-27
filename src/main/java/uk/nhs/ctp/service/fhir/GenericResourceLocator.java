@@ -1,11 +1,10 @@
-package uk.nhs.ctp.service;
+package uk.nhs.ctp.service.fhir;
 
 import ca.uhn.fhir.context.FhirContext;
 import lombok.AllArgsConstructor;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.stereotype.Service;
-import uk.nhs.ctp.service.resolver.reference.IResourceLocator;
 
 @Service
 @AllArgsConstructor

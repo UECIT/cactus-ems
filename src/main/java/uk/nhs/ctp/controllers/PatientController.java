@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.nhs.ctp.entities.PatientEntity;
 import uk.nhs.ctp.repos.PatientRepository;
-import uk.nhs.ctp.service.GenericResourceLocator;
-import uk.nhs.ctp.service.ReferenceService;
+import uk.nhs.ctp.service.fhir.GenericResourceLocator;
+import uk.nhs.ctp.service.fhir.ReferenceService;
 import uk.nhs.ctp.service.dto.PatientDTO;
 import uk.nhs.ctp.transform.PatientTransformer;
 

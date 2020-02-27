@@ -9,19 +9,19 @@ import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.entities.CaseObservation;
-import uk.nhs.ctp.repos.CaseDataRepository;
+import uk.nhs.ctp.repos.ObservationRepository;
 import uk.nhs.ctp.transform.ObservationTransformer;
 
 @Component
 @AllArgsConstructor
 public class ObservationProvider implements IResourceProvider {
 
-  private final CaseDataRepository caseDataRepository;
+  private final ObservationRepository observationRepository;
   private final ObservationTransformer observationTransformer;
 
   @Read
   public Observation getObservation(@IdParam IdType id) {
-    CaseObservation obs = caseDataRepository.getOne(id.getIdPartAsLong());
+    CaseObservation obs = observationRepository.getOne(id.getIdPartAsLong());
     return observationTransformer.transform(obs);
   }
 

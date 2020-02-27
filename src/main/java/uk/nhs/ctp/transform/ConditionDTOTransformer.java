@@ -10,8 +10,8 @@ import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.stereotype.Component;
-import uk.nhs.ctp.service.GenericResourceLocator;
-import uk.nhs.ctp.service.ReferenceService;
+import uk.nhs.ctp.service.fhir.GenericResourceLocator;
+import uk.nhs.ctp.service.fhir.ReferenceService;
 import uk.nhs.ctp.service.dto.ConditionDTO;
 
 @Component

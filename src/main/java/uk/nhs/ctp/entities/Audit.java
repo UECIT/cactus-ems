@@ -2,49 +2,53 @@ package uk.nhs.ctp.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.ToString.Exclude;
+import uk.nhs.ctp.enums.AuditType;
 import uk.nhs.ctp.audit.HttpAudit;
 
 @Entity
-@Table(name = "audit_entry_v2")
+@Table(name = "audit")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuditEntry implements HttpAudit {
+public class Audit implements HttpAudit {
 
-  // generic audit details
+  @JsonIgnore
+  private boolean storable;
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @ManyToOne(fetch = FetchType.EAGER)
-  @JoinColumn(name = "audit_id")
-  @JsonIgnore
-  @Exclude
-  @EqualsAndHashCode.Exclude
-  private Audit audit;
-
   @Temporal(TemporalType.TIMESTAMP)
   @Column(name = "created_date")
   private Date createdDate;
+
+  @Column(name = "case_id")
+  private Long caseId;
+
+  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "audit")
+  private List<AuditEntry> auditEntries;
+
+  @Column(name = "type", length = 100)
+  private AuditType type;
 
   @Column(name = "request_method")
   @Lob
@@ -75,9 +79,4 @@ public class AuditEntry implements HttpAudit {
   @Column(name = "response_body")
   @Lob
   private String responseBody;
-
-  @Column(name = "data")
-  @Lob
-  private byte[] data;
-
 }

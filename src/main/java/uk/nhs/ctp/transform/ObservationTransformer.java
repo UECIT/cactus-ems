@@ -13,7 +13,7 @@ import org.hl7.fhir.dstu3.model.StringType;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.Cases;
-import uk.nhs.ctp.service.ReferenceService;
+import uk.nhs.ctp.service.fhir.ReferenceService;
 
 @Component
 @RequiredArgsConstructor

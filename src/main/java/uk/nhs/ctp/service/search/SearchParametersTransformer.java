@@ -25,7 +25,7 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.enums.Setting;
 import uk.nhs.ctp.enums.UserType;
-import uk.nhs.ctp.service.GenericResourceLocator;
+import uk.nhs.ctp.service.fhir.GenericResourceLocator;
 import uk.nhs.ctp.service.dto.SettingsDTO;
 
 @Component

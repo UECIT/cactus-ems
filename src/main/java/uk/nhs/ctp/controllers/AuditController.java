@@ -1,6 +1,7 @@
 package uk.nhs.ctp.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,7 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import uk.nhs.ctp.entities.AuditRecord;
+import uk.nhs.ctp.entities.Audit;
+import uk.nhs.ctp.repos.AuditRepository;
+import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.AuditService;
 import uk.nhs.ctp.service.search.AuditSearchRequest;
 import uk.nhs.ctp.service.search.AuditSearchResultDTO;
@@ -19,14 +22,16 @@ import uk.nhs.ctp.service.search.AuditSearchResultDTO;
 @CrossOrigin
 @RestController
 @RequestMapping(path = "/audit")
+@RequiredArgsConstructor
 public class AuditController {
 
-	@Autowired
-	private AuditService auditService;
+	private final AuditRepository auditRepository;
+	private final AuditService auditService;
 
 	@GetMapping(path = "/{id}")
-	public @ResponseBody AuditRecord getAudit(@PathVariable Long id) {
-		return auditService.getAuditRecordByCase(id);
+	public @ResponseBody
+	List<Audit> getAudit(@PathVariable Long id) {
+		return auditRepository.findAllByCaseId(id);
 	}
 	
 	@PostMapping

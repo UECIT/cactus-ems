@@ -1,36 +1,48 @@
-package uk.nhs.ctp.service;
+package uk.nhs.ctp.service.fhir;
 
 import static org.springframework.util.StringUtils.isEmpty;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.AllArgsConstructor;
-import org.hl7.fhir.dstu3.model.IdType;
+import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.nhs.ctp.service.resolver.reference.IResourceLocator;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class StorageService implements IResourceLocator {
 
-  private IGenericClient fhirClient;
+  @Value("${fhir.server}")
+  private String fhirServer;
+
+  private final FhirContext fhirContext;
 
   public String storeExternal(Resource resource) {
     if (!isEmpty(resource.getId())) {
       return resource.getId();
     }
 
-    var id = fhirClient.create().resource(resource).execute().getId();
+    var id = getClient().create()
+        .resource(resource)
+        .execute()
+        .getId();
     resource.setId(id);
     return id.getValue();
   }
 
+  private IGenericClient getClient() {
+    return fhirContext.newRestfulGenericClient(fhirServer);
+  }
+
   public void updateExternal(Resource resource) {
-    fhirClient.update().resource(resource).execute();
+    getClient().update()
+        .resource(resource)
+        .execute();
   }
 
   public <T extends Resource> List<T> findResources(List<String> resourceReferences,
@@ -41,15 +53,18 @@ public class StorageService implements IResourceLocator {
   }
 
   public <T extends Resource> T findResource(String id, Class<T> clazz) {
-    return fhirClient.read().resource(clazz).withUrl(id).execute();
+    return getClient().read()
+        .resource(clazz)
+        .withUrl(id)
+        .execute();
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public <T extends IBaseResource> T findResource(IIdType idType) {
-    return (T) fhirClient.read()
+    return (T) getClient().read()
         .resource(idType.getResourceType())
-        .withId(idType)
+        .withUrl(idType)
         .execute();
   }
 }
