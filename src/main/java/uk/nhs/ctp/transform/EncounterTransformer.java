@@ -31,6 +31,8 @@ public class EncounterTransformer {
 
     encounter.setId(caseEntity.getId().toString());
     encounter.setSubject(new Reference(caseEntity.getPatientId()));
+    encounter.setServiceProvider(
+        referenceService.buildRef(ResourceType.Organization, "self"));
 
     if (caseEntity.getPractitionerId() != null) {
       var participant = new Encounter.EncounterParticipantComponent();
@@ -67,9 +69,11 @@ public class EncounterTransformer {
     //TODO: Contained/hard coded for now, find out which condition this should be, when it should be set and where to get it from? RefReq?
     Condition condition = new Condition();
     condition.setVerificationStatus(ConditionVerificationStatus.CONFIRMED);
-    condition.setCode(new CodeableConcept().addCoding(new Coding("ems", "47658378", "Diagnosis Condition")));
+    condition.setCode(
+        new CodeableConcept().addCoding(new Coding("ems", "47658378", "Diagnosis Condition")));
     condition.setSubject(new Reference(caseEntity.getPatientId()));
-    condition.setCategory(Collections.singletonList(ConditionCategory.ENCOUNTER_DIAGNOSIS.toCodeableConcept()));
+    condition.setCategory(
+        Collections.singletonList(ConditionCategory.ENCOUNTER_DIAGNOSIS.toCodeableConcept()));
     encounter.addDiagnosis()
         .setCondition(new Reference(condition));
 
