@@ -9,14 +9,17 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.entities.ReferralRequestEntity;
+import uk.nhs.ctp.repos.ReferralRequestRepository;
 import uk.nhs.ctp.service.fhir.ReferenceService;
 import uk.nhs.ctp.transform.ReferralRequestEntityTransformer;
+import uk.nhs.ctp.utils.ErrorHandlingUtils;
 
 @Service
 @AllArgsConstructor
 public class ReferralRequestService {
 
   private ReferralRequestEntityTransformer referralRequestEntityTransformer;
+  private ReferralRequestRepository referralRequestRepository;
   private FhirContext fhirContext;
   private ReferenceService referenceService;
 
@@ -44,5 +47,13 @@ public class ReferralRequestService {
     updateFn.accept(referralRequest);
     IParser fhirParser = fhirContext.newJsonParser();
     entity.setResource(fhirParser.encodeResourceToString(referralRequest));
+  }
+
+  public ReferralRequest get(Long id) {
+    ReferralRequestEntity referralRequestEntity =
+        referralRequestRepository.findOne(id);
+    ErrorHandlingUtils.checkEntityExists(referralRequestEntity, "ReferralRequest");
+
+    return referralRequestEntityTransformer.transform(referralRequestEntity);
   }
 }
