@@ -13,6 +13,7 @@ import org.hl7.fhir.dstu3.model.Procedure;
 import org.hl7.fhir.dstu3.model.Procedure.ProcedureStatus;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.springframework.stereotype.Service;
+import uk.nhs.ctp.service.fhir.ReferenceService;
 
 @Service
 @AllArgsConstructor
