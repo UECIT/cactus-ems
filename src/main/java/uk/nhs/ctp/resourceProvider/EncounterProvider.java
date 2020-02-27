@@ -12,7 +12,6 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Encounter;
-import org.hl7.fhir.dstu3.model.Encounter.DiagnosisComponent;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Reference;
@@ -106,10 +105,6 @@ public class EncounterProvider implements IResourceProvider {
 
     // Add patient
     addResource(bundle, encounter.getSubject(), encounter.getIdElement());
-    // Add diagnosis
-    encounter.getDiagnosis().stream()
-        .map(DiagnosisComponent::getCondition)
-        .forEach(reference -> addResource(bundle, reference, encounter.getIdElement()));
     return encounter;
   }
 

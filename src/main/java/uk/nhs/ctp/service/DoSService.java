@@ -26,7 +26,7 @@ public class DoSService {
 	@Value("${dos.server}")
 	private String dosServer;
 
-	@Value("${ems.server}")
+	@Value("${ems.fhir.server}")
 	private String emsServer;
 
 	private final FhirContext fhirContext;
@@ -52,7 +52,7 @@ public class DoSService {
 				.patient(patient)
 				.build();
 
-		return Stream.of(dosServer, emsServer + "/fhir")
+		return Stream.of(dosServer, emsServer)
 				.map(dos -> new CheckServicesResponseBundle(dos, callDos(dos, requestBundle)))
 				.flatMap(responseTransformer::transform)
 				.collect(Collectors.toList());
