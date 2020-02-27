@@ -22,13 +22,13 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequiredArgsConstructor
 public class ReferenceService {
 
-  @Value("${ems.server}")
+  @Value("${ems.fhir.server}")
   private String emsServer;
 
   private final FhirContext fhirContext;
 
   private URI getFullEmsServerUrl() {
-    return UriComponentsBuilder.fromUriString(emsServer).pathSegment("fhir").build().toUri();
+    return URI.create(emsServer);
   }
 
   public String buildId(ResourceType resourceType, long id) {
