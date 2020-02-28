@@ -81,7 +81,7 @@ public class CdssService {
    * @return
    */
   public List<CdssSupplierDTO> queryServiceDefinitions(@NotNull SearchParameters parameters) {
-    return cdssSupplierRepository.findAll().parallelStream()
+    return cdssSupplierRepository.findAll().stream() //TODO: More efficient in parallel NCTH-536
         .map(supplier -> queryServiceDefinitions(supplier, parameters))
         .filter(Objects::nonNull)
         .filter(supplier -> !CollectionUtils.isEmpty(supplier.getServiceDefinitions()))
