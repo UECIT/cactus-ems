@@ -1,7 +1,6 @@
 package uk.nhs.ctp.service.search;
 
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +23,7 @@ public class SearchParameters {
   private static final String SP_PATIENT_TRIGGER = "trigger-type-date";
   private static final String SP_CONTEXT_VALUE = "useContext-code-value";
   private static final String SP_JURISDICTION = "jurisdiction";
-  private static final String SP_EFFECTIVE_PERIOD_START = "effectivePeriod.start";
-  private static final String SP_EFFECTIVE_PERIOD_END = "effectivePeriod.end";
+  private static final String SP_SEARCH_DATE_TIME = "searchDateTime";
 
   private String query;
   private String jurisdiction;
@@ -35,8 +33,6 @@ public class SearchParameters {
   private List<String> contextQuantityCode;
   private String status;
   private String experimental;
-  private String effectivePeriodStart;
-  private String effectivePeriodEnd;
 
   public MultiValueMap<String, String> toMultiValueMap() {
     LinkedMultiValueMap<String, String> map = new LinkedMultiValueMap<>();
@@ -50,12 +46,6 @@ public class SearchParameters {
     if (StringUtils.isNotEmpty(jurisdiction)) {
       map.add(SP_JURISDICTION, jurisdiction);
     }
-    if (StringUtils.isNotEmpty(effectivePeriodStart)) {
-      map.add(SP_EFFECTIVE_PERIOD_START, effectivePeriodStart);
-    }
-    if (StringUtils.isNotEmpty(effectivePeriodEnd)) {
-      map.add(SP_EFFECTIVE_PERIOD_END, effectivePeriodEnd);
-    }
     if (CollectionUtils.isNotEmpty(observationTriggers)) {
       map.put(SP_OBSERVATION_TRIGGER, observationTriggers);
     }
@@ -65,6 +55,8 @@ public class SearchParameters {
     if (CollectionUtils.isNotEmpty(contextValueCode)) {
       map.put(SP_CONTEXT_VALUE, contextValueCode);
     }
+
+    map.add(SP_SEARCH_DATE_TIME, LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
     return map;
   }
@@ -76,18 +68,6 @@ public class SearchParameters {
       }
 
       this.contextValueCode.add(context + "$" + system + "|" + code);
-      return this;
-    }
-
-    public SearchParametersBuilder effectivePeriodStart(ParamPrefixEnum mod, LocalDate date) {
-      this.effectivePeriodStart = mod.getValue()
-          + date.format(DateTimeFormatter.ISO_LOCAL_DATE);
-      return this;
-    }
-
-    public SearchParametersBuilder effectivePeriodEnd(ParamPrefixEnum mod, LocalDate date) {
-      this.effectivePeriodEnd = mod.getValue()
-          + date.format(DateTimeFormatter.ISO_LOCAL_DATE);
       return this;
     }
 
