@@ -1,0 +1,11 @@
+{
+  "id": "self",
+  "name": "EMS Test Service Provider",
+  "identifiers": [
+    {
+      "value": "AA123",
+      "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+      "type": "oc"
+    }
+  ]
+}
