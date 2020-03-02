@@ -1,7 +1,5 @@
 package uk.nhs.ctp.service.search;
 
-import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
-import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN_OR_EQUALS;
 import static uk.nhs.ctp.SystemURL.CS_CDS_STUB;
 import static uk.nhs.ctp.SystemURL.CS_GENDER;
 import static uk.nhs.ctp.SystemURL.CS_PROVIDER_TAXONOMY;
@@ -9,7 +7,6 @@ import static uk.nhs.ctp.SystemURL.SNOMED;
 import static uk.nhs.ctp.utils.DateUtils.ageCodeFromDate;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -25,8 +22,8 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.enums.Setting;
 import uk.nhs.ctp.enums.UserType;
-import uk.nhs.ctp.service.fhir.GenericResourceLocator;
 import uk.nhs.ctp.service.dto.SettingsDTO;
+import uk.nhs.ctp.service.fhir.GenericResourceLocator;
 
 @Component
 @AllArgsConstructor
@@ -42,8 +39,6 @@ public class SearchParametersTransformer {
         .query("triage")
         .status("active")
         .experimental("false")
-        .effectivePeriodStart(LESSTHAN_OR_EQUALS, LocalDate.now())
-        .effectivePeriodEnd(GREATERTHAN_OR_EQUALS, LocalDate.now())
         .patientTriggers(transformPatientTriggers(dataRequirements))
         .observationTriggers(transformObservationTriggers(dataRequirements));
 

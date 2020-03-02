@@ -25,9 +25,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.nhs.ctp.service.fhir.GenericResourceLocator;
 import uk.nhs.ctp.service.dto.CodeDTO;
 import uk.nhs.ctp.service.dto.SettingsDTO;
+import uk.nhs.ctp.service.fhir.GenericResourceLocator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SearchParametersTransformerTest {
