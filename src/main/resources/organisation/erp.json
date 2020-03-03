@@ -3,7 +3,7 @@
   "name": "East Road Pharmacy",
   "identifiers": [
     {
-      "value": "1236457",
+      "value": "723645",
       "system": "https://fhir.nhs.uk/Id/ods-organization-code",
       "type": "oc"
     }
