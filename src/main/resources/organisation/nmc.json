@@ -3,7 +3,7 @@
   "name": "Nursing and Midwifery Council",
   "identifiers": [
     {
-      "value": "1236497",
+      "value": "123649",
       "system": "https://fhir.nhs.uk/Id/ods-organization-code",
       "type": "oc"
     }

@@ -3,7 +3,7 @@
   "name": "East Road General Practitioner",
   "identifiers": [
     {
-      "value": "1236458",
+      "value": "123645",
       "system": "https://fhir.nhs.uk/Id/ods-organization-code",
       "type": "oc"
     }
