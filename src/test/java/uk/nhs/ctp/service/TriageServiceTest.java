@@ -9,8 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import java.net.ConnectException;
+import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Before;
@@ -21,8 +20,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import uk.nhs.ctp.service.dto.CdssRequestDTO;
 import uk.nhs.ctp.service.dto.CdssResponseDTO;
 import uk.nhs.ctp.service.dto.CdssResult;
-import uk.nhs.ctp.service.factory.ReferencingContextFactory;
-import uk.nhs.ctp.service.fhir.ResponseResolver;
 import uk.nhs.ctp.transform.CaseObservationTransformer;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -41,16 +38,7 @@ public class TriageServiceTest {
   private AuditService auditService;
 
   @Mock
-  private EvaluateParametersService evaluateParametersService;
-
-  @Mock
-  private CdssSupplierService cdssSupplierService;
-
-  @Mock
   private ResponseService responseService;
-
-  @Mock
-  private ReferencingContextFactory referencingContextFactory;
 
   @Mock
   private EncounterService encounterService;
@@ -59,10 +47,10 @@ public class TriageServiceTest {
   private CaseObservationTransformer caseObservationTransformer;
 
   @Mock
-  private ResponseResolver responseResolver;
+  private EvaluateService evaluateService;
 
   @Mock
-  private EvaluateService evaluateService;
+  private FhirContext fhirContext;
 
   CdssResult mockCdssResult;
   CdssResponseDTO mockCdssResponseDTO;
@@ -78,7 +66,8 @@ public class TriageServiceTest {
         auditService,
         encounterService,
         evaluateService,
-        caseObservationTransformer
+        caseObservationTransformer,
+        fhirContext
     ));
 
     triageService = new TriageService(
@@ -88,7 +77,8 @@ public class TriageServiceTest {
         auditService,
         encounterService,
         evaluateService,
-        caseObservationTransformer
+        caseObservationTransformer,
+        fhirContext
     );
 
     mockCdssResult = mock(CdssResult.class);
@@ -102,8 +92,7 @@ public class TriageServiceTest {
   }
 
   @Test
-  public void testSecondRequestMadeTwiceWhenNoResultOrDataRequirementReturned()
-      throws Exception {
+  public void testSecondRequestMadeTwiceWhenNoResultOrDataRequirementReturned() throws Exception {
     doReturn(mockCdssResult)
         .when(evaluateService)
         .evaluate(mockCdssRequestDTO);
@@ -121,8 +110,7 @@ public class TriageServiceTest {
   }
 
   @Test
-  public void testNoSecondRequestMadeOnceWhenResultInProgress()
-      throws Exception {
+  public void testNoSecondRequestMadeOnceWhenResultInProgress() throws Exception {
     doReturn(mockCdssResult)
         .when(evaluateService)
         .evaluate(mockCdssRequestDTO);
@@ -139,14 +127,12 @@ public class TriageServiceTest {
   }
 
   @Test(expected = NullPointerException.class)
-  public void testExceptionThrownWhenCdssResultIsNull()
-      throws ConnectException, JsonProcessingException, FHIRException {
+  public void testExceptionThrownWhenCdssResultIsNull() throws FHIRException {
     triageService.buildResponseDtoFromResult(null, 1L, 1L);
   }
 
   @Test
-  public void testQuestionnaireRequestMadeWhenDataRequirementPresent()
-      throws ConnectException, JsonProcessingException, FHIRException {
+  public void testQuestionnaireRequestMadeWhenDataRequirementPresent() throws FHIRException {
     when(mockCdssResult.hasResult())
         .thenReturn(false);
     when(mockCdssResult.hasQuestionnaire())
@@ -165,7 +151,7 @@ public class TriageServiceTest {
 
   @Test
   public void testQuestionnaireRequestNotMadeWhenResultAndDataRequirementPresent()
-      throws ConnectException, JsonProcessingException, FHIRException {
+      throws FHIRException {
     when(mockCdssResult.hasResult())
         .thenReturn(true);
     when(mockCdssResult.hasQuestionnaire())
@@ -179,8 +165,7 @@ public class TriageServiceTest {
   }
 
   @Test
-  public void testQuestionnaireRequestNotMadeWhenOnlyResultIsPresent()
-      throws ConnectException, JsonProcessingException, FHIRException {
+  public void testQuestionnaireRequestNotMadeWhenOnlyResultIsPresent() throws FHIRException {
     when(mockCdssResult.hasResult())
         .thenReturn(true);
     when(mockCdssResult.hasQuestionnaire())

@@ -66,8 +66,8 @@ public class CdssService {
    * @return {@link ServiceDefinition}
    * @throws ca.uhn.fhir.parser.DataFormatException
    */
-  public ServiceDefinition getServiceDefinition(String serviceDefId, String cdssSupplierId) {
-    String baseUrl = getBaseUrl(Long.valueOf(cdssSupplierId));
+  public ServiceDefinition getServiceDefinition(Long cdssSupplierId, String serviceDefId) {
+    String baseUrl = getBaseUrl(cdssSupplierId);
     return fhirContext.newRestfulGenericClient(baseUrl)
         .read()
         .resource(ServiceDefinition.class)

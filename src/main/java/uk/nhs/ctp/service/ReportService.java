@@ -4,16 +4,18 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import javax.xml.bind.JAXBException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.codesystems.ContentType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -28,24 +30,19 @@ import uk.nhs.ctp.service.dto.ReportsDTO;
 import uk.nhs.ctp.service.report.Reportable;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class ReportService {
 
-  @Autowired
-  private Collection<Reportable> reportServices;
-
-  @Autowired
-  private AuditService auditService;
-
-  @Autowired
-  private ObjectMapper mapper;
+  private final Collection<Reportable> reportServices;
+  private final ValidationService validationService;
+  private final ObjectMapper mapper;
 
   @Value("${reports.server}")
   private String reportsServer;
 
   @Value("${reports.server.auth.token}")
   private String reportServerToken;
-
-  private static final Logger LOG = LoggerFactory.getLogger(ReportService.class);
 
   public Collection<ReportsDTO> generateReports(
       ReportRequestDTO request) throws JAXBException, JsonProcessingException {
@@ -56,7 +53,7 @@ public class ReportService {
       try {
         reports.add(service.generate(request.clone()));
       } catch (Exception e) {
-        LOG.error(MessageFormat.format("Error creating report {0} ",
+        log.error(MessageFormat.format("Error creating report {0} ",
             service.getClass().getSimpleName().replace("Service", "")), e);
       }
 
@@ -66,6 +63,8 @@ public class ReportService {
   }
 
   public Collection<ReportsDTO> generateReports(String encounterRef) {
+    ArrayList<ReportsDTO> reports = new ArrayList<>();
+
     RestTemplate template = new RestTemplate();
     template.getInterceptors().add((request, body, execution) -> {
       if (request.getURI().toString().startsWith(reportsServer)) {
@@ -78,7 +77,7 @@ public class ReportService {
         .queryParam("encounter", encounterRef)
         .toUriString();
 
-    LOG.info("Sending an http post to: {}", reportsUrl);
+    log.info("Sending an http post to: {}", reportsUrl);
 
     ResponseEntity<String> response = template
         .exchange(reportsUrl, HttpMethod.POST, null, String.class);
@@ -93,7 +92,6 @@ public class ReportService {
           new TypeReference<Map<String, String>>() {
           });
 
-      ArrayList<ReportsDTO> reports = new ArrayList<>();
       if (parsedResponse.containsKey("ecds")) {
         reports.add(ReportsDTO.builder()
             .contentType(ContentType.XML)
@@ -111,12 +109,29 @@ public class ReportService {
             .response(parsedResponse.get("iucds"))
             .build());
       }
-
-      return reports;
     } catch (IOException e) {
       throw new InternalErrorException(
           "Creating Reports: Unable to parse response", e);
     }
+
+    // Validation report
+    try {
+      byte[] zipData = validationService
+          .zipResources(new Reference(encounterRef).getReferenceElement().getIdPartAsLong());
+
+      // TODO send to TKW instead of writing locally
+      File zipFile = File.createTempFile("validation", ".zip");
+      try (FileOutputStream outputStream = new FileOutputStream(zipFile)) {
+        outputStream.write(zipData);
+      }
+      log.info("Output written to " + zipFile);
+
+    } catch (IOException e) {
+      throw new InternalErrorException(
+          "Creating Reports: Unable to create resource bundle for validation", e);
+    }
+
+    return reports;
   }
 
 }

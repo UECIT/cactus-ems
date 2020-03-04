@@ -52,10 +52,15 @@ public class EvaluateService {
   }
 
   private CdssResult evaluateServiceDefinition(CdssRequestDTO requestDetails,
-      CdssSupplier cdssSupplier, String requestId)
-      throws JsonProcessingException {
+      CdssSupplier cdssSupplier, String requestId) {
 
     var caseId = requestDetails.getCaseId();
+
+    // Fetch for audit
+    cdssService.getServiceDefinition(
+        requestDetails.getCdssSupplierId(),
+        requestDetails.getServiceDefinitionId()
+    );
 
     Parameters request = evaluateParametersService.getEvaluateParameters(
         caseId,
