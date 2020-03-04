@@ -11,7 +11,6 @@ import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.dstu3.model.CareConnectCarePlan;
 import org.hl7.fhir.dstu3.model.CareConnectCareTeam;
-import org.hl7.fhir.dstu3.model.CareConnectCondition;
 import org.hl7.fhir.dstu3.model.CareConnectEncounter;
 import org.hl7.fhir.dstu3.model.CareConnectEpisodeOfCare;
 import org.hl7.fhir.dstu3.model.CareConnectHealthcareService;
@@ -44,7 +43,6 @@ public class FHIRConfig {
     List<Class<? extends Resource>> profiles = Arrays.asList(
         CareConnectCarePlan.class,
         CareConnectCareTeam.class,
-        CareConnectCondition.class,
         CareConnectEncounter.class,
         CareConnectEpisodeOfCare.class,
         CareConnectHealthcareService.class,
