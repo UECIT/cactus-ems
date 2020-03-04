@@ -1,5 +1,6 @@
 package uk.nhs.ctp.service;
 
+import ca.uhn.fhir.context.FhirContext;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,6 @@ import uk.nhs.ctp.service.dto.EncounterReportInput;
 import uk.nhs.ctp.service.dto.TriageLaunchDTO;
 import uk.nhs.ctp.service.dto.TriageQuestion;
 import uk.nhs.ctp.transform.CaseObservationTransformer;
-import uk.nhs.ctp.utils.ResourceProviderUtils;
 
 @Service
 @AllArgsConstructor
@@ -29,6 +29,7 @@ public class TriageService {
   private EncounterService encounterService;
   private EvaluateService evaluateService;
   private CaseObservationTransformer caseObservationTransformer;
+  private FhirContext fhirContext;
 
   /**
    * Creates case from test case scenario and patient details and launches first triage request
@@ -55,6 +56,10 @@ public class TriageService {
     cdssRequest.setServiceDefinitionId(requestDetails.getServiceDefinitionId());
     cdssRequest.setSettings(requestDetails.getSettings());
     cdssRequest.setPatientId(requestDetails.getPatientId());
+
+    // Fetch for audit
+    cdssService.getServiceDefinition(
+        requestDetails.getCdssSupplierId(), requestDetails.getServiceDefinitionId());
 
     return processTriageRequest(cdssRequest);
   }
@@ -94,7 +99,6 @@ public class TriageService {
       requestDetails.setQuestionResponse(null);
       cdssResult = evaluateService.evaluate(requestDetails);
 
-      // Add Audit Record
       cdssResponse = buildResponseDtoFromResult(cdssResult, caseId,
           requestDetails.getCdssSupplierId());
     }
@@ -140,12 +144,8 @@ public class TriageService {
     }
     Questionnaire questionnaire = null;
     if (!cdssResult.hasResult() && cdssResult.hasQuestionnaire()) {
-      // TODO GetResource out of contained
-      questionnaire = ResourceProviderUtils
-          .getResource(cdssResult.getContained(), Questionnaire.class);
-      questionnaire = questionnaire == null ? cdssService
-          .getQuestionnaire(cdssSupplierId, cdssResult.getQuestionnaireRef())
-          : questionnaire;
+      questionnaire = cdssService
+          .getQuestionnaire(cdssSupplierId, cdssResult.getQuestionnaireRef());
     }
     return responseService.buildResponse(cdssResult, questionnaire, caseId, cdssSupplierId);
   }

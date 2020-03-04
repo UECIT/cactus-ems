@@ -1,8 +1,8 @@
 package uk.nhs.ctp.service.fhir;
 
-import static uk.nhs.ctp.utils.ResourceProviderUtils.*;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static uk.nhs.ctp.utils.ResourceProviderUtils.*;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -55,8 +55,8 @@ public class ResponseResolverImpl implements ResponseResolver {
     cdssResult.setOutputData(getOutputData(guidanceResponse));
     cdssResult.setSessionId(getSessionID(guidanceResponse));
     cdssResult.setContained(guidanceResponse.getContained());
-    cdssResult
-        .setServiceDefinitionId(guidanceResponse.getModule().getReferenceElement().getIdPart());
+    cdssResult.setServiceDefinitionId(
+        guidanceResponse.getModule().getReferenceElement().getIdPart());
 
     switch (guidanceResponse.getStatus()) {
       case SUCCESS:
@@ -109,9 +109,9 @@ public class ResponseResolverImpl implements ResponseResolver {
       if (childReference != null) {
         guidanceResponse.addContained(
             getResource(fhirContext,
-            cdssSupplier.getBaseUrl(),
-            getResourceType(childReference),
-            childReference));
+                cdssSupplier.getBaseUrl(),
+                getResourceType(childReference),
+                childReference));
       }
     });
   }

@@ -91,7 +91,6 @@ public class AuditService {
       }
       if (audit.isStorable()) {
         auditRepository.saveAndFlush(audit);
-        log.info(auditTransformer.transform(audit));
       }
     } finally {
       this.currentAudit.remove();
