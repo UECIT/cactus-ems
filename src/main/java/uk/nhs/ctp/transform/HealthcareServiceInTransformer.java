@@ -13,6 +13,7 @@ import org.hl7.fhir.dstu3.model.HealthcareService;
 import org.hl7.fhir.dstu3.model.HealthcareService.HealthcareServiceAvailableTimeComponent;
 import org.hl7.fhir.dstu3.model.HealthcareService.HealthcareServiceNotAvailableComponent;
 import org.springframework.stereotype.Component;
+import uk.nhs.ctp.service.dto.CodeDTO;
 import uk.nhs.ctp.service.dto.HealthcareServiceDTO;
 
 @Component
@@ -36,7 +37,15 @@ public class HealthcareServiceInTransformer
         .provision(getCodeDisplay(healthcareService.getServiceProvisionCode()))
         .availableTimes(getAvailableTimes(healthcareService.getAvailableTime()))
         .notAvailableTimes(getNotAvailableTimes(healthcareService.getNotAvailable()))
+        .types(getTypes(healthcareService.getType()))
         .build();
+  }
+
+  private List<CodeDTO> getTypes(List<CodeableConcept> concept) {
+    return concept.stream()
+        .map(cc ->
+            new CodeDTO(cc.getCodingFirstRep().getCode(), cc.getCodingFirstRep().getDisplay(), cc.getCodingFirstRep().getSystem()))
+        .collect(Collectors.toUnmodifiableList());
   }
 
   private List<String> getNotAvailableTimes(List<HealthcareServiceNotAvailableComponent> notAvailable) {

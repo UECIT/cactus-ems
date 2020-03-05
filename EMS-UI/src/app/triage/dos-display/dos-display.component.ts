@@ -4,9 +4,11 @@ import {ReferralRequest} from 'src/app/model/questionnaire';
 import {DosService} from 'src/app/service/dos.service';
 import {HealthcareService} from 'src/app/model/dos';
 import {TriageService} from "../../service/triage.service";
+import {ReportService} from "../../service/report.service";
 import {ToastrService} from "ngx-toastr";
 import {AppState} from 'src/app/app.state';
 import {Store} from '@ngrx/store';
+import {HandoverMessageDialogComponent} from '../handover-message-dialog/handover-message-dialog.component';
 
 @Component({
   selector: 'app-dos-display',
@@ -21,10 +23,12 @@ export class DosDisplayComponent {
   selectedService: HealthcareService;
   patientId: string;
   error: object;
+  isReportEnabled: boolean;
 
   constructor(
       private dosService: DosService,
       private triageService: TriageService,
+      private reportService: ReportService,
       private toastr: ToastrService,
       public dialog: MatDialog,
       store: Store<AppState>) {
@@ -45,6 +49,7 @@ export class DosDisplayComponent {
           this.error = error;
         }
     );
+    this.isReportEnabled = await this.reportService.getEnabled();
   }
 
   viewDetails(selected: HealthcareService) {
@@ -59,12 +64,45 @@ export class DosDisplayComponent {
       const url = `${this.selectedService.endpoint}?encounter=${encounterRef}`;
 
       // Service must be updated in referral request before invoking handover
-      await this.triageService.updateSelectedService(this.caseId, this.selectedService);
+      await this.selectService();
 
       window.open(url);
     } catch (e) {
       this.toastr.error('Unable to update selected service for case - ' + e.message);
     }
+  }
+
+  async generateReport() {
+    // Service must be updated in referral request before generating the report
+    await this.selectService();
+
+    await this.reportService.generateReport(this.referralRequest.contextReference)
+        .then(result => {
+          this.openDialog(result);
+        })
+        .catch(err => {
+          this.toastr.error('Unable to generate reports - ' + err);
+        });
+  }
+
+  private async selectService() {
+    await this.triageService.updateSelectedService(this.caseId, this.selectedService);
+  }
+
+  openDialog(reports) {
+    this.dialog.open(HandoverMessageDialogComponent, {
+      height: '95vh',
+      width: '95vw',
+      panelClass: 'report',
+      backdropClass: 'report-backdrop',
+      data: {
+        reports: reports
+      }
+    });
+  }
+
+  get reportEnabled() {
+    return this.isReportEnabled;
   }
 }
 

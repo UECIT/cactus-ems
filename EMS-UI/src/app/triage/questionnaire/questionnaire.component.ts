@@ -1,10 +1,7 @@
-import { ReferralRequest } from './../../model/questionnaire';
-import {HandoverMessageDialogComponent} from '../handover-message-dialog/handover-message-dialog.component';
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {Options, Questionnaire, QuestionResponse, TriageQuestion} from '../../model/questionnaire';
 import {QuestionnaireResponse} from '../../model/processTriage';
 import {MatDialog} from '@angular/material';
-import {ReportService} from 'src/app/service/report.service';
 import {ServiceDefinitionService} from '../../service/service-definition.service';
 
 
@@ -27,30 +24,10 @@ export class QuestionnaireComponent implements OnInit {
   freeText: Map<string, string>;
   url: Map<string, string> = new Map();
   enableWhen: Map<string, string[]> = new Map();
-  reports: any;
-  isloadingReport: boolean;
   supplierId: string;
-  isReportEnabled: boolean;
 
   constructor(public dialog: MatDialog,
-              private reportService: ReportService,
               private serviceDefinitionService: ServiceDefinitionService) {
-  }
-
-  openDialog(): void {
-    const dialogRef = this.dialog.open(HandoverMessageDialogComponent, {
-      height: '95vh',
-      width: '95vw',
-      panelClass: 'report',
-      backdropClass: 'report-backdrop',
-      data: {
-        reports: this.reports
-      }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      console.log(result);
-    });
   }
 
   async ngOnInit() {
@@ -100,21 +77,6 @@ export class QuestionnaireComponent implements OnInit {
           );
         }
       }
-    }
-
-    // check for result and build the handoverMessage and corresponding reports.
-    this.isReportEnabled = await this.reportService.getEnabled();
-    if (this.questionnaire.referralRequest != null 
-      && !this.hasDraftReferralRequest()
-      && this.isReportEnabled) {
-        console.log(this.questionnaire.referralRequest)
-      await this.reportService.generateReport(this.questionnaire.referralRequest.contextReference)
-        .then(result => {
-          this.reports = result;
-        })
-        .catch(err => {
-          console.log(err);
-        });
     }
     this.supplierId = await this.serviceDefinitionService.getCdssSupplierUrl(this.questionnaire.cdssSupplierId);
   }
@@ -354,13 +316,5 @@ export class QuestionnaireComponent implements OnInit {
 
   formatQuestion(question: TriageQuestion) {
     return question.question.replace(/!\[.*?\]\((.*?)\)/g, '');
-  }
-
-  get reportReady() {
-    return  this.reports && !this.isloadingReport;
-  }
-
-  get reportEnabled() {
-    return this.isReportEnabled;
   }
 }

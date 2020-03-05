@@ -1,3 +1,4 @@
+import { Code } from '.';
 export class HealthcareService {
     id: string;
     name: string;
@@ -10,4 +11,5 @@ export class HealthcareService {
     provision: string[];
     availableTimes: string[];
     notAvailableTimes: string[];
+    types: Code[];
 }

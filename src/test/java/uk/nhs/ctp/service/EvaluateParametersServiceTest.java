@@ -35,7 +35,6 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -150,7 +149,7 @@ public class EvaluateParametersServiceTest {
 
     settings = new SettingsDTO();
 
-    settings.setUserType(new CodeDTO("Patient", "Patient"));
+    settings.setUserType(new CodeDTO("Patient", "Patient", "UserTypeSys"));
     settings.setUserLanguage(languageDto);
     settings.setUserTaskContext(codeDto);
     settings.setRecipientLanguage(languageDto);
