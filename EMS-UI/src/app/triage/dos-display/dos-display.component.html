@@ -2,7 +2,7 @@
 
 <mat-card-title>Search for Service: </mat-card-title>
 
-<button mat-raised-button (click)="getDosResponse()" class="col-md-4" id="search">Search</button>
+<button mat-raised-button (click)="getDosResponse()" class="col-md-4 search">Search</button>
 
 <mat-card-title *ngIf="response">Services Summary: </mat-card-title>
 <mat-radio-group [(ngModel)]="selectedService">
@@ -12,7 +12,8 @@
         </mat-radio-button>
         <button mat-button class="modal-link" color="primary" (click)="viewDetails(service)">View Details</button>
     </div>
-    <a *ngIf="selectedService" mat-fab (click)="invoke()">Invoke!</a>
+    <button *ngIf="selectedService" class="search" mat-raised-button (click)="invoke()">Invoke!</button>
+    <button *ngIf="selectedService && reportEnabled" class="search" mat-raised-button (click)="generateReport()">View Report</button>
 </mat-radio-group>
 
 <mat-card-title *ngIf="error" style="clear:both;">Error Summary: </mat-card-title>

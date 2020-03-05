@@ -251,16 +251,6 @@
         <mat-card-title class="col-8" style="display:inline-block;">
           Result: {{ questionnaire.result }}</mat-card-title>
 
-        <div *ngIf="reportEnabled">
-          <button [ngClass]="{'no-padding': !reportReady}"
-                  class="col-sm-4 offset-sm-0 continue"
-                  [disabled]="!reportReady"
-                  (click)="openDialog()">
-            View Result/Reports
-              <mat-progress-bar *ngIf="!reportReady" mode="indeterminate"></mat-progress-bar>
-          </button>
-        </div>
-
         <mat-tab-group style="clear: both;">
           <mat-tab label="Result Details" *ngIf="questionnaire.referralRequest">
             <mat-card>

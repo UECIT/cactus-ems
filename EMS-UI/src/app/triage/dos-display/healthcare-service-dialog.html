@@ -1,6 +1,10 @@
 <h1 mat-dialog-title>Service: {{service.name}}</h1>
 <div mat-dialog-content>
     <p>Description: {{service.description}}</p>
+    <p>Services provided:</p>
+    <ul>
+        <li *ngFor="let type of service.types">{{type.display}}</li>
+    </ul>
     <p>Active: {{service.active}}</p>
     <p>Appointment Required: {{service.appointmentRequired}}</p>
     <p>Phone Number: {{service.phoneNumber}}</p>

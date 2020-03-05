@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -41,6 +42,7 @@ import uk.nhs.ctp.entities.ReferralRequestEntity;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.repos.PatientRepository;
 import uk.nhs.ctp.service.dto.CdssResult;
+import uk.nhs.ctp.service.dto.SelectedServiceRequestDTO;
 import uk.nhs.ctp.service.fhir.GenericResourceLocator;
 import uk.nhs.ctp.service.fhir.ReferenceService;
 import uk.nhs.ctp.service.fhir.StorageService;
@@ -194,7 +196,11 @@ public class CaseServiceTest {
         .transform(new ReferralRequest());
     triageCase.setReferralRequest(referralRequestEntity);
 
-    Cases cases = spyCaseService.updateSelectedService(1L, "HealthcareService/5");
+    SelectedServiceRequestDTO serviceRequestDTO = new SelectedServiceRequestDTO();
+    serviceRequestDTO.setCaseId(1L);
+    serviceRequestDTO.setSelectedServiceId("HealthcareService/5");
+    serviceRequestDTO.setServiceTypes(Collections.emptyList());
+    Cases cases = spyCaseService.updateSelectedService(serviceRequestDTO);
     referralRequestEntity = cases.getReferralRequest();
     ReferralRequest referralRequest = referralRequestEntityTransformer
         .transform(referralRequestEntity);

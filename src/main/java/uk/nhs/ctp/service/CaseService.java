@@ -1,17 +1,19 @@
 package uk.nhs.ctp.service;
 
 import static com.google.common.collect.MoreCollectors.onlyElement;
+import static java.util.Collections.singletonList;
 import static uk.nhs.ctp.SystemConstants.DATE_FORMAT;
 
 import com.google.common.base.Preconditions;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Immunization;
@@ -37,6 +39,7 @@ import uk.nhs.ctp.entities.QuestionResponse;
 import uk.nhs.ctp.entities.ReferralRequestEntity;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.dto.CdssResult;
+import uk.nhs.ctp.service.dto.SelectedServiceRequestDTO;
 import uk.nhs.ctp.service.fhir.GenericResourceLocator;
 import uk.nhs.ctp.service.fhir.ReferenceService;
 import uk.nhs.ctp.service.fhir.StorageService;
@@ -369,13 +372,13 @@ public class CaseService {
     }
   }
 
-  public Cases updateSelectedService(Long caseId, String selectedServiceId) {
-    Cases triageCase = caseRepository.findOne(caseId);
+  public Cases updateSelectedService(SelectedServiceRequestDTO serviceRequestDTO) {
+    Cases triageCase = caseRepository.findOne(serviceRequestDTO.getCaseId());
     ErrorHandlingUtils.checkEntityExists(triageCase, "Case");
 
     log.info("Setting selected HealthcareService for case " + triageCase.getId());
 
-    Reference serviceRef = new Reference(selectedServiceId);
+    Reference serviceRef = new Reference(serviceRequestDTO.getSelectedServiceId());
     Preconditions.checkArgument(
         "HealthcareService".equals(serviceRef.getReferenceElement().getResourceType()),
         "Selected service must be a HealthcareService"
@@ -384,7 +387,13 @@ public class CaseService {
 
     ReferralRequestEntity referralRequestEntity = triageCase.getReferralRequest();
     referralRequestService.update(referralRequestEntity, referralRequest -> {
-      referralRequest.setRecipient(Collections.singletonList(serviceRef));
+      List<CodeableConcept> serviceRequested = serviceRequestDTO.getServiceTypes().stream()
+          .map(codeDTO ->
+              new CodeableConcept().addCoding(
+                  new Coding(codeDTO.getSystem(), codeDTO.getCode(), codeDTO.getDisplay())))
+          .collect(Collectors.toList());
+      referralRequest.setServiceRequested(serviceRequested);
+      referralRequest.setRecipient(singletonList(serviceRef));
       referralRequest.addSupportingInfo(
           referenceService.buildRef(ResourceType.Appointment, "example-appointment"));
     });

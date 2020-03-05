@@ -84,6 +84,6 @@ public class CaseController {
   Cases updateSelectedService(@RequestBody SelectedServiceRequestDTO requestDTO) {
     auditService.setCaseId(requestDTO.getCaseId());
     return caseService
-        .updateSelectedService(requestDTO.getCaseId(), requestDTO.getSelectedServiceId());
+        .updateSelectedService(requestDTO);
   }
 }

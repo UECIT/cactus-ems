@@ -88,7 +88,8 @@ export class TriageService {
       let url = `${environment.EMS_API}/case/selectedService`;
       let request = {
         caseId,
-        selectedServiceId: selectedService.id
+        selectedServiceId: selectedService.id,
+        serviceTypes: selectedService.types
       };
       await this.http
       .put<Case>(url, JSON.stringify(request), httpOptions)

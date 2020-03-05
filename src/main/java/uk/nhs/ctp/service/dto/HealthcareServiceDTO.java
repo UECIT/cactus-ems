@@ -19,5 +19,6 @@ public class HealthcareServiceDTO {
   List<String> provision;
   List<String> availableTimes;
   List<String> notAvailableTimes;
+  List<CodeDTO> types;
 
 }
