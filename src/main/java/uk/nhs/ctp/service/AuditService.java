@@ -16,7 +16,6 @@ import uk.nhs.ctp.repos.AuditRepository;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.search.AuditSearchRequest;
 import uk.nhs.ctp.service.search.AuditSearchResultDTO;
-import uk.nhs.ctp.transform.AuditTransformer;
 
 /**
  * Collects an audit of HTTP requests and responses during a single EMS API call
@@ -43,7 +42,6 @@ public class AuditService {
 
   private final AuditRepository auditRepository;
   private final CaseRepository caseRepository;
-  private final AuditTransformer auditTransformer;
 
   private ThreadLocal<Audit> currentAudit = new ThreadLocal<>();
   private ThreadLocal<AuditEntry> currentEntry = new ThreadLocal<>();
@@ -61,7 +59,10 @@ public class AuditService {
   }
 
   public Audit startAudit(HttpRequest request) {
-    Preconditions.checkState(currentAudit.get() == null, "Unclosed audit");
+    if (currentAudit.get() != null) {
+      log.warn("Unclosed audit");
+      currentAudit.remove();
+    }
 
     Audit audit = Audit.builder()
         .auditEntries(new ArrayList<>())
@@ -76,7 +77,10 @@ public class AuditService {
 
   public void endAudit(HttpRequest request, HttpResponse response) {
     try {
-      Preconditions.checkState(currentEntry.get() == null, "Unclosed audit entry");
+      if (currentEntry.get() != null) {
+        log.warn("Unclosed audit entry");
+        currentEntry.remove();
+      }
 
       Audit audit = getCurrentAudit();
       audit.setRequestBody(request.getBodyString());
@@ -142,7 +146,10 @@ public class AuditService {
   }
 
   public AuditEntry startEntry(HttpRequest request) {
-    Preconditions.checkState(currentEntry.get() == null, "Unclosed audit entry");
+    if (currentEntry.get() != null) {
+      log.warn("Unclosed audit entry");
+      currentEntry.remove();
+    }
 
     Audit audit = getCurrentAudit();
 
