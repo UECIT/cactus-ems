@@ -25,7 +25,7 @@ public class ObservationTransformer implements Transformer<CaseObservation, Obse
   public Observation transform(CaseObservation caseObservation) {
     var observation = new Observation()
         .setStatus(ObservationStatus.FINAL)
-        .setIssued(caseObservation.getTimestamp())
+        .setIssued(caseObservation.getDateCreated())
         .setCode(new CodeableConcept().addCoding(new Coding(
             caseObservation.getSystem(),
             caseObservation.getCode(),

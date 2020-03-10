@@ -135,7 +135,7 @@ public class QuestionnaireService {
 
     // Look for an existing response for this questionnaire
     var qr = questionnaireResponses.stream()
-        .filter(equalQuestionnaireIds(questionnaireId))
+        .filter(equalQuestionnaireIds(questionnaireRef.getReference()))
         .findFirst();
 
     if (qr.isPresent() && amending) {
@@ -155,7 +155,7 @@ public class QuestionnaireService {
 
       QuestionResponse questionResponseEntity = QuestionResponse.builder()
           .reference(qrRef)
-          .questionnaireId(questionnaireId)
+          .questionnaireId(questionnaireRef.getReference())
           .build();
 
       caseEntity.addQuestionResponse(questionResponseEntity);
@@ -167,7 +167,7 @@ public class QuestionnaireService {
   }
 
   private Predicate<QuestionnaireResponse> equalQuestionnaireIds(String questionnaireId) {
-    return resp -> new IdType(resp.getQuestionnaire().getReference())
-        .getIdPart().equals(questionnaireId);
+    return resp -> resp.getQuestionnaire().getReference()
+        .equals(questionnaireId);
   }
 }

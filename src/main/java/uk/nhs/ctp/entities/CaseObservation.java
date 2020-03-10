@@ -4,18 +4,16 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import lombok.Data;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "case_observation")
@@ -59,7 +57,11 @@ public class CaseObservation {
   @Column(name = "value_display")
   private String valueDisplay;
 
-  @Temporal(TemporalType.DATE)
-  @Column(name = "observation_timestamp")
-  private Date timestamp;
+  @CreationTimestamp
+  @Column(name = "created")
+  private Date dateCreated;
+
+  @UpdateTimestamp
+  @Column(name = "updated")
+  private Date dateUpdated;
 }

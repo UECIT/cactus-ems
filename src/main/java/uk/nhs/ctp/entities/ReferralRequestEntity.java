@@ -2,6 +2,7 @@ package uk.nhs.ctp.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonRawValue;
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -14,6 +15,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import lombok.Data;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "referral_request")
@@ -34,6 +37,14 @@ public class ReferralRequestEntity {
   @Column
   @JsonRawValue
   private String resource;
+
+  @CreationTimestamp
+  @Column(name = "created")
+  private Date dateCreated;
+
+  @UpdateTimestamp
+  @Column(name = "updated")
+  private Date dateUpdated;
 
   public void setCaseEntity(Cases caseEntity) {
     caseEntity.setReferralRequest(this);

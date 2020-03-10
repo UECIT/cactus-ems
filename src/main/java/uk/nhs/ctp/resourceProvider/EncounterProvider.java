@@ -24,6 +24,7 @@ import uk.nhs.ctp.entities.CaseCarePlan;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.EncounterService;
+import uk.nhs.ctp.service.ListService;
 import uk.nhs.ctp.service.fhir.GenericResourceLocator;
 import uk.nhs.ctp.service.fhir.ReferenceService;
 
@@ -34,6 +35,7 @@ public class EncounterProvider implements IResourceProvider {
   private GenericResourceLocator resourceLocator;
   private EncounterService encounterService;
   private ReferenceService referenceService;
+  private ListService listService;
   private CaseRepository caseRepository;
 
 
@@ -49,6 +51,7 @@ public class EncounterProvider implements IResourceProvider {
     addReferralRequest(bundle, caseId);
     addObservations(bundle, caseId);
     addCarePlans(bundle, caseId);
+    addList(bundle, caseId);
 
     return bundle;
   }
@@ -127,6 +130,13 @@ public class EncounterProvider implements IResourceProvider {
           "CarePlan must have absolute reference");
       addResource(bundle, reference, null);
     }
+  }
+
+  private void addList(Bundle bundle, Long caseId) {
+    bundle.addEntry()
+        .setResource(listService.buildFromCase(caseId))
+        .setFullUrl(referenceService.buildId(ResourceType.List, caseId)); //Use EncounterID as ListID
+
   }
 
   @Read
