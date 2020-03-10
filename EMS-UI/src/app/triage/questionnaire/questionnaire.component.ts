@@ -4,12 +4,6 @@ import {QuestionnaireResponse} from '../../model/processTriage';
 import {MatDialog} from '@angular/material';
 import {ServiceDefinitionService} from '../../service/service-definition.service';
 
-
-export interface DialogData {
-  handoverMessage: any;
-  reports: any;
-}
-
 @Component({
   selector: 'app-questionnaire',
   templateUrl: './questionnaire.component.html',

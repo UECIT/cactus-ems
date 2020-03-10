@@ -4,26 +4,27 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Map;
 import javax.xml.bind.JAXBException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.codesystems.ContentType;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import uk.nhs.ctp.enums.ContentType;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.dto.ReportType;
 import uk.nhs.ctp.service.dto.ReportsDTO;
@@ -43,6 +44,9 @@ public class ReportService {
 
   @Value("${reports.server.auth.token}")
   private String reportServerToken;
+
+  @Value("${reports.validation.server}")
+  private String reportValidationServer;
 
   public Collection<ReportsDTO> generateReports(
       ReportRequestDTO request) throws JAXBException, JsonProcessingException {
@@ -114,24 +118,50 @@ public class ReportService {
           "Creating Reports: Unable to parse response", e);
     }
 
-    // Validation report
+    reports.add(validate(encounterRef));
+
+    return reports;
+  }
+
+  public ReportsDTO validate(String encounterRef) {
     try {
       byte[] zipData = validationService
           .zipResources(new Reference(encounterRef).getReferenceElement().getIdPartAsLong());
 
-      // TODO send to TKW instead of writing locally
-      File zipFile = File.createTempFile("validation", ".zip");
-      try (FileOutputStream outputStream = new FileOutputStream(zipFile)) {
-        outputStream.write(zipData);
+      byte[] encodedZip = Base64.getEncoder().encode(zipData);
+      RestTemplate template = new RestTemplate();
+
+      ResponseEntity<String> responseHtml = template
+          .exchange(reportValidationServer, HttpMethod.POST, new HttpEntity<>(encodedZip),
+              String.class);
+
+      if (!responseHtml.getStatusCode().is2xxSuccessful()) {
+        log.warn("Call to validation service on {} returned status {}, with message:\n{}",
+            reportValidationServer,
+            responseHtml.getStatusCode().value(),
+            responseHtml.getStatusCode().getReasonPhrase());
       }
-      log.info("Output written to " + zipFile);
+
+      return ReportsDTO.builder()
+          .contentType(ContentType.HTML)
+          .reportType(ReportType.VALIDATION)
+          .request(reportValidationServer)
+          .response(responseHtml.getBody())
+          .build();
 
     } catch (IOException e) {
       throw new InternalErrorException(
           "Creating Reports: Unable to create resource bundle for validation", e);
     }
-
-    return reports;
+    catch (ResourceAccessException e) { //Temporary until we have an endpoint
+      log.warn("Unable to invoke reports validation on {}", reportValidationServer);
+      return ReportsDTO.builder()
+          .contentType(ContentType.HTML)
+          .reportType(ReportType.VALIDATION)
+          .request(reportValidationServer)
+          .response(e.getMessage())
+          .build();
+    }
   }
 
 }

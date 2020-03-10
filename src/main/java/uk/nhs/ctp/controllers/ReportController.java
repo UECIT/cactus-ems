@@ -1,7 +1,6 @@
 package uk.nhs.ctp.controllers;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Collection;
 import javax.xml.bind.JAXBException;

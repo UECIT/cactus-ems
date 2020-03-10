@@ -8,6 +8,7 @@ public enum ReportType {
 	AMBULANCE_V2,
 	DOS,
 	ECDS,
-	IUCDS
+	IUCDS,
+	VALIDATION
 
 }
