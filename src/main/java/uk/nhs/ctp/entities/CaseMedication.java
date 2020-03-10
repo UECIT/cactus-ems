@@ -1,16 +1,15 @@
 package uk.nhs.ctp.entities;
 
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "case_medication")
@@ -30,8 +29,12 @@ public class CaseMedication {
 	@Column(name = "not_given")
 	private Boolean notGiven;
 
-	@Temporal(TemporalType.DATE)
-	@Column(name = "medication_timestamp")
-	private Date timestamp;
+	@CreationTimestamp
+	@Column(name = "created")
+	private Date dateCreated;
+
+	@UpdateTimestamp
+	@Column(name = "updated")
+	private Date dateUpdated;
 
 }

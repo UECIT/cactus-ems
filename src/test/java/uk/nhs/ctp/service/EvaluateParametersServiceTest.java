@@ -85,21 +85,18 @@ public class EvaluateParametersServiceTest {
     caseObservation.setId(1L);
     caseObservation.setCode("123456");
     caseObservation.setDisplay("Test Observation");
-    caseObservation.setTimestamp(calendar.getTime());
     caseObservation.setValueCode("true");
 
     caseImmunization = new CaseImmunization();
     caseImmunization.setId(1L);
     caseImmunization.setCode("123456");
     caseImmunization.setDisplay("Test Immunization");
-    caseImmunization.setTimestamp(calendar.getTime());
     caseImmunization.setNotGiven(true);
 
     caseMedication = new CaseMedication();
     caseMedication.setId(1L);
     caseMedication.setCode("123456");
     caseMedication.setDisplay("Test Medication");
-    caseMedication.setTimestamp(calendar.getTime());
     caseMedication.setNotGiven(false);
 
     caseWithNoData = newCase();

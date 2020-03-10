@@ -1,6 +1,5 @@
 package uk.nhs.ctp.transform;
 
-import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.Transformer;
 import org.hl7.fhir.dstu3.model.BooleanType;
@@ -25,7 +24,6 @@ public class CaseObservationTransformer implements Transformer<Observation, Case
     Coding dataAbsentReason = observation.getDataAbsentReason().getCodingFirstRep();
     caseObservation.setDataAbsentCode(dataAbsentReason.getCode());
     caseObservation.setDataAbsentDisplay(dataAbsentReason.getDisplay());
-    caseObservation.setTimestamp(new Date());
 
     return caseObservation;
   }

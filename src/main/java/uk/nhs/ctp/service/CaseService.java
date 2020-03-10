@@ -151,14 +151,12 @@ public class CaseService {
 
     // Store references to CarePlans
     if (evaluateResponse.hasCareAdvice()) {
-      Date now = new Date();
       List<CaseCarePlan> carePlans = triageCase.getCarePlans();
       carePlans.clear();
 
       evaluateResponse.getCareAdvice().stream()
           .map(dto -> CaseCarePlan.builder()
               .reference(dto.getId())
-              .timestamp(now)
               .build())
           .forEach(carePlans::add);
     }
@@ -193,7 +191,7 @@ public class CaseService {
     //noinspection UnstableApiUsage
     QuestionResponse existingResponse = triageCase.getQuestionResponses().stream()
         .filter(answer -> answer.getQuestionnaireId()
-            .equals(response.getQuestionnaire().getReferenceElement().getIdPart()))
+            .equals(response.getQuestionnaire().getReference()))
         .collect(onlyElement());
 
     response.setId(existingResponse.getReference());
@@ -215,7 +213,6 @@ public class CaseService {
           log.info("Amending Medication {} for case {}", medicationAdmin.getCode(),
               triageCase.getId());
           updateMedicationCoding(currentMed, medicationAdmin);
-          medicationAdmin.setTimestamp(new Date());
 
           amended = true;
         }
@@ -239,7 +236,6 @@ public class CaseService {
         log.info("Amending Immunisation {} for case {}", immunisation.getCode(),
             triageCase.getId());
         updateImmunisationCoding(resource, immunisation);
-        immunisation.setTimestamp(new Date());
 
         amended = true;
       }
@@ -263,7 +259,6 @@ public class CaseService {
             triageCase.getId());
 
         caseObservationTransformer.updateObservationCoding(currentObs, observation);
-        observation.setTimestamp(new Date());
 
         amended = true;
         break;
@@ -292,7 +287,6 @@ public class CaseService {
     updateImmunisationCoding(immunization, caseImmunization);
 
     caseImmunization.setNotGiven(immunization.getNotGiven());
-    caseImmunization.setTimestamp(new Date());
 
     return caseImmunization;
   }
@@ -348,7 +342,6 @@ public class CaseService {
     updateMedicationCoding(medication, caseMedication);
 
     caseMedication.setNotGiven(medication.getNotGiven());
-    caseMedication.setTimestamp(new Date());
 
     return caseMedication;
   }

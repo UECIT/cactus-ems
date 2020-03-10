@@ -7,12 +7,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "case_carePlan")
@@ -28,6 +28,11 @@ public class CaseCarePlan {
 	@Column
 	private String reference;
 
-	@Temporal(TemporalType.DATE)
-	private Date timestamp;
+	@CreationTimestamp
+	@Column(name = "created")
+	private Date dateCreated;
+
+	@UpdateTimestamp
+	@Column(name = "updated")
+	private Date dateUpdated;
 }
