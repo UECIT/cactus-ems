@@ -3,7 +3,7 @@ package uk.nhs.ctp.service.dto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import org.hl7.fhir.dstu3.model.codesystems.ContentType;
+import uk.nhs.ctp.enums.ContentType;
 
 @AllArgsConstructor
 @Getter
