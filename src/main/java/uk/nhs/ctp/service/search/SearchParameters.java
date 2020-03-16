@@ -1,5 +1,8 @@
 package uk.nhs.ctp.service.search;
 
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -7,8 +10,6 @@ import java.util.List;
 import java.util.StringJoiner;
 import lombok.Builder;
 import lombok.Getter;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -36,27 +37,31 @@ public class SearchParameters {
 
   public MultiValueMap<String, String> toMultiValueMap() {
     LinkedMultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-    map.add(SP_QUERY, query);
-    if (StringUtils.isNotEmpty(status)) {
+
+    if (isNotEmpty(query)) {
+      map.add(SP_QUERY, query);
+    }
+    if (isNotEmpty(status)) {
       map.add(SP_STATUS, status);
     }
-    if (StringUtils.isNotEmpty(experimental)) {
+    if (isNotEmpty(experimental)) {
       map.add(SP_EXPERIMENTAL, experimental);
     }
-    if (StringUtils.isNotEmpty(jurisdiction)) {
+    if (isNotEmpty(jurisdiction)) {
       map.add(SP_JURISDICTION, jurisdiction);
     }
-    if (CollectionUtils.isNotEmpty(observationTriggers)) {
+    if (isNotEmpty(observationTriggers)) {
       map.put(SP_OBSERVATION_TRIGGER, observationTriggers);
     }
-    if (CollectionUtils.isNotEmpty(patientTriggers)) {
+    if (isNotEmpty(patientTriggers)) {
       map.put(SP_PATIENT_TRIGGER, patientTriggers);
     }
-    if (CollectionUtils.isNotEmpty(contextValueCode)) {
+    if (isNotEmpty(contextValueCode)) {
       map.put(SP_CONTEXT_VALUE, contextValueCode);
     }
-
-    map.add(SP_SEARCH_DATE_TIME, LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+    if (isNotEmpty(query)) {
+      map.add(SP_SEARCH_DATE_TIME, LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+    }
 
     return map;
   }
