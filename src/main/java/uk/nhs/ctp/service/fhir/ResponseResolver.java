@@ -13,6 +13,6 @@ public interface ResponseResolver {
 
 	// TODO: These should be refactored into separate components
 	RequestGroup getResult(GuidanceResponse guidanceResponse);
-	String getQuestionnaireReference(GuidanceResponse guidanceResponse);
+	String getQuestionnaireId(GuidanceResponse guidanceResponse);
 	
 }

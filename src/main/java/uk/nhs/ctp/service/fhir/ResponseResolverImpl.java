@@ -24,6 +24,7 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.RequestGroup;
 import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.entities.CdssSupplier;
@@ -52,6 +53,7 @@ public class ResponseResolverImpl implements ResponseResolver {
     CdssResult cdssResult = new CdssResult();
     extractedResources.forEach(child -> addContained(child, cdssSupplier, guidanceResponse));
 
+    cdssResult.setRequestId(guidanceResponse.getRequestId());
     cdssResult.setOutputData(getOutputData(guidanceResponse));
     cdssResult.setSessionId(getSessionID(guidanceResponse));
     cdssResult.setContained(guidanceResponse.getContained());
@@ -66,7 +68,11 @@ public class ResponseResolverImpl implements ResponseResolver {
         break;
       case DATAREQUESTED:
       case DATAREQUIRED:
-        cdssResult.setQuestionnaireRef(getQuestionnaireReference(guidanceResponse));
+        var questionnaireRef = referenceService.buildId(
+            cdssSupplier.getBaseUrl(),
+            ResourceType.Questionnaire,
+            getQuestionnaireId(guidanceResponse));
+        cdssResult.setQuestionnaireRef(questionnaireRef);
         break;
       case FAILURE:
         cdssResult.setOperationOutcome(getResource(fhirContext,
@@ -163,7 +169,7 @@ public class ResponseResolverImpl implements ResponseResolver {
   }
 
   @Override
-  public String getQuestionnaireReference(GuidanceResponse guidanceResponse) {
+  public String getQuestionnaireId(GuidanceResponse guidanceResponse) {
 
     if (guidanceResponse.hasDataRequirement()) {
       DataRequirementCodeFilterComponent requirement = guidanceResponse

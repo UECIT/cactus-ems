@@ -21,21 +21,6 @@ import uk.nhs.ctp.SystemCode;
 
 @UtilityClass
 public class ResourceProviderUtils {
-
-	public Reference getParameterAsReference(
-			List<ParametersParameterComponent> parameters,
-			String parameterName) {
-
-		return castToType(getParameterByName(parameters, parameterName).getValue(), Reference.class);
-	}
-	
-	public <T extends Resource> T getParameterAsResource(
-			List<ParametersParameterComponent> parameters,
-			String parameterName,
-			Class<T> resourceClass) {
-
-		return resourceClass.cast(getParameterByName(parameters, parameterName).getResource());
-	}
 	
 	public ParametersParameterComponent getParameterByName(
 			List<ParametersParameterComponent> parameters,

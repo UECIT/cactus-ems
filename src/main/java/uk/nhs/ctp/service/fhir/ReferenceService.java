@@ -2,10 +2,11 @@ package uk.nhs.ctp.service.fhir;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.FhirTerser;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -27,21 +28,26 @@ public class ReferenceService {
 
   private final FhirContext fhirContext;
 
-  private URI getFullEmsServerUrl() {
-    return URI.create(emsServer);
-  }
-
   public String buildId(ResourceType resourceType, long id) {
     return buildId(resourceType, Long.toString(id));
   }
 
   public String buildId(ResourceType resourceType, String id) {
-    return buildId(getFullEmsServerUrl(), resourceType,id);
+    return buildId(emsServer, resourceType, id);
   }
 
-  public String buildId(URI base, ResourceType resourceType, String id) {
-    return UriComponentsBuilder.fromUri(base)
-        .pathSegment(resourceType.name(), id)
+  public String buildId(String base, ResourceType resourceType, String id) {
+    var idType = new IdType(id);
+    if (idType.isAbsolute()) {
+      return id;
+    }
+
+    var resourceSegment = StringUtils.isEmpty(idType.getResourceType())
+        ? resourceType.name()
+        : idType.getResourceType();
+
+    return UriComponentsBuilder.fromUriString(base)
+        .pathSegment(resourceSegment, idType.getIdPart())
         .build()
         .toUriString();
   }
@@ -69,7 +75,7 @@ public class ReferenceService {
   }
 
   public Reference buildRef(String baseUrl, ResourceType resourceType, String id) {
-    return new Reference(buildId(URI.create(baseUrl), resourceType, id));
+    return new Reference(buildId(baseUrl, resourceType, id));
   }
 
   public void resolve(String baseUrl, List<? extends IBaseReference> references) {

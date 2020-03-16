@@ -23,6 +23,8 @@ public class CdssResult {
   private List<Resource> contained;
   private OperationOutcome operationOutcome;
 
+  private String requestId;
+
   public boolean hasOutputData() {
     return !this.outputData.getParameter().isEmpty();
   }
@@ -37,15 +39,6 @@ public class CdssResult {
 
   public boolean hasQuestionnaire() {
     return this.questionnaireRef != null;
-  }
-
-  public boolean isInProgress() {
-    return this.hasOutputData() && !this.hasResult() && !this.hasQuestionnaire() && !this
-        .hasOperationOutcome();
-  }
-
-  private boolean hasOperationOutcome() {
-    return this.operationOutcome != null;
   }
 
   public boolean hasReferralRequest() {

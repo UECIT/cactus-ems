@@ -140,7 +140,7 @@ public class ResponseResolverTest {
 
 	@Test(expected = EMSException.class)
 	public void testExceptionThrownWhenQuestionnaireReferenceNotPresentAndStatusIsDataRequired() {
-		guidanceResponseService.getQuestionnaireReference(invalidResponse);
+		guidanceResponseService.getQuestionnaireId(invalidResponse);
 	}
 
 }

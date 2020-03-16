@@ -21,6 +21,7 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.entities.PatientEntity;
 import uk.nhs.ctp.enums.Language;
+import uk.nhs.ctp.service.NarrativeService;
 import uk.nhs.ctp.service.fhir.ReferenceService;
 
 @Component
@@ -29,12 +30,14 @@ import uk.nhs.ctp.service.fhir.ReferenceService;
 public class CareConnectPatientBuilder {
 
   private final ReferenceService referenceService;
+  private final NarrativeService narrativeService;
 
   public CareConnectPatient build(PatientEntity patientEntity) {
 
     CareConnectPatient patient = new CareConnectPatient();
     patient.setId(referenceService.buildId(ResourceType.Patient, patientEntity.getId()));
 
+    addText(patient, patientEntity);
     addNHSId(patient, patientEntity);
     addName(patient, patientEntity);
     addAddress(patient, patientEntity);
@@ -53,14 +56,19 @@ public class CareConnectPatientBuilder {
     return patient;
   }
 
+  private void addText(CareConnectPatient patient, PatientEntity patientEntity) {
+    var text = "Patient " + patientEntity.getFirstName() + " " + patientEntity.getLastName()
+        + ", " + patientEntity.getGender() + ", born on " + patientEntity.getDateOfBirth();
+    patient.setText(narrativeService.buildNarrative(text));
+  }
+
   private void addGP(CareConnectPatient patient, PatientEntity patientEntity) {
     // TODO add to entity
     patient.addGeneralPractitioner(referenceService.buildRef(ResourceType.Practitioner, "gp"));
     patient.addGeneralPractitioner(referenceService.buildRef(ResourceType.Organization, "ergp"));
   }
 
-  private void addPharmacy(CareConnectPatient patient,
-      PatientEntity patientEntity) {
+  private void addPharmacy(CareConnectPatient patient, PatientEntity patientEntity) {
     // TODO add to entity
     patient.setNominatedPharmacy(referenceService.buildRef(ResourceType.Organization, "erp"));
   }

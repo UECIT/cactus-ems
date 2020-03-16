@@ -18,6 +18,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import lombok.Data;
+import org.hl7.fhir.dstu3.model.Composition;
 
 @Entity
 @Table(name = "cases")
@@ -90,6 +91,10 @@ public class Cases {
   @OneToOne(mappedBy = "caseEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   protected ReferralRequestEntity referralRequest;
 
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+  @JoinColumn(name = "case_id")
+  private List<CompositionEntity> compositions = new ArrayList<>();
+
   @Column(name = "triage_complete")
   private boolean triageComplete;
 
@@ -103,6 +108,11 @@ public class Cases {
       referralRequest.caseEntity = this;
     }
     this.referralRequest = referralRequest;
+  }
+
+  public void addComposition(CompositionEntity composition) {
+    this.compositions.add(composition);
+    composition.setCaseEntity(this);
   }
 
   public void addMedication(CaseMedication medication) {
