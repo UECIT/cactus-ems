@@ -48,8 +48,8 @@ public class ComponentOfDocumentDecorator implements OneOneOneDecorator {
 	@Autowired
 	private Generex uuidGenerator;
 	
-    @Autowired
-    private SimpleDateFormat reportDateFormat;
+	@Autowired
+	private SimpleDateFormat reportDateFormat;
 	
 	@Override
 	public void decorate(POCDMT200001GB02ClinicalDocument document, ReportRequestDTO request) {
@@ -126,7 +126,7 @@ public class ComponentOfDocumentDecorator implements OneOneOneDecorator {
 		COCDTP146232GB01ResponsibleParty responsibleParty = responsiblePartyTemplateResolver.resolve(
 				request.getReferralRequest().getRequester().getAgent().getResource(), request);
 		
-		encompassingEncounter.setResponsibleParty(new JAXBElement<COCDTP146232GB01ResponsibleParty>(
+		encompassingEncounter.setResponsibleParty(new JAXBElement<>(
 				new QName("urn:hl7-org:v3", "responsibleParty"), COCDTP146232GB01ResponsibleParty.class, responsibleParty));
 		
 		componentOf.setCOCDTP146232GB01EncompassingEncounter(encompassingEncounter);

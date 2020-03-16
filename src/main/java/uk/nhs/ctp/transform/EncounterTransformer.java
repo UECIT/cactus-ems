@@ -11,6 +11,7 @@ import org.hl7.fhir.dstu3.model.Condition.ConditionVerificationStatus;
 import org.hl7.fhir.dstu3.model.Duration;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.Encounter.EncounterStatus;
+import org.hl7.fhir.dstu3.model.Narrative;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ResourceType;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.enums.ConditionCategory;
 import uk.nhs.ctp.enums.ParticipationType;
+import uk.nhs.ctp.service.NarrativeService;
 import uk.nhs.ctp.service.fhir.ReferenceService;
 
 @Service
@@ -25,6 +27,7 @@ import uk.nhs.ctp.service.fhir.ReferenceService;
 public class EncounterTransformer {
 
   private final ReferenceService referenceService;
+  private final NarrativeService narrativeService;
 
   public Encounter transform(Cases caseEntity) {
     var encounter = new Encounter();
@@ -41,6 +44,7 @@ public class EncounterTransformer {
 //        "unscheduled", "unscheduled"));
 
     encounter.setId(caseEntity.getId().toString());
+    encounter.setText(transformNarrative(caseEntity));
     encounter.setSubject(new Reference(caseEntity.getPatientId()));
     encounter.setServiceProvider(
         referenceService.buildRef(ResourceType.Organization, "self"));
@@ -63,6 +67,13 @@ public class EncounterTransformer {
         .setCondition(new Reference(condition));
 
     return encounter;
+  }
+
+  private Narrative transformNarrative(Cases caseEntity) {
+    String text = "A " + (caseEntity.isTriageComplete() ? "finished" : "triaged")
+        + "encounter for patient " + caseEntity.getFirstName() + " " + caseEntity.getLastName()
+        + " on " + caseEntity.getCreatedDate();
+    return narrativeService.buildNarrative(text);
   }
 
   private void addPractitioner(Cases caseEntity, Encounter encounter) {

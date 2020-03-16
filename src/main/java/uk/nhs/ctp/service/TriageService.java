@@ -1,7 +1,5 @@
 package uk.nhs.ctp.service;
 
-import ca.uhn.fhir.context.FhirContext;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -29,14 +27,13 @@ public class TriageService {
   private EncounterService encounterService;
   private EvaluateService evaluateService;
   private CaseObservationTransformer caseObservationTransformer;
-  private FhirContext fhirContext;
+  private CompositionService compositionService;
 
   /**
    * Creates case from test case scenario and patient details and launches first triage request
    *
    * @param requestDetails {@link TriageLaunchDTO}
    * @return response {@link CdssResponseDTO}
-   * @throws Exception
    */
   public CdssResponseDTO launchTriage(TriageLaunchDTO requestDetails) throws Exception {
 
@@ -80,7 +77,6 @@ public class TriageService {
    *
    * @param requestDetails {@link CdssRequestDTO}
    * @return response {@link CdssResponseDTO}
-   * @throws JsonProcessingException
    */
   public CdssResponseDTO processTriageRequest(CdssRequestDTO requestDetails) throws Exception {
 
@@ -91,17 +87,12 @@ public class TriageService {
 
     CdssResult cdssResult = evaluateService.evaluate(requestDetails);
 
-    CdssResponseDTO cdssResponse = buildResponseDtoFromResult(cdssResult,
+    CdssResponseDTO cdssResponse = buildResponseDtoFromResult(
+        cdssResult,
         caseId,
         requestDetails.getCdssSupplierId());
 
-    if (cdssResult.isInProgress()) {
-      requestDetails.setQuestionResponse(null);
-      cdssResult = evaluateService.evaluate(requestDetails);
-
-      cdssResponse = buildResponseDtoFromResult(cdssResult, caseId,
-          requestDetails.getCdssSupplierId());
-    }
+    compositionService.crupdate(caseId, cdssResult);
 
     return cdssResponse;
   }
@@ -111,7 +102,6 @@ public class TriageService {
    *
    * @param requestDetails {@link CdssRequestDTO}
    * @return response {@link CdssResponseDTO}
-   * @throws JsonProcessingException
    */
   public CdssResponseDTO processTriageAmendRequest(CdssRequestDTO requestDetails)
       throws Exception {
@@ -122,11 +112,9 @@ public class TriageService {
     auditService.setCaseId(caseId);
     CdssResult cdssResult = evaluateService.evaluate(requestDetails);
 
-    CdssResponseDTO cdssResponse = buildAmendResponseDtoFromResult(
+    return buildAmendResponseDtoFromResult(
         cdssResult, caseId, requestDetails.getCdssSupplierId(),
         requestDetails.getQuestionResponse());
-
-    return cdssResponse;
   }
 
   /**
@@ -155,7 +143,6 @@ public class TriageService {
    *
    * @param cdssResult        {@link CdssResult}
    * @param caseId            {@link Long}
-   * @param previousQuestions
    * @return {@link CdssRequestDTO}
    */
   protected CdssResponseDTO buildAmendResponseDtoFromResult(

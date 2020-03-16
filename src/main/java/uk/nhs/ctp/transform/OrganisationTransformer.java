@@ -6,6 +6,7 @@ import org.hl7.fhir.dstu3.model.CareConnectOrganization;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.model.Organisation;
+import uk.nhs.ctp.service.NarrativeService;
 import uk.nhs.ctp.service.fhir.ReferenceService;
 
 @Component
@@ -14,6 +15,7 @@ public class OrganisationTransformer implements Transformer<Organisation, CareCo
 
   private final ReferenceService referenceService;
   private final IdentifierTransformer identifierTransformer;
+  private final NarrativeService narrativeService;
 
   @Override
   public CareConnectOrganization transform(Organisation from) {
@@ -21,6 +23,8 @@ public class OrganisationTransformer implements Transformer<Organisation, CareCo
 
     organisation.setId(referenceService.buildId(ResourceType.Organization, from.getId()));
     organisation.setName(from.getName());
+    organisation.setText(
+        narrativeService.buildNarrative("The " + from.getName() + " organisation"));
 
     // calling "organisation::addIdentifier" specifically as it's the only one
     // implemented by the CareConnectOrganization profile for now

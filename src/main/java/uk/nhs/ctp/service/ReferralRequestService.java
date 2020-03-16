@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.google.common.base.Preconditions;
 import java.util.function.Consumer;
+import javax.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
@@ -38,9 +39,6 @@ public class ReferralRequestService {
   /**
    * Applies an update to the embedded ReferralRequest resource by deserializing it, applying the
    * update function and then re-serializing it.
-   *
-   * @param entity
-   * @param updateFn
    */
   public void update(ReferralRequestEntity entity, Consumer<ReferralRequest> updateFn) {
     ReferralRequest referralRequest = referralRequestEntityTransformer.transform(entity);
@@ -49,6 +47,7 @@ public class ReferralRequestService {
     entity.setResource(fhirParser.encodeResourceToString(referralRequest));
   }
 
+  @Transactional
   public ReferralRequest get(Long id) {
     ReferralRequestEntity referralRequestEntity =
         referralRequestRepository.findOne(id);

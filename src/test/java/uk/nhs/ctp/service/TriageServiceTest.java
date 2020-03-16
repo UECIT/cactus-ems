@@ -2,7 +2,6 @@ package uk.nhs.ctp.service;
 
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -47,6 +46,9 @@ public class TriageServiceTest {
   private CaseObservationTransformer caseObservationTransformer;
 
   @Mock
+  private CompositionService compositionService;
+
+  @Mock
   private EvaluateService evaluateService;
 
   @Mock
@@ -67,7 +69,7 @@ public class TriageServiceTest {
         encounterService,
         evaluateService,
         caseObservationTransformer,
-        fhirContext
+        compositionService
     ));
 
     triageService = new TriageService(
@@ -78,7 +80,7 @@ public class TriageServiceTest {
         encounterService,
         evaluateService,
         caseObservationTransformer,
-        fhirContext
+        compositionService
     );
 
     mockCdssResult = mock(CdssResult.class);
@@ -88,41 +90,6 @@ public class TriageServiceTest {
     when(mockCdssRequestDTO.getCdssSupplierId()).thenReturn(1L);
 
     mockQuestionnaire = mock(Questionnaire.class);
-
-  }
-
-  @Test
-  public void testSecondRequestMadeTwiceWhenNoResultOrDataRequirementReturned() throws Exception {
-    doReturn(mockCdssResult)
-        .when(evaluateService)
-        .evaluate(mockCdssRequestDTO);
-    when(mockCdssResult.isInProgress())
-        .thenReturn(true)
-        .thenReturn(false);
-    doReturn(mockCdssResponseDTO)
-        .when(spyTriageService)
-        .buildResponseDtoFromResult(mockCdssResult, 1L, 1L);
-
-    spyTriageService.processTriageRequest(mockCdssRequestDTO);
-
-    verify(evaluateService, times(2)).evaluate(mockCdssRequestDTO);
-
-  }
-
-  @Test
-  public void testNoSecondRequestMadeOnceWhenResultInProgress() throws Exception {
-    doReturn(mockCdssResult)
-        .when(evaluateService)
-        .evaluate(mockCdssRequestDTO);
-    when(mockCdssResult.isInProgress())
-        .thenReturn(false);
-    doReturn(mockCdssResponseDTO)
-        .when(spyTriageService)
-        .buildResponseDtoFromResult(mockCdssResult, 1L, 1L);
-
-    spyTriageService.processTriageRequest(mockCdssRequestDTO);
-
-    verify(evaluateService, times(1)).evaluate(mockCdssRequestDTO);
 
   }
 

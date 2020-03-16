@@ -1,11 +1,7 @@
 package uk.nhs.ctp.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -25,6 +21,7 @@ import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
@@ -52,6 +49,7 @@ import uk.nhs.ctp.service.dto.PractitionerDTO;
 import uk.nhs.ctp.service.dto.SettingsDTO;
 import uk.nhs.ctp.service.dto.TriageOption;
 import uk.nhs.ctp.service.dto.TriageQuestion;
+import uk.nhs.ctp.service.fhir.GenericResourceLocator;
 import uk.nhs.ctp.service.fhir.StorageService;
 
 @SpringBootTest
@@ -67,11 +65,10 @@ public class EvaluateParametersServiceTest {
   private CaseRepository mockCaseRepository;
   @MockBean
   private StorageService mockStorageService;
+  @MockBean
+  private GenericResourceLocator resourceLocator;
 
   private Cases caseWithNoData, caseWithObservation, caseWithImmunization, caseWithMedication, caseWithData;
-  private CaseObservation caseObservation;
-  private CaseImmunization caseImmunization;
-  private CaseMedication caseMedication;
   private Calendar calendar;
   private TriageQuestion[] questionResponses;
   private SettingsDTO settings;
@@ -81,19 +78,19 @@ public class EvaluateParametersServiceTest {
     calendar = Calendar.getInstance();
     calendar.set(2018, Calendar.JUNE, 3);
 
-    caseObservation = new CaseObservation();
+    var caseObservation = new CaseObservation();
     caseObservation.setId(1L);
     caseObservation.setCode("123456");
     caseObservation.setDisplay("Test Observation");
     caseObservation.setValueCode("true");
 
-    caseImmunization = new CaseImmunization();
+    var caseImmunization = new CaseImmunization();
     caseImmunization.setId(1L);
     caseImmunization.setCode("123456");
     caseImmunization.setDisplay("Test Immunization");
     caseImmunization.setNotGiven(true);
 
-    caseMedication = new CaseMedication();
+    var caseMedication = new CaseMedication();
     caseMedication.setId(1L);
     caseMedication.setCode("123456");
     caseMedication.setDisplay("Test Medication");
@@ -114,6 +111,10 @@ public class EvaluateParametersServiceTest {
     caseWithData.addImmunization(caseImmunization);
     caseWithData.addMedication(caseMedication);
     caseWithData.addObservation(caseObservation);
+
+    var questionnaire = new Questionnaire();
+    questionnaire.setId("1");
+    questionnaire.addItem().setLinkId("1").setText("Is this a test?");
 
     var questionResponsesTemp = new ArrayList<TriageQuestion>();
 
@@ -168,6 +169,8 @@ public class EvaluateParametersServiceTest {
         }
       }
     });
+    when(resourceLocator.<Questionnaire>findResource(any(Reference.class)))
+        .thenReturn(questionnaire);
   }
 
   @Test

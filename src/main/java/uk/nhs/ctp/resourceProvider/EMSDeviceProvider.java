@@ -14,21 +14,21 @@ import uk.nhs.ctp.service.EMSDeviceService;
 
 @Component
 @RequiredArgsConstructor
-public class DeviceProvider implements IResourceProvider {
+public class EMSDeviceProvider implements IResourceProvider {
 
   private final EMSDeviceService emsDeviceService;
 
+  @Override
+  public Class<? extends IBaseResource> getResourceType() {
+    return Device.class;
+  }
+
   @Read
-  public Device getEmsDevice(@IdParam IdType id) {
+  public Device getEMSDevice(@IdParam IdType id) {
     if (ObjectUtils.notEqual(id.getIdPart(), EMSDeviceService.MAIN_ID)) {
       throw new ResourceNotFoundException(id);
     }
 
     return emsDeviceService.getEms();
-  }
-
-  @Override
-  public Class<? extends IBaseResource> getResourceType() {
-    return Device.class;
   }
 }
