@@ -79,7 +79,6 @@ public class EncounterTransformer {
   private void addPractitioner(Cases caseEntity, Encounter encounter) {
     if (caseEntity.getPractitionerId() != null) {
       var participant = new Encounter.EncounterParticipantComponent();
-      participant.addType(ParticipationType.PPRF.toCodeableConcept());
       participant.addType(ParticipationType.ADM.toCodeableConcept());
       participant.addType(ParticipationType.DIS.toCodeableConcept());
       participant.setIndividual(
