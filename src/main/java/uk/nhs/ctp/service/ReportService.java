@@ -1,5 +1,6 @@
 package uk.nhs.ctp.service;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -13,15 +14,25 @@ import java.util.Map;
 import javax.xml.bind.JAXBException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.RequestBuilder;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Reference;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Whitelist;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.nhs.ctp.enums.ContentType;
@@ -38,6 +49,7 @@ public class ReportService {
   private final Collection<Reportable> reportServices;
   private final ValidationService validationService;
   private final ObjectMapper mapper;
+  private final FhirContext fhirContext;
 
   @Value("${reports.server}")
   private String reportsServer;
@@ -69,6 +81,13 @@ public class ReportService {
   public Collection<ReportsDTO> generateReports(String encounterRef) {
     ArrayList<ReportsDTO> reports = new ArrayList<>();
 
+    transformEncounterReport(encounterRef, reports);
+    reports.add(validate(encounterRef));
+
+    return reports;
+  }
+
+  private void transformEncounterReport(String encounterRef, ArrayList<ReportsDTO> reports) {
     RestTemplate template = new RestTemplate();
     template.getInterceptors().add((request, body, execution) -> {
       if (request.getURI().toString().startsWith(reportsServer)) {
@@ -83,83 +102,116 @@ public class ReportService {
 
     log.info("Sending an http post to: {}", reportsUrl);
 
-    ResponseEntity<String> response = template
-        .exchange(reportsUrl, HttpMethod.POST, null, String.class);
-
-    if (response.getStatusCode() != HttpStatus.OK) {
-      throw new InternalErrorException(
-          "Creating Reports: Unexpected response status: " + response.getStatusCode());
-    }
-
     try {
-      Map<String, String> parsedResponse = mapper.readValue(response.getBody(),
-          new TypeReference<Map<String, String>>() {
-          });
+      ResponseEntity<String> response = template
+          .exchange(reportsUrl, HttpMethod.POST, null, String.class);
 
-      if (parsedResponse.containsKey("ecds")) {
+      if (response.getStatusCode() != HttpStatus.OK) {
+        log.error("Creating Reports: Unexpected response status: " + response.getStatusCode());
+
         reports.add(ReportsDTO.builder()
-            .contentType(ContentType.XML)
+            .contentType(ContentType.HTML)
             .reportType(ReportType.ECDS)
             .request(reportsUrl)
-            .response(parsedResponse.get("ecds"))
+            .response("Creating Reports: Unexpected response status: " + response.getStatusCode())
             .build());
-      }
+      } else {
+        Map<String, String> parsedResponse = mapper.readValue(response.getBody(),
+            new TypeReference<Map<String, String>>() {
+            });
 
-      if (parsedResponse.containsKey("iucds")) {
-        reports.add(ReportsDTO.builder()
-            .contentType(ContentType.XML)
-            .reportType(ReportType.IUCDS)
-            .request(reportsUrl)
-            .response(parsedResponse.get("iucds"))
-            .build());
+        if (parsedResponse.containsKey("ecds")) {
+          reports.add(ReportsDTO.builder()
+              .contentType(ContentType.XML)
+              .reportType(ReportType.ECDS)
+              .request(reportsUrl)
+              .response(parsedResponse.get("ecds"))
+              .build());
+        }
+
+        if (parsedResponse.containsKey("iucds")) {
+          reports.add(ReportsDTO.builder()
+              .contentType(ContentType.XML)
+              .reportType(ReportType.IUCDS)
+              .request(reportsUrl)
+              .response(parsedResponse.get("iucds"))
+              .build());
+        }
       }
     } catch (IOException e) {
-      throw new InternalErrorException(
-          "Creating Reports: Unable to parse response", e);
+      reports.add(ReportsDTO.builder()
+          .contentType(ContentType.HTML)
+          .reportType(ReportType.ECDS)
+          .request(reportsUrl)
+          .response("Creating Reports: Unable to parse response: " + e.getMessage())
+          .build());
+    } catch (RestClientException e) {
+      reports.add(ReportsDTO.builder()
+          .contentType(ContentType.HTML)
+          .reportType(ReportType.ECDS)
+          .request(reportsUrl)
+          .response("Creating Reports: Error contacting reports service: " + e.getMessage())
+          .build());
     }
-
-    reports.add(validate(encounterRef));
-
-    return reports;
   }
 
   public ReportsDTO validate(String encounterRef) {
-    try {
+    try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
       byte[] zipData = validationService
           .zipResources(new Reference(encounterRef).getReferenceElement().getIdPartAsLong());
 
-      byte[] encodedZip = Base64.getEncoder().encode(zipData);
-      RestTemplate template = new RestTemplate();
+      var base64Zip = Base64.getEncoder().encode(zipData);
 
-      ResponseEntity<String> responseHtml = template
-          .exchange(reportValidationServer, HttpMethod.POST, new HttpEntity<>(encodedZip),
-              String.class);
+      // Send to validation service
+      String validatorUrl = reportValidationServer + "/$evaluate";
 
-      if (!responseHtml.getStatusCode().is2xxSuccessful()) {
-        log.warn("Call to validation service on {} returned status {}, with message:\n{}",
-            reportValidationServer,
-            responseHtml.getStatusCode().value(),
-            responseHtml.getStatusCode().getReasonPhrase());
-      }
-
-      return ReportsDTO.builder()
-          .contentType(ContentType.HTML)
-          .reportType(ReportType.VALIDATION)
-          .request(reportValidationServer)
-          .response(responseHtml.getBody())
+      HttpUriRequest request = RequestBuilder
+          .post(validatorUrl)
+          .addHeader(HttpHeaders.ACCEPT, "application/fhir+json")
+          .addHeader(HttpHeaders.CONTENT_TYPE, "application/zip")
+          .addHeader("Content-Transfer-Encoding", "base64")
+          .setEntity(new ByteArrayEntity(base64Zip))
           .build();
 
+      try (CloseableHttpResponse response = httpClient.execute(request)) {
+        if (response.getStatusLine().getStatusCode() != 200) {
+          log.warn("Call to validation service on {} returned status {}, with message:\n{}",
+              validatorUrl,
+              response.getStatusLine().getStatusCode(),
+              response.getStatusLine().getReasonPhrase());
+        }
+
+        OperationOutcome operationOutcome = fhirContext.newJsonParser()
+            .parseResource(OperationOutcome.class, response.getEntity().getContent());
+        String html = operationOutcome.getIssueFirstRep().getDiagnostics();
+        Whitelist whitelist = Whitelist.relaxed()
+            .addTags("hr")
+            .addAttributes("tr", "bgcolor");
+        String safeHtml = Jsoup.clean(html, whitelist);
+
+        return ReportsDTO.builder()
+            .contentType(ContentType.HTML)
+            .reportType(ReportType.VALIDATION)
+            .request(validatorUrl)
+            .response(safeHtml)
+            .build();
+      } catch (HttpClientErrorException e) {
+        return ReportsDTO.builder()
+            .contentType(ContentType.HTML)
+            .reportType(ReportType.VALIDATION)
+            .request(validatorUrl)
+            .response("Failed to request validation: " + e.getMessage())
+            .build();
+      }
     } catch (IOException e) {
       throw new InternalErrorException(
           "Creating Reports: Unable to create resource bundle for validation", e);
-    }
-    catch (ResourceAccessException e) { //Temporary until we have an endpoint
-      log.warn("Unable to invoke reports validation on {}", reportValidationServer);
+    } catch (ResourceAccessException e) {
       return ReportsDTO.builder()
           .contentType(ContentType.HTML)
           .reportType(ReportType.VALIDATION)
-          .request(reportValidationServer)
-          .response(e.getMessage())
+          .request("")
+          .response("Creating Reports: Unable to contact validation service: " + e.getMessage())
           .build();
     }
   }
