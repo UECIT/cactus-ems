@@ -143,7 +143,8 @@ public class CaseService {
     if (referralRequest != null) {
       log.info("Storing referral request");
       ReferralRequest absoluteReferralRequest = referralRequestService
-          .makeAbsolute(referralRequest);
+          .makeAbsolute(referralRequest)
+          .setBasedOn(List.of(new Reference(referralRequest)));
       ReferralRequestEntity referralRequestEntity = referralRequestTransformer
           .transform(absoluteReferralRequest);
       triageCase.setReferralRequest(referralRequestEntity);
