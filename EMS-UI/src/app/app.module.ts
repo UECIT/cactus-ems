@@ -63,6 +63,8 @@ import { PatientSelectionComponent } from './main/patient-selection/patient-sele
 import { ReferralRequestComponent, ConditionDialog } from './triage/referral-request/referral-request.component';
 import { PractitionerSelectionComponent } from './main/practitioner-selection/practitioner-selection.component';
 import { EnvironmentService } from './service/environment.service';
+import { EmsSupplierComponent, EditEmsDialog } from './supplier-managment/ems-supplier/ems-supplier.component';
+import { EmsService } from './service/ems.service';
 
 export function hljsLanguages() {
   return [
@@ -108,9 +110,11 @@ export function hljsLanguages() {
     HealthcareServiceDialog,
     ReferralRequestComponent,
     ConditionDialog,
-    PractitionerSelectionComponent
+    PractitionerSelectionComponent,
+    EmsSupplierComponent,
+    EditEmsDialog
   ],
-  entryComponents: [SwitchSupplierDialogComponent, SwitchServicePromptDialogComponent, HandoverMessageDialogComponent, HealthcareServiceDialog, ConditionDialog],
+  entryComponents: [SwitchSupplierDialogComponent, SwitchServicePromptDialogComponent, HandoverMessageDialogComponent, HealthcareServiceDialog, ConditionDialog, EditEmsDialog],
   imports: [
     BrowserModule,
     StoreModule.forRoot({
@@ -138,6 +142,7 @@ export function hljsLanguages() {
     TriageService,
     CdssService,
     CaseService,
+    EmsService,
     DosService,
     {provide: LocationStrategy, useClass: HashLocationStrategy},
     {provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher},

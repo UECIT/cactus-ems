@@ -1,0 +1,18 @@
+<h1 *ngIf="supplier.name" mat-dialog-title>Edit: {{supplier.name}}</h1>
+<h1 *ngIf="!supplier.name" mat-dialog-title>Create EMS:</h1>
+<div mat-dialog-content>
+    <mat-form-field class="full-width">
+        <mat-label>Name</mat-label>
+        <input required matInput [(ngModel)]="updatedSupplier.name" />
+        <mat-error *ngIf="!updatedSupplier.name">Required</mat-error>
+    </mat-form-field>
+    <mat-form-field class="full-width">
+        <mat-label>Fhir Server URL</mat-label>
+        <input required matInput [(ngModel)]="updatedSupplier.baseUrl" />
+        <mat-error *ngIf="!updatedSupplier.baseUrl">Required</mat-error>
+    </mat-form-field>
+    <div mat-dialog-actions>
+        <button mat-button (click)="cancel()">Cancel</button>
+        <button mat-button [disabled]="!updatedSupplier.name || !updatedSupplier.baseUrl" (click)="save()">Save</button>
+    </div>
+</div>
