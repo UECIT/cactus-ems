@@ -1,7 +1,6 @@
 package uk.nhs.ctp.service;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -203,10 +202,7 @@ public class ReportService {
             .response("Failed to request validation: " + e.getMessage())
             .build();
       }
-    } catch (IOException e) {
-      throw new InternalErrorException(
-          "Creating Reports: Unable to create resource bundle for validation", e);
-    } catch (ResourceAccessException e) {
+    } catch (ResourceAccessException | IOException e) {
       return ReportsDTO.builder()
           .contentType(ContentType.HTML)
           .reportType(ReportType.VALIDATION)
