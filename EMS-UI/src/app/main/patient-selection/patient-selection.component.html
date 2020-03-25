@@ -5,13 +5,18 @@
       <nav class="d-flex flex-wrap">
         <div *ngFor="let patient of patients">
           <button mat-raised-button [class.selected]="patient == selectedPatient"
-                  class="btn btn-primary btnSearch text-center" (click)="change(patient)" [disabled]="disabled">
+                  class="btnSearch" (click)="change(patient)" [disabled]="disabled">
             <div>
               {{ patient.title }} {{ patient.firstName }} {{ patient.lastName }}
             </div>
             <div>
               Age: {{ patient.dateOfBirth | age }}
             </div>
+          </button>
+        </div>
+        <div>
+          <button mat-raised-button class="btnSearch" (click)="openSearch()">
+              Search for a patient
           </button>
         </div>
       </nav>

@@ -5,6 +5,7 @@ import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.Transformer;
 import org.hl7.fhir.dstu3.model.Address;
+import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.StringType;
@@ -18,8 +19,11 @@ public class EncounterReportInputTransformer implements Transformer<EncounterRep
   @Override
   public EncounterHandoverDTO transform(EncounterReportInput encounterReportInput) {
     Patient patient = encounterReportInput.getPatient();
+    Encounter encounter = encounterReportInput.getEncounter();
     return EncounterHandoverDTO.builder()
-        .encounterId(encounterReportInput.getEncounter().getId())
+        .encounterId(encounter.getId())
+        .encounterStart(encounter.getPeriod().getStart().toString())
+        .encounterEnd(encounter.getPeriod().getEnd().toString())
         .observations(getObservations(encounterReportInput.getObservations()))
         .patientId(patient.getId())
         .patientName(patient.getNameFirstRep().getNameAsSingleString())

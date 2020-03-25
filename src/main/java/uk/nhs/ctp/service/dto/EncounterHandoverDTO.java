@@ -8,10 +8,12 @@ import lombok.Data;
 @Builder
 public class EncounterHandoverDTO {
 
-  String encounterId;
-  List<String> observations;
-  String patientId;
-  String patientName;
-  String patientAddress;
+  private String encounterId;
+  private String encounterStart;
+  private String encounterEnd;
+  private List<String> observations;
+  private String patientId;
+  private String patientName;
+  private String patientAddress;
 
 }

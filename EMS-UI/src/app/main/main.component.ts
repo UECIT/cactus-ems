@@ -62,6 +62,7 @@ export class MainComponent implements OnInit {
       private patientService: PatientService,
       private reportService: ReportService
   ) {
+    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
   }
 
   disableLaunch() {
