@@ -65,6 +65,7 @@ import { PractitionerSelectionComponent } from './main/practitioner-selection/pr
 import { EnvironmentService } from './service/environment.service';
 import { EmsSupplierComponent, EditEmsDialog } from './supplier-managment/ems-supplier/ems-supplier.component';
 import { EmsService } from './service/ems.service';
+import { ReportSearchDialogComponent } from './main/report-search-dialog/report-search-dialog.component';
 
 export function hljsLanguages() {
   return [
@@ -112,9 +113,18 @@ export function hljsLanguages() {
     ConditionDialog,
     PractitionerSelectionComponent,
     EmsSupplierComponent,
-    EditEmsDialog
+    EditEmsDialog,
+    ReportSearchDialogComponent
   ],
-  entryComponents: [SwitchSupplierDialogComponent, SwitchServicePromptDialogComponent, HandoverMessageDialogComponent, HealthcareServiceDialog, ConditionDialog, EditEmsDialog],
+  entryComponents: [
+    SwitchSupplierDialogComponent, 
+    SwitchServicePromptDialogComponent, 
+    HandoverMessageDialogComponent, 
+    HealthcareServiceDialog, 
+    ConditionDialog, 
+    EditEmsDialog, 
+    ReportSearchDialogComponent
+  ],
   imports: [
     BrowserModule,
     StoreModule.forRoot({

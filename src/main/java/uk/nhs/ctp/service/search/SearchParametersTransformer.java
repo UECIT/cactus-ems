@@ -1,9 +1,5 @@
 package uk.nhs.ctp.service.search;
 
-import static uk.nhs.ctp.SystemURL.CS_CDS_STUB;
-import static uk.nhs.ctp.SystemURL.CS_GENDER;
-import static uk.nhs.ctp.SystemURL.CS_PROVIDER_TAXONOMY;
-import static uk.nhs.ctp.SystemURL.SNOMED;
 import static uk.nhs.ctp.utils.DateUtils.ageCodeFromDate;
 
 import java.time.Instant;
@@ -20,6 +16,7 @@ import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementCodeFilterCompone
 import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementDateFilterComponent;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.stereotype.Component;
+import uk.nhs.ctp.SystemURL;
 import uk.nhs.ctp.enums.Setting;
 import uk.nhs.ctp.enums.UserType;
 import uk.nhs.ctp.service.dto.SettingsDTO;
@@ -46,9 +43,9 @@ public class SearchParametersTransformer {
       UserType initiatingType = Setting.fromCode(settingsDTO.getSetting().getCode()) == Setting.ONLINE
           ? UserType.fromCode(settingsDTO.getUserType().getCode())
           : UserType.PRACTITIONER;
-      builder.contextValue("user", CS_PROVIDER_TAXONOMY, initiatingType.getValue())
-          .contextValue("setting", CS_PROVIDER_TAXONOMY, settingsDTO.getSetting().getCode())
-          .contextValue("task", CS_CDS_STUB, settingsDTO.getUserTaskContext().getCode())
+      builder.contextValue("user", SystemURL.CS_PROVIDER_TAXONOMY, initiatingType.getValue())
+          .contextValue("setting", SystemURL.CS_PROVIDER_TAXONOMY, settingsDTO.getSetting().getCode())
+          .contextValue("task", SystemURL.CS_CDS_STUB, settingsDTO.getUserTaskContext().getCode())
           .jurisdiction(settingsDTO.getJurisdiction().getCode());
     }
 
@@ -56,11 +53,11 @@ public class SearchParametersTransformer {
       Patient patient = resourceLocator.findResource(patientId);
 
       if (patient.hasGender()) {
-        builder.contextValue("gender", CS_GENDER, patient.getGender().toCode());
+        builder.contextValue("gender", SystemURL.CS_GENDER, patient.getGender().toCode());
       }
 
       if (patient.hasBirthDate()) {
-        builder.contextValue("age", SNOMED, ageCodeFromDate(patient.getBirthDate()));
+        builder.contextValue("age", SystemURL.SNOMED, ageCodeFromDate(patient.getBirthDate()));
       }
     }
 

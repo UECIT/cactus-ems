@@ -39,6 +39,18 @@ export class ReportService {
     }
   }
 
+  searchByPatient(nhsNumber: string) {
+    const httpOptions = {headers: new HttpHeaders()};
+    if (this.sessionStorage['auth_token'] != null) {
+      httpOptions.headers = httpOptions.headers.set(
+          'Authorization',
+          this.sessionStorage['auth_token']
+      );
+      const url = `${environment.EMS_API}/report/search?nhsNumber=${nhsNumber}`;
+      return this.http.get<EncounterReportInput[]>(url, httpOptions).toPromise();
+    }
+  }
+
   generateReport(encounterId: string) {
     const httpOptions = {headers: new HttpHeaders()};
     if (this.sessionStorage['auth_token'] != null) {

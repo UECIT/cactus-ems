@@ -1,9 +1,14 @@
 package uk.nhs.ctp.resourceProvider;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -19,6 +24,7 @@ import org.hl7.fhir.dstu3.model.Composition;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
@@ -41,6 +47,7 @@ public class EncounterProvider implements IResourceProvider {
   private ReferenceService referenceService;
   private ListService listService;
   private CompositionService compositionService;
+  private FhirContext context;
 
   /**
    * Encounter Report Search
@@ -175,6 +182,15 @@ public class EncounterProvider implements IResourceProvider {
   @Read
   public Encounter getEncounter(@IdParam IdType id) {
     return encounterService.getEncounter(id.getIdPartAsLong());
+  }
+
+  @Search
+  public List<Encounter> searchByPatient(
+      @RequiredParam(name = Encounter.SP_PATIENT, chainWhitelist = Patient.SP_IDENTIFIER) ReferenceParam param) {
+
+    TokenParam identifier = param.toTokenParam(context);
+
+    return encounterService.getByPatientIdentifier(identifier.getSystem(), identifier.getValue());
   }
 
   @Override

@@ -3,6 +3,7 @@ package uk.nhs.ctp.controllers;
 import ca.uhn.fhir.context.FhirContext;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Collection;
+import java.util.List;
 import javax.xml.bind.JAXBException;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.nhs.ctp.service.EncounterService;
 import uk.nhs.ctp.service.ReportService;
 import uk.nhs.ctp.service.dto.EncounterHandoverDTO;
-import uk.nhs.ctp.service.dto.EncounterReportInput;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.dto.ReportsDTO;
 import uk.nhs.ctp.transform.EncounterReportInputTransformer;
@@ -61,9 +61,13 @@ public class ReportController {
   @GetMapping(path = "/encounter")
   @ResponseBody
   public EncounterHandoverDTO getEncounterReport(@RequestParam String encounterId) {
-    EncounterReportInput encounterReport = encounterService
-        .getEncounterReport(new IdType(encounterId));
-    return encounterReportInputTransformer.transform(encounterReport);
+    return encounterService.getEncounterReportHandover(new IdType(encounterId));
+  }
+
+  @GetMapping(path = "/search")
+  @ResponseBody
+  public List<EncounterHandoverDTO> findEncountersByPatient(@RequestParam String nhsNumber) {
+    return encounterService.searchEncounterIdsByPatientNhsNumber(nhsNumber);
   }
 
 }
