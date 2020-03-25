@@ -14,13 +14,14 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Observation;
-import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.springframework.stereotype.Service;
+import uk.nhs.ctp.entities.CaseCarePlan;
 import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.entities.ReferralRequestEntity;
+import uk.nhs.ctp.repos.CarePlanRepository;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.repos.ReferralRequestRepository;
 import uk.nhs.ctp.service.dto.EncounterReportInput;
@@ -37,6 +38,7 @@ public class EncounterService {
   private ObservationTransformer observationTransformer;
   private CaseRepository caseRepository;
   private ReferralRequestRepository referralRequestRepository;
+  private CarePlanRepository carePlanRepository;
   private ReferralRequestEntityTransformer referralRequestEntityTransformer;
   private FhirContext fhirContext;
 
@@ -66,13 +68,19 @@ public class EncounterService {
     return Optional.empty();
   }
 
+  @Transactional
+  public List<CaseCarePlan> getCaseCarePlan(Long caseId) {
+    return carePlanRepository.findAllByCaseEntityId(caseId);
+  }
+
   public EncounterReportInput getEncounterReport(IdType encounterId) {
     Bundle encounterReportBundle = fhirContext.newRestfulGenericClient(encounterId.getBaseUrl())
-        .operation()
-        .onInstance(encounterId)
-        .named("$UEC-Report")
-        .withNoParameters(Parameters.class)
-        .returnResourceType(Bundle.class)
+        .search()
+        .forResource(Encounter.class)
+        .where(Encounter.RES_ID.exactly().identifier(encounterId.getIdPart()))
+        .include(Encounter.INCLUDE_ALL.asRecursive())
+        .revInclude(Encounter.INCLUDE_ALL.asRecursive())
+        .returnBundle(Bundle.class)
         .execute();
 
     Encounter encounter = getResource(encounterReportBundle, Encounter.class);
