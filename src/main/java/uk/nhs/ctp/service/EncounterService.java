@@ -116,8 +116,8 @@ public class EncounterService {
               .execute();
 
           return patient.getIdentifier().stream()
-              .anyMatch(identifier -> identifier.getSystem().equals(system)
-                  && identifier.getValue().equals(value));
+              .anyMatch(identifier -> system.equals(identifier.getSystem())
+                  && value.equals(identifier.getValue()));
         })
         .map(encounterTransformer::transform)
         .collect(Collectors.toUnmodifiableList());
