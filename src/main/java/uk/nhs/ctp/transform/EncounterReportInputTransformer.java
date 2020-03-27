@@ -8,6 +8,7 @@ import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.service.dto.EncounterHandoverDTO;
@@ -16,14 +17,28 @@ import uk.nhs.ctp.service.dto.EncounterReportInput;
 @Component
 public class EncounterReportInputTransformer implements Transformer<EncounterReportInput, EncounterHandoverDTO> {
 
+  private static final String UNKNOWN = "Unknown";
+
   @Override
   public EncounterHandoverDTO transform(EncounterReportInput encounterReportInput) {
     Patient patient = encounterReportInput.getPatient();
     Encounter encounter = encounterReportInput.getEncounter();
+
+    String start, end;
+
+    if (encounter.hasPeriod()) {
+      Period period = encounter.getPeriod();
+      start = period.hasStart() ? period.getStart().toString() : UNKNOWN;
+      end = period.hasEnd() ? period.getEnd().toString() : UNKNOWN;
+    }
+    else {
+      start = end = UNKNOWN;
+    }
+
     return EncounterHandoverDTO.builder()
         .encounterId(encounter.getId())
-        .encounterStart(encounter.getPeriod().getStart().toString())
-        .encounterEnd(encounter.getPeriod().getEnd().toString())
+        .encounterStart(start)
+        .encounterEnd(end)
         .observations(getObservations(encounterReportInput.getObservations()))
         .patientId(patient.getId())
         .patientName(patient.getNameFirstRep().getNameAsSingleString())

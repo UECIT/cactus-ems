@@ -1,5 +1,6 @@
 package uk.nhs.ctp.transform;
 
+import static java.lang.Boolean.TRUE;
 import static java.time.temporal.ChronoUnit.SECONDS;
 
 import java.util.Collections;
@@ -51,7 +52,7 @@ public class EncounterTransformer {
 
     addPractitioner(caseEntity, encounter);
 
-    encounter.setStatus(caseEntity.isTriageComplete()
+    encounter.setStatus(TRUE.equals(caseEntity.getTriageComplete())
         ? EncounterStatus.FINISHED
         : EncounterStatus.TRIAGED);
 
@@ -70,7 +71,7 @@ public class EncounterTransformer {
   }
 
   private Narrative transformNarrative(Cases caseEntity) {
-    String text = "A " + (caseEntity.isTriageComplete() ? "finished" : "triaged")
+    String text = "A " + (TRUE.equals(caseEntity.getTriageComplete()) ? "finished" : "triaged")
         + "encounter for patient " + caseEntity.getFirstName() + " " + caseEntity.getLastName()
         + " on " + caseEntity.getCreatedDate();
     return narrativeService.buildNarrative(text);
