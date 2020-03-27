@@ -157,6 +157,7 @@ public class CaseService {
       evaluateResponse.getCareAdvice().stream()
           .map(dto -> CaseCarePlan.builder()
               .reference(dto.getId())
+              .caseEntity(triageCase)
               .build())
           .forEach(carePlans::add);
     }

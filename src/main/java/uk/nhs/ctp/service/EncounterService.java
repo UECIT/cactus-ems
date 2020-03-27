@@ -107,17 +107,26 @@ public class EncounterService {
   public List<Encounter> getByPatientIdentifier(String system, String value) {
     return caseRepository.findAll().stream()
         .filter(caseEntity -> {
+          if (caseEntity.getPatientId() == null) {
+            return false;
+          }
           IdType id = new IdType(caseEntity.getPatientId());
 
           //TODO: This seems inefficient, have to get the patient for each case!?
-          Patient patient = fhirContext.newRestfulGenericClient(id.getBaseUrl())
-              .read().resource(Patient.class)
-              .withId(id)
-              .execute();
+          try {
+            Patient patient = fhirContext.newRestfulGenericClient(id.getBaseUrl())
+                .read().resource(Patient.class)
+                .withId(id)
+                .execute();
 
-          return patient.getIdentifier().stream()
-              .anyMatch(identifier -> system.equals(identifier.getSystem())
-                  && value.equals(identifier.getValue()));
+            return patient.getIdentifier().stream()
+                .anyMatch(identifier -> system.equals(identifier.getSystem())
+                    && value.equals(identifier.getValue()));
+          } catch (Exception e) {
+            log.error("Unable to find patient {} for encounter {}: {}", id.getValue(), caseEntity.getId(), e.getMessage());
+            return false;
+          }
+
         })
         .map(encounterTransformer::transform)
         .collect(Collectors.toUnmodifiableList());

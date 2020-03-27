@@ -18,7 +18,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import lombok.Data;
-import org.hl7.fhir.dstu3.model.Composition;
 
 @Entity
 @Table(name = "cases")
@@ -96,7 +95,7 @@ public class Cases {
   private List<CompositionEntity> compositions = new ArrayList<>();
 
   @Column(name = "triage_complete")
-  private boolean triageComplete;
+  private Boolean triageComplete;
 
   public void setReferralRequest(ReferralRequestEntity referralRequest) {
     if (referralRequest == null) {

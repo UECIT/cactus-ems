@@ -55,6 +55,7 @@ public class ListService {
     addReferralRequest(caseEntity, entityTimeList);
 
     entityTimeList.stream()
+        .filter(dateReferencePair -> dateReferencePair.getKey() != null) //Filter out old data that was not timestamped.
         .sorted(comparingByKey())
         .map(Pair::getValue)
         .map(ListEntryComponent::new)
@@ -90,6 +91,10 @@ public class ListService {
 
   private void addReferralRequest(Cases caseEntity, List<Pair<Date, Reference>> dateRefList) {
     ReferralRequestEntity referralRequestEntity = caseEntity.getReferralRequest();
+
+    if (referralRequestEntity == null) {
+      return;
+    }
     dateRefList.add(Pair.of(
         referralRequestEntity.getDateCreated(),
         referenceService.buildRef(ResourceType.ReferralRequest, referralRequestEntity.getId())));
