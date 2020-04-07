@@ -37,7 +37,7 @@ export class AuditService {
       sorts: [
         {
           direction: 'ASC',
-          sortField: 'TIMESTAMP'
+          sortField: 'DATE_CREATED'
         },
         {
           direction: 'ASC',

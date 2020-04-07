@@ -6,7 +6,7 @@ public class SearchSort {
 
 	protected enum SortField {
 		
-		TIMESTAMP("timestamp"),
+		DATE_CREATED("createdDate"),
 		FIRST_NAME("firstName"),
 		LAST_NAME("lastName");
 		
