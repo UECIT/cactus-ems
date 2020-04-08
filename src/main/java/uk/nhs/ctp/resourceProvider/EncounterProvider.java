@@ -9,9 +9,6 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
-import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import com.google.common.base.Preconditions;
 import java.util.List;
@@ -32,6 +29,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.entities.CaseCarePlan;
+import uk.nhs.ctp.service.AppointmentService;
 import uk.nhs.ctp.service.CompositionService;
 import uk.nhs.ctp.service.EncounterService;
 import uk.nhs.ctp.service.ListService;
@@ -44,6 +42,7 @@ public class EncounterProvider implements IResourceProvider {
 
   private GenericResourceLocator resourceLocator;
   private EncounterService encounterService;
+  private AppointmentService appointmentService;
   private ReferenceService referenceService;
   private ListService listService;
   private CompositionService compositionService;
@@ -115,9 +114,10 @@ public class EncounterProvider implements IResourceProvider {
   private void addReferralRequest(Bundle bundle, Long caseId) {
     encounterService.getReferralRequestForEncounter(caseId)
         .ifPresent(referralRequest -> {
+          String url = referenceService
+              .buildId(ResourceType.ReferralRequest, referralRequest.getId());
           bundle.addEntry()
-              .setFullUrl(
-                  referenceService.buildId(ResourceType.ReferralRequest, referralRequest.getId()))
+              .setFullUrl(url)
               .setResource(referralRequest);
 
           // Dereference primary concern (Conditions)
@@ -127,6 +127,18 @@ public class EncounterProvider implements IResourceProvider {
           // Dereference secondary concerns (Conditions)
           referralRequest.getSupportingInfo()
               .forEach(reference -> addResource(bundle, reference, referralRequest.getIdElement()));
+
+          addAppointment(url, bundle);
+        });
+  }
+
+  private void addAppointment(String referralRequest, Bundle bundle) {
+    appointmentService.getByReferral(referralRequest)
+        .ifPresent(app -> {
+          String id = referenceService.buildId(app.getIdElement());
+          bundle.addEntry()
+              .setFullUrl(id)
+              .setResource(app);
         });
   }
 
