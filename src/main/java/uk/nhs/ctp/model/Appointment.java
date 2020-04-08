@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.Instant;
 import lombok.Builder;
 import lombok.Data;
+import org.hl7.fhir.dstu3.model.Reference;
 import uk.nhs.ctp.enums.AppointmentStatus;
 import uk.nhs.ctp.enums.AppointmentType;
 import uk.nhs.ctp.enums.EncounterReason;
@@ -29,4 +30,5 @@ public class Appointment {
   private String comment;
   private String patientId;
   private String referral;
+  private Reference healthcareService;
 }

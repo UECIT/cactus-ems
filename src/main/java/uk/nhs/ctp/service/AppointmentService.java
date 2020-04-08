@@ -39,6 +39,7 @@ public class AppointmentService {
         .orElseThrow();
     appointment.setPatientId(referralRequest.getSubject().getReference());
     appointment.setReferral(referralRequest.getId());
+    appointment.setHealthcareService(referralRequest.getRecipientFirstRep());
     storageService.storeExternal(appointmentTransformer.transform(appointment));
   }
 }

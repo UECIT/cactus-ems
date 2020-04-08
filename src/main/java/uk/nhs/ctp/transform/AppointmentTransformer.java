@@ -16,6 +16,7 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ResourceType;
+import org.hl7.fhir.dstu3.model.Schedule;
 import org.hl7.fhir.dstu3.model.Slot;
 import org.hl7.fhir.dstu3.model.Slot.SlotStatus;
 import org.springframework.stereotype.Component;
@@ -92,7 +93,19 @@ public class AppointmentTransformer
     slot.setStatus(SlotStatus.BUSY);
     slot.setStart(Date.from(from.getStart()));
     slot.setEnd(Date.from(from.getEnd()));
+    slot.setSchedule(new Reference(createSchedule(from)));
     storageService.storeExternal(slot);
     return slot;
+  }
+
+  private Schedule createSchedule(Appointment from) {
+    Schedule schedule = new Schedule()
+        .setActive(true)
+        .addServiceType(from.getServiceType().toCodeableConcept())
+        .addSpecialty(from.getSpecialty().toCodeableConcept())
+        .addActor(from.getHealthcareService());
+
+    storageService.storeExternal(schedule);
+    return schedule;
   }
 }
