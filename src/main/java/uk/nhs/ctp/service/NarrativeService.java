@@ -2,6 +2,7 @@ package uk.nhs.ctp.service;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.commons.text.StringEscapeUtils;
 import org.hl7.fhir.dstu3.model.Narrative;
 import org.hl7.fhir.dstu3.model.Narrative.NarrativeStatus;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
@@ -16,7 +17,7 @@ public class NarrativeService {
 
   public Narrative buildNarrative(String text) {
     var narrative = new Narrative().setStatus(NarrativeStatus.GENERATED);
-    narrative.setDivAsString(text);
+    narrative.setDivAsString(StringEscapeUtils.escapeHtml3(text));
     return narrative;
   }
 
