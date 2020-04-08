@@ -1,24 +1,30 @@
 package uk.nhs.ctp.resourceProvider;
 
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import lombok.AllArgsConstructor;
+import java.util.Collection;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.dstu3.model.Appointment;
-import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.service.AppointmentService;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class AppointmentProvider implements IResourceProvider {
 
   private final AppointmentService appointmentService;
 
-  @Read
-  public Appointment getAppointment(@IdParam IdType id) {
-    return appointmentService.get(id);
+  @Search
+  public Collection<Appointment> findByIncomingReferral(
+      @RequiredParam(name = Appointment.SP_INCOMINGREFERRAL) ReferenceParam incomingReferralRef
+  ) {
+    String referral = incomingReferralRef.getValue();
+    return appointmentService.getByReferral(referral).stream()
+        .collect(Collectors.toList());
   }
 
   @Override

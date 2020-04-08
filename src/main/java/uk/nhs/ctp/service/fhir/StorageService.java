@@ -35,7 +35,7 @@ public class StorageService implements IResourceLocator {
     return id.getValue();
   }
 
-  private IGenericClient getClient() {
+  public IGenericClient getClient() {
     return fhirContext.newRestfulGenericClient(fhirServer);
   }
 

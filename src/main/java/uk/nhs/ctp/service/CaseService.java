@@ -24,7 +24,6 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
-import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.SystemConstants;
@@ -41,7 +40,6 @@ import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.dto.CdssResult;
 import uk.nhs.ctp.service.dto.SelectedServiceRequestDTO;
 import uk.nhs.ctp.service.fhir.GenericResourceLocator;
-import uk.nhs.ctp.service.fhir.ReferenceService;
 import uk.nhs.ctp.service.fhir.StorageService;
 import uk.nhs.ctp.transform.CaseObservationTransformer;
 import uk.nhs.ctp.transform.ReferralRequestTransformer;
@@ -58,7 +56,7 @@ public class CaseService {
   private CaseObservationTransformer caseObservationTransformer;
   private ReferralRequestService referralRequestService;
   private ReferralRequestTransformer referralRequestTransformer;
-  private ReferenceService referenceService;
+  private AppointmentService appointmentService;
 
 
   public Cases createCase(String patientRef, String practitionerId) {
@@ -388,8 +386,7 @@ public class CaseService {
           .collect(Collectors.toList());
       referralRequest.setServiceRequested(serviceRequested);
       referralRequest.setRecipient(singletonList(serviceRef));
-      referralRequest.addSupportingInfo(
-          referenceService.buildRef(ResourceType.Appointment, "example-appointment"));
+      appointmentService.create(referralRequest); //Create a static appointment for the referral request.
     });
 
     caseRepository.saveAndFlush(triageCase);

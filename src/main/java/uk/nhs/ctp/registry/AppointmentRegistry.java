@@ -16,14 +16,12 @@ public class AppointmentRegistry implements Registry<Appointment> {
   public List<Appointment> getAll() {
     var now = Instant.now();
     return List.of(Appointment.builder()
-        .id("example-appointment")
         .status(AppointmentStatus.BOOKED)
         .serviceCategory(ServiceCategory.SPECIALIST_MEDICAL)
         .serviceType(ServiceType.GENERAL_PRACTICE)
         .specialty(PracticeSetting.GENERAL_MEDICAL_PRACTICE)
         .appointmentType(AppointmentType.ROUTINE)
         .reason(EncounterReason.ARTHRITIS)
-        .practitionerId("gp")
         .description("Head to our main wing at the designated time for your routine appointment")
         .start(now.plus(Duration.ofDays(5)).plus(Duration.ofHours(2)))
         .end(now.plus(Duration.ofDays(5)).plus(Duration.ofHours(3)))

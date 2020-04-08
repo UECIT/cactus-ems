@@ -27,5 +27,6 @@ public class Appointment {
   private Duration estimatedDuration;
   private Instant created;
   private String comment;
-  private String practitionerId;
+  private String patientId;
+  private String referral;
 }

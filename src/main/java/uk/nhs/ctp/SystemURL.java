@@ -21,4 +21,6 @@ public final class SystemURL {
 	public final String CS_PROVIDER_TAXONOMY = "http://hl7.org/fhir/valueset-provider-taxonomy.html";
 	public final String CS_CDS_STUB = "cdss/supplier/stub";
 	public final String CS_GENDER = "http://hl7.org/fhir/administrative-gender";
+
+	public final String APPT_DOCUMENT_IDENTIFIER = "https://tools.ietf.org/html/rfc4122";
 }

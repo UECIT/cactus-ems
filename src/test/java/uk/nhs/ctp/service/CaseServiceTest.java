@@ -44,7 +44,6 @@ import uk.nhs.ctp.repos.PatientRepository;
 import uk.nhs.ctp.service.dto.CdssResult;
 import uk.nhs.ctp.service.dto.SelectedServiceRequestDTO;
 import uk.nhs.ctp.service.fhir.GenericResourceLocator;
-import uk.nhs.ctp.service.fhir.ReferenceService;
 import uk.nhs.ctp.service.fhir.StorageService;
 import uk.nhs.ctp.transform.CaseObservationTransformer;
 import uk.nhs.ctp.transform.ReferralRequestEntityTransformer;
@@ -70,7 +69,7 @@ public class CaseServiceTest {
   @Mock
   private StorageService storageService;
   @Mock
-  private ReferenceService referenceService;
+  private AppointmentService appointmentService;
 
   @Mock
   private CaseObservationTransformer caseObservationTransformer;
@@ -106,7 +105,7 @@ public class CaseServiceTest {
         caseObservationTransformer,
         referralRequestService,
         referralRequestTransformer,
-        referenceService
+        appointmentService
     ));
 
     MockitoAnnotations.initMocks(this);

@@ -1,13 +1,14 @@
 package uk.nhs.ctp.service;
 
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.dstu3.model.Appointment;
-import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.registry.Registry;
+import uk.nhs.ctp.service.fhir.StorageService;
 import uk.nhs.ctp.transform.AppointmentTransformer;
 
 @Service
@@ -16,20 +17,28 @@ public class AppointmentService {
 
   private final AppointmentTransformer appointmentTransformer;
   private final Registry<uk.nhs.ctp.model.Appointment> appointmentRegistry;
+  private final EncounterService encounterService;
+  private final StorageService storageService;
 
-  public List<Appointment> getAll() {
-    return appointmentRegistry.getAll()
-        .stream()
-        .map(appointmentTransformer::transform)
-        .collect(Collectors.toList());
+  public Optional<Appointment> getByReferral(String referralRequest) {
+    return storageService.getClient()
+        .search()
+        .forResource(Appointment.class)
+        .where(Appointment.INCOMINGREFERRAL.hasId(referralRequest))
+        .returnBundle(Bundle.class)
+        .execute()
+        .getEntry().stream()
+        .map(BundleEntryComponent::getResource)
+        .map(Appointment.class::cast)
+        .findFirst();
   }
 
-  public Appointment get(IdType id) {
-    return appointmentRegistry.getAll()
-        .stream()
-        .filter(p -> p.getId().equals(id.getIdPart()))
+  public void create(ReferralRequest referralRequest) {
+    uk.nhs.ctp.model.Appointment appointment = appointmentRegistry.getAll().stream()
         .findFirst()
-        .map(appointmentTransformer::transform)
-        .orElseThrow(() -> new ResourceNotFoundException(id));
+        .orElseThrow();
+    appointment.setPatientId(referralRequest.getSubject().getReference());
+    appointment.setReferral(referralRequest.getId());
+    storageService.storeExternal(appointmentTransformer.transform(appointment));
   }
 }
