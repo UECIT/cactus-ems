@@ -3,6 +3,7 @@ package uk.nhs.ctp.service.dto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import uk.nhs.ctp.enums.ContentType;
 
 @AllArgsConstructor
@@ -11,6 +12,7 @@ import uk.nhs.ctp.enums.ContentType;
 public class ReportsDTO {
 	
 	private String request;
+	@Setter
 	private String response;
 	private ReportType reportType;
 	private ContentType contentType;
