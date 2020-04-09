@@ -1,6 +1,9 @@
 package uk.nhs.ctp.service;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.DataFormatException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,6 +16,7 @@ import java.util.Map;
 import javax.xml.bind.JAXBException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.RequestBuilder;
@@ -155,6 +159,14 @@ public class ReportService {
   }
 
   public ReportsDTO validate(String encounterRef) {
+    String validatorUrl = reportValidationServer + "/$evaluate";
+
+    ReportsDTO reportsDTO = ReportsDTO.builder()
+        .contentType(ContentType.HTML)
+        .reportType(ReportType.VALIDATION)
+        .request(validatorUrl)
+        .build();
+
     try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
       byte[] zipData = validationService
           .zipResources(new Reference(encounterRef).getReferenceElement().getIdPartAsLong());
@@ -162,7 +174,6 @@ public class ReportService {
       var base64Zip = Base64.getEncoder().encode(zipData);
 
       // Send to validation service
-      String validatorUrl = reportValidationServer + "/$evaluate";
 
       HttpUriRequest request = RequestBuilder
           .post(validatorUrl)
@@ -180,36 +191,37 @@ public class ReportService {
               response.getStatusLine().getReasonPhrase());
         }
 
-        OperationOutcome operationOutcome = fhirContext.newJsonParser()
-            .parseResource(OperationOutcome.class, response.getEntity().getContent());
+        OperationOutcome operationOutcome;
+        String content = IOUtils.toString(response.getEntity().getContent(), UTF_8);
+        try {
+          operationOutcome = fhirContext.newJsonParser()
+              .parseResource(OperationOutcome.class, content);
+        } catch (DataFormatException e) {
+          reportsDTO.setResponse("Error parsing response: " + cleanHtml(content));
+          return reportsDTO;
+        }
         String html = operationOutcome.getIssueFirstRep().getDiagnostics();
-        Whitelist whitelist = Whitelist.relaxed()
-            .addTags("hr")
-            .addAttributes("tr", "bgcolor");
-        String safeHtml = Jsoup.clean(html, whitelist);
 
-        return ReportsDTO.builder()
-            .contentType(ContentType.HTML)
-            .reportType(ReportType.VALIDATION)
-            .request(validatorUrl)
-            .response(safeHtml)
-            .build();
+        String safeHtml = cleanHtml(html);
+
+        reportsDTO.setResponse(safeHtml);
+        return reportsDTO;
       } catch (HttpClientErrorException e) {
-        return ReportsDTO.builder()
-            .contentType(ContentType.HTML)
-            .reportType(ReportType.VALIDATION)
-            .request(validatorUrl)
-            .response("Failed to request validation: " + e.getMessage())
-            .build();
+        reportsDTO.setResponse("Failed to request validation: " + e.getMessage());
+        return reportsDTO;
       }
     } catch (ResourceAccessException | IOException e) {
-      return ReportsDTO.builder()
-          .contentType(ContentType.HTML)
-          .reportType(ReportType.VALIDATION)
-          .request("")
-          .response("Creating Reports: Unable to contact validation service: " + e.getMessage())
-          .build();
+      reportsDTO.setResponse("Creating Reports: Unable to contact validation service: " + e.getMessage());
+      return reportsDTO;
     }
+  }
+
+  private String cleanHtml(String html) {
+    Whitelist whitelist = Whitelist.relaxed()
+        .addTags("hr")
+        .addAttributes("tr", "bgcolor");
+
+    return Jsoup.clean(html, whitelist);
   }
 
 }
