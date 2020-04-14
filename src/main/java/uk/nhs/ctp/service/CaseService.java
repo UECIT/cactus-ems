@@ -38,6 +38,7 @@ import uk.nhs.ctp.entities.QuestionResponse;
 import uk.nhs.ctp.entities.ReferralRequestEntity;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.dto.CdssResult;
+import uk.nhs.ctp.service.dto.PractitionerDTO;
 import uk.nhs.ctp.service.dto.SelectedServiceRequestDTO;
 import uk.nhs.ctp.service.fhir.GenericResourceLocator;
 import uk.nhs.ctp.service.fhir.StorageService;
@@ -59,25 +60,28 @@ public class CaseService {
   private AppointmentService appointmentService;
 
 
-  public Cases createCase(String patientRef, String practitionerId) {
+  public Cases createCase(String patientRef, PractitionerDTO practitioner) {
     String resourceType = new Reference(patientRef).getReferenceElement().getResourceType();
     Preconditions.checkArgument(resourceType.equalsIgnoreCase("Patient"),
         "Case must be created with a Patient resource");
 
     Patient patientResource = resourceLocator.findResource(patientRef);
-    return createCase(patientResource, practitionerId);
+    return createCase(patientResource, practitioner);
   }
 
   /**
    * Create new case from patient resource
    */
-  public Cases createCase(Patient patient, String practitionerId) {
+  public Cases createCase(Patient patient, PractitionerDTO practitioner) {
 
     log.info("Creating case for patient: " + patient.getNameFirstRep().getNameAsSingleString());
 
     Cases triageCase = new Cases();
     triageCase.setPatientId(patient.getId());
-    triageCase.setPractitionerId(practitionerId);
+
+    if (practitioner != null) {
+      triageCase.setPractitionerId(practitioner.getId());
+    }
     setCaseDetails(triageCase, patient);
 
     // Store a mostly empty encounter record for future reference

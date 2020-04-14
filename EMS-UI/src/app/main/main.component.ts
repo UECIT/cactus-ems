@@ -31,6 +31,7 @@ export class MainComponent implements OnInit {
   patients: Patient[];
   practitioners: Practitioner[];
   selectedPatient: Patient;
+  selectedPractitioner: Practitioner;
   cdssSuppliers: CdssSupplier[];
   serviceDefinitions: ServiceDefinition[];
   selectedSupplier: number;
@@ -68,7 +69,8 @@ export class MainComponent implements OnInit {
   disableLaunch() {
     return this.selectedPatient == null ||
            this.selectedSupplier == null ||
-           this.selectedServiceDefinition == null;
+           this.selectedServiceDefinition == null ||
+           (this.isPractitioner() && this.selectedPractitioner == null);
   }
 
   ngOnInit() {
@@ -99,7 +101,7 @@ export class MainComponent implements OnInit {
       settings.setting = this.settings[0];
       settings.userType = this.roles[0];
       await this.getPractitioners();
-        settings.practitioner = this.practitioners[0];
+      settings.practitioner = null; //By default
       this.sessionStorage.setItem('settings', JSON.stringify(settings));
   
       this.autoSelectServiceDefinition(true);
@@ -250,6 +252,9 @@ export class MainComponent implements OnInit {
     settings.setting = setting;
     this.sessionStorage.setItem('settings', JSON.stringify(settings));
     this.selectedSetting = setting.code;
+    if (!this.isPractitioner()) {
+      this.addPractitionerToStore()
+    }
     this.autoSelectServiceDefinition(false);
   }
 
@@ -260,8 +265,9 @@ export class MainComponent implements OnInit {
     this.autoSelectServiceDefinition(false);
   }
 
-  addPractitionerToStore(practitioner: Practitioner) {
+  addPractitionerToStore(practitioner?: Practitioner) {
     var settings: Settings = this.sessionStorage['settings'];
+    this.selectedPractitioner = practitioner;
     settings.practitioner = practitioner;
     this.sessionStorage.setItem('settings', JSON.stringify(settings));
   }

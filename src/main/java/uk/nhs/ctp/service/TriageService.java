@@ -39,7 +39,7 @@ public class TriageService {
 
     Long caseId = caseService.createCase(
         requestDetails.getPatientId(),
-        requestDetails.getSettings().getPractitioner().getId()
+        requestDetails.getSettings().getPractitioner()
     ).getId();
     String encounterId = requestDetails.getEncounterId();
     if (encounterId != null) {
