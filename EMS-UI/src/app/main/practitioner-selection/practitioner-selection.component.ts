@@ -13,12 +13,6 @@ export class PractitionerSelectionComponent {
 
   selectedPractitioner: Practitioner;
 
-  ngOnChanges() {
-    if (this.practitioners) {
-      this.selectedPractitioner = this.practitioners[0];
-    }
-  }
-
   change(selection: Practitioner) {
     this.onChange.emit(selection);
     this.selectedPractitioner = selection;
