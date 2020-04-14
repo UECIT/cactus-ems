@@ -305,8 +305,10 @@ public class CaseService {
 
   public void addObservation(Long caseId, CaseObservation observation) {
     Cases existingCase = caseRepository.findOne(caseId);
-    existingCase.addObservation(observation);
-    caseRepository.save(existingCase);
+    if (!existingCase.getObservations().contains(observation)) {
+      existingCase.addObservation(observation);
+      caseRepository.save(existingCase);
+    }
   }
 
   /**
