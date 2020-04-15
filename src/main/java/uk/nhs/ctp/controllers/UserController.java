@@ -27,48 +27,55 @@ import uk.nhs.ctp.service.dto.UserDTO;
 @RequestMapping(path = "/users")
 public class UserController {
 
-	@Autowired
-	private UserManagementService userManagementService;
+  @Autowired
+  private UserManagementService userManagementService;
 
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
-	@GetMapping
-	public @ResponseBody List<UserDTO> getUsers() {
-		return userManagementService.getAllUsers();
-	}
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  @GetMapping
+  public @ResponseBody
+  List<UserDTO> getUsers() {
+    return userManagementService.getAllUsers();
+  }
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_NHS', 'ROLE_CDSS')")
-	@GetMapping(path = "/{username}")
-	public @ResponseBody UserDTO getUserByUsername(@PathVariable("username") String username) throws NotFoundException {
-		return userManagementService.getUserByUsername(username);
-	}
+  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_NHS', 'ROLE_CDSS')")
+  @GetMapping(path = "/{username}")
+  public @ResponseBody
+  UserDTO getUserByUsername(@PathVariable("username") String username) throws NotFoundException {
+    return userManagementService.getUserByUsername(username);
+  }
 
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
-	@PutMapping
-	public @ResponseBody UserEntity updateUser(@RequestBody UserDTO user) throws Exception {
-		return userManagementService.updateUser(user);
-	}
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  @PutMapping
+  public @ResponseBody
+  UserEntity updateUser(@RequestBody UserDTO user) throws Exception {
+    return userManagementService.updateUser(user);
+  }
 
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
-	@PutMapping(path = "/reset")
-	public @ResponseBody UserEntity resetPassword(@RequestBody ChangePasswordDTO changePassword) throws Exception {
-		return userManagementService.resetPassword(changePassword);
-	}
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  @PutMapping(path = "/reset")
+  public @ResponseBody
+  UserEntity resetPassword(@RequestBody ChangePasswordDTO changePassword) throws Exception {
+    return userManagementService.resetPassword(changePassword);
+  }
 
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
-	@DeleteMapping(path = "/{username}")
-	public @ResponseBody void deleteUser(@PathVariable("username") String username) throws Exception {
-		userManagementService.deleteUser(username);
-	}
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  @DeleteMapping(path = "/{username}")
+  public @ResponseBody
+  void deleteUser(@PathVariable("username") String username) throws Exception {
+    userManagementService.deleteUser(username);
+  }
 
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
-	@PostMapping
-	public @ResponseBody UserEntity createUser(@RequestBody NewUserDTO user) throws Exception {
-		return userManagementService.createUser(user);
-	}
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  @PostMapping
+  public @ResponseBody
+  UserEntity createUser(@RequestBody NewUserDTO user) throws Exception {
+    return userManagementService.createUser(user);
+  }
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_NHS','ROLE_CDSS')")
-	@PutMapping(path = "/update")
-	public @ResponseBody UserEntity updatePassword(@RequestBody ChangePasswordDTO changePassword) throws Exception {
-		return userManagementService.updatePassword(changePassword);
-	}
+  @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_NHS','ROLE_CDSS')")
+  @PutMapping(path = "/update")
+  public @ResponseBody
+  UserEntity updatePassword(@RequestBody ChangePasswordDTO changePassword) throws Exception {
+    return userManagementService.updatePassword(changePassword);
+  }
 }
