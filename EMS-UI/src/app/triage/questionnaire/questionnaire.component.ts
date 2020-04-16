@@ -19,6 +19,7 @@ export class QuestionnaireComponent implements OnInit {
   url: Map<string, string> = new Map();
   enableWhen: Map<string, string[]> = new Map();
   supplierId: string;
+  attachmentError: boolean;
 
   constructor(public dialog: MatDialog,
               private serviceDefinitionService: ServiceDefinitionService) {
@@ -201,6 +202,13 @@ export class QuestionnaireComponent implements OnInit {
       );
       const questionResponse: QuestionResponse = new QuestionResponse();
       questionResponse.triageQuestion = triageQuestion;
+      const validTypes = ["image/gif", "image/jpeg", "image/png"];
+      if (!validTypes.includes(event.target.files[0].type)) {
+        this.attachmentError = true;
+        this.answerSelectedChange.emit(this.answerSelected);
+        return;
+      }
+      this.attachmentError = false;
       questionResponse.responseAttachmentType = event.target.files[0].type;
 
       let reader = new FileReader();
