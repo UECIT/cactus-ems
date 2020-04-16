@@ -204,39 +204,6 @@ export class QuestionnaireComponent implements OnInit {
     this.freeText.set(triageQuestion.questionId, responseDate.toISOString());
   }
 
-  // onAttachmentAnswerChange(event: any, triageQuestion: TriageQuestion) {
-  //   if (event.target.files[0]) {
-  //     this.answerSelected = this.answerSelected.filter(
-  //         e => e.triageQuestion.questionId !== triageQuestion.questionId
-  //     );
-  //     const questionResponse: QuestionResponse = new QuestionResponse();
-  //     questionResponse.triageQuestion = triageQuestion;
-  //     const validTypes = ["image/gif", "image/jpeg", "image/png"];
-  //     if (!validTypes.includes(event.target.files[0].type)) {
-  //       this.attachmentError = true;
-  //       this.answerSelectedChange.emit(this.answerSelected);
-  //       return;
-  //     }
-  //     this.attachmentError = false;
-  //     questionResponse.responseAttachmentType = event.target.files[0].type;
-
-  //     let reader = new FileReader();
-  //     reader.readAsText(event.target.files[0]);
-  //     reader.onload = (readEvent: any) => {
-  //       questionResponse.responseAttachment = readEvent.target.result;
-  //       this.answerSelected.push(questionResponse);
-  //       this.answerSelectedChange.emit(this.answerSelected);
-  //       this.freeText.set(triageQuestion.questionId, readEvent.target.result);
-  //     };
-
-  //     reader = new FileReader();
-  //     reader.readAsDataURL(event.target.files[0]);
-  //     reader.onload = (urlEvent: any) => {
-  //       this.url.set(triageQuestion.questionId, urlEvent.target.result);
-  //     };
-  //   }
-  // }
-
   // Get the answer that was selected.
   selectedAnswer(selectedOption: Options, triageQuestion: TriageQuestion) {
     if (this.checkEnableWhen(triageQuestion)) {
