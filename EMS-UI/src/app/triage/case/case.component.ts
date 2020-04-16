@@ -29,6 +29,7 @@ export interface DialogData {
   styleUrls: ['./case.component.css']
 })
 export class CaseComponent implements OnInit {
+  //TODO: NCTH-672 Remove this property once all question types using answer service.
   @Input() answerSelected: QuestionResponse[];
   @Input() case: Case;
   @Input() cdssSupplierName: string;
