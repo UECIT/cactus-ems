@@ -1,3 +1,4 @@
+import { AnswerService } from './../service/answer.service';
 import { ErrorMessage } from './../model/questionnaire';
 import { Component, OnInit } from '@angular/core';
 import { TriageService } from '../service/triage.service';

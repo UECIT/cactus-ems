@@ -1,3 +1,4 @@
+import { AnswerService } from './service/answer.service';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { HashLocationStrategy, LocationStrategy } from '@angular/common';
@@ -66,6 +67,7 @@ import { EnvironmentService } from './service/environment.service';
 import { EmsSupplierComponent, EditEmsDialog } from './supplier-managment/ems-supplier/ems-supplier.component';
 import { EmsService } from './service/ems.service';
 import { ReportSearchDialogComponent } from './main/report-search-dialog/report-search-dialog.component';
+import { AttachmentQuestionComponent } from './triage/questionnaire/question-types/attachment-question/attachment-question.component';
 
 export function hljsLanguages() {
   return [
@@ -114,7 +116,8 @@ export function hljsLanguages() {
     PractitionerSelectionComponent,
     EmsSupplierComponent,
     EditEmsDialog,
-    ReportSearchDialogComponent
+    ReportSearchDialogComponent,
+    AttachmentQuestionComponent
   ],
   entryComponents: [
     SwitchSupplierDialogComponent, 
@@ -161,6 +164,7 @@ export function hljsLanguages() {
     ResourceService,
     ReportService,
     EnvironmentService,
+    AnswerService,
     {provide: MAT_DATE_LOCALE, useValue: 'en-GB'}],
   bootstrap: [AppComponent]
 })

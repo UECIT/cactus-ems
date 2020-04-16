@@ -1,3 +1,4 @@
+import { QuestionniareType } from './question-types/questionniare-type.enum';
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {Options, Questionnaire, QuestionResponse, TriageQuestion} from '../../model/questionnaire';
 import {QuestionnaireResponse} from '../../model/processTriage';
@@ -19,7 +20,8 @@ export class QuestionnaireComponent implements OnInit {
   url: Map<string, string> = new Map();
   enableWhen: Map<string, string[]> = new Map();
   supplierId: string;
-  attachmentError: boolean;
+  questionnaireType = QuestionniareType; 
+  // attachmentError: boolean;
 
   constructor(public dialog: MatDialog,
               private serviceDefinitionService: ServiceDefinitionService) {
@@ -95,6 +97,13 @@ export class QuestionnaireComponent implements OnInit {
       }
     }
     return false;
+  }
+
+  getType(triageQuestion: TriageQuestion) : QuestionniareType {
+    if (triageQuestion.questionType == 'ATTACHMENT' && !this.hasInitialValue(triageQuestion)) {
+      return QuestionniareType.ATTACHMENT;
+    }
+    return QuestionniareType.NOT_SUPPORTED
   }
 
   mouseClickOnImage(event: any, triageQuestion: TriageQuestion) {
@@ -195,38 +204,38 @@ export class QuestionnaireComponent implements OnInit {
     this.freeText.set(triageQuestion.questionId, responseDate.toISOString());
   }
 
-  onAttachmentAnswerChange(event: any, triageQuestion: TriageQuestion) {
-    if (event.target.files[0]) {
-      this.answerSelected = this.answerSelected.filter(
-          e => e.triageQuestion.questionId !== triageQuestion.questionId
-      );
-      const questionResponse: QuestionResponse = new QuestionResponse();
-      questionResponse.triageQuestion = triageQuestion;
-      const validTypes = ["image/gif", "image/jpeg", "image/png"];
-      if (!validTypes.includes(event.target.files[0].type)) {
-        this.attachmentError = true;
-        this.answerSelectedChange.emit(this.answerSelected);
-        return;
-      }
-      this.attachmentError = false;
-      questionResponse.responseAttachmentType = event.target.files[0].type;
+  // onAttachmentAnswerChange(event: any, triageQuestion: TriageQuestion) {
+  //   if (event.target.files[0]) {
+  //     this.answerSelected = this.answerSelected.filter(
+  //         e => e.triageQuestion.questionId !== triageQuestion.questionId
+  //     );
+  //     const questionResponse: QuestionResponse = new QuestionResponse();
+  //     questionResponse.triageQuestion = triageQuestion;
+  //     const validTypes = ["image/gif", "image/jpeg", "image/png"];
+  //     if (!validTypes.includes(event.target.files[0].type)) {
+  //       this.attachmentError = true;
+  //       this.answerSelectedChange.emit(this.answerSelected);
+  //       return;
+  //     }
+  //     this.attachmentError = false;
+  //     questionResponse.responseAttachmentType = event.target.files[0].type;
 
-      let reader = new FileReader();
-      reader.readAsText(event.target.files[0]);
-      reader.onload = (readEvent: any) => {
-        questionResponse.responseAttachment = readEvent.target.result;
-        this.answerSelected.push(questionResponse);
-        this.answerSelectedChange.emit(this.answerSelected);
-        this.freeText.set(triageQuestion.questionId, readEvent.target.result);
-      };
+  //     let reader = new FileReader();
+  //     reader.readAsText(event.target.files[0]);
+  //     reader.onload = (readEvent: any) => {
+  //       questionResponse.responseAttachment = readEvent.target.result;
+  //       this.answerSelected.push(questionResponse);
+  //       this.answerSelectedChange.emit(this.answerSelected);
+  //       this.freeText.set(triageQuestion.questionId, readEvent.target.result);
+  //     };
 
-      reader = new FileReader();
-      reader.readAsDataURL(event.target.files[0]);
-      reader.onload = (urlEvent: any) => {
-        this.url.set(triageQuestion.questionId, urlEvent.target.result);
-      };
-    }
-  }
+  //     reader = new FileReader();
+  //     reader.readAsDataURL(event.target.files[0]);
+  //     reader.onload = (urlEvent: any) => {
+  //       this.url.set(triageQuestion.questionId, urlEvent.target.result);
+  //     };
+  //   }
+  // }
 
   // Get the answer that was selected.
   selectedAnswer(selectedOption: Options, triageQuestion: TriageQuestion) {

@@ -1,0 +1,6 @@
+<div class="answers">
+  <input id="singleFile" type="file" accept="image/gif, image/jpeg, image/png"
+         (change)="onChange($event, triageQuestion)"
+         [disabled]="disabled"/>
+  <mat-error *ngIf="attachmentError">Please upload an image file.</mat-error>
+</div>

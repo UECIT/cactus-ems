@@ -1,3 +1,4 @@
+import { AnswerService } from './../../service/answer.service';
 import { ProcessTriage } from 'src/app/model/processTriage';
 import {
   Component,
@@ -15,6 +16,7 @@ import { CdssSupplier } from 'src/app/model/cdssSupplier';
 import { Router } from '@angular/router';
 import { SessionStorage } from 'h5webstorage';
 import { Settings } from 'src/app/model/settings';
+import { Subscription } from 'rxjs';
 
 export interface DialogData {
   cdssSupplier: CdssSupplier;
@@ -43,10 +45,20 @@ export class CaseComponent implements OnInit {
 
   cdssSupplier: CdssSupplier;
   serviceDefinition: string;
+  answerSubscription: Subscription;
+  validToProceed: boolean;
 
-  constructor(public dialog: MatDialog,
-              public router: Router,
-              private sessionStorage: SessionStorage) {}
+  constructor(
+    public dialog: MatDialog,
+    public router: Router,
+    private sessionStorage: SessionStorage,
+    private answerService: AnswerService
+  ) 
+  {
+    this.answerSubscription = this.answerService.answerSelected$.subscribe(
+      answer => this.answerSelected = answer
+    )
+  }
 
   openDialog(): void {
     const dialogRef = this.dialog.open(SwitchSupplierDialogComponent, {
@@ -98,7 +110,7 @@ export class CaseComponent implements OnInit {
     this.router.navigate(['/main']);
   }
 
-  checkAllRequieredQuestionsAreAnswered(): boolean {
+  checkAllRequiredQuestionsAreAnswered(): boolean {
     let requieredComplete = false;
     let requieredQuestions: Boolean = false;
 
@@ -128,5 +140,9 @@ export class CaseComponent implements OnInit {
       }
     });
     return requieredComplete;
+  }
+
+  ngOnDestroy() {
+    this.answerSubscription.unsubscribe();
   }
 }

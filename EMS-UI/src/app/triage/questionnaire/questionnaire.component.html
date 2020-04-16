@@ -170,7 +170,7 @@
           </div>
         </form>
 
-        <form #form="ngForm" class="col-12"
+        <!-- <form #form="ngForm" class="col-12"
               *ngIf="triageQuestion.questionType == 'ATTACHMENT' && !hasInitialValue(triageQuestion)">
           <div class="answers">
             <img *ngIf="hasInitialValue(triageQuestion)"
@@ -181,7 +181,7 @@
             <img [src]="triageQuestion.responseAttachmentInitial" height="200">
             <mat-error *ngIf="attachmentError">Please upload an image file.</mat-error>
           </div>
-        </form>
+        </form> -->
 
         <form #form="ngForm" class="col-12" *ngIf="isImageMap(triageQuestion)">
           <div class="answers">
@@ -191,6 +191,12 @@
           </div>
         </form>
 
+        <form #form="ngForm" class="col-12" [ngSwitch]="getType(triageQuestion)">
+          <attachment-question *ngSwitchCase="questionnaireType.ATTACHMENT"
+            [(answerSelected)]="answerSelected"
+            [triageQuestion]="triageQuestion"
+            [disabled]="checkEnableWhen(triageQuestion)"></attachment-question>
+        </form>
 
       </div>
     </div>
