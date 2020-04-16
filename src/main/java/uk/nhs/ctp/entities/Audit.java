@@ -13,14 +13,13 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.nhs.ctp.enums.AuditType;
+import org.hibernate.annotations.CreationTimestamp;
 import uk.nhs.ctp.audit.HttpAudit;
+import uk.nhs.ctp.enums.AuditType;
 
 @Entity
 @Table(name = "audit")
@@ -37,7 +36,7 @@ public class Audit implements HttpAudit {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Temporal(TemporalType.TIMESTAMP)
+  @CreationTimestamp
   @Column(name = "created_date")
   private Date createdDate;
 
