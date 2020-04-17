@@ -21,7 +21,6 @@ export class QuestionnaireComponent implements OnInit {
   enableWhen: Map<string, string[]> = new Map();
   supplierId: string;
   questionnaireType = QuestionniareType; 
-  // attachmentError: boolean;
 
   constructor(public dialog: MatDialog,
               private serviceDefinitionService: ServiceDefinitionService) {
@@ -105,6 +104,9 @@ export class QuestionnaireComponent implements OnInit {
     }
     if (triageQuestion.questionType == 'CHOICE') {
       return QuestionniareType.CHOICE;
+    }
+    if (triageQuestion.questionType == 'GROUP' && triageQuestion.subQuestions) {
+      return QuestionniareType.GROUP;
     }
     return QuestionniareType.NOT_SUPPORTED
   }
@@ -205,35 +207,6 @@ export class QuestionnaireComponent implements OnInit {
     this.answerSelected.push(questionResponse);
     this.answerSelectedChange.emit(this.answerSelected);
     this.freeText.set(triageQuestion.questionId, responseDate.toISOString());
-  }
-
-  // Get the answer that was selected.
-  selectedAnswer(selectedOption: Options, triageQuestion: TriageQuestion) {
-    if (this.checkEnableWhen(triageQuestion)) {
-      return;
-    }
-    this.cleanupAnswersSelected(
-        triageQuestion.questionId,
-        selectedOption,
-        triageQuestion.repeats
-    );
-    const questionResponse: QuestionResponse = new QuestionResponse();
-    questionResponse.triageQuestion = triageQuestion;
-    questionResponse.answer = selectedOption;
-
-    if (
-        this.answerSelected.filter(
-            vendor => vendor.answer === questionResponse.answer
-        ).length > 0
-    ) {
-      this.answerSelected = this.answerSelected.filter(
-          e => e.answer !== selectedOption
-      );
-    } else {
-      this.answerSelected.push(questionResponse);
-    }
-
-    this.answerSelectedChange.emit(this.answerSelected);
   }
 
   hasDraftCareAdvice(careAdvice: any[]) {

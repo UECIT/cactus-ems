@@ -69,6 +69,7 @@ import { EmsService } from './service/ems.service';
 import { ReportSearchDialogComponent } from './main/report-search-dialog/report-search-dialog.component';
 import { AttachmentQuestionComponent } from './triage/questionnaire/question-types/attachment-question/attachment-question.component';
 import { ChoiceQuestionComponent } from './triage/questionnaire/question-types/choice-question/choice-question.component';
+import { GroupQuestionComponent } from './triage/questionnaire/question-types/group-question/group-question.component';
 
 export function hljsLanguages() {
   return [
@@ -119,7 +120,8 @@ export function hljsLanguages() {
     EditEmsDialog,
     ReportSearchDialogComponent,
     AttachmentQuestionComponent,
-    ChoiceQuestionComponent
+    ChoiceQuestionComponent,
+    GroupQuestionComponent
   ],
   entryComponents: [
     SwitchSupplierDialogComponent, 

@@ -17,45 +17,6 @@
 
       <div class="answers row">
         <form #form="ngForm" class="col-12"
-              *ngIf="triageQuestion.questionType == 'GROUP' && triageQuestion.subQuestions">
-          <div *ngFor="let subQuestion of triageQuestion.subQuestions">
-            <div class="row" *ngIf="subQuestion.questionType == 'CHOICE'">
-              <div class="col-12 question" style="font-weight: bold;">
-                {{ subQuestion.question }}
-                <span *ngFor="let infomation of triageQuestion.subQuestions">
-                                <mat-icon
-                                    *ngIf="infomation.questionType == 'DISPLAY' && infomation.extension.display == subQuestion.questionId"
-                                    matTooltipPosition="after"
-                                    matTooltip="{{ infomation.question }}">help</mat-icon>
-                            </span>
-                <span *ngIf="subQuestion.required">*Required</span>
-              </div>
-            </div>
-
-            <img *ngIf="hasInitialValue(subQuestion)" [src]="subQuestion.responseAttachmentInitial"
-                 height="200" style="float:right;">
-
-            <div class="radio-group" *ngIf="subQuestion.questionType == 'CHOICE'">
-              <mat-radio-group class="radio-group" *ngFor="let subAnswer of subQuestion.options"
-                               [disabled]="checkEnableWhen(triageQuestion)">
-                <mat-radio-button class="radio-button" [value]="subAnswer"
-                                  (click)="selectedAnswer(subAnswer, subQuestion)"
-                                  [checked]="selectedContains(subAnswer, subQuestion)">
-                  {{subAnswer.display}}
-                  <span *ngFor="let infomation of triageQuestion.subQuestions">
-                                    <mat-icon
-                                        *ngIf="infomation.questionType == 'DISPLAY' && infomation.extension.display == subAnswer.code"
-                                        matTooltipPosition="after"
-                                        matTooltip="{{ infomation.question }}">help</mat-icon>
-                                </span>
-                </mat-radio-button>
-              </mat-radio-group>
-            </div>
-
-          </div>
-        </form>
-
-        <form #form="ngForm" class="col-12"
               *ngIf="triageQuestion.questionType == 'STRING' && !hasInitialValue(triageQuestion)">
           <div class="answers">
             <img *ngIf="hasInitialValue(triageQuestion)"
@@ -158,12 +119,17 @@
 
         <form #form="ngForm" class="col-12" [ngSwitch]="getType(triageQuestion)">
           <choice-question *ngSwitchCase="questionnaireType.CHOICE"
-            [(answerSelected)]="answerSelected"
+            [answerSelected]="answerSelected"
             [triageQuestion]="triageQuestion"
             [disabled]=checkEnableWhen(triageQuestion)>
           </choice-question>
+          <group-question *ngSwitchCase="questionnaireType.GROUP"
+            [answerSelected]="answerSelected"
+            [triageQuestion]="triageQuestion"
+            [disabled]="checkEnableWhen(triageQuestion)">
+          </group-question>
           <attachment-question *ngSwitchCase="questionnaireType.ATTACHMENT"
-            [(answerSelected)]="answerSelected"
+            [answerSelected]="answerSelected"
             [triageQuestion]="triageQuestion"
             [disabled]="checkEnableWhen(triageQuestion)">
           </attachment-question>
