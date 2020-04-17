@@ -236,46 +236,6 @@ export class QuestionnaireComponent implements OnInit {
     this.answerSelectedChange.emit(this.answerSelected);
   }
 
-  cleanupAnswersSelected(
-      selectedQuestionId: string,
-      selectedOption: Options,
-      repeats: boolean
-  ) {
-    if (!repeats || selectedOption.extension) {
-      this.answerSelected = this.answerSelected.filter(
-          e => e.triageQuestion.questionId !== selectedQuestionId
-      );
-    } else if (!selectedOption.extension) {
-      let i = 0;
-      this.answerSelected.forEach(element => {
-        if (
-            element.answer.extension !== selectedOption.extension &&
-            element.triageQuestion.questionId === selectedQuestionId
-        ) {
-          this.answerSelected.splice(i, 1);
-        }
-        i++;
-      });
-    }
-  }
-
-  selectedContains(
-      selectedOption: Options,
-      selectedQuestionId: TriageQuestion
-  ): boolean {
-    if (
-        this.answerSelected.some(
-            e =>
-                e.answer != null &&
-                e.answer.code === selectedOption.code &&
-                e.answer.display === selectedOption.display &&
-                e.triageQuestion.questionId === selectedQuestionId.questionId
-        )
-    ) {
-      return true;
-    }
-  }
-
   hasDraftCareAdvice(careAdvice: any[]) {
     return careAdvice && careAdvice.find(ca => ca.status === 'draft')
   }

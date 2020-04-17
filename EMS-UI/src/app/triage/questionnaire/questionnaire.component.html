@@ -16,28 +16,6 @@
       </div>
 
       <div class="answers row">
-
-        <!-- <form #form="ngForm" class="col-12" *ngIf="triageQuestion.questionType == 'CHOICE'">
-          <img *ngIf="hasInitialValue(triageQuestion)"
-               [src]="triageQuestion.responseAttachmentInitial" height="200" style="float:right;">
-          <div class="radio-group">
-            <mat-radio-group class="radio-group" *ngFor="let answer of triageQuestion.options"
-                             [disabled]="checkEnableWhen(triageQuestion)">
-              <mat-radio-button class="radio-button" [value]="answer"
-                                (click)="selectedAnswer(answer, triageQuestion)"
-                                [checked]="selectedContains(answer, triageQuestion)">
-                {{answer.display}}
-                <span *ngFor="let infomation of triageQuestion.subQuestions">
-                                <mat-icon
-                                    *ngIf="infomation.questionType == 'DISPLAY' && infomation.extension.display == answer.code"
-                                    matTooltipPosition="after"
-                                    matTooltip="{{ infomation.question }}">help</mat-icon>
-                            </span>
-              </mat-radio-button>
-            </mat-radio-group>
-          </div>
-        </form> -->
-
         <form #form="ngForm" class="col-12"
               *ngIf="triageQuestion.questionType == 'GROUP' && triageQuestion.subQuestions">
           <div *ngFor="let subQuestion of triageQuestion.subQuestions">
