@@ -103,6 +103,9 @@ export class QuestionnaireComponent implements OnInit {
     if (triageQuestion.questionType == 'ATTACHMENT' && !this.hasInitialValue(triageQuestion)) {
       return QuestionniareType.ATTACHMENT;
     }
+    if (triageQuestion.questionType == 'CHOICE') {
+      return QuestionniareType.CHOICE;
+    }
     return QuestionniareType.NOT_SUPPORTED
   }
 

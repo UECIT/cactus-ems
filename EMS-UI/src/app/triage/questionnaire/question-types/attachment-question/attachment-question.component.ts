@@ -10,8 +10,6 @@ import { QuestionResponse, TriageQuestion } from 'src/app/model';
 export class AttachmentQuestionComponent {
 
   @Input() answerSelected: QuestionResponse[];
-  @Output() answerSelectedChange = new EventEmitter<QuestionResponse[]>();
-
   @Input() triageQuestion: TriageQuestion;
   @Input() disabled: boolean;
   
@@ -42,7 +40,6 @@ export class AttachmentQuestionComponent {
         questionResponse.responseAttachment = readEvent.target.result;
         this.answerSelected.push(questionResponse);
         this.answerService.selectAnswer(this.answerSelected);
-        // this.answerSelectedChange.emit(this.answerSelected);
       };
     }
   }

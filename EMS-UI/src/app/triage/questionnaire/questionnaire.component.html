@@ -17,7 +17,7 @@
 
       <div class="answers row">
 
-        <form #form="ngForm" class="col-12" *ngIf="triageQuestion.questionType == 'CHOICE'">
+        <!-- <form #form="ngForm" class="col-12" *ngIf="triageQuestion.questionType == 'CHOICE'">
           <img *ngIf="hasInitialValue(triageQuestion)"
                [src]="triageQuestion.responseAttachmentInitial" height="200" style="float:right;">
           <div class="radio-group">
@@ -36,7 +36,7 @@
               </mat-radio-button>
             </mat-radio-group>
           </div>
-        </form>
+        </form> -->
 
         <form #form="ngForm" class="col-12"
               *ngIf="triageQuestion.questionType == 'GROUP' && triageQuestion.subQuestions">
@@ -179,6 +179,11 @@
         </form>
 
         <form #form="ngForm" class="col-12" [ngSwitch]="getType(triageQuestion)">
+          <choice-question *ngSwitchCase="questionnaireType.CHOICE"
+            [(answerSelected)]="answerSelected"
+            [triageQuestion]="triageQuestion"
+            [disabled]=checkEnableWhen(triageQuestion)>
+          </choice-question>
           <attachment-question *ngSwitchCase="questionnaireType.ATTACHMENT"
             [(answerSelected)]="answerSelected"
             [triageQuestion]="triageQuestion"

@@ -1,0 +1,16 @@
+<div class="radio-group">
+  <mat-radio-group class="radio-group" *ngFor="let answer of triageQuestion.options" [disabled]="disabled">
+    <mat-radio-button 
+      class="radio-button" 
+      [value]="answer"
+      (click)="selectedAnswer(answer, triageQuestion)"
+      [checked]="selectedContains(answer, triageQuestion)">
+        {{answer.display}}
+      <span *ngFor="let infomation of triageQuestion.subQuestions">
+          <mat-icon *ngIf="infomation.questionType == 'DISPLAY' && infomation.extension.display == answer.code"
+            matTooltipPosition="after"
+            matTooltip="{{ infomation.question }}">help</mat-icon>
+      </span>
+    </mat-radio-button>
+  </mat-radio-group>
+</div>
