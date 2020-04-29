@@ -27,6 +27,5 @@ jobs:
         SPRING_DATASOURCE_PASSWORD: root
       run: |
         sudo systemctl start mysql
-        ls -R $GITHUB_WORKSPACE
-        mysql -uroot -proot < $GITHUB_WORKSPACE/src/main/resources/create_database.sql
+        mysql -uroot -proot < $GITHUB_WORKSPACE/src/main/resources/sql/create_database.sql
         mvn -B package --file pom.xml
