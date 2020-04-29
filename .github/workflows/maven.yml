@@ -22,3 +22,7 @@ jobs:
         java-version: 1.11
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+      env:
+        SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/cdss_decoupling?useSSL=false
+        SPRING_DATASOURCE_USERNAME: root
+        SPRING_DATASOURCE_PASSWORD: root
