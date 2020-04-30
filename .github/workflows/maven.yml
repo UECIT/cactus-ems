@@ -40,7 +40,7 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
         registry: docker.pkg.github.com
-        repository: uecit/cactus-ems/latest
+        repository: uecit/cactus-ems/cactus-ems
         tag_with_ref: true
 
   publish-ui:
@@ -54,5 +54,5 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: docker.pkg.github.com
-          repository: uecit/cactus-ems/ui
+          repository: uecit/cactus-ems/cactus-ems-ui
           tag_with_ref: true
