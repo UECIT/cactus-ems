@@ -49,7 +49,7 @@ jobs:
       - name: Push EMS UI to GitHub Packages
         uses: docker/build-push-action@v1
         with:
-          dockerfile: EMS-UI/Dockerfile
+          path: EMS-UI
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: docker.pkg.github.com
