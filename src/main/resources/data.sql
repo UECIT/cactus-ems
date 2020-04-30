@@ -28,3 +28,30 @@ INSERT INTO
  cdss_decoupling.users (username, name, password, enabled, role)
 VALUES
  ('admin', 'Admin User', '$2a$10$hbxecwitQQ.dDT4JOFzQAulNySFwEpaFLw38jda6Td.Y/cOiRzDFu', true, 'ROLE_ADMIN');
+
+INSERT INTO
+ cdss_decoupling.cdss_supplier (id, name, base_url)
+VALUES
+ (1, 'CDSS Stub', 'http://ec2-3-8-182-163.eu-west-2.compute.amazonaws.com:8080/cdss-supplier-stub/fhir/'),
+ (2, 'CDSS Local', 'http://localhost:8080/fhir/');
+
+INSERT INTO
+ cdss_decoupling.service_definition (id, cdss_supplier_id, service_definition_id, description)
+VALUES
+ (1, 1, 1, 'Vomiting and fever'),
+ (2, 1, 2, 'Headache'),
+ (3, 1, 3, 'Leg Injury, Blunt Trauma'),
+ (4, 1, 4, 'Cut to right hand 7 days ago'),
+ (5, 1, 5, 'Palpitations past 2 hours and currently experiencing'),
+ (6, 1, 6, 'Fallen and hurt right knee'),
+ (7, 1, 7, 'Mental Health Scenario'),
+ (16, 1, 8, 'None of the Above Scenario'),
+ (17, 1, 9, 'Mental Health Table Scenario'),
+ (20, 2, 5, 'Palpitations simple'),
+ (21, 2, 6, 'Palpitations extended'),
+ (22, 2, 7, 'Anxiety');
+
+INSERT INTO
+ cdss_decoupling.user_cdss_supplier (username, cdss_supplier_id)
+VALUES
+ ('admin', 1);
