@@ -40,5 +40,5 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
         registry: docker.pkg.github.com
-        repository: UECIT/cdss-ems/${GITHUB_REF##*/}
+        repository: UECIT/cdss-ems/${{ github.head_ref }}
         tag_with_ref: true
