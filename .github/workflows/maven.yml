@@ -29,3 +29,16 @@ jobs:
         sudo systemctl start mysql
         mysql -uroot -proot < $GITHUB_WORKSPACE/src/main/resources/sql/create_database.sql
         mvn -B package --file pom.xml
+
+  push_docker:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Push to GitHub Packages
+      uses: docker/build-push-action@v1
+      with:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        registry: docker.pkg.github.com
+        repository: my-org/my-repo
+        tag_with_ref: true
