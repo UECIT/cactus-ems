@@ -1,3 +1,5 @@
+TRUNCATE TABLE cdss_decoupling.patient;
+
 INSERT INTO
  cdss_decoupling.patient (id, title, first_name, last_name, date_of_birth, gender, nhs_number, address, city, postal_code, home_phone, mobile, email, language)
 VALUES
