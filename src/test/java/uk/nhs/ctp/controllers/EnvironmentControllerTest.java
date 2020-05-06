@@ -23,11 +23,13 @@ public class EnvironmentControllerTest {
   @Test
   public void shouldReturnEnvironmentProperties() {
     ReflectionTestUtils.setField(environmentController, "apiVersion", "1.1.1");
+    ReflectionTestUtils.setField(environmentController, "appVersion", "0.0.1-SNAPSHOT");
     ReflectionTestUtils.setField(environmentController, "envName", "thename");
 
     Map<String, String> props = environmentController.getProps();
 
-    assertThat(props, hasEntry("version", "1.1.1"));
+    assertThat(props, hasEntry("apiVersion", "1.1.1"));
+    assertThat(props, hasEntry("appVersion", "0.0.1-SNAPSHOT"));
     assertThat(props, hasEntry("name", "thename"));
   }
 

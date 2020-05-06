@@ -20,12 +20,16 @@ public class EnvironmentController {
   @Value("${environment.name}")
   private String envName;
 
+  @Value("${app.version}")
+  private String appVersion;
+
 
   @GetMapping("properties")
   public @ResponseBody Map<String, String> getProps() {
     return Map.ofEntries(
-        new SimpleEntry<>("version", apiVersion),
-        new SimpleEntry<>("name", envName)
+        new SimpleEntry<>("apiVersion", apiVersion),
+        new SimpleEntry<>("name", envName),
+        new SimpleEntry<>("appVersion", appVersion)
     );
   }
 

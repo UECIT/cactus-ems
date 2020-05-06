@@ -7,7 +7,6 @@ export const environment = {
   UECDI_API: 'http://localhost:5000',
   UECDI_VALIDATE_API: 'http://localhost:7000/tkw-client',
   TERM_API: 'https://ontoserver.dataproducts.nhs.uk/fhir',
-  version: 'v1.1.0'
 };
 
 /*

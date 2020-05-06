@@ -67,7 +67,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     http.cors().and()
         .csrf().disable()
         .authorizeRequests()
-        .antMatchers("/document", "/fhir/**").permitAll()
+        .antMatchers("/environment/**", "/document", "/fhir/**").permitAll()
         .anyRequest().authenticated().and()
         .addFilterBefore(
             new JWTLoginFilter("/login", authenticationManager(), userRepository,

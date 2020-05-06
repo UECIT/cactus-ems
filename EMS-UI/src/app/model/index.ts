@@ -16,3 +16,4 @@ export * from './settings';
 export * from './token';
 export * from './user';
 export * from './emsSupplier';
+export * from './environment';
