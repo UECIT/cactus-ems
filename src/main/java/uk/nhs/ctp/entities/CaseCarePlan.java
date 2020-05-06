@@ -42,7 +42,7 @@ public class CaseCarePlan {
 
 	@JsonIgnore
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "case_id")
+	@JoinColumn(name = "case_id", nullable = false)
 	@ToString.Exclude()
 	private Cases caseEntity;
 }

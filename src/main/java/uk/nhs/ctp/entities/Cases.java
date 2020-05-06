@@ -73,8 +73,7 @@ public class Cases {
   @JoinColumn(name = "case_id")
   private List<QuestionResponse> questionResponses = new ArrayList<>();
 
-  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-  @JoinColumn(name = "case_id")
+  @OneToMany(mappedBy = "caseEntity", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<CaseCarePlan> carePlans = new ArrayList<>();
 
   @Column(name = "session_id")
