@@ -1,5 +1,7 @@
 package uk.nhs.ctp.controllers;
 
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,13 +14,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/environment")
 public class EnvironmentController {
 
-  @Value("${back.colour}")
-  private String colour;
+  @Value("${cds.api.version}")
+  private String apiVersion;
+
+  @Value("${environment.name}")
+  private String envName;
 
 
-  @GetMapping("colour")
-  public @ResponseBody String getColour() {
-    return colour;
+  @GetMapping("properties")
+  public @ResponseBody Map<String, String> getProps() {
+    return Map.ofEntries(
+        new SimpleEntry<>("version", apiVersion),
+        new SimpleEntry<>("name", envName)
+    );
   }
 
 
