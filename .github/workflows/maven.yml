@@ -59,6 +59,7 @@ jobs:
           node-version: '10.x'
       - name: Build and run angular ui tests
         run: |
+          cd EMS-UI
           npm install
           npm test
 
