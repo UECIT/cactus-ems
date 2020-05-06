@@ -60,8 +60,8 @@ jobs:
       - name: Build and run angular ui tests
         run: |
           cd EMS-UI
-          npm install
-          npm test
+          npm ci
+          npm run test:ci
 
   publish-ui:
     runs-on: ubuntu-latest
