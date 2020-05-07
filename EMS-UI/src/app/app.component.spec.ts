@@ -1,11 +1,9 @@
-import { environment } from './../environments/environment.prod';
-import { Environment } from './model/environment';
 import { AppComponent } from './app.component';
-import { SessionStorage, SESSION_STORAGE_OBJECT, SERDES_OBJECT, STORAGE_OPTIONS } from "h5webstorage"
 import { EnvironmentService } from "./service/environment.service"
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Component, Predicate, DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
+import { configureSessionProviders } from './testing/session-helper';
 
 @Component({selector: 'app-navigation', template: ''})
 class NavigationComponentStub {}
@@ -41,6 +39,7 @@ describe('App Component', () => {
 
     beforeEach(() => {
         envServiceSpy = jasmine.createSpyObj("EnvironmentService", ['getVariables']);
+        configureSessionProviders();
         TestBed.configureTestingModule({
             declarations: [
                 AppComponent,
@@ -49,10 +48,6 @@ describe('App Component', () => {
             ],
             providers: [
                 {provide: EnvironmentService, useValue: envServiceSpy},
-                {provide: SESSION_STORAGE_OBJECT, useValue: sessionStorage},
-                {provide: SERDES_OBJECT, useValue: {stringify: JSON.stringify, parse: JSON.parse}}, //Raise a tech debt: move it to a common before step
-                {provide: STORAGE_OPTIONS, useValue: {}},
-                SessionStorage,
                 AppComponent
             ]
         });
