@@ -10,7 +10,7 @@
 </div>
 <app-navigation></app-navigation>
 <router-outlet></router-outlet>
-<div class="buildinfo">
+<div *ngIf="env" class="buildinfo">
     <p>Build: {{env.appVersion}}</p>
     <p>Environment: {{env.name}}</p>
     <p>CDS-API Version: {{env.apiVersion}}</p>
