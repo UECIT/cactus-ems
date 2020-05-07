@@ -1,22 +1,29 @@
+import { Environment } from './model/environment';
 import { Component, OnInit } from '@angular/core';
-import { environment } from '../environments/environment';
 import { Settings, Code } from './model';
 import { SessionStorage } from 'h5webstorage';
-import { ToastrService } from 'ngx-toastr';
+import { EnvironmentService } from './service/environment.service';
 
 @Component({
   selector: 'app-root',
-  templateUrl: './app.component.html'
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
 })
 export class AppComponent  implements OnInit {
   title = 'EMS Test Harness';
-  version = environment.version;
-
   settings: Settings = new Settings();
+  env: Environment;
 
-  constructor(private sessionStorage: SessionStorage, private toastr: ToastrService) { }
+  constructor(
+    private sessionStorage: SessionStorage, 
+    private environmentService: EnvironmentService) { }
 
-  ngOnInit() {
+  async ngOnInit() {
+    await this.environmentService.getVariables()
+        .then(env => this.sessionStorage.setItem("properties", JSON.stringify(env)));
+
+    this.env = this.sessionStorage['properties'];
+
     var oldSettings: Settings = this.sessionStorage['settings'];
 
     if (!oldSettings) {

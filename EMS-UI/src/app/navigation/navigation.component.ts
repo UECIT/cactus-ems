@@ -15,11 +15,9 @@ export class NavigationComponent implements OnInit {
   isAdmin: boolean;
   username: string;
   tokenInfo: Token;
-  colour: string;
 
   constructor(
-    private loginService: LoginService,
-    private environmentService: EnvironmentService, 
+    private loginService: LoginService, 
     public router: Router, 
     private sessionStorage: SessionStorage) {}
 
@@ -27,11 +25,8 @@ export class NavigationComponent implements OnInit {
     this.checkLoginStatus();
     this.loginService.watchAuthToken().subscribe((loggedIn: boolean) => {
       this.checkLoginStatus();
-      if (loggedIn) {
-        this.environmentService.getBackgroundColour()
-        .then(res => this.colour = res);
-      }
     });
+    
   }
 
   logoff() {

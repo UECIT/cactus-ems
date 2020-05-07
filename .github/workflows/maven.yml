@@ -43,6 +43,26 @@ jobs:
         repository: uecit/cactus-ems/cactus-ems
         tag_with_ref: true
 
+  build-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Cache node modules
+        uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '10.x'
+      - name: Build and run angular ui tests
+        run: |
+          cd EMS-UI
+          npm ci
+          npm run test:ci
+
   publish-ui:
     runs-on: ubuntu-latest
     steps:
