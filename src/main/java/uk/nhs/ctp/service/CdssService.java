@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.jodah.failsafe.Failsafe;
+import net.jodah.failsafe.RetryPolicy;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.GuidanceResponse;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -27,6 +29,7 @@ import uk.nhs.ctp.repos.CdssSupplierRepository;
 import uk.nhs.ctp.service.dto.CdssSupplierDTO;
 import uk.nhs.ctp.service.dto.ServiceDefinitionDTO;
 import uk.nhs.ctp.service.search.SearchParameters;
+import uk.nhs.ctp.utils.RetryUtils;
 
 @Service
 @Slf4j
@@ -51,13 +54,13 @@ public class CdssService {
   ) {
 
     IGenericClient fhirClient = fhirContext.newRestfulGenericClient(getBaseUrl(cdssSupplierId));
-    return fhirClient
+    return RetryUtils.retry(() -> fhirClient
         .operation()
         .onInstance(new IdType(SystemConstants.SERVICE_DEFINITION, serviceDefinitionId))
         .named(SystemConstants.EVALUATE)
         .withParameters(parameters)
         .returnResourceType(GuidanceResponse.class)
-        .execute();
+        .execute());
   }
 
   /**
@@ -68,11 +71,13 @@ public class CdssService {
    */
   public ServiceDefinition getServiceDefinition(Long cdssSupplierId, String serviceDefId) {
     String baseUrl = getBaseUrl(cdssSupplierId);
-    return fhirContext.newRestfulGenericClient(baseUrl)
-        .read()
-        .resource(ServiceDefinition.class)
-        .withId(serviceDefId)
-        .execute();
+    return RetryUtils.retry(() ->
+        fhirContext.newRestfulGenericClient(baseUrl)
+            .read()
+            .resource(ServiceDefinition.class)
+            .withId(serviceDefId)
+            .execute()
+    );
   }
 
   /**
@@ -96,10 +101,12 @@ public class CdssService {
         String.format("%s/ServiceDefinition", baseUrl), parameters);
     CdssSupplierDTO supplierDTO = new CdssSupplierDTO(supplier);
     try {
-      Bundle bundle = fhirContext.newRestfulGenericClient(baseUrl).search()
+      Bundle bundle = RetryUtils.retry(() ->
+          fhirContext.newRestfulGenericClient(baseUrl).search()
           .byUrl(url)
           .returnBundle(Bundle.class)
-          .execute();
+          .execute()
+      );
 
       List<ServiceDefinitionDTO> serviceDefinitions = bundle.getEntry().stream()
           .map(entry -> (ServiceDefinition) entry.getResource())
@@ -150,11 +157,11 @@ public class CdssService {
    * @return {@link Questionnaire}
    */
   public Questionnaire getQuestionnaire(Long cdssSupplierId, String questionnaireRef) {
-
-    return fhirContext.newRestfulGenericClient(getBaseUrl(cdssSupplierId)).read()
+    return RetryUtils.retry(() ->
+        fhirContext.newRestfulGenericClient(getBaseUrl(cdssSupplierId)).read()
         .resource(Questionnaire.class)
         .withId(questionnaireRef)
-        .execute();
+        .execute());
   }
 
 }
