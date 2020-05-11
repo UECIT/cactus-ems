@@ -27,7 +27,7 @@ public class RetryUtilsTest {
         throw new FhirClientConnectionException(new ConnectException());
       }, null);
     } finally {
-      assertThat(count.get(), is(4)); //3 retires executes 4 times
+      assertThat(count.get(), is(4)); //3 retries executes 4 times
     }
   }
 
