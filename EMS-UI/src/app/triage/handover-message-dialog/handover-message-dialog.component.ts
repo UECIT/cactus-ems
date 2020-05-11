@@ -1,6 +1,5 @@
-import { Component, OnInit, Inject, Directive} from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
-import { ResourceService } from '../../service/resource.service';
 import { ReportService } from '../../service/report.service';
 import { environment } from '../../../environments/environment';
 
@@ -17,8 +16,8 @@ export interface DialogData {
 })
 export class HandoverMessageDialogComponent implements OnInit {
 
-  constructor(private resourceService: ResourceService, private reportService: ReportService,
-     public dialogRef: MatDialogRef<HandoverMessageDialogComponent>,
+  constructor(
+    public dialogRef: MatDialogRef<HandoverMessageDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: DialogData) { }
 
     emsUrl = environment.EMS_API;

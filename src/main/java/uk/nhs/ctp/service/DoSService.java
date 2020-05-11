@@ -17,6 +17,7 @@ import uk.nhs.ctp.transform.CheckServicesRequestTransformer;
 import uk.nhs.ctp.transform.CheckServicesResponseTransformer;
 import uk.nhs.ctp.transform.bundle.CheckServicesRequestBundle;
 import uk.nhs.ctp.transform.bundle.CheckServicesResponseBundle;
+import uk.nhs.ctp.utils.RetryUtils;
 
 @Service
 @Slf4j
@@ -37,15 +38,17 @@ public class DoSService {
 
 		IGenericClient fhirClient = fhirContext.newRestfulGenericClient(emsServer);
 
-		var referralRequest = fhirClient.read()
+		var referralRequest = RetryUtils.retry(() -> fhirClient.read()
 				.resource(ReferralRequest.class)
 				.withUrl(referralRequestRef)
-				.execute();
+				.execute(),
+				emsServer);
 
-		var patient = fhirClient.read()
+		var patient = RetryUtils.retry(() -> fhirClient.read()
 				.resource(Patient.class)
 				.withUrl(patientRef)
-				.execute();
+				.execute(),
+				emsServer);
 
 		var requestBundle = CheckServicesRequestBundle.builder()
 				.referralRequest(referralRequest)
@@ -61,13 +64,14 @@ public class DoSService {
 
 	private Parameters callDos(String dos, CheckServicesRequestBundle bundle) {
 		try {
-			return fhirContext.newRestfulGenericClient(dos)
+			return RetryUtils.retry(() -> fhirContext.newRestfulGenericClient(dos)
 					.operation()
 					.onServer()
 					.named("$check-services")
 					.withParameters(requestTransformer.transform(bundle))
 					.returnResourceType(Parameters.class)
-					.execute();
+					.execute(),
+					dos);
 		} catch (Exception e) {
 			log.warn("Error calling DOS: " + dos, e);
 			return null;

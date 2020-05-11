@@ -32,6 +32,7 @@ import uk.nhs.ctp.transform.EncounterTransformer;
 import uk.nhs.ctp.transform.ObservationTransformer;
 import uk.nhs.ctp.transform.ReferralRequestEntityTransformer;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
+import uk.nhs.ctp.utils.RetryUtils;
 
 @Service
 @AllArgsConstructor
@@ -80,14 +81,16 @@ public class EncounterService {
   }
 
   public EncounterReportInput getEncounterReport(IdType encounterId) {
-    Bundle encounterReportBundle = fhirContext.newRestfulGenericClient(encounterId.getBaseUrl())
+    String baseUrl = encounterId.getBaseUrl();
+    Bundle encounterReportBundle = RetryUtils.retry(() -> fhirContext.newRestfulGenericClient(baseUrl)
         .search()
         .forResource(Encounter.class)
         .where(Encounter.RES_ID.exactly().identifier(encounterId.getIdPart()))
         .include(Encounter.INCLUDE_ALL.asRecursive())
         .revInclude(Encounter.INCLUDE_ALL.asRecursive())
         .returnBundle(Bundle.class)
-        .execute();
+        .execute(),
+        baseUrl);
 
     Encounter encounter = ResourceProviderUtils.getResource(encounterReportBundle, Encounter.class);
     Patient patient = ResourceProviderUtils.getResource(encounterReportBundle, Patient.class);
@@ -114,10 +117,12 @@ public class EncounterService {
 
           //TODO: This seems inefficient, have to get the patient for each case!?
           try {
-            Patient patient = fhirContext.newRestfulGenericClient(id.getBaseUrl())
+            String baseUrl = id.getBaseUrl();
+            Patient patient = RetryUtils.retry(() -> fhirContext.newRestfulGenericClient(baseUrl)
                 .read().resource(Patient.class)
                 .withId(id)
-                .execute();
+                .execute(),
+                baseUrl);
 
             return patient.getIdentifier().stream()
                 .anyMatch(identifier -> system.equals(identifier.getSystem())
@@ -136,15 +141,16 @@ public class EncounterService {
     List<EmsSupplier> suppliers = emsSupplierService.getAll();
 
     return suppliers.stream()
-        .map(supplier -> fhirContext.newRestfulGenericClient(supplier.getBaseUrl())
-            .search()
-            .forResource(Encounter.class)
-            .where(Encounter.PATIENT
-                .hasChainedProperty(
-                    Patient.IDENTIFIER.exactly()
-                        .systemAndIdentifier(SystemURL.NHS_NUMBER, nhsNumber)))
-            .returnBundle(Bundle.class)
-            .execute()
+        .map(supplier -> RetryUtils.retry(() -> fhirContext.newRestfulGenericClient(supplier.getBaseUrl())
+                .search()
+                .forResource(Encounter.class)
+                .where(Encounter.PATIENT
+                    .hasChainedProperty(
+                        Patient.IDENTIFIER.exactly()
+                            .systemAndIdentifier(SystemURL.NHS_NUMBER, nhsNumber)))
+                .returnBundle(Bundle.class)
+                .execute(), 
+            supplier.getBaseUrl())
             .getEntry().stream()
             .map(BundleEntryComponent::getFullUrl)
             .collect(Collectors.toUnmodifiableList()))

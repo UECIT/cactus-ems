@@ -106,7 +106,11 @@ public class ResourceProviderUtils {
 			Class<T> resourceClass,
 			String resourceUrl) {
 		IGenericClient client = ctx.newRestfulGenericClient(baseUrl);
-    return client.read().resource(resourceClass).withUrl(resourceUrl).execute();
+    return RetryUtils.retry(() -> client.read()
+				.resource(resourceClass)
+				.withUrl(resourceUrl)
+				.execute(),
+				baseUrl);
 	}
 
 	@SuppressWarnings("unchecked")
