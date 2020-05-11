@@ -12,6 +12,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.nhs.ctp.utils.RetryUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -27,10 +28,11 @@ public class StorageService implements IResourceLocator {
       return resource.getId();
     }
 
-    var id = getClient().create()
+    var id = RetryUtils.retry(() -> getClient().create()
         .resource(resource)
         .execute()
-        .getId();
+        .getId(),
+        fhirServer);
     resource.setId(id);
     return id.getValue();
   }
@@ -40,9 +42,9 @@ public class StorageService implements IResourceLocator {
   }
 
   public void updateExternal(Resource resource) {
-    getClient().update()
+    RetryUtils.retry(() -> getClient().update()
         .resource(resource)
-        .execute();
+        .execute(), fhirServer);
   }
 
   public <T extends Resource> List<T> findResources(List<String> resourceReferences,
@@ -53,18 +55,20 @@ public class StorageService implements IResourceLocator {
   }
 
   public <T extends Resource> T findResource(String id, Class<T> clazz) {
-    return getClient().read()
+    return RetryUtils.retry(() -> getClient().read()
         .resource(clazz)
         .withUrl(id)
-        .execute();
+        .execute(),
+        fhirServer);
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public <T extends IBaseResource> T findResource(IIdType idType) {
-    return (T) getClient().read()
+    return (T) RetryUtils.retry(() -> getClient().read()
         .resource(idType.getResourceType())
         .withUrl(idType)
-        .execute();
+        .execute(),
+        fhirServer);
   }
 }

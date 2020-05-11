@@ -27,6 +27,7 @@ import uk.nhs.ctp.repos.CdssSupplierRepository;
 import uk.nhs.ctp.service.dto.CdssSupplierDTO;
 import uk.nhs.ctp.service.dto.ServiceDefinitionDTO;
 import uk.nhs.ctp.service.search.SearchParameters;
+import uk.nhs.ctp.utils.RetryUtils;
 
 @Service
 @Slf4j
@@ -49,15 +50,16 @@ public class CdssService {
       Long cdssSupplierId,
       String serviceDefinitionId
   ) {
-
-    IGenericClient fhirClient = fhirContext.newRestfulGenericClient(getBaseUrl(cdssSupplierId));
-    return fhirClient
+    String baseUrl = getBaseUrl(cdssSupplierId);
+    IGenericClient fhirClient = fhirContext.newRestfulGenericClient(baseUrl);
+    return RetryUtils.retry(() -> fhirClient
         .operation()
         .onInstance(new IdType(SystemConstants.SERVICE_DEFINITION, serviceDefinitionId))
         .named(SystemConstants.EVALUATE)
         .withParameters(parameters)
         .returnResourceType(GuidanceResponse.class)
-        .execute();
+        .execute(),
+        baseUrl);
   }
 
   /**
@@ -68,11 +70,14 @@ public class CdssService {
    */
   public ServiceDefinition getServiceDefinition(Long cdssSupplierId, String serviceDefId) {
     String baseUrl = getBaseUrl(cdssSupplierId);
-    return fhirContext.newRestfulGenericClient(baseUrl)
-        .read()
-        .resource(ServiceDefinition.class)
-        .withId(serviceDefId)
-        .execute();
+    return RetryUtils.retry(() ->
+        fhirContext.newRestfulGenericClient(baseUrl)
+            .read()
+            .resource(ServiceDefinition.class)
+            .withId(serviceDefId)
+            .execute(),
+        baseUrl
+    );
   }
 
   /**
@@ -96,10 +101,13 @@ public class CdssService {
         String.format("%s/ServiceDefinition", baseUrl), parameters);
     CdssSupplierDTO supplierDTO = new CdssSupplierDTO(supplier);
     try {
-      Bundle bundle = fhirContext.newRestfulGenericClient(baseUrl).search()
+      Bundle bundle = RetryUtils.retry(() ->
+          fhirContext.newRestfulGenericClient(baseUrl).search()
           .byUrl(url)
           .returnBundle(Bundle.class)
-          .execute();
+          .execute(),
+          baseUrl
+      );
 
       List<ServiceDefinitionDTO> serviceDefinitions = bundle.getEntry().stream()
           .map(entry -> (ServiceDefinition) entry.getResource())
@@ -150,11 +158,13 @@ public class CdssService {
    * @return {@link Questionnaire}
    */
   public Questionnaire getQuestionnaire(Long cdssSupplierId, String questionnaireRef) {
-
-    return fhirContext.newRestfulGenericClient(getBaseUrl(cdssSupplierId)).read()
+    String baseUrl = getBaseUrl(cdssSupplierId);
+    return RetryUtils.retry(() ->
+        fhirContext.newRestfulGenericClient(baseUrl).read()
         .resource(Questionnaire.class)
         .withId(questionnaireRef)
-        .execute();
+        .execute(),
+        baseUrl);
   }
 
 }
