@@ -48,11 +48,11 @@ public class RetryUtilsTest {
       RetryUtils.retry(() -> {
         count.incrementAndGet();
         if (count.get() == 3) {
-          throw new FhirClientConnectionException(new ConnectException());
+          return count;
         }
-        return count;
+        throw new FhirClientConnectionException(new ConnectException());
       }, null);
-    } catch (Exception e){
+    } finally {
       assertThat(count.get(), is(3));
     }
 
