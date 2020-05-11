@@ -43,6 +43,7 @@ jobs:
         registry: docker.pkg.github.com
         repository: uecit/cactus-ems/cactus-ems
         tag_with_ref: true
+        tag_with_sha: true
 
   build-ui:
     runs-on: ubuntu-latest
@@ -78,6 +79,7 @@ jobs:
           registry: docker.pkg.github.com
           repository: uecit/cactus-ems/cactus-ems-ui
           tag_with_ref: true
+          tag_with_sha: true
 
   invoke-deployment:
     runs-on: ubuntu-latest
