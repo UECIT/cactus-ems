@@ -33,11 +33,28 @@ public class RetryUtilsTest {
 
   @Test
   public void shouldPassFirstTime() {
+    AtomicInteger count = new AtomicInteger(0);
+
+    RetryUtils.retry(count::incrementAndGet);
+    assertThat(count.get(), is(1));
 
   }
 
   @Test
   public void shouldPassAfterTwoFailsOneSuccess() {
+    AtomicInteger count = new AtomicInteger(0);
+
+    try {
+      RetryUtils.retry(() -> {
+        count.incrementAndGet();
+        if (count.get() == 3) {
+          throw new FhirClientConnectionException(new ConnectException());
+        }
+        return count;
+      });
+    } catch (Exception e){
+      assertThat(count.get(), is(3));
+    }
 
   }
 
