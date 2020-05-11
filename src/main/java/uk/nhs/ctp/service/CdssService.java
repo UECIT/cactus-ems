@@ -10,8 +10,6 @@ import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.jodah.failsafe.Failsafe;
-import net.jodah.failsafe.RetryPolicy;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.GuidanceResponse;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -52,15 +50,16 @@ public class CdssService {
       Long cdssSupplierId,
       String serviceDefinitionId
   ) {
-
-    IGenericClient fhirClient = fhirContext.newRestfulGenericClient(getBaseUrl(cdssSupplierId));
+    String baseUrl = getBaseUrl(cdssSupplierId);
+    IGenericClient fhirClient = fhirContext.newRestfulGenericClient(baseUrl);
     return RetryUtils.retry(() -> fhirClient
         .operation()
         .onInstance(new IdType(SystemConstants.SERVICE_DEFINITION, serviceDefinitionId))
         .named(SystemConstants.EVALUATE)
         .withParameters(parameters)
         .returnResourceType(GuidanceResponse.class)
-        .execute());
+        .execute(),
+        baseUrl);
   }
 
   /**
@@ -76,7 +75,8 @@ public class CdssService {
             .read()
             .resource(ServiceDefinition.class)
             .withId(serviceDefId)
-            .execute()
+            .execute(),
+        baseUrl
     );
   }
 
@@ -105,7 +105,8 @@ public class CdssService {
           fhirContext.newRestfulGenericClient(baseUrl).search()
           .byUrl(url)
           .returnBundle(Bundle.class)
-          .execute()
+          .execute(),
+          baseUrl
       );
 
       List<ServiceDefinitionDTO> serviceDefinitions = bundle.getEntry().stream()
@@ -157,11 +158,13 @@ public class CdssService {
    * @return {@link Questionnaire}
    */
   public Questionnaire getQuestionnaire(Long cdssSupplierId, String questionnaireRef) {
+    String baseUrl = getBaseUrl(cdssSupplierId);
     return RetryUtils.retry(() ->
-        fhirContext.newRestfulGenericClient(getBaseUrl(cdssSupplierId)).read()
+        fhirContext.newRestfulGenericClient(baseUrl).read()
         .resource(Questionnaire.class)
         .withId(questionnaireRef)
-        .execute());
+        .execute(),
+        baseUrl);
   }
 
 }

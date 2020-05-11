@@ -25,7 +25,7 @@ public class RetryUtilsTest {
       RetryUtils.retry(() -> {
         count.incrementAndGet();
         throw new FhirClientConnectionException(new ConnectException());
-      });
+      }, null);
     } finally {
       assertThat(count.get(), is(4)); //3 retires executes 4 times
     }
@@ -35,7 +35,7 @@ public class RetryUtilsTest {
   public void shouldPassFirstTime() {
     AtomicInteger count = new AtomicInteger(0);
 
-    RetryUtils.retry(count::incrementAndGet);
+    RetryUtils.retry(count::incrementAndGet, null);
     assertThat(count.get(), is(1));
 
   }
@@ -51,7 +51,7 @@ public class RetryUtilsTest {
           throw new FhirClientConnectionException(new ConnectException());
         }
         return count;
-      });
+      }, null);
     } catch (Exception e){
       assertThat(count.get(), is(3));
     }
