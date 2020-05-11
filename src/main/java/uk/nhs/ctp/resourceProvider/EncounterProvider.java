@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
+import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.Composition;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -28,11 +29,12 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.stereotype.Component;
-import uk.nhs.ctp.entities.CaseCarePlan;
 import uk.nhs.ctp.service.AppointmentService;
+import uk.nhs.ctp.service.CarePlanService;
 import uk.nhs.ctp.service.CompositionService;
 import uk.nhs.ctp.service.EncounterService;
 import uk.nhs.ctp.service.ListService;
+import uk.nhs.ctp.service.ReferralRequestService;
 import uk.nhs.ctp.service.fhir.GenericResourceLocator;
 import uk.nhs.ctp.service.fhir.ReferenceService;
 
@@ -43,6 +45,8 @@ public class EncounterProvider implements IResourceProvider {
   private GenericResourceLocator resourceLocator;
   private EncounterService encounterService;
   private AppointmentService appointmentService;
+  private ReferralRequestService referralRequestService;
+  private CarePlanService carePlanService;
   private ReferenceService referenceService;
   private ListService listService;
   private CompositionService compositionService;
@@ -112,7 +116,7 @@ public class EncounterProvider implements IResourceProvider {
   }
 
   private void addReferralRequest(Bundle bundle, Long caseId) {
-    encounterService.getReferralRequestForEncounter(caseId)
+    referralRequestService.getByCaseId(caseId)
         .ifPresent(referralRequest -> {
           String url = referenceService
               .buildId(ResourceType.ReferralRequest, referralRequest.getId());
@@ -165,9 +169,9 @@ public class EncounterProvider implements IResourceProvider {
   }
 
   public void addCarePlans(Bundle bundle, Long caseId) {
-    List<CaseCarePlan> carePlans = encounterService.getCaseCarePlan(caseId);
-    for (CaseCarePlan carePlan : carePlans) {
-      Reference reference = new Reference(carePlan.getReference());
+    List<CarePlan> carePlans = carePlanService.getByCaseId(caseId);
+    for (CarePlan carePlan : carePlans) {
+      Reference reference = new Reference(carePlan);
       Preconditions.checkArgument(reference.getReferenceElement().isAbsolute(),
           "CarePlan must have absolute reference");
       addResource(bundle, reference, null);

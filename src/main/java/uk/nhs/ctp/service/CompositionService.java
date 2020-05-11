@@ -2,7 +2,6 @@ package uk.nhs.ctp.service;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -24,14 +23,12 @@ import org.hl7.fhir.dstu3.model.Narrative;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.springframework.stereotype.Service;
-import uk.nhs.ctp.entities.CaseCarePlan;
 import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.entities.CompositionEntity;
 import uk.nhs.ctp.entities.QuestionResponse;
-import uk.nhs.ctp.entities.ReferralRequestEntity;
 import uk.nhs.ctp.enums.DocumentSectionCode;
 import uk.nhs.ctp.enums.DocumentType;
 import uk.nhs.ctp.enums.ListOrder;
@@ -56,6 +53,8 @@ public class CompositionService {
   private final CompositionTransformer compositionTransformer;
   private final GenericResourceLocator resourceLocator;
   private final NarrativeService narrativeService;
+  private final ReferralRequestService referralRequestService;
+  private final CarePlanService carePlanService;
 
   @Transactional
   public List<Composition> getAllByEncounter(long encounterId) {
@@ -214,17 +213,14 @@ public class CompositionService {
   }
 
   private Optional<Reference> getReferralRequest(Cases caseEntity) {
-    return Optional.ofNullable(caseEntity.getReferralRequest())
-        .map(ReferralRequestEntity::getId)
-        .map(id -> referenceService.buildRef(ResourceType.ReferralRequest, id));
+    return referralRequestService.getByCaseId(caseEntity.getId())
+        .map(Reference::new);
   }
 
   private Stream<Reference> getCarePlans(Cases caseEntity) {
-    return Optional.ofNullable(caseEntity.getCarePlans())
+    return carePlanService.getByCaseId(caseEntity.getId())
         .stream()
-        .flatMap(Collection::stream)
-        .map(CaseCarePlan::getReference)
-        .map(ref -> referenceService.buildRef(ResourceType.CarePlan, ref));
+        .map(Reference::new);
   }
 
   private boolean isFinal(CdssResult cdssResult) {

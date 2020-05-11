@@ -17,7 +17,6 @@ public class AppointmentService {
 
   private final AppointmentTransformer appointmentTransformer;
   private final Registry<uk.nhs.ctp.model.Appointment> appointmentRegistry;
-  private final EncounterService encounterService;
   private final StorageService storageService;
 
   public Optional<Appointment> getByReferral(String referralRequest) {

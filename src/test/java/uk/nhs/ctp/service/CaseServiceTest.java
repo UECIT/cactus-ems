@@ -1,6 +1,5 @@
 package uk.nhs.ctp.service;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
@@ -9,7 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -19,7 +17,6 @@ import org.hl7.fhir.dstu3.model.Immunization;
 import org.hl7.fhir.dstu3.model.MedicationAdministration;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +26,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.nhs.ctp.SystemConstants;
@@ -38,27 +34,16 @@ import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.entities.PatientEntity;
-import uk.nhs.ctp.entities.ReferralRequestEntity;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.repos.PatientRepository;
 import uk.nhs.ctp.service.dto.CdssResult;
-import uk.nhs.ctp.service.dto.SelectedServiceRequestDTO;
 import uk.nhs.ctp.service.fhir.GenericResourceLocator;
 import uk.nhs.ctp.service.fhir.StorageService;
 import uk.nhs.ctp.transform.CaseObservationTransformer;
-import uk.nhs.ctp.transform.ReferralRequestEntityTransformer;
-import uk.nhs.ctp.transform.ReferralRequestTransformer;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
 public class CaseServiceTest {
-
-  @Autowired
-  private ReferralRequestService referralRequestService;
-  @Autowired
-  private ReferralRequestTransformer referralRequestTransformer;
-  @Autowired
-  private ReferralRequestEntityTransformer referralRequestEntityTransformer;
 
   @Mock
   private CaseRepository mockCaseRepository;
@@ -68,8 +53,6 @@ public class CaseServiceTest {
   private GenericResourceLocator resourceLocator;
   @Mock
   private StorageService storageService;
-  @Mock
-  private AppointmentService appointmentService;
 
   @Mock
   private CaseObservationTransformer caseObservationTransformer;
@@ -102,10 +85,7 @@ public class CaseServiceTest {
         mockCaseRepository,
         resourceLocator,
         storageService,
-        caseObservationTransformer,
-        referralRequestService,
-        referralRequestTransformer,
-        appointmentService
+        caseObservationTransformer
     ));
 
     MockitoAnnotations.initMocks(this);
@@ -189,21 +169,4 @@ public class CaseServiceTest {
     verify(spyCaseService, times(1)).createCaseMedication(any());
   }
 
-  @Test
-  public void testUpdateSelectedService() {
-    ReferralRequestEntity referralRequestEntity = referralRequestTransformer
-        .transform(new ReferralRequest());
-    triageCase.setReferralRequest(referralRequestEntity);
-
-    SelectedServiceRequestDTO serviceRequestDTO = new SelectedServiceRequestDTO();
-    serviceRequestDTO.setCaseId(1L);
-    serviceRequestDTO.setSelectedServiceId("HealthcareService/5");
-    serviceRequestDTO.setServiceTypes(Collections.emptyList());
-    Cases cases = spyCaseService.updateSelectedService(serviceRequestDTO);
-    referralRequestEntity = cases.getReferralRequest();
-    ReferralRequest referralRequest = referralRequestEntityTransformer
-        .transform(referralRequestEntity);
-
-    assertEquals("HealthcareService/5", referralRequest.getRecipientFirstRep().getReference());
-  }
 }
