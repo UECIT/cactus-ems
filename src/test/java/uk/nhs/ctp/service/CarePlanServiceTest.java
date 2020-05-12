@@ -3,6 +3,7 @@ package uk.nhs.ctp.service;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -11,10 +12,12 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.nhs.ctp.service.fhir.ReferenceService;
@@ -24,6 +27,7 @@ import uk.nhs.ctp.testhelper.MockingUtils;
 @RunWith(MockitoJUnitRunner.class)
 public class CarePlanServiceTest {
 
+  @InjectMocks
   private CarePlanService carePlanService;
 
   @Mock
@@ -38,10 +42,6 @@ public class CarePlanServiceTest {
   @Before
   public void setup() {
     when(storageService.getClient()).thenReturn(mockClient);
-    carePlanService = new CarePlanService(
-        storageService,
-        referenceService
-    );
   }
 
   @Test
@@ -56,6 +56,7 @@ public class CarePlanServiceTest {
 
     List<CarePlan> results = carePlanService.getByCaseId(3L);
 
+    verify(referenceService).buildId(ResourceType.Encounter, 3L);
     assertThat(results, contains(expected));
   }
 
@@ -65,6 +66,7 @@ public class CarePlanServiceTest {
 
     List<CarePlan> results = carePlanService.getByCaseId(3L);
 
+    verify(referenceService).buildId(ResourceType.Encounter, 3L);
     assertThat(results, empty());
   }
 

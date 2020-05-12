@@ -1,6 +1,10 @@
 package uk.nhs.ctp.service;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.both;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.argThat;
@@ -9,6 +13,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
+import java.util.Collections;
+import java.util.Optional;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.dstu3.model.CareConnectPatient;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -61,6 +67,12 @@ public class CompositionServiceTest {
   private NarrativeService narrativeService;
 
   @Mock
+  private ReferralRequestService referralRequestService;
+
+  @Mock
+  private CarePlanService carePlanService;
+
+  @Mock
   private FhirContext mockedFhirContext;
 
   @InjectMocks
@@ -91,6 +103,10 @@ public class CompositionServiceTest {
 
     when(compositionEntityTransformer.transform(Mockito.any(CompositionEntity.class)))
         .thenReturn(new Composition());
+
+    //TODO: CDSCT-129 improve test coverage of this class, these mocks are just to get it to pass
+    when(referralRequestService.getByCaseId(1L)).thenReturn(Optional.empty());
+    when(carePlanService.getByCaseId(1L)).thenReturn(Collections.emptyList());
   }
 
   @Test
