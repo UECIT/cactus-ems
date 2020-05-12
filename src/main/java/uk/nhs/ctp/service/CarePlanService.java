@@ -12,6 +12,7 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.service.fhir.ReferenceService;
 import uk.nhs.ctp.service.fhir.StorageService;
+import uk.nhs.ctp.utils.RetryUtils;
 
 @Service
 @AllArgsConstructor
@@ -22,11 +23,12 @@ public class CarePlanService {
   private ReferenceService referenceService;
 
   public List<CarePlan> getByCaseId(Long id) {
-    return storageService.getClient().search()
+    return RetryUtils.retry(() -> storageService.getClient().search()
         .forResource(CarePlan.class)
         .where(ReferralRequest.CONTEXT.hasId(referenceService.buildId(ResourceType.Encounter, id)))
         .returnBundle(Bundle.class)
-        .execute()
+        .execute(),
+        storageService.getClient().getServerBase())
         .getEntry().stream()
         .map(BundleEntryComponent::getResource)
         .map(CarePlan.class::cast)

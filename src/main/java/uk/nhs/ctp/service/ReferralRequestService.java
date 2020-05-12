@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import uk.nhs.ctp.service.dto.SelectedServiceRequestDTO;
 import uk.nhs.ctp.service.fhir.ReferenceService;
 import uk.nhs.ctp.service.fhir.StorageService;
+import uk.nhs.ctp.utils.RetryUtils;
 
 @Service
 @AllArgsConstructor
@@ -43,11 +44,11 @@ public class ReferralRequestService {
   }
 
   public Optional<ReferralRequest> getByCaseId(Long id) {
-    return storageService.getClient().search()
+    return RetryUtils.retry(() -> storageService.getClient().search()
         .forResource(ReferralRequest.class)
         .where(ReferralRequest.CONTEXT.hasId(referenceService.buildId(ResourceType.Encounter, id)))
         .returnBundle(Bundle.class)
-        .execute()
+        .execute(), storageService.getClient().getServerBase())
         .getEntry().stream()
         .map(BundleEntryComponent::getResource)
         .map(ReferralRequest.class::cast)

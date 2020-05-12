@@ -171,7 +171,7 @@ public class EncounterProvider implements IResourceProvider {
   public void addCarePlans(Bundle bundle, Long caseId) {
     List<CarePlan> carePlans = carePlanService.getByCaseId(caseId);
     for (CarePlan carePlan : carePlans) {
-      Reference reference = new Reference(carePlan);
+      Reference reference = new Reference(carePlan.getId());
       Preconditions.checkArgument(reference.getReferenceElement().isAbsolute(),
           "CarePlan must have absolute reference");
       addResource(bundle, reference, null);
