@@ -2,13 +2,12 @@ package uk.nhs.ctp.service;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import java.util.Arrays;
-import java.util.Optional;
+import java.util.List;
 import org.hamcrest.CustomTypeSafeMatcher;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -65,20 +64,20 @@ public class ReferralRequestServiceTest {
             .setResource(expected));
     MockingUtils.mockSearch(mockClient, ReferralRequest.class, returns);
 
-    Optional<ReferralRequest> results = referralRequestService.getByCaseId(3L);
+    List<ReferralRequest> results = referralRequestService.getByCaseId(3L);
 
     verify(referenceService).buildId(ResourceType.Encounter, 3L);
-    assertThat(results.orElseThrow(), is(expected));
+    assertThat(results, contains(expected));
   }
 
   @Test
   public void shouldReturnEmptyListNoCarePlansFound() {
     MockingUtils.mockSearch(mockClient, ReferralRequest.class, new Bundle());
 
-    Optional<ReferralRequest> results = referralRequestService.getByCaseId(3L);
+    List<ReferralRequest> results = referralRequestService.getByCaseId(3L);
 
     verify(referenceService).buildId(ResourceType.Encounter, 3L);
-    assertThat(results.isPresent(), is(false));
+    assertThat(results, contains(false));
   }
 
   @Test

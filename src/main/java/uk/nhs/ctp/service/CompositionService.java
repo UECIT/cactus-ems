@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.transaction.Transactional;
@@ -212,9 +211,10 @@ public class CompositionService {
     return references;
   }
 
-  private Optional<Reference> getReferralRequest(Cases caseEntity) {
-    return referralRequestService.getByCaseId(caseEntity.getId())
-        .map(Reference::new);
+  private List<Reference> getReferralRequest(Cases caseEntity) {
+    return referralRequestService.getByCaseId(caseEntity.getId()).stream()
+        .map(Reference::new)
+        .collect(Collectors.toList());
   }
 
   private Stream<Reference> getCarePlans(Cases caseEntity) {

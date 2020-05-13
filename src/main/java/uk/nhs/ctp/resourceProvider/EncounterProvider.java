@@ -117,7 +117,7 @@ public class EncounterProvider implements IResourceProvider {
 
   private void addReferralRequest(Bundle bundle, Long caseId) {
     referralRequestService.getByCaseId(caseId)
-        .ifPresent(referralRequest -> {
+        .forEach(referralRequest -> {
           String url = referenceService
               .buildId(ResourceType.ReferralRequest, referralRequest.getId());
           bundle.addEntry()

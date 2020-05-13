@@ -92,7 +92,7 @@ public class ListService {
 
   private void addReferralRequest(Cases caseEntity, List<Pair<Date, Reference>> dateRefList) {
     referralRequestService.getByCaseId(caseEntity.getId())
-        .ifPresent(referralRequest -> dateRefList.add(Pair.of(
+        .forEach(referralRequest -> dateRefList.add(Pair.of(
             referralRequest.getAuthoredOn(),
             new Reference(referralRequest))));
   }

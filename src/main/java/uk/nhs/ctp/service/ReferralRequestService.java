@@ -3,7 +3,6 @@ package uk.nhs.ctp.service;
 import static java.util.Collections.singletonList;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +30,7 @@ public class ReferralRequestService {
 
   public void updateServiceRequested(SelectedServiceRequestDTO requestDTO) {
     log.info("Setting selected HealthcareService for case " + requestDTO.getCaseId());
-    ReferralRequest referralRequest = getByCaseId(requestDTO.getCaseId()).orElseThrow();
+    ReferralRequest referralRequest = getByCaseId(requestDTO.getCaseId()).get(0); //TODO: CDSCT-130
     List<CodeableConcept> serviceRequested = requestDTO.getServiceTypes().stream()
         .map(codeDTO ->
             new CodeableConcept().addCoding(
@@ -43,7 +42,7 @@ public class ReferralRequestService {
     storageService.updateExternal(referralRequest);
   }
 
-  public Optional<ReferralRequest> getByCaseId(Long id) {
+  public List<ReferralRequest> getByCaseId(Long id) {
     return RetryUtils.retry(() -> storageService.getClient().search()
         .forResource(ReferralRequest.class)
         .where(ReferralRequest.CONTEXT.hasId(referenceService.buildId(ResourceType.Encounter, id)))
@@ -52,6 +51,6 @@ public class ReferralRequestService {
         .getEntry().stream()
         .map(BundleEntryComponent::getResource)
         .map(ReferralRequest.class::cast)
-        .findFirst();
+        .collect(Collectors.toList());
   }
 }
