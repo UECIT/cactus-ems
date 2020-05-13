@@ -18,6 +18,7 @@ import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.AuditService;
 import uk.nhs.ctp.service.CaseService;
 import uk.nhs.ctp.service.CdssService;
+import uk.nhs.ctp.service.ReferralRequestService;
 import uk.nhs.ctp.service.TriageService;
 import uk.nhs.ctp.service.dto.CdssRequestDTO;
 import uk.nhs.ctp.service.dto.CdssResponseDTO;
@@ -38,6 +39,7 @@ public class CaseController {
   private final CaseRepository caseRepository;
   private final CaseService caseService;
   private final AuditService auditService;
+  private final ReferralRequestService referralRequestService;
 
   private final SearchParametersTransformer searchParametersTransformer;
 
@@ -80,10 +82,8 @@ public class CaseController {
   }
 
   @PutMapping(path = "/selectedService")
-  public @ResponseBody
-  Cases updateSelectedService(@RequestBody SelectedServiceRequestDTO requestDTO) {
+  public @ResponseBody void updateSelectedService(@RequestBody SelectedServiceRequestDTO requestDTO) {
     auditService.setCaseId(requestDTO.getCaseId());
-    return caseService
-        .updateSelectedService(requestDTO);
+    referralRequestService.updateServiceRequested(requestDTO);
   }
 }

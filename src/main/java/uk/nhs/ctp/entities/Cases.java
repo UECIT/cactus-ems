@@ -7,13 +7,11 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -73,9 +71,6 @@ public class Cases {
   @JoinColumn(name = "case_id")
   private List<QuestionResponse> questionResponses = new ArrayList<>();
 
-  @OneToMany(mappedBy = "caseEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<CaseCarePlan> carePlans = new ArrayList<>();
-
   @Column(name = "session_id")
   private String sessionId;
 
@@ -86,27 +81,12 @@ public class Cases {
   @Column(name = "closed_date")
   private Date closedDate;
 
-  @OneToOne(mappedBy = "caseEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-  protected ReferralRequestEntity referralRequest;
-
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "case_id")
   private List<CompositionEntity> compositions = new ArrayList<>();
 
   @Column(name = "triage_complete")
   private Boolean triageComplete;
-
-  public void setReferralRequest(ReferralRequestEntity referralRequest) {
-    if (referralRequest == null) {
-      if (this.referralRequest != null) {
-        this.referralRequest.caseEntity = null;
-      }
-    }
-    else {
-      referralRequest.caseEntity = this;
-    }
-    this.referralRequest = referralRequest;
-  }
 
   public void addComposition(CompositionEntity composition) {
     this.compositions.add(composition);

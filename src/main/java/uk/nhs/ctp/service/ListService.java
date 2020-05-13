@@ -16,7 +16,6 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.entities.Cases;
-import uk.nhs.ctp.entities.ReferralRequestEntity;
 import uk.nhs.ctp.enums.ListOrder;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.fhir.ReferenceService;
@@ -27,6 +26,8 @@ public class ListService {
 
   private final CaseRepository caseRepository;
   private final ReferenceService referenceService;
+  private final ReferralRequestService referralRequestService;
+  private final CarePlanService carePlanService;
 
   @Transactional
   public ListResource buildFromCase(long caseId) {
@@ -90,20 +91,16 @@ public class ListService {
   }
 
   private void addReferralRequest(Cases caseEntity, List<Pair<Date, Reference>> dateRefList) {
-    ReferralRequestEntity referralRequestEntity = caseEntity.getReferralRequest();
-
-    if (referralRequestEntity == null) {
-      return;
-    }
-    dateRefList.add(Pair.of(
-        referralRequestEntity.getDateCreated(),
-        referenceService.buildRef(ResourceType.ReferralRequest, referralRequestEntity.getId())));
+    referralRequestService.getByCaseId(caseEntity.getId())
+        .forEach(referralRequest -> dateRefList.add(Pair.of(
+            referralRequest.getAuthoredOn(),
+            new Reference(referralRequest))));
   }
 
   private void addCarePlans(Cases caseEntity, List<Pair<Date, Reference>> dateRefList) {
-    List<Pair<Date, Reference>> carePlanRefs = caseEntity.getCarePlans().stream()
-        .map(carePlan -> Pair.of(carePlan.getDateCreated(), new Reference(carePlan.getReference())))
-        .collect(Collectors.toUnmodifiableList());
+    List<Pair<Date, Reference>> carePlanRefs = carePlanService.getByCaseId(caseEntity.getId()).stream()
+        .map(carePlan -> Pair.of(new Date(), new Reference(carePlan))) //Todo: what should this be sorted by.
+        .collect(Collectors.toList());
     dateRefList.addAll(carePlanRefs);
   }
 

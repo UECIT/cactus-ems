@@ -1,58 +1,56 @@
 package uk.nhs.ctp.service;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
-import com.google.common.base.Preconditions;
-import java.util.function.Consumer;
-import javax.transaction.Transactional;
+import static java.util.Collections.singletonList;
+
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
-import org.hl7.fhir.dstu3.model.IdType;
+import lombok.extern.slf4j.Slf4j;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.springframework.stereotype.Service;
-import uk.nhs.ctp.entities.ReferralRequestEntity;
-import uk.nhs.ctp.repos.ReferralRequestRepository;
+import uk.nhs.ctp.service.dto.SelectedServiceRequestDTO;
 import uk.nhs.ctp.service.fhir.ReferenceService;
-import uk.nhs.ctp.transform.ReferralRequestEntityTransformer;
-import uk.nhs.ctp.utils.ErrorHandlingUtils;
+import uk.nhs.ctp.service.fhir.StorageService;
+import uk.nhs.ctp.utils.RetryUtils;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class ReferralRequestService {
 
-  private ReferralRequestEntityTransformer referralRequestEntityTransformer;
-  private ReferralRequestRepository referralRequestRepository;
-  private FhirContext fhirContext;
+  private AppointmentService appointmentService;
+  private StorageService storageService;
   private ReferenceService referenceService;
 
-  public ReferralRequest makeAbsolute(ReferralRequest referralRequest) {
-    IdType idElement = referralRequest.getIdElement();
-    Preconditions.checkArgument(idElement.isAbsolute(), "Referral request must have absolute ID");
-    String baseUrl = idElement.getBaseUrl();
-
-    ReferralRequest copy = referralRequest.copy();
-    copy.setIdElement(null);
-    referenceService.resolveRelative(baseUrl, copy);
-
-    return copy;
+  public void updateServiceRequested(SelectedServiceRequestDTO requestDTO) {
+    log.info("Setting selected HealthcareService for case " + requestDTO.getCaseId());
+    ReferralRequest referralRequest = getByCaseId(requestDTO.getCaseId()).get(0); //TODO: CDSCT-130
+    List<CodeableConcept> serviceRequested = requestDTO.getServiceTypes().stream()
+        .map(codeDTO ->
+            new CodeableConcept().addCoding(
+                new Coding(codeDTO.getSystem(), codeDTO.getCode(), codeDTO.getDisplay())))
+        .collect(Collectors.toList());
+    referralRequest.setServiceRequested(serviceRequested);
+    referralRequest.setRecipient(singletonList(new Reference(requestDTO.getSelectedServiceId())));
+    appointmentService.create(referralRequest); //Create a static appointment for the referral request.
+    storageService.updateExternal(referralRequest);
   }
 
-  /**
-   * Applies an update to the embedded ReferralRequest resource by deserializing it, applying the
-   * update function and then re-serializing it.
-   */
-  public void update(ReferralRequestEntity entity, Consumer<ReferralRequest> updateFn) {
-    ReferralRequest referralRequest = referralRequestEntityTransformer.transform(entity);
-    updateFn.accept(referralRequest);
-    IParser fhirParser = fhirContext.newJsonParser();
-    entity.setResource(fhirParser.encodeResourceToString(referralRequest));
-  }
-
-  @Transactional
-  public ReferralRequest get(Long id) {
-    ReferralRequestEntity referralRequestEntity =
-        referralRequestRepository.findOne(id);
-    ErrorHandlingUtils.checkEntityExists(referralRequestEntity, "ReferralRequest");
-
-    return referralRequestEntityTransformer.transform(referralRequestEntity);
+  public List<ReferralRequest> getByCaseId(Long id) {
+    return RetryUtils.retry(() -> storageService.getClient().search()
+        .forResource(ReferralRequest.class)
+        .where(ReferralRequest.CONTEXT.hasId(referenceService.buildId(ResourceType.Encounter, id)))
+        .returnBundle(Bundle.class)
+        .execute(), storageService.getClient().getServerBase())
+        .getEntry().stream()
+        .map(BundleEntryComponent::getResource)
+        .map(ReferralRequest.class::cast)
+        .collect(Collectors.toList());
   }
 }

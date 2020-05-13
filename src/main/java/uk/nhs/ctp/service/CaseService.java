@@ -1,19 +1,15 @@
 package uk.nhs.ctp.service;
 
 import static com.google.common.collect.MoreCollectors.onlyElement;
-import static java.util.Collections.singletonList;
 import static uk.nhs.ctp.SystemConstants.DATE_FORMAT;
 
 import com.google.common.base.Preconditions;
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Immunization;
@@ -23,27 +19,22 @@ import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.SystemURL;
-import uk.nhs.ctp.entities.CaseCarePlan;
 import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.CaseParameter;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.entities.QuestionResponse;
-import uk.nhs.ctp.entities.ReferralRequestEntity;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.dto.CdssResult;
 import uk.nhs.ctp.service.dto.PractitionerDTO;
-import uk.nhs.ctp.service.dto.SelectedServiceRequestDTO;
 import uk.nhs.ctp.service.fhir.GenericResourceLocator;
 import uk.nhs.ctp.service.fhir.StorageService;
 import uk.nhs.ctp.transform.CaseObservationTransformer;
-import uk.nhs.ctp.transform.ReferralRequestTransformer;
 import uk.nhs.ctp.utils.ErrorHandlingUtils;
 
 @Service
@@ -55,10 +46,6 @@ public class CaseService {
   private GenericResourceLocator resourceLocator;
   private StorageService storageService;
   private CaseObservationTransformer caseObservationTransformer;
-  private ReferralRequestService referralRequestService;
-  private ReferralRequestTransformer referralRequestTransformer;
-  private AppointmentService appointmentService;
-
 
   public Cases createCase(String patientRef, PractitionerDTO practitioner) {
     String resourceType = new Reference(patientRef).getReferenceElement().getResourceType();
@@ -137,32 +124,7 @@ public class CaseService {
     Cases triageCase = caseRepository.findOne(caseId);
     ErrorHandlingUtils.checkEntityExists(triageCase, "Case");
     triageCase.setSessionId(sessionId);
-    triageCase.setReferralRequest(null);
     caseRepository.saveAndFlush(triageCase);
-
-    // Store referral request
-    ReferralRequest referralRequest = evaluateResponse.getReferralRequest();
-    if (referralRequest != null) {
-      log.info("Storing referral request");
-      ReferralRequest absoluteReferralRequest = referralRequestService
-          .makeAbsolute(referralRequest);
-      ReferralRequestEntity referralRequestEntity = referralRequestTransformer
-          .transform(absoluteReferralRequest);
-      triageCase.setReferralRequest(referralRequestEntity);
-    }
-
-    // Store references to CarePlans
-    if (evaluateResponse.hasCareAdvice()) {
-      List<CaseCarePlan> carePlans = triageCase.getCarePlans();
-      carePlans.clear();
-
-      evaluateResponse.getCareAdvice().stream()
-          .map(dto -> CaseCarePlan.builder()
-              .reference(dto.getId())
-              .caseEntity(triageCase)
-              .build())
-          .forEach(carePlans::add);
-    }
 
     // Store output data
     for (ParametersParameterComponent parameter : evaluateResponse.getOutputData().getParameter()) {
@@ -368,34 +330,5 @@ public class CaseService {
     } catch (FHIRException e) {
       log.error("Unable to fetch medication codeable concept", e);
     }
-  }
-
-  public Cases updateSelectedService(SelectedServiceRequestDTO serviceRequestDTO) {
-    Cases triageCase = caseRepository.findOne(serviceRequestDTO.getCaseId());
-    ErrorHandlingUtils.checkEntityExists(triageCase, "Case");
-
-    log.info("Setting selected HealthcareService for case " + triageCase.getId());
-
-    Reference serviceRef = new Reference(serviceRequestDTO.getSelectedServiceId());
-    Preconditions.checkArgument(
-        "HealthcareService".equals(serviceRef.getReferenceElement().getResourceType()),
-        "Selected service must be a HealthcareService"
-    );
-    Preconditions.checkNotNull(triageCase.getReferralRequest(), "No referral request found");
-
-    ReferralRequestEntity referralRequestEntity = triageCase.getReferralRequest();
-    referralRequestService.update(referralRequestEntity, referralRequest -> {
-      List<CodeableConcept> serviceRequested = serviceRequestDTO.getServiceTypes().stream()
-          .map(codeDTO ->
-              new CodeableConcept().addCoding(
-                  new Coding(codeDTO.getSystem(), codeDTO.getCode(), codeDTO.getDisplay())))
-          .collect(Collectors.toList());
-      referralRequest.setServiceRequested(serviceRequested);
-      referralRequest.setRecipient(singletonList(serviceRef));
-      appointmentService.create(referralRequest); //Create a static appointment for the referral request.
-    });
-
-    caseRepository.saveAndFlush(triageCase);
-    return triageCase;
   }
 }
