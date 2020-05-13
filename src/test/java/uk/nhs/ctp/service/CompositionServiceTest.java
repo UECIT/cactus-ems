@@ -14,7 +14,6 @@ import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.util.Collections;
-import java.util.Optional;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.dstu3.model.CareConnectPatient;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -105,7 +104,7 @@ public class CompositionServiceTest {
         .thenReturn(new Composition());
 
     //TODO: CDSCT-129 improve test coverage of this class, these mocks are just to get it to pass
-    when(referralRequestService.getByCaseId(1L)).thenReturn(Optional.empty());
+    when(referralRequestService.getByCaseId(1L)).thenReturn(Collections.emptyList());
     when(carePlanService.getByCaseId(1L)).thenReturn(Collections.emptyList());
   }
 

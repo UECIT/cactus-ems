@@ -2,6 +2,7 @@ package uk.nhs.ctp.service;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -77,7 +78,7 @@ public class ReferralRequestServiceTest {
     List<ReferralRequest> results = referralRequestService.getByCaseId(3L);
 
     verify(referenceService).buildId(ResourceType.Encounter, 3L);
-    assertThat(results, contains(false));
+    assertThat(results, empty());
   }
 
   @Test
