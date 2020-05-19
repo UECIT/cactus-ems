@@ -30,7 +30,6 @@ public class AuditController {
 	@GetMapping(path = "/{id}")
 	public @ResponseBody
 	List<Audit> getAudit(@PathVariable Long id) {
-		//TODO: CDSCT-139
 		return auditRepository.findAllByCaseId(id);
 	}
 	

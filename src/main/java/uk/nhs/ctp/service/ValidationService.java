@@ -23,7 +23,6 @@ public class ValidationService {
   private final AuditRepository auditRepository;
 
   public byte[] zipResources(Long caseId) throws IOException {
-    //TODO: CDSCT-139
     List<Audit> audits = auditRepository.findAllByCaseId(caseId);
     AuditEntry[] auditEntries = audits.stream()
         .flatMap(a -> a.getAuditEntries().stream())
