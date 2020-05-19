@@ -18,7 +18,7 @@ import uk.nhs.ctp.enums.ReferencingType;
 @Entity
 @Table(name = "cdss_supplier")
 @Data
-public class CdssSupplier {
+public class CdssSupplier extends SupplierPartitioned {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
