@@ -13,7 +13,8 @@ public class EmsSupplierService {
   private final EmsSupplierRepository emsSupplierRepository;
 
   public List<EmsSupplier> getAll() {
-    return emsSupplierRepository.findAll();
+    //TODO: CDSCT-139
+    return emsSupplierRepository.findAllBySupplierId(null);
   }
 
   public EmsSupplier crupdate(EmsSupplier updated) {
