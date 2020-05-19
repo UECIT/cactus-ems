@@ -6,7 +6,7 @@ import lombok.Data;
 @Entity
 @Table(name = "service_definition")
 @Data
-public class ServiceDefinition {
+public class ServiceDefinition extends SupplierPartitioned {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

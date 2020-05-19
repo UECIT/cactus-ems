@@ -27,7 +27,7 @@ import uk.nhs.ctp.enums.AuditType;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Audit implements HttpAudit {
+public class Audit extends SupplierPartitioned implements HttpAudit {
 
   @JsonIgnore
   private boolean storable;

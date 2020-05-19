@@ -28,7 +28,7 @@ import uk.nhs.ctp.audit.HttpAudit;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuditEntry implements HttpAudit {
+public class AuditEntry extends SupplierPartitioned implements HttpAudit {
 
   // generic audit details
   @Id

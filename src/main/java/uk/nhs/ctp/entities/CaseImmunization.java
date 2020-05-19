@@ -14,7 +14,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Entity
 @Table(name = "case_immunization")
 @Data
-public class CaseImmunization {
+public class CaseImmunization extends SupplierPartitioned {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
