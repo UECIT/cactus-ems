@@ -20,7 +20,7 @@ import lombok.Data;
 @Entity
 @Table(name = "cases")
 @Data
-public class Cases {
+public class Cases extends SupplierPartitioned {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

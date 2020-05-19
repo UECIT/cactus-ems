@@ -15,7 +15,7 @@ import lombok.Data;
 @Entity
 @Table(name = "case_parameter")
 @Data
-public class CaseParameter {
+public class CaseParameter extends SupplierPartitioned {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;

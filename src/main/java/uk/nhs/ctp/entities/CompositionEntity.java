@@ -18,7 +18,7 @@ import lombok.ToString;
 @Entity
 @Table(name = "compositions")
 @Data
-public class CompositionEntity {
+public class CompositionEntity extends SupplierPartitioned {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

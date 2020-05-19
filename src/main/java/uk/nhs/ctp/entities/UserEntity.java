@@ -16,7 +16,7 @@ import lombok.Data;
 @Entity
 @Table(name = "users")
 @Data
-public class UserEntity {
+public class UserEntity extends SupplierPartitioned {
 
   @Id
   @Column(name = "username")

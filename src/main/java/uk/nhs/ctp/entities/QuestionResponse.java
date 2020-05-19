@@ -20,7 +20,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class QuestionResponse {
+public class QuestionResponse extends SupplierPartitioned {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
