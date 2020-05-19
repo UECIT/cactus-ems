@@ -1,15 +1,22 @@
 FROM node:10 AS builder
 
+# Build the distribution package
 RUN mkdir -p /app
 WORKDIR /app
-COPY package*.json /app/
+COPY package*.json ./
 RUN npm install
-COPY . /app/
-COPY src/environments/environment.prod.ts /app/src/environments/environment.ts
-RUN npm run build
+COPY . ./
+RUN npm run build:prod
 
 
+# Copy package to final image
 FROM nginx:alpine
 EXPOSE 4200
-COPY --from=builder /app/dist/cdss-ui /var/share/nginx/html
+WORKDIR /var/share/nginx/html
+COPY --from=builder /app/dist/cdss-ui ./
 COPY nginx.conf /etc/nginx/nginx.conf
+
+#Setup and execute startup script
+COPY run.sh ./
+RUN sed -i 's/\x0D$//' run.sh
+ENTRYPOINT ./run.sh
