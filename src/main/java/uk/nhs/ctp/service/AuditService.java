@@ -182,7 +182,10 @@ public class AuditService {
   public Page<AuditSearchResultDTO> search(AuditSearchRequest request) {
     return caseRepository.search(
         request.getFrom(), request.getTo(),
-        request.isIncludeClosed(), request.isIncludeIncomplete(), request);
+        request.isIncludeClosed(), request.isIncludeIncomplete(),
+        //TODO: CDSCT-139
+        null,
+        request);
   }
 
 }

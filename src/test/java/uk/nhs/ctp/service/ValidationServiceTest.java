@@ -2,6 +2,7 @@ package uk.nhs.ctp.service;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.when;
 
@@ -36,7 +37,7 @@ public class ValidationServiceTest {
         .responseBody("Encounter resource")
         .build()));
 
-    when(auditRepository.findAllByCaseId(anyLong()))
+    when(auditRepository.findAllByCaseIdEqualsAndSuppliedIdEquals(anyLong(), any()))
         .thenReturn(List.of(audit));
 
     byte[] output = validationService.zipResources(1L);

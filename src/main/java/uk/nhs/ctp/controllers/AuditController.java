@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import uk.nhs.ctp.entities.Audit;
 import uk.nhs.ctp.repos.AuditRepository;
-import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.AuditService;
 import uk.nhs.ctp.service.search.AuditSearchRequest;
 import uk.nhs.ctp.service.search.AuditSearchResultDTO;
@@ -31,7 +30,8 @@ public class AuditController {
 	@GetMapping(path = "/{id}")
 	public @ResponseBody
 	List<Audit> getAudit(@PathVariable Long id) {
-		return auditRepository.findAllByCaseId(id);
+		//TODO: CDSCT-139
+		return auditRepository.findAllByCaseIdEqualsAndSuppliedIdEquals(id, null);
 	}
 	
 	@PostMapping
