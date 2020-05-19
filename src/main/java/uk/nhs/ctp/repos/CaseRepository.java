@@ -10,7 +10,7 @@ import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.service.search.AuditSearchResultDTO;
 
 @Repository
-public interface CaseRepository extends PartitionedRepository<Cases> {
+public interface CaseRepository extends PartitionedRepository<Cases, Long> {
   
   @Query("SELECT NEW uk.nhs.ctp.service.search.AuditSearchResultDTO(c.id, c.firstName, c.lastName, c.createdDate) " +
           "FROM Cases c " +
