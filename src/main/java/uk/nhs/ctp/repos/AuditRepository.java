@@ -7,6 +7,6 @@ import uk.nhs.ctp.entities.Audit;
 @Repository
 public interface AuditRepository extends PartitionedRepository<Audit> {
 
-  List<Audit> findAllByCaseIdEqualsAndSuppliedIdEquals(Long caseId, String supplierId);
+  List<Audit> findAllByCaseId(Long caseId);
 
 }

@@ -31,7 +31,7 @@ public class AuditController {
 	public @ResponseBody
 	List<Audit> getAudit(@PathVariable Long id) {
 		//TODO: CDSCT-139
-		return auditRepository.findAllByCaseIdEqualsAndSuppliedIdEquals(id, null);
+		return auditRepository.findAllByCaseId(id);
 	}
 	
 	@PostMapping
