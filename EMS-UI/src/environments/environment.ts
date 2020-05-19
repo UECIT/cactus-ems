@@ -1,8 +1,7 @@
-// This file can be replaced during build by using the `fileReplacements` array.
-// `ng build ---prod` replaces `environment.ts` with `environment.prod.ts`.
-// The list of file replacements can be found in `angular.json`.
+// `ng build ---prod` replaces this file with `environment.prod.ts`
+// via config provided in angular.json
 export const environment = {
-  production: false,
+  ENV_NAME: 'local',
   EMS_API: 'http://localhost:8083',
   UECDI_API: 'http://localhost:5000',
   UECDI_VALIDATE_API: 'http://localhost:7000/tkw-client',

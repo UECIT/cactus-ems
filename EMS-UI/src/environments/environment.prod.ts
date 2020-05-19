@@ -1,7 +1,8 @@
+// The values in this file will be replaced with environment variables in run.sh
 export const environment = {
-  production: true,
-  EMS_API: 'https://ems.cactus-staging.iucdspilot.uk',
-  UECDI_API: 'http://emstestharness-ems-care-advice.eu-west-2.elasticbeanstalk.com',
-  UECDI_VALIDATE_API: 'http://uecdi-tom-tkw.eu-west-2.elasticbeanstalk.com/tkw-client',
-  TERM_API: 'https://ontoserver.dataproducts.nhs.uk/fhir',
+  ENV_NAME: '$ENV_NAME',
+  EMS_API: '$EMS_API',
+  UECDI_API: '$UECDI_API',
+  UECDI_VALIDATE_API: '$UECDI_VALIDATE_API',
+  TERM_API: '$TERM_API',
 };
