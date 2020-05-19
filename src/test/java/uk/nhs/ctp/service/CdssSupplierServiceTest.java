@@ -1,135 +1,112 @@
 package uk.nhs.ctp.service;
 
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.samePropertyValuesAs;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.entities.UserEntity;
 import uk.nhs.ctp.exception.EMSException;
 import uk.nhs.ctp.repos.CdssSupplierRepository;
-import uk.nhs.ctp.repos.ServiceDefinitionRepository;
 import uk.nhs.ctp.repos.UserRepository;
 import uk.nhs.ctp.service.dto.CdssSupplierDTO;
 
-@SpringBootTest
-@RunWith(SpringRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class CdssSupplierServiceTest {
 
-  private CdssSupplierService spyCdssSupplierService;
+  @InjectMocks
+  private CdssSupplierService cdssSupplierService;
 
   @Mock
-  private UserRepository mockUserRepository;
+  private UserRepository userRepository;
 
   @Mock
-  private CdssSupplierRepository mockCdssSupplierRepository;
+  private CdssSupplierRepository cdssSupplierRepository;
 
-  @Mock
-  private ServiceDefinitionRepository mockServiceDefinitionRepository;
-
-  CdssSupplier cdss1, cdss2;
-  List<CdssSupplier> cdssSuppliersList1, cdssSuppliersList2;
-  CdssSupplierDTO cdssDTO1, cdssDTO2;
-  List<CdssSupplierDTO> cdssSupplierDTOsList1, cdssSupplierDTOsList2;
-  UserEntity adminUser, nhsUser, cdssUser, invalidRoleUser;
-
-  @Before
-  public void setup() {
-    spyCdssSupplierService = spy(
-        new CdssSupplierService(
-            mockUserRepository, mockCdssSupplierRepository,
-            mockServiceDefinitionRepository));
-
-    cdss1 = mock(CdssSupplier.class);
-    cdss2 = mock(CdssSupplier.class);
-    adminUser = mock(UserEntity.class);
-    nhsUser = mock(UserEntity.class);
-    cdssUser = mock(UserEntity.class);
-    invalidRoleUser = mock(UserEntity.class);
-
-    cdssSuppliersList1 = new ArrayList<>();
-    cdssSuppliersList2 = new ArrayList<>();
-
-    cdssSuppliersList1.add(cdss1);
-    cdssSuppliersList2.add(cdss1);
-    cdssSuppliersList2.add(cdss2);
-
-    cdssDTO1 = mock(CdssSupplierDTO.class);
-    cdssDTO2 = mock(CdssSupplierDTO.class);
-
-    cdssSupplierDTOsList1 = new ArrayList<>();
-    cdssSupplierDTOsList2 = new ArrayList<>();
-
-    cdssSupplierDTOsList1.add(cdssDTO1);
-    cdssSupplierDTOsList2.add(cdssDTO1);
-    cdssSupplierDTOsList2.add(cdssDTO2);
-
-    when(adminUser.getRole()).thenReturn("ROLE_ADMIN");
-    when(nhsUser.getRole()).thenReturn("ROLE_NHS");
-    when(cdssUser.getRole()).thenReturn("ROLE_CDSS");
-    when(invalidRoleUser.getRole()).thenReturn("INVALID_ROLE");
-
-    when(mockUserRepository.findByUsername("admin")).thenReturn(adminUser);
-    when(mockUserRepository.findByUsername("nhs")).thenReturn(nhsUser);
-    when(mockUserRepository.findByUsername("cdss")).thenReturn(cdssUser);
-    when(mockUserRepository.findByUsername("invalid")).thenReturn(invalidRoleUser);
-
-    when(mockCdssSupplierRepository.findAll()).thenReturn(cdssSuppliersList2);
-    when(cdssUser.getCdssSuppliers()).thenReturn(cdssSuppliersList1);
-
-    doReturn(cdssSupplierDTOsList1).when(spyCdssSupplierService)
-        .convertToSupplierDTO(cdssSuppliersList1);
-    doReturn(cdssSupplierDTOsList2).when(spyCdssSupplierService)
-        .convertToSupplierDTO(cdssSuppliersList2);
-
-  }
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void testAllSuppliersReturnedWhenRoleIsNhsUser() {
-    List<CdssSupplierDTO> result = spyCdssSupplierService.getCdssSuppliers("admin");
+    String username = "nhs";
+    UserEntity nhsUser = new UserEntity();
+    nhsUser.setUsername(username);
+    nhsUser.setRole("ROLE_NHS");
+    CdssSupplier input = new CdssSupplier();
+    input.setName("test");
+    when(userRepository.findByUsername(username)).thenReturn(nhsUser);
+    when(cdssSupplierRepository.findAllBySupplierId(null))
+        .thenReturn(Collections.singletonList(input));
 
-    assertTrue(result.size() == 2);
+    List<CdssSupplierDTO> suppliers = cdssSupplierService.getCdssSuppliers("nhs");
 
-    verify(mockCdssSupplierRepository, times(1)).findAll();
-    verify(adminUser, times(0)).getCdssSuppliers();
+    CdssSupplierDTO expected = new CdssSupplierDTO();
+    expected.setName("test");
+    assertThat(suppliers, contains(samePropertyValuesAs(expected)));
+
   }
 
   @Test
   public void testAllSuppliersReturnedWhenRoleIsAdminUser() {
-    List<CdssSupplierDTO> result = spyCdssSupplierService.getCdssSuppliers("nhs");
+    String username = "admin";
+    UserEntity nhsUser = new UserEntity();
+    nhsUser.setUsername(username);
+    nhsUser.setRole("ROLE_ADMIN");
+    CdssSupplier input = new CdssSupplier();
+    input.setName("test");
+    when(userRepository.findByUsername(username)).thenReturn(nhsUser);
+    when(cdssSupplierRepository.findAllBySupplierId(null))
+        .thenReturn(Collections.singletonList(input));
 
-    assertTrue(result.size() == 2);
+    List<CdssSupplierDTO> suppliers = cdssSupplierService.getCdssSuppliers("admin");
 
-    verify(mockCdssSupplierRepository, times(1)).findAll();
-    verify(nhsUser, times(0)).getCdssSuppliers();
+    CdssSupplierDTO expected = new CdssSupplierDTO();
+    expected.setName("test");
+    assertThat(suppliers, contains(samePropertyValuesAs(expected)));
   }
 
   @Test
   public void testSpecificSuppliersRetrievedWhenRoleIsNotAdminOrNhsUser() {
-    List<CdssSupplierDTO> result = spyCdssSupplierService.getCdssSuppliers("cdss");
+    String username = "cdss";
+    UserEntity nhsUser = new UserEntity();
+    nhsUser.setUsername(username);
+    nhsUser.setRole("ROLE_CDSS");
+    CdssSupplier input = new CdssSupplier();
+    input.setName("test");
+    nhsUser.setCdssSuppliers(Collections.singletonList(input));
+    when(userRepository.findByUsername(username)).thenReturn(nhsUser);
 
-    assertTrue(result.size() == 1);
+    List<CdssSupplierDTO> suppliers = cdssSupplierService.getCdssSuppliers("cdss");
 
-    verify(mockCdssSupplierRepository, times(0)).findAll();
-    verify(cdssUser, times(1)).getCdssSuppliers();
+    CdssSupplierDTO expected = new CdssSupplierDTO();
+    expected.setName("test");
+    assertThat(suppliers, contains(samePropertyValuesAs(expected)));
+    verify(cdssSupplierRepository, never()).findAllBySupplierId(any());
   }
 
-  @Test(expected = EMSException.class)
+  @Test
   public void testExceptionThrownWhenUserHasInvalidRole() {
-    spyCdssSupplierService.getCdssSuppliers("invalid");
+    UserEntity invalid = new UserEntity();
+    invalid.setRole("NOT_A_ROLE");
+    when(userRepository.findByUsername(anyString())).thenReturn(invalid);
+
+    expectedException.expect(EMSException.class);
+    cdssSupplierService.getCdssSuppliers("anything");
+
   }
 
 }

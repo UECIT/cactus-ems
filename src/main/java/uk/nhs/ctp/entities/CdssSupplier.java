@@ -1,5 +1,6 @@
 package uk.nhs.ctp.entities;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -36,5 +37,5 @@ public class CdssSupplier extends SupplierPartitioned {
 
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
   @JoinColumn(name = "cdss_supplier_id")
-  private List<ServiceDefinition> serviceDefinitions;
+  private List<ServiceDefinition> serviceDefinitions = new ArrayList<>();
 }
