@@ -13,7 +13,8 @@
               <th scope="col">Name</th>
               <th scope="col">BaseUrl</th>
               <th scope="col">Service Descriptions</th>
-              <th scope="col">Referencing</th>
+              <th scope="col">Input Data Referencing</th>
+              <th scope="col">Input Params Referencing</th>
               <th scope="col"></th>
             </tr>
           </thead>
@@ -26,10 +27,13 @@
                   <li *ngFor="let serviceDefinition of supplier.serviceDefinitions">{{ serviceDefinition.description }}</li>
                 </ul>
               </td>
-              <td [ngSwitch]="supplier.referencingType">
-                <p *ngSwitchCase="'ServerReferences'">External</p>
-                <p *ngSwitchCase="'BundledReferences'">Bundled</p>
-                <p *ngSwitchCase="'ContainedReferences'">Contained</p>
+              <td [ngSwitch]="supplier.inputDataRefType">
+                <p *ngSwitchCase="'resourceReferenceType.ByReference'">Referenced</p>
+                <p *ngSwitchCase="'resourceReferenceType.ByResource'">Contained</p>
+              </td>
+              <td [ngSwitch]="supplier.inputParamsRefType">
+                <p *ngSwitchCase="'resourceReferenceType.ByReference'">Referenced</p>
+                <p *ngSwitchCase="'resourceReferenceType.ByResource'">Contained</p>
               </td>
               <td>
                 <div class="actions">

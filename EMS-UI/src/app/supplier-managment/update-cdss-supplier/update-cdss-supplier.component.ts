@@ -1,3 +1,4 @@
+import { ResourceReferenceType } from './../../model/cdssSupplier';
 import { Component, OnInit } from '@angular/core';
 import { CdssService } from 'src/app/service/cdss.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -13,6 +14,7 @@ import { ToastrService } from 'ngx-toastr';
   styleUrls: ['./update-cdss-supplier.component.css']
 })
 export class UpdateCdssSupplierComponent implements OnInit {
+  resourceReferenceType = ResourceReferenceType;
   user: User = null;
   sub: any;
   supplierId: string;

@@ -49,13 +49,21 @@
       </div>
 
       <div>
-        <p title="Defines how referenced resources will be defined in the $evaluate request">
-          Reference types:
+        <p title="Defines how input parameter resources will be defined in the $evaluate request">
+          Input Parameter Reference types:
         </p>
-        <mat-button-toggle-group [(ngModel)]="supplier.referencingType" [ngModelOptions]="{standalone: true}">
-          <mat-button-toggle value="ServerReferences">External</mat-button-toggle>
-          <mat-button-toggle value="BundledReferences">Bundled</mat-button-toggle>
-          <mat-button-toggle value="ContainedReferences">Contained</mat-button-toggle>
+        <mat-button-toggle-group [(ngModel)]="supplier.inputParamsRefType" [ngModelOptions]="{standalone: true}">
+          <mat-button-toggle value="resourceReferenceType.ByReference">References</mat-button-toggle>
+          <mat-button-toggle value="resourceReferenceType.ByResource">Contained</mat-button-toggle>
+        </mat-button-toggle-group>
+      </div>
+      <div>
+        <p title="Defines how input data resources will be defined in the $evaluate request">
+          Input Data Reference types:
+        </p>
+        <mat-button-toggle-group [(ngModel)]="supplier.inputDataRefType" [ngModelOptions]="{standalone: true}">
+          <mat-button-toggle value="resourceReferenceType.ByReference">References</mat-button-toggle>
+          <mat-button-toggle value="resourceReferenceType.ByResource">Contained</mat-button-toggle>
         </mat-button-toggle-group>
       </div>
 
