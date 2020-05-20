@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {environment} from '../../environments/environment';
-import {CdssSupplier, ReferencingTypes, ServiceDefinition} from '../model/cdssSupplier';
+import {CdssSupplier, ServiceDefinition} from '../model/cdssSupplier';
 import {Token} from '../model/token';
 import {SessionStorage} from 'h5webstorage';
 import {ToastrService} from 'ngx-toastr';
@@ -80,14 +80,11 @@ export class CdssService {
           'Content-Type',
           'application/json'
       );
-      const dto = {
-        ...cdssSupplier,
-        referencingType: ReferencingTypes.toOrdinal(cdssSupplier.referencingType)
-      };
       const url = `${environment.EMS_API}/cdss`;
+      console.log(JSON.stringify(cdssSupplier));
       return this.http.post<CdssSupplier>(
           url,
-          JSON.stringify(dto),
+          JSON.stringify(cdssSupplier),
           httpOptions
       );
     }
