@@ -32,10 +32,13 @@ import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseParameter;
 import uk.nhs.ctp.entities.Cases;
+import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.enums.Language;
+import uk.nhs.ctp.enums.ReferencingType;
 import uk.nhs.ctp.enums.Setting;
 import uk.nhs.ctp.enums.UserType;
 import uk.nhs.ctp.repos.CaseRepository;
+import uk.nhs.ctp.service.dto.CdssRequestDTO;
 import uk.nhs.ctp.service.dto.CodeDTO;
 import uk.nhs.ctp.service.dto.SettingsDTO;
 import uk.nhs.ctp.service.dto.TriageQuestion;
@@ -48,9 +51,9 @@ import uk.nhs.ctp.utils.ErrorHandlingUtils;
 @Slf4j
 public class EvaluateParametersService {
 
-  private static Set<String> validInitiatingPersonTypes =
+  private static final Set<String> VALID_INITIATING_PERSON_TYPES =
       Set.of("Patient", "RelatedPerson", "Practitioner");
-  private static Set<String> validReceivingPersonTypes =
+  private static final Set<String> VALID_RECEIVING_PERSON_TYPES =
       Set.of("Patient", "RelatedPerson");
 
   private CaseRepository caseRepository;
@@ -58,15 +61,9 @@ public class EvaluateParametersService {
   private ObservationTransformer observationTransformer;
   private QuestionnaireService questionnaireService;
 
-  Parameters getEvaluateParameters(
-      Long caseId,
-      TriageQuestion[] questionResponse,
-      SettingsDTO settings,
-      Boolean amending,
-      String questionnaireId,
-      String supplierBaseUrl,
-      String requestId
-  ) {
+  Parameters getEvaluateParameters(CdssRequestDTO requestDetails, CdssSupplier cdssSupplier, String requestId) {
+    Long caseId = requestDetails.getCaseId();
+    SettingsDTO settings = requestDetails.getSettings();
     Cases caseEntity = caseRepository.findOne(caseId);
 
     ErrorHandlingUtils.checkEntityExists(caseEntity, "Case");
@@ -77,15 +74,39 @@ public class EvaluateParametersService {
         .setSetting(settings.getSetting());
 
     addPeople(builder, caseEntity.getPatientId(), settings);
-    addInputData(caseEntity, builder);
-    addInputParameters(caseEntity, builder);
-    addQuestionnaireResponses(builder, caseEntity, questionnaireId, questionResponse, amending, supplierBaseUrl);
+    addInputData(caseEntity, builder, cdssSupplier.getInputDataRefType());
+    addInputParameters(caseEntity, builder, cdssSupplier.getInputParamsRefType());
+    addQuestionnaireResponses(
+        builder,
+        caseEntity,
+        requestDetails.getQuestionnaireId(),
+        requestDetails.getQuestionResponse(),
+        requestDetails.getAmendingPrevious(),
+        cdssSupplier.getBaseUrl()
+    );
 
     return builder.build();
   }
 
-  private void addInputData(Cases caseEntity, Builder builder) {
-    getObservations(caseEntity).forEach(builder::addInputData);
+  private void addInputData(Cases caseEntity, Builder builder, ReferencingType inputDataRefType) {
+    Stream<Observation> observations = getObservations(caseEntity);
+    if (inputDataRefType == null) {
+      // don't fall over just default to referencing
+      inputDataRefType = ReferencingType.BY_REFERENCE;
+    }
+    switch (inputDataRefType) {
+      case BY_REFERENCE:
+        observations
+            .map(obs -> referenceService.buildRef(obs.getIdElement()))
+            .forEach(builder::addInputData);
+        break;
+      case BY_RESOURCE:
+        observations
+            .forEach(builder::addInputData);
+        break;
+    }
+
+    // TODO: CDSCT-167 - Can't reference these as we never save them anywhere. We should remove them
     getImmunizations(caseEntity).forEach(builder::addInputData);
     getMedications(caseEntity).forEach(builder::addInputData);
   }
@@ -149,7 +170,6 @@ public class EvaluateParametersService {
   }
 
   private ArrayList<Immunization> getImmunizations(Cases caseEntity) {
-    // TODO support sending as reference or resource - NCTH-450
     ArrayList<Immunization> immunizations = new ArrayList<>();
 
     if (!caseEntity.getImmunizations().isEmpty()) {
@@ -168,7 +188,6 @@ public class EvaluateParametersService {
   }
 
   private ArrayList<MedicationAdministration> getMedications(Cases caseEntity) {
-    // TODO support sending as reference or resource - NCTH-450
     ArrayList<MedicationAdministration> medications = new ArrayList<>();
     for (CaseMedication medicationEntity : caseEntity.getMedications()) {
       MedicationAdministration medication = new MedicationAdministration()
@@ -184,14 +203,11 @@ public class EvaluateParametersService {
   }
 
   private Stream<Observation> getObservations(Cases caseEntity) {
-    // TODO support sending as reference or resource - NCTH-450
-//    return caseEntity.getObservations().stream()
-//        .map(o -> referenceService.buildRef(ResourceType.Observation, o.getId()));
     return caseEntity.getObservations().stream()
         .map(observationTransformer::transform);
   }
 
-  private void addInputParameters(Cases caseEntity, Builder builder) {
+  private void addInputParameters(Cases caseEntity, Builder builder, ReferencingType inputParamsRefType) {
     // TODO review this in more detail. Non outputData output parameters are included here
     if (!caseEntity.getParameters().isEmpty()) {
       Parameters inputParameters = new Parameters();
@@ -250,7 +266,7 @@ public class EvaluateParametersService {
 
       validate(SystemConstants.USERTYPE)
           .checkSingle()
-          .checkCodeableConcept(validInitiatingPersonTypes);
+          .checkCodeableConcept(VALID_INITIATING_PERSON_TYPES);
 
       validate(SystemConstants.RECEIVINGPERSON)
           .checkSingle()
@@ -337,8 +353,8 @@ public class EvaluateParametersService {
 
     public Builder setUserType(UserType userType) {
       Preconditions.checkArgument(
-          validInitiatingPersonTypes.contains(userType.getValue()),
-          "User type must be one of " + validInitiatingPersonTypes);
+          VALID_INITIATING_PERSON_TYPES.contains(userType.getValue()),
+          "User type must be one of " + VALID_INITIATING_PERSON_TYPES);
 
       addUniqueParameter(SystemConstants.USERTYPE)
           .setValue(userType.toCodeableConcept());
@@ -348,8 +364,8 @@ public class EvaluateParametersService {
 
     public Builder setRecipientType(UserType recipientType) {
       Preconditions.checkArgument(
-          validReceivingPersonTypes.contains(recipientType.getValue()),
-          "Recipient type must be one of " + validReceivingPersonTypes);
+          VALID_RECEIVING_PERSON_TYPES.contains(recipientType.getValue()),
+          "Recipient type must be one of " + VALID_RECEIVING_PERSON_TYPES);
 
       addUniqueParameter(SystemConstants.RECIPIENTTYPE)
           .setValue(recipientType.toCodeableConcept());

@@ -62,15 +62,8 @@ public class EvaluateService {
         requestDetails.getServiceDefinitionId()
     );
 
-    Parameters request = evaluateParametersService.getEvaluateParameters(
-        caseId,
-        requestDetails.getQuestionResponse(),
-        requestDetails.getSettings(),
-        requestDetails.getAmendingPrevious(),
-        requestDetails.getQuestionnaireId(),
-        cdssSupplier.getBaseUrl(),
-        requestId
-    );
+    Parameters request =
+        evaluateParametersService.getEvaluateParameters(requestDetails, cdssSupplier, requestId);
 
     GuidanceResponse response = cdssService.evaluateServiceDefinition(
         request,
