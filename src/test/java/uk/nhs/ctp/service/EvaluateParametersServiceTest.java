@@ -1,9 +1,13 @@
 package uk.nhs.ctp.service;
 
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.Iterables;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -28,6 +32,7 @@ import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemC
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,7 +47,10 @@ import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.Cases;
+import uk.nhs.ctp.entities.CdssSupplier;
+import uk.nhs.ctp.enums.ReferencingType;
 import uk.nhs.ctp.repos.CaseRepository;
+import uk.nhs.ctp.service.dto.CdssRequestDTO;
 import uk.nhs.ctp.service.dto.CodeDTO;
 import uk.nhs.ctp.service.dto.PersonDTO;
 import uk.nhs.ctp.service.dto.PractitionerDTO;
@@ -177,14 +185,17 @@ public class EvaluateParametersServiceTest {
   public void testParametersCreatedCorrectlyWithNoCaseDataStored() {
     when(mockCaseRepository.findOne(1L)).thenReturn(caseWithNoData);
 
+    CdssRequestDTO requestDTO = new CdssRequestDTO();
+    requestDTO.setCaseId(1L);
+    requestDTO.setSettings(settings);
+    CdssSupplier supplier = new CdssSupplier();
+    supplier.setBaseUrl(BASE_URL);
+
     Parameters parameters = evaluateParametersService.getEvaluateParameters(
-        1L,
-        null,
-        settings,
-        false,
-        "",
-        BASE_URL,
-        UUID.randomUUID().toString());
+        requestDTO,
+        supplier,
+        UUID.randomUUID().toString()
+    );
 
     assertNotNull(parameters);
 
@@ -192,7 +203,6 @@ public class EvaluateParametersServiceTest {
 
     testRequestIdParamIsCorrect(parameterComponents);
     testPatientParamIsCorrect(parameterComponents);
-
   }
 
   @Test
@@ -200,14 +210,19 @@ public class EvaluateParametersServiceTest {
       throws FHIRException {
     when(mockCaseRepository.findOne(1L)).thenReturn(caseWithNoData);
 
+    CdssRequestDTO requestDTO = new CdssRequestDTO();
+    requestDTO.setCaseId(1L);
+    requestDTO.setQuestionResponse(questionResponses);
+    requestDTO.setQuestionnaireId("1");
+    requestDTO.setSettings(settings);
+    CdssSupplier supplier = new CdssSupplier();
+    supplier.setBaseUrl(BASE_URL);
+
     Parameters parameters = evaluateParametersService.getEvaluateParameters(
-        1L,
-        questionResponses,
-        settings,
-        false,
-        "1",
-        BASE_URL,
-        UUID.randomUUID().toString());
+        requestDTO,
+        supplier,
+        UUID.randomUUID().toString()
+    );
 
     assertNotNull(parameters);
 
@@ -229,14 +244,18 @@ public class EvaluateParametersServiceTest {
   public void testParametersCreatedCorrectlyWithCaseImmunizationStored() {
     when(mockCaseRepository.findOne(1L)).thenReturn(caseWithImmunization);
 
+    CdssRequestDTO requestDTO = new CdssRequestDTO();
+    requestDTO.setCaseId(1L);
+    requestDTO.setQuestionnaireId("1");
+    requestDTO.setSettings(settings);
+    CdssSupplier supplier = new CdssSupplier();
+    supplier.setBaseUrl(BASE_URL);
+
     Parameters parameters = evaluateParametersService.getEvaluateParameters(
-        1L,
-        null,
-        settings,
-        false,
-        "",
-        BASE_URL,
-        UUID.randomUUID().toString());
+        requestDTO,
+        supplier,
+        UUID.randomUUID().toString()
+    );
 
     assertNotNull(parameters);
 
@@ -258,13 +277,16 @@ public class EvaluateParametersServiceTest {
   public void testParametersCreatedCorrectlyWithCaseMedicationStored() throws FHIRException {
     when(mockCaseRepository.findOne(1L)).thenReturn(caseWithMedication);
 
+    CdssRequestDTO requestDTO = new CdssRequestDTO();
+    requestDTO.setCaseId(1L);
+    requestDTO.setQuestionnaireId("1");
+    requestDTO.setSettings(settings);
+    CdssSupplier supplier = new CdssSupplier();
+    supplier.setBaseUrl(BASE_URL);
+
     Parameters parameters = evaluateParametersService.getEvaluateParameters(
-        1L,
-        null,
-        settings,
-        false,
-        "",
-        BASE_URL,
+        requestDTO,
+        supplier,
         UUID.randomUUID().toString());
 
     assertNotNull(parameters);
@@ -280,20 +302,23 @@ public class EvaluateParametersServiceTest {
         .collect(Collectors.toList());
 
     testMedicationIsCorrect(inputDataParameters);
-
   }
 
   @Test
-  public void testParametersCreatedCorrectlyWithCaseObservationStored() throws FHIRException {
+  public void testParametersCreatedCorrectlyWithCaseObservationStored_Resource() throws FHIRException {
     when(mockCaseRepository.findOne(1L)).thenReturn(caseWithObservation);
 
+    CdssRequestDTO requestDTO = new CdssRequestDTO();
+    requestDTO.setCaseId(1L);
+    requestDTO.setQuestionnaireId("1");
+    requestDTO.setSettings(settings);
+    CdssSupplier supplier = new CdssSupplier();
+    supplier.setBaseUrl(BASE_URL);
+    supplier.setInputDataRefType(ReferencingType.BY_RESOURCE);
+
     Parameters parameters = evaluateParametersService.getEvaluateParameters(
-        1L,
-        null,
-        settings,
-        false,
-        "",
-        BASE_URL,
+        requestDTO,
+        supplier,
         UUID.randomUUID().toString());
 
     assertNotNull(parameters);
@@ -309,21 +334,67 @@ public class EvaluateParametersServiceTest {
         .collect(Collectors.toList());
 
     testObservationIsCorrect(inputDataParameters);
+  }
 
+  @Test
+  public void testParametersCreatedCorrectlyWithCaseObservationStored_Reference() throws FHIRException {
+    when(mockCaseRepository.findOne(1L)).thenReturn(caseWithObservation);
+
+    CdssRequestDTO requestDTO = new CdssRequestDTO();
+    requestDTO.setCaseId(1L);
+    requestDTO.setQuestionnaireId("1");
+    requestDTO.setSettings(settings);
+    CdssSupplier supplier = new CdssSupplier();
+    supplier.setBaseUrl(BASE_URL);
+    supplier.setInputDataRefType(ReferencingType.BY_REFERENCE);
+
+    Parameters parameters = evaluateParametersService.getEvaluateParameters(
+        requestDTO,
+        supplier,
+        UUID.randomUUID().toString());
+
+    assertNotNull(parameters);
+
+    List<ParametersParameterComponent> parameterComponents = parameters.getParameter();
+
+    testRequestIdParamIsCorrect(parameterComponents);
+    testPatientParamIsCorrect(parameterComponents);
+
+    //Get inputData parameters
+    List<ParametersParameterComponent> inputDataParameters = parameterComponents.stream()
+        .filter(param -> param.getName().equals("inputData"))
+        .collect(Collectors.toList());
+
+    assertThat(inputDataParameters, hasSize(1));
+    Type value = Iterables.getOnlyElement(inputDataParameters).getValue();
+    assertThat(value, instanceOf(Reference.class));
+    assertThat(((Reference)value).getReference(), is("http://localhost:8083/fhir/Observation/1"));
   }
 
   @Test
   public void testParametersCreatedCorrectlyWithCaseDataStoredAndQuestionAnswered()
       throws FHIRException {
     when(mockCaseRepository.findOne(1L)).thenReturn(caseWithData);
+//    Parameters parameters = evaluateParametersService.getEvaluateParameters(
+//        1L,
+//        questionResponses,
+//        settings,
+//        false,
+//        "1",
+//        BASE_URL,
+//        UUID.randomUUID().toString());
+    CdssRequestDTO requestDTO = new CdssRequestDTO();
+    requestDTO.setCaseId(1L);
+    requestDTO.setQuestionResponse(questionResponses);
+    requestDTO.setQuestionnaireId("1");
+    requestDTO.setSettings(settings);
+    CdssSupplier supplier = new CdssSupplier();
+    supplier.setBaseUrl(BASE_URL);
+    supplier.setInputDataRefType(ReferencingType.BY_RESOURCE);
 
     Parameters parameters = evaluateParametersService.getEvaluateParameters(
-        1L,
-        questionResponses,
-        settings,
-        false,
-        "1",
-        BASE_URL,
+        requestDTO,
+        supplier,
         UUID.randomUUID().toString());
 
     assertNotNull(parameters);
@@ -344,7 +415,6 @@ public class EvaluateParametersServiceTest {
     testMedicationIsCorrect(inputDataParameters);
 
   }
-
 
   private void testMedicationIsCorrect(List<ParametersParameterComponent> inputDataParameters)
       throws FHIRException {
