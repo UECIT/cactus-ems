@@ -85,7 +85,8 @@ public class CdssSupplierService {
     CdssSupplier cdssSupplier = new CdssSupplier();
     cdssSupplier.setName(newCdssSupplierDTO.getName());
     cdssSupplier.setBaseUrl(newCdssSupplierDTO.getBaseUrl());
-    cdssSupplier.setInputDataRefType(newCdssSupplierDTO.getReferencingType());
+    cdssSupplier.setInputDataRefType(newCdssSupplierDTO.getInputDataRefType());
+    cdssSupplier.setInputParamsRefType(newCdssSupplierDTO.getInputParamsRefType());
     cdssSupplier = cdssSupplierRepository.save(cdssSupplier);
 
     // for each service definition DTO, loop through and create a service definition
