@@ -63,7 +63,8 @@ public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
 		UserEntity userEntity = userRepository.findByUsername(auth.getName());
 		List<CdssSupplier> cdssSuppliers;
 		if (userEntity.getRole().equals("ROLE_NHS") || userEntity.getRole().equals("ROLE_ADMIN")) {
-			cdssSuppliers = cdssSupplierRepository.findAll();
+			//TODO: CDSCT-139 (this code doesn't seem to be used as it gets overwritten straight away)
+			cdssSuppliers = cdssSupplierRepository.findAllBySupplierId(null);
 		}
 		cdssSuppliers = userEntity.getCdssSuppliers();
 

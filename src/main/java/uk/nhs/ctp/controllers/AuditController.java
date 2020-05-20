@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import uk.nhs.ctp.entities.Audit;
 import uk.nhs.ctp.repos.AuditRepository;
-import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.AuditService;
 import uk.nhs.ctp.service.search.AuditSearchRequest;
 import uk.nhs.ctp.service.search.AuditSearchResultDTO;

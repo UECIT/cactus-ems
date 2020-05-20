@@ -54,7 +54,6 @@ public class EvaluateParametersService {
       Set.of("Patient", "RelatedPerson");
 
   private CaseRepository caseRepository;
-  private AuditService auditService;
   private ReferenceService referenceService;
   private ObservationTransformer observationTransformer;
   private QuestionnaireService questionnaireService;

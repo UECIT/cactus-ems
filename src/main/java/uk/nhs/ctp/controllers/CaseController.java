@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.AuditService;
-import uk.nhs.ctp.service.CaseService;
 import uk.nhs.ctp.service.CdssService;
 import uk.nhs.ctp.service.ReferralRequestService;
 import uk.nhs.ctp.service.TriageService;
@@ -37,7 +36,6 @@ public class CaseController {
   private final CdssService cdssService;
   private final TriageService triageService;
   private final CaseRepository caseRepository;
-  private final CaseService caseService;
   private final AuditService auditService;
   private final ReferralRequestService referralRequestService;
 

@@ -82,7 +82,8 @@ public class EncounterService {
   }
 
   public List<Encounter> getByPatientIdentifier(String system, String value) {
-    return caseRepository.findAll().stream()
+    //TODO: CDSCT-139
+    return caseRepository.findAllBySupplierId(null).stream()
         .filter(caseEntity -> {
           if (caseEntity.getPatientId() == null) {
             return false;
