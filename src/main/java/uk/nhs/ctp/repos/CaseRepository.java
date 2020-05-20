@@ -18,7 +18,7 @@ public interface CaseRepository extends PartitionedRepository<Cases, Long> {
           "AND (:to IS NULL OR createdDate < :to) " +
           "AND (:includeClosed = TRUE OR closedDate IS NULL)" +
           "AND (:includeIncomplete = TRUE OR triageComplete = TRUE)" +
-          "AND (:supplierId IS NULL OR supplierId = :supplierId)")
+          "AND (supplierId = :supplierId)")
   Page<AuditSearchResultDTO> search(
       @Param("from") Date from,
       @Param("to") Date to,
