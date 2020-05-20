@@ -81,7 +81,6 @@ export class CdssService {
           'application/json'
       );
       const url = `${environment.EMS_API}/cdss`;
-      console.log(JSON.stringify(cdssSupplier));
       return this.http.post<CdssSupplier>(
           url,
           JSON.stringify(cdssSupplier),
