@@ -66,3 +66,7 @@
 .serviceDefinitionListClose {
     cursor: pointer;
 }
+
+mat-button-toggle-group {
+    margin-bottom: 20px;
+}

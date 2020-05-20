@@ -375,14 +375,6 @@ public class EvaluateParametersServiceTest {
   public void testParametersCreatedCorrectlyWithCaseDataStoredAndQuestionAnswered()
       throws FHIRException {
     when(mockCaseRepository.findOne(1L)).thenReturn(caseWithData);
-//    Parameters parameters = evaluateParametersService.getEvaluateParameters(
-//        1L,
-//        questionResponses,
-//        settings,
-//        false,
-//        "1",
-//        BASE_URL,
-//        UUID.randomUUID().toString());
     CdssRequestDTO requestDTO = new CdssRequestDTO();
     requestDTO.setCaseId(1L);
     requestDTO.setQuestionResponse(questionResponses);

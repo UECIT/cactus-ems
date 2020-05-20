@@ -49,8 +49,12 @@
           Input Parameter Reference types:
         </p>
         <mat-button-toggle-group [(ngModel)]="inputParamRefType" [ngModelOptions]="{standalone: true}">
-          <mat-button-toggle value="resourceReferenceType.ByReference">References</mat-button-toggle>
-          <mat-button-toggle value="resourceReferenceType.ByResource">Contained</mat-button-toggle>
+          <mat-button-toggle id="param-ref-ref" value="resourceReferenceType.ByReference">
+            References
+          </mat-button-toggle>
+          <mat-button-toggle id="param-ref-res" value="resourceReferenceType.ByResource">
+            Contained
+          </mat-button-toggle>
         </mat-button-toggle-group>
       </div>
 
@@ -59,8 +63,12 @@
           Input Data Reference types:
         </p>
         <mat-button-toggle-group [(ngModel)]="inputDataRefType" [ngModelOptions]="{standalone: true}">
-          <mat-button-toggle value="resourceReferenceType.ByReference">References</mat-button-toggle>
-          <mat-button-toggle value="resourceReferenceType.ByResource">Contained</mat-button-toggle>
+          <mat-button-toggle id="data-ref-ref" value="resourceReferenceType.ByReference">
+            References
+          </mat-button-toggle>
+          <mat-button-toggle id="data-ref-res" value="resourceReferenceType.ByResource">
+            Contained
+          </mat-button-toggle>
         </mat-button-toggle-group>
       </div>
 
