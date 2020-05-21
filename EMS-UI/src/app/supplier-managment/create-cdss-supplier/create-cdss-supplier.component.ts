@@ -1,11 +1,6 @@
+import { ResourceReferenceType, CdssSupplier, ServiceDefinition } from './../../model/cdssSupplier';
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
-import {
-  NewCdssSupplier,
-  ServiceDefinition,
-  ReferencingType,
-  ReferencingTypes
-} from '../../model/cdssSupplier';
 import { CdssService } from 'src/app/service/cdss.service';
 import { Router } from '@angular/router';
 import { LoginService } from 'src/app/service/login.service';
@@ -17,12 +12,14 @@ import { LoginService } from 'src/app/service/login.service';
 })
 export class CreateCdssSupplierComponent implements OnInit {
   data: any = {};
-  supplier: NewCdssSupplier;
+  supplier: CdssSupplier;
   title: String = 'Create New Supplier';
   formData: FormGroup = new FormGroup({ password: new FormControl() });
   loaded = false;
   serviceDefinitions: ServiceDefinition[] = [];
-  referencingType: ReferencingType = ReferencingTypes.contained;
+  resourceReferenceType = ResourceReferenceType;
+  inputDataRefType: ResourceReferenceType = ResourceReferenceType.ByReference;
+  inputParamRefType: ResourceReferenceType = ResourceReferenceType.ByReference;
   warning: boolean;
   warningMessage: string;
   error: boolean;
@@ -89,16 +86,15 @@ export class CreateCdssSupplierComponent implements OnInit {
       id: data.id,
       name: data.name,
       baseUrl: data.baseUrl,
-      referencingType: this.referencingType,
-      serviceDefinitions: []
+      serviceDefinitions: [],
+      inputDataRefType: this.inputDataRefType,
+      inputParamsRefType: this.inputParamRefType
     };
     this.serviceDefinitions.forEach(serviceDefinition => {
       this.supplier.serviceDefinitions.push(serviceDefinition);
     });
     this.cdssService.createCdssSupplier(this.supplier).subscribe(
-      supplier => {
-        this.router.navigate(['/suppliers']);
-      },
+      () => this.router.navigate(['/suppliers']),
       error => {
         this.error = true;
         if (error.status === 401) {

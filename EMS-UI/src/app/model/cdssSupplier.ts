@@ -3,34 +3,24 @@ export class CdssSupplier {
   name: string;
   baseUrl: string;
   serviceDefinitions: ServiceDefinition[];
-  referencingType: ReferencingType;
+  inputParamsRefType: ResourceReferenceType;
+  inputDataRefType: ResourceReferenceType;
+  constructor() {
+    this.id = 0;
+    this.name = '';
+    this.baseUrl = '';
+    this.serviceDefinitions = [];
+    this.inputDataRefType = ResourceReferenceType.ByReference;
+    this.inputParamsRefType = ResourceReferenceType.ByReference;
+  }
 }
 
-export type ReferencingType = 'ServerReferences' | 'ContainedReferences' | 'BundledReferences';
-
-export class ReferencingTypes {
-  static readonly server: ReferencingType = 'ServerReferences';
-  static readonly contained: ReferencingType = 'ContainedReferences';
-  static readonly bundled: ReferencingType = 'BundledReferences';
-  static toOrdinal(type: ReferencingType) {
-    return [ReferencingTypes.server, ReferencingTypes.contained, ReferencingTypes.bundled]
-      .indexOf(type);
-  }
+export enum ResourceReferenceType {
+  ByReference = 0,
+  ByResource
 }
 
 export class ServiceDefinition {
   serviceDefinitionId: string;
   description: string;
-}
-
-export class NewCdssSupplier extends CdssSupplier {
-  baseUrl: string;
-  constructor() {
-    super();
-    this.id = 0;
-    this.name = '';
-    this.baseUrl = '';
-    this.referencingType = ReferencingTypes.contained;
-    this.serviceDefinitions = [];
-  }
 }

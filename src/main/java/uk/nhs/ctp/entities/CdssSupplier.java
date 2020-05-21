@@ -15,8 +15,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import uk.nhs.ctp.enums.ReferencingType;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "cdss_supplier", indexes = @Index(columnList = "supplierId"))
 @Data
@@ -32,8 +34,11 @@ public class CdssSupplier extends SupplierPartitioned {
   @Column(name = "base_url")
   private String baseUrl;
 
-  @Column(name = "referencing_type")
-  private ReferencingType referencingType;
+  @Column(name = "input_params_referencing_type")
+  private ReferencingType inputParamsRefType;
+
+  @Column(name = "input_data_referencing_type")
+  private ReferencingType inputDataRefType;
 
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
   @JoinColumn(name = "cdss_supplier_id")
