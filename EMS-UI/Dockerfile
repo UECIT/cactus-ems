@@ -18,5 +18,6 @@ COPY nginx.conf /etc/nginx/nginx.conf
 
 #Setup and execute startup script
 COPY run.sh ./
-RUN sed -i 's/\x0D$//' run.sh
+RUN sed -i 's/\x0D$//' run.sh && \
+  chmod +x ./run.sh
 ENTRYPOINT ./run.sh
