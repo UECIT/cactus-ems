@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.UUID;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,8 +35,13 @@ public class UserController {
   private final UserManagementService userManagementService;
 
   @PostMapping(path = "/register")
-  public @ResponseBody SupplierAccountDetails signup(@RequestBody RegisterSupplierRequest request) {
-    return SupplierAccountDetails.builder()
+  @PreAuthorize(value = "hasRole('ROLE_ADMIN')") // Only admin users can create suppliers
+  public @ResponseBody
+  ResponseEntity<SupplierAccountDetails> signup(@RequestBody RegisterSupplierRequest request) {
+    if (request.getSupplierId() == null) {
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+    SupplierAccountDetails details = SupplierAccountDetails.builder()
         .jwt(UUID.randomUUID().toString())
         .username(request.getSupplierId())
         .password("a generated password")
@@ -44,6 +51,7 @@ public class UserController {
             .dos("everywhere")
             .build())
         .build();
+    return new ResponseEntity<>(details, HttpStatus.OK);
   }
 
   @PreAuthorize("hasRole('ROLE_ADMIN')")

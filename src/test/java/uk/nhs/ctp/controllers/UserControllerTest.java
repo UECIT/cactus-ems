@@ -1,12 +1,14 @@
 package uk.nhs.ctp.controllers;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
-import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.nhs.ctp.model.RegisterSupplierRequest;
 import uk.nhs.ctp.model.SupplierAccountDetails;
@@ -22,8 +24,17 @@ public class UserControllerTest {
   public void shouldResponseWithAccountDetails() {
     RegisterSupplierRequest request = new RegisterSupplierRequest();
     request.setSupplierId("testid");
-    SupplierAccountDetails accountDetails = userController.signup(request);
+    ResponseEntity<SupplierAccountDetails> response = userController.signup(request);
 
-    assertThat(accountDetails.getUsername(), Matchers.is("testid"));
+    assertThat(response.getStatusCode(), is(HttpStatus.OK));
+  }
+
+  @Test
+  public void shouldNotResponseError() {
+    RegisterSupplierRequest request = new RegisterSupplierRequest();
+
+    ResponseEntity<SupplierAccountDetails> response = userController.signup(request);
+
+    assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST));
   }
 }
