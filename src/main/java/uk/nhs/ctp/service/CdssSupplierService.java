@@ -37,7 +37,8 @@ public class CdssSupplierService {
     List<CdssSupplier> suppliers;
 
     if (userEntity.getRole().equals(SystemConstants.ROLE_NHS)
-        || userEntity.getRole().equals(SystemConstants.ROLE_ADMIN)) {
+        || userEntity.getRole().equals(SystemConstants.ROLE_ADMIN)
+        || userEntity.getRole().equals(SystemConstants.ROLE_SUPPLIER_ADMIN)) {
       //TODO: CDSCT-139
       suppliers = cdssSupplierRepository.findAllBySupplierId(null);
     } else {
@@ -53,7 +54,8 @@ public class CdssSupplierService {
     List<CdssSupplier> suppliers;
 
     if (userEntity.getRole().equals(SystemConstants.ROLE_NHS)
-        || userEntity.getRole().equals(SystemConstants.ROLE_ADMIN)) {
+        || userEntity.getRole().equals(SystemConstants.ROLE_ADMIN)
+        || userEntity.getRole().equals(SystemConstants.ROLE_SUPPLIER_ADMIN)) {
       //TODO: CDSCT-139
       suppliers = cdssSupplierRepository.findAllBySupplierId(null);
     } else {

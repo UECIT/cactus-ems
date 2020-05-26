@@ -33,14 +33,23 @@ public class UserManagementService {
 	@Value("${cactus.cdss}")
 	private String cdss;
 
-	@Value("${dos.server")
+	@Value("${dos.server}")
 	private String dos;
 
 	public SupplierAccountDetails createNewSupplierUser(RegisterSupplierRequest request) {
+		var userDetails = new NewUserDTO();
+		userDetails.setUsername("admin_" + request.getSupplierId());
+		userDetails.setPassword(UUID.randomUUID().toString());
+		userDetails.setEnabled(true);
+		userDetails.setName("<Change me>");
+		userDetails.setRole("ROLE_SUPPLIER_ADMIN");
+
+		createUser(userDetails);
+
 		return SupplierAccountDetails.builder()
 				.jwt(UUID.randomUUID().toString())
-				.username(request.getSupplierId())
-				.password("a generated password")
+				.username(userDetails.getUsername())
+				.password(userDetails.getPassword())
 				.endpoints(EndpointDetails.builder()
 						.ems(ems)
 						.cdss(cdss)

@@ -37,6 +37,7 @@ public final class SystemConstants {
 	public static final String QUESTIONNAIRE = "Questionnaire";
 
 	public static final String ROLE_ADMIN = "ROLE_ADMIN";
+	public static final String ROLE_SUPPLIER_ADMIN = "ROLE_SUPPLIER_ADMIN";
 	public static final String ROLE_NHS = "ROLE_NHS";
 	public static final String ROLE_CDSS = "ROLE_CDSS";
 
