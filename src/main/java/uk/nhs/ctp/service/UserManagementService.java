@@ -27,14 +27,20 @@ public class UserManagementService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 
-	@Value("${ems.frontend}")
+	@Value("${ems.fhir.server}")
 	private String ems;
+
+	@Value("${ems.frontend}")
+	private String emsUi;
 
 	@Value("${cactus.cdss}")
 	private String cdss;
 
 	@Value("${dos.server}")
 	private String dos;
+
+	@Value("${logs.server}")
+	private String logs;
 
 	public SupplierAccountDetails createNewSupplierUser(RegisterSupplierRequest request) {
 		var userDetails = new NewUserDTO();
@@ -52,8 +58,10 @@ public class UserManagementService {
 				.password(userDetails.getPassword())
 				.endpoints(EndpointDetails.builder()
 						.ems(ems)
+						.emsUi(emsUi)
 						.cdss(cdss)
 						.dos(dos)
+						.logs(logs)
 						.build())
 				.build();
 	}

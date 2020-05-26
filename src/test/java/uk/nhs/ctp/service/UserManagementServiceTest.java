@@ -51,20 +51,24 @@ public class UserManagementServiceTest {
   @Test
   public void createNewSupplierUser() {
     ReflectionTestUtils.setField(userManagementService, "ems", "http://ems.com");
+    ReflectionTestUtils.setField(userManagementService, "emsUi", "http://ems-ui.com");
     ReflectionTestUtils.setField(userManagementService, "cdss", "http://cdss.com");
     ReflectionTestUtils.setField(userManagementService, "dos", "http://dos.com");
+    ReflectionTestUtils.setField(userManagementService, "logs", "http://elastic.com");
 
     RegisterSupplierRequest request = new RegisterSupplierRequest();
-    request.setSupplierId("suppliedid");
+    request.setSupplierId("supplier_id");
 
     SupplierAccountDetails returned = userManagementService.createNewSupplierUser(request);
 
     SupplierAccountDetails expected = SupplierAccountDetails.builder()
-        .username("admin_suppliedid")
+        .username("admin_supplier_id")
         .endpoints(EndpointDetails.builder()
             .ems("http://ems.com")
+            .emsUi("http://ems-ui.com")
             .cdss("http://cdss.com")
             .dos("http://dos.com")
+            .logs("http://elastic.com")
             .build())
         .build();
 

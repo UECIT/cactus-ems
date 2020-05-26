@@ -20,18 +20,19 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 @UtilityClass
 public class TokenAuthenticationService {
 
-	private static final long EXPIRATIONTIME = 864_000_000; // 10 days
-	private static final String SECRET = "CTPsecret";
-	private static final String TOKEN_PREFIX = "Bearer";
-	private static final String HEADER_STRING = "Authorization";
-	private static final String ROLE_STRING = "Roles";
+	private final long EXPIRATIONTIME = 864_000_000; // 10 days
+	private final String SECRET = "CTPsecret";
+	private final String TOKEN_PREFIX = "Bearer";
+	private final String HEADER_STRING = "Authorization";
+	private final String ROLE_STRING = "Roles";
 
 	void addAuthentication(HttpServletResponse res, String username,
 			Collection<? extends GrantedAuthority> roles) {
 		String roleString = roles.stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
 
 		String jwt = Jwts.builder().claim("roles", roleString)
-				.setSubject(username).setExpiration(new Date(System.currentTimeMillis() + EXPIRATIONTIME))
+				.setSubject(username)
+				.setExpiration(new Date(System.currentTimeMillis() + EXPIRATIONTIME))
 				.signWith(SignatureAlgorithm.HS512, SECRET).compact();
 		res.addHeader(HEADER_STRING, TOKEN_PREFIX + " " + jwt);
 		res.addHeader(ROLE_STRING, roleString);
@@ -40,7 +41,8 @@ public class TokenAuthenticationService {
 	Authentication getAuthentication(HttpServletRequest request) {
 		String token = request.getHeader(HEADER_STRING);
 		if (token != null && !Objects.equals(token, "")) {
-			Claims claims = Jwts.parser().setSigningKey(SECRET).parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
+			Claims claims = Jwts.parser().setSigningKey(SECRET)
+					.parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
 					.getBody();
 			String user = claims.getSubject();
 			List<? extends GrantedAuthority> roles = Arrays.stream(claims.get("roles").toString().split(","))
