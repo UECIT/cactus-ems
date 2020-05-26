@@ -40,8 +40,6 @@ public class CdssSupplierService {
         || userEntity.getRole().equals(SystemConstants.ROLE_ADMIN)) {
       //TODO: CDSCT-139
       suppliers = cdssSupplierRepository.findAllBySupplierId(null);
-    } else if (userEntity.getRole().equals(SystemConstants.ROLE_CDSS)) {
-      suppliers = userEntity.getCdssSuppliers();
     } else {
       throw new EMSException(HttpStatus.FORBIDDEN, "User has invalid role");
     }
@@ -58,8 +56,6 @@ public class CdssSupplierService {
         || userEntity.getRole().equals(SystemConstants.ROLE_ADMIN)) {
       //TODO: CDSCT-139
       suppliers = cdssSupplierRepository.findAllBySupplierId(null);
-    } else if (userEntity.getRole().equals(SystemConstants.ROLE_CDSS)) {
-      suppliers = userEntity.getCdssSuppliers();
     } else {
       throw new EMSException(HttpStatus.FORBIDDEN, "User has invalid role");
     }

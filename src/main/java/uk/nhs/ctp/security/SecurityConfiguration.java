@@ -19,8 +19,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-import uk.nhs.ctp.repos.CdssSupplierRepository;
-import uk.nhs.ctp.repos.UserRepository;
 
 @Configuration
 @EnableWebSecurity
@@ -34,12 +32,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
   @Autowired
   private DataSource dataSource;
-
-  @Autowired
-  private UserRepository userRepository;
-
-  @Autowired
-  private CdssSupplierRepository cdssSupplierRepository;
 
   @Autowired
   public void configureGlobalSecurity(AuthenticationManagerBuilder auth) throws Exception {
@@ -64,15 +56,21 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
   @Override
   protected void configure(HttpSecurity http) throws Exception {
 
+    //Use cors
     http.cors().and()
+        // Disable CSRF
         .csrf().disable()
         .authorizeRequests()
-        .antMatchers("/environment/**", "/document", "/fhir/**").permitAll()
-        .anyRequest().authenticated().and()
+          // All permitted
+          .antMatchers("/environment/**", "/document", "/fhir/**").permitAll()
+          // Anything else needs auth
+          .anyRequest().authenticated()
+          .and()
+        //Add the login filter to create authentication
         .addFilterBefore(
-            new JWTLoginFilter("/login", authenticationManager(), userRepository,
-                cdssSupplierRepository),
+            new JWTLoginFilter("/login", authenticationManager()),
             UsernamePasswordAuthenticationFilter.class)
+        // All other filters retrieve/require the authentication
         .addFilterBefore(new JWTAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
         .exceptionHandling().authenticationEntryPoint(new Http401AuthenticationEntryPoint(""));
   }

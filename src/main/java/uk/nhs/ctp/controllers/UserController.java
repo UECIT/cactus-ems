@@ -1,8 +1,10 @@
 package uk.nhs.ctp.controllers;
 
 import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import javassist.NotFoundException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,9 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import javassist.NotFoundException;
 import uk.nhs.ctp.entities.UserEntity;
+import uk.nhs.ctp.model.RegisterSupplierRequest;
+import uk.nhs.ctp.model.SupplierAccountDetails;
 import uk.nhs.ctp.service.UserManagementService;
 import uk.nhs.ctp.service.dto.ChangePasswordDTO;
 import uk.nhs.ctp.service.dto.NewUserDTO;
@@ -25,10 +27,21 @@ import uk.nhs.ctp.service.dto.UserDTO;
 @CrossOrigin
 @RestController
 @RequestMapping(path = "/users")
+@RequiredArgsConstructor
 public class UserController {
 
-  @Autowired
-  private UserManagementService userManagementService;
+  private final UserManagementService userManagementService;
+
+  @PostMapping(path = "/register")
+  @PreAuthorize(value = "hasRole('ROLE_ADMIN')") // Only admin users can create suppliers
+  public @ResponseBody
+  ResponseEntity<SupplierAccountDetails> signup(@RequestBody RegisterSupplierRequest request) {
+    if (request.getSupplierId() == null) {
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+    SupplierAccountDetails newSupplierUser = userManagementService.createNewSupplierUser(request);
+    return new ResponseEntity<>(newSupplierUser, HttpStatus.OK);
+  }
 
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @GetMapping
