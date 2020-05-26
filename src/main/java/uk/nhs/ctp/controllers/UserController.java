@@ -1,8 +1,9 @@
 package uk.nhs.ctp.controllers;
 
 import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.UUID;
+import javassist.NotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,9 +15,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import javassist.NotFoundException;
 import uk.nhs.ctp.entities.UserEntity;
+import uk.nhs.ctp.model.RegisterSupplierRequest;
+import uk.nhs.ctp.model.SupplierAccountDetails;
+import uk.nhs.ctp.model.SupplierAccountDetails.EndpointDetails;
 import uk.nhs.ctp.service.UserManagementService;
 import uk.nhs.ctp.service.dto.ChangePasswordDTO;
 import uk.nhs.ctp.service.dto.NewUserDTO;
@@ -25,10 +27,24 @@ import uk.nhs.ctp.service.dto.UserDTO;
 @CrossOrigin
 @RestController
 @RequestMapping(path = "/users")
+@RequiredArgsConstructor
 public class UserController {
 
-  @Autowired
-  private UserManagementService userManagementService;
+  private final UserManagementService userManagementService;
+
+  @PostMapping(path = "/register")
+  public @ResponseBody SupplierAccountDetails signup(@RequestBody RegisterSupplierRequest request) {
+    return SupplierAccountDetails.builder()
+        .jwt(UUID.randomUUID().toString())
+        .username(request.getSupplierId())
+        .password("a generated password")
+        .endpoints(EndpointDetails.builder()
+            .ems("here")
+            .cdss("there")
+            .dos("everywhere")
+            .build())
+        .build();
+  }
 
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @GetMapping

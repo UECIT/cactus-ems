@@ -90,25 +90,6 @@ public class CdssSupplierServiceTest {
   }
 
   @Test
-  public void testSpecificSuppliersRetrievedWhenRoleIsNotAdminOrNhsUser() {
-    String username = "cdss";
-    UserEntity nhsUser = new UserEntity();
-    nhsUser.setUsername(username);
-    nhsUser.setRole("ROLE_CDSS");
-    CdssSupplier input = new CdssSupplier();
-    input.setName("test");
-    nhsUser.setCdssSuppliers(Collections.singletonList(input));
-    when(userRepository.findByUsername(username)).thenReturn(nhsUser);
-
-    List<CdssSupplierDTO> suppliers = cdssSupplierService.getCdssSuppliers("cdss");
-
-    CdssSupplierDTO expected = new CdssSupplierDTO();
-    expected.setName("test");
-    assertThat(suppliers, contains(samePropertyValuesAs(expected)));
-    verify(cdssSupplierRepository, never()).findAllBySupplierId(any());
-  }
-
-  @Test
   public void testExceptionThrownWhenUserHasInvalidRole() {
     UserEntity invalid = new UserEntity();
     invalid.setRole("NOT_A_ROLE");

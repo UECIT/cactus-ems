@@ -4,14 +4,11 @@ import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
+import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import javassist.NotFoundException;
-import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.entities.UserEntity;
 import uk.nhs.ctp.exception.EMSException;
 import uk.nhs.ctp.repos.UserRepository;
@@ -53,13 +50,6 @@ public class UserManagementService {
 		userEntity.setName(userDTO.getName());
 		userEntity.setEnabled(userDTO.isEnabled());
 		userEntity.setRole(userDTO.getRole());
-		userEntity.setCdssSuppliers(getCdssSuppliers(userDTO));
-	}
-
-	private List<CdssSupplier> getCdssSuppliers(UserDTO userDTO) {
-		return userDTO.getCdssSuppliers().stream()
-				.map(supplierDTO -> cdssSupplierService.findBySupplierId(supplierDTO.getId()))
-				.collect(Collectors.toList());
 	}
 
 	public List<UserDTO> getAllUsers() {
@@ -73,9 +63,7 @@ public class UserManagementService {
 	}
 
 	private UserDTO convertToUserDTO(UserEntity entity) {
-		UserDTO userDTO = new UserDTO(entity);
-		userDTO.setCdssSuppliers(cdssSupplierService.convertToSupplierDTO(entity.getCdssSuppliers()));
-		return userDTO;
+		return new UserDTO(entity);
 	}
 
 	public UserEntity createUser(NewUserDTO userDTO) {
