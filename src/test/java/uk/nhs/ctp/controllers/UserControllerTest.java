@@ -25,7 +25,6 @@ public class UserControllerTest {
     RegisterSupplierRequest request = new RegisterSupplierRequest();
     request.setSupplierId("testid");
     ResponseEntity<SupplierAccountDetails> response = userController.signup(request);
-
     assertThat(response.getStatusCode(), is(HttpStatus.OK));
   }
 

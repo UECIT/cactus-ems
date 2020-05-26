@@ -1,7 +1,6 @@
 package uk.nhs.ctp.controllers;
 
 import java.util.List;
-import java.util.UUID;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.nhs.ctp.entities.UserEntity;
 import uk.nhs.ctp.model.RegisterSupplierRequest;
 import uk.nhs.ctp.model.SupplierAccountDetails;
-import uk.nhs.ctp.model.SupplierAccountDetails.EndpointDetails;
 import uk.nhs.ctp.service.UserManagementService;
 import uk.nhs.ctp.service.dto.ChangePasswordDTO;
 import uk.nhs.ctp.service.dto.NewUserDTO;
@@ -41,17 +39,8 @@ public class UserController {
     if (request.getSupplierId() == null) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
-    SupplierAccountDetails details = SupplierAccountDetails.builder()
-        .jwt(UUID.randomUUID().toString())
-        .username(request.getSupplierId())
-        .password("a generated password")
-        .endpoints(EndpointDetails.builder()
-            .ems("here")
-            .cdss("there")
-            .dos("everywhere")
-            .build())
-        .build();
-    return new ResponseEntity<>(details, HttpStatus.OK);
+    SupplierAccountDetails newSupplierUser = userManagementService.createNewSupplierUser(request);
+    return new ResponseEntity<>(newSupplierUser, HttpStatus.OK);
   }
 
   @PreAuthorize("hasRole('ROLE_ADMIN')")

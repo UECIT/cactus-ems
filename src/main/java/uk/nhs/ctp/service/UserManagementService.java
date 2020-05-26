@@ -1,16 +1,19 @@
 package uk.nhs.ctp.service;
 
-import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
-import javassist.NotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.entities.UserEntity;
 import uk.nhs.ctp.exception.EMSException;
+import uk.nhs.ctp.model.RegisterSupplierRequest;
+import uk.nhs.ctp.model.SupplierAccountDetails;
+import uk.nhs.ctp.model.SupplierAccountDetails.EndpointDetails;
 import uk.nhs.ctp.repos.UserRepository;
 import uk.nhs.ctp.service.dto.ChangePasswordDTO;
 import uk.nhs.ctp.service.dto.NewUserDTO;
@@ -18,25 +21,42 @@ import uk.nhs.ctp.service.dto.UserDTO;
 import uk.nhs.ctp.utils.ErrorHandlingUtils;
 
 @Service
+@RequiredArgsConstructor
 public class UserManagementService {
 
-	@Autowired
-	private UserRepository userRepository;
+	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
 
-	@Autowired
-	private PasswordEncoder passwordEncoder;
+	@Value("${ems.frontend}")
+	private String ems;
 
-	@Autowired
-	private CdssSupplierService cdssSupplierService;
+	@Value("${cactus.cdss}")
+	private String cdss;
 
-	public UserDTO getUserByUsername(String username) throws NotFoundException {
+	@Value("${dos.server")
+	private String dos;
+
+	public SupplierAccountDetails createNewSupplierUser(RegisterSupplierRequest request) {
+		return SupplierAccountDetails.builder()
+				.jwt(UUID.randomUUID().toString())
+				.username(request.getSupplierId())
+				.password("a generated password")
+				.endpoints(EndpointDetails.builder()
+						.ems(ems)
+						.cdss(cdss)
+						.dos(dos)
+						.build())
+				.build();
+	}
+
+	public UserDTO getUserByUsername(String username) {
 		UserEntity userEntity = userRepository.findOne(username);
 		ErrorHandlingUtils.checkEntityExists(userEntity, "User");
 
-		return convertToUserDTO(userEntity);
+		return new UserDTO(userEntity);
 	}
 
-	public UserEntity updateUser(UserDTO userDTO) throws Exception {
+	public UserEntity updateUser(UserDTO userDTO) {
 		UserEntity userEntity = userRepository.findOne(userDTO.getUsername());
 		ErrorHandlingUtils.checkEntityExists(userEntity, "User");
 
@@ -55,15 +75,11 @@ public class UserManagementService {
 	public List<UserDTO> getAllUsers() {
 		List<UserDTO> userDTOs = new ArrayList<>();
 
-		userRepository.findAll().forEach(entity -> {
-			userDTOs.add(convertToUserDTO(entity));
-		});
+		userRepository.findAll().stream()
+				.map(UserDTO::new)
+				.forEach(userDTOs::add);
 
 		return userDTOs;
-	}
-
-	private UserDTO convertToUserDTO(UserEntity entity) {
-		return new UserDTO(entity);
 	}
 
 	public UserEntity createUser(NewUserDTO userDTO) {
@@ -79,7 +95,7 @@ public class UserManagementService {
 		return userRepository.save(userEntity);
 	}
 
-	public UserEntity updatePassword(ChangePasswordDTO changePasswordDTO) throws UserPrincipalNotFoundException {
+	public UserEntity updatePassword(ChangePasswordDTO changePasswordDTO) {
 		UserEntity user = userRepository.findByUsername(changePasswordDTO.getUsername());
 		ErrorHandlingUtils.checkEntityExists(user, "User");
 		if (passwordEncoder.matches(changePasswordDTO.getOldPassword(), user.getPassword())) {
@@ -101,8 +117,9 @@ public class UserManagementService {
 		userRepository.delete(username);
 	}
 
-	public List<String> getExistingUsernames() {
-		return userRepository.findAll().stream().map(userEntity -> userEntity.getUsername())
+	private List<String> getExistingUsernames() {
+		return userRepository.findAll().stream()
+				.map(UserEntity::getUsername)
 				.collect(Collectors.toList());
 	}
 }
