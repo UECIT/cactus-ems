@@ -55,6 +55,7 @@ public class UserManagementService {
 		userDetails.setPassword(PasswordUtil.getStrongPassword());
 		userDetails.setEnabled(true);
 		userDetails.setName("<Change me>");
+		userDetails.setSupplierId(supplierId);
 		userDetails.setRole("ROLE_SUPPLIER_ADMIN");
 
 		try {
@@ -124,7 +125,7 @@ public class UserManagementService {
 
 		setUserDetails(userDTO, userEntity);
 		userEntity.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-
+		userEntity.setSupplierId(userDTO.getSupplierId());
 		return userRepository.save(userEntity);
 	}
 

@@ -35,6 +35,7 @@ public class CognitoService {
 
     var tempPassword = PasswordUtil.getStrongPassword();
     var adminCreateUserRequest = new AdminCreateUserRequest()
+        .withUserPoolId(userPool)
         .withUsername(accountDetails.getUsername())
         .withTemporaryPassword(tempPassword)
         .withUserAttributes(

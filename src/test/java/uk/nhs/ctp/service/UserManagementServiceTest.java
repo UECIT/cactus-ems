@@ -105,6 +105,7 @@ public class UserManagementServiceTest {
     newUser.setPassword("insecure password");
     newUser.setName("test name");
     newUser.setEnabled(true);
+    newUser.setSupplierId("thesupplier");
     return newUser;
   }
 
@@ -118,6 +119,7 @@ public class UserManagementServiceTest {
     expectedUser.setPassword("insecure password");
     expectedUser.setName("test name");
     expectedUser.setEnabled(true);
+    expectedUser.setSupplierId("thesupplier");
 
     verify(userRepository).save(argThat(sameBeanAs(expectedUser)));
   }
