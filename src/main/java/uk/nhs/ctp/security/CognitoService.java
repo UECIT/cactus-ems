@@ -7,6 +7,7 @@ import com.amazonaws.services.cognitoidp.model.AdminInitiateAuthRequest;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.AuthFlowType;
 import com.amazonaws.services.cognitoidp.model.ChangePasswordRequest;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.model.SupplierAccountDetails;
@@ -49,7 +50,11 @@ public class CognitoService {
     // Create the user
     cognitoIdentityProvider.adminCreateUser(adminCreateUserRequest);
     var adminInitiateAuthRequest = new AdminInitiateAuthRequest()
-        .withAuthFlow(AuthFlowType.ADMIN_NO_SRP_AUTH)
+        .withAuthFlow(AuthFlowType.ADMIN_USER_PASSWORD_AUTH)
+        .withAuthParameters(Map.of(
+            "USERNAME", accountDetails.getUsername(),
+            "PASSWORD", tempPassword
+        ))
         .withUserPoolId(userPool)
         .withClientId(clientId);
     // Login as admin
