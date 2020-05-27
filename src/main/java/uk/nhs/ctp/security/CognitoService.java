@@ -46,14 +46,17 @@ public class CognitoService {
               .withName(EMAIL_ATTRIBUTE)
               .withValue(accountDetails.getEmail())
         );
+    // Create the user
     cognitoIdentityProvider.adminCreateUser(adminCreateUserRequest);
     var adminInitiateAuthRequest = new AdminInitiateAuthRequest()
-        .withAuthFlow(AuthFlowType.USER_PASSWORD_AUTH)
+        .withAuthFlow(AuthFlowType.ADMIN_NO_SRP_AUTH)
         .withUserPoolId(userPool)
         .withClientId(clientId);
+    // Login as admin
     var adminInitiateAuthResult = cognitoIdentityProvider
         .adminInitiateAuth(adminInitiateAuthRequest);
     String token = adminInitiateAuthResult.getAuthenticationResult().getAccessToken();
+    // Change the temporary password to the one we return
     var changePasswordRequest = new ChangePasswordRequest()
         .withAccessToken(token)
         .withPreviousPassword(tempPassword)
