@@ -4,19 +4,21 @@ import static com.shazam.shazamcrest.matcher.Matchers.sameBeanAs;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import javax.persistence.EntityExistsException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-
 import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -26,6 +28,7 @@ import uk.nhs.ctp.model.RegisterSupplierRequest;
 import uk.nhs.ctp.model.SupplierAccountDetails;
 import uk.nhs.ctp.model.SupplierAccountDetails.EndpointDetails;
 import uk.nhs.ctp.repos.UserRepository;
+import uk.nhs.ctp.security.CognitoService;
 import uk.nhs.ctp.service.dto.NewUserDTO;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -39,6 +42,9 @@ public class UserManagementServiceTest {
 
   @Mock
   private PasswordEncoder passwordEncoder;
+
+  @Mock
+  private CognitoService cognitoService;
 
   @InjectMocks
   private UserManagementService userManagementService;
@@ -75,6 +81,21 @@ public class UserManagementServiceTest {
     assertThat(returned, sameBeanAs(expected)
       .with("jwt", any(String.class))
       .with("password", any(String.class)));
+    verify(cognitoService).signUp("supplier_id", returned);
+  }
+
+  @Test
+  public void createNewSupplierUser_alreadyExists() {
+    when(userRepository.save(Matchers.any(UserEntity.class)))
+        .thenThrow(new EntityExistsException());
+
+    RegisterSupplierRequest request = new RegisterSupplierRequest();
+    request.setSupplierId("supplier_id");
+
+    expectedException.expect(EntityExistsException.class);
+    userManagementService.createNewSupplierUser(request);
+
+    verifyZeroInteractions(cognitoService);
   }
 
   private NewUserDTO getTestUser() {
@@ -98,7 +119,7 @@ public class UserManagementServiceTest {
     expectedUser.setName("test name");
     expectedUser.setEnabled(true);
 
-    Mockito.verify(userRepository).save(Matchers.argThat(sameBeanAs(expectedUser)));
+    verify(userRepository).save(argThat(sameBeanAs(expectedUser)));
   }
 
   @Test

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,17 +16,21 @@ import uk.nhs.ctp.model.RegisterSupplierRequest;
 import uk.nhs.ctp.model.SupplierAccountDetails;
 import uk.nhs.ctp.model.SupplierAccountDetails.EndpointDetails;
 import uk.nhs.ctp.repos.UserRepository;
+import uk.nhs.ctp.security.CognitoService;
 import uk.nhs.ctp.service.dto.ChangePasswordDTO;
 import uk.nhs.ctp.service.dto.NewUserDTO;
 import uk.nhs.ctp.service.dto.UserDTO;
 import uk.nhs.ctp.utils.ErrorHandlingUtils;
+import uk.nhs.ctp.utils.PasswordUtil;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserManagementService {
 
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final CognitoService cognitoService;
 
 	@Value("${ems.fhir.server}")
 	private String ems;
@@ -44,26 +49,36 @@ public class UserManagementService {
 
 	public SupplierAccountDetails createNewSupplierUser(RegisterSupplierRequest request) {
 		var userDetails = new NewUserDTO();
-		userDetails.setUsername("admin_" + request.getSupplierId());
-		userDetails.setPassword(UUID.randomUUID().toString());
+		String supplierId = request.getSupplierId();
+		String username = "admin_" + supplierId;
+		userDetails.setUsername(username);
+		userDetails.setPassword(PasswordUtil.getStrongPassword());
 		userDetails.setEnabled(true);
 		userDetails.setName("<Change me>");
 		userDetails.setRole("ROLE_SUPPLIER_ADMIN");
 
-		createUser(userDetails);
+		try {
+			createUser(userDetails);
 
-		return SupplierAccountDetails.builder()
-				.jwt(UUID.randomUUID().toString())
-				.username(userDetails.getUsername())
-				.password(userDetails.getPassword())
-				.endpoints(EndpointDetails.builder()
-						.ems(ems)
-						.emsUi(emsUi)
-						.cdss(cdss)
-						.dos(dos)
-						.logs(logs)
-						.build())
-				.build();
+			SupplierAccountDetails supplierAccountDetails = SupplierAccountDetails.builder()
+					.jwt(UUID.randomUUID().toString())
+					.username(userDetails.getUsername())
+					.password(userDetails.getPassword())
+					.endpoints(EndpointDetails.builder()
+							.ems(ems)
+							.emsUi(emsUi)
+							.cdss(cdss)
+							.dos(dos)
+							.logs(logs)
+							.build())
+					.build();
+			// Create the user in cognito for ElasticSearch searching.
+			cognitoService.signUp(supplierId, supplierAccountDetails);
+			return supplierAccountDetails;
+		} catch (Exception e) {
+			log.error("Error creating user: {}", supplierId);
+			throw e;
+		}
 	}
 
 	public UserDTO getUserByUsername(String username) {
