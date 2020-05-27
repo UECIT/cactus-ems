@@ -68,8 +68,8 @@ public class CognitoService {
         .withAuthFlow(AuthFlowType.ADMIN_USER_PASSWORD_AUTH)
         .withAuthParameters(Map.ofEntries(
             Map.entry(USERNAME_PROPERTY, username),
-            Map.entry(PASSWORD_PROPERTY, calculateSecretHash(clientId, clientSecret, username)),
-            Map.entry(SECRET_HASH_PROPERTY, clientSecret)
+            Map.entry(PASSWORD_PROPERTY, tempPassword),
+            Map.entry(SECRET_HASH_PROPERTY, calculateSecretHash(clientId, clientSecret, username))
         ))
         .withUserPoolId(userPool)
         .withClientId(clientId);
