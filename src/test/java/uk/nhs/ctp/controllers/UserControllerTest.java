@@ -55,11 +55,13 @@ public class UserControllerTest {
   public void shouldResponseWithAccountDetails() {
     RegisterSupplierRequest request = new RegisterSupplierRequest();
     request.setSupplierId("testid");
+    request.setEmail("testemail");
     ResponseEntity<SupplierAccountDetails> response = userController.signup(request);
     assertThat(response.getStatusCode(), is(HttpStatus.OK));
 
     var body = SupplierAccountDetails.builder()
         .username("admin_testid")
+        .email("testemail")
         .endpoints(EndpointDetails.builder()
             .cdss("http://localhost:8080/fhir")
             .ems("http://localhost:8083/fhir")
