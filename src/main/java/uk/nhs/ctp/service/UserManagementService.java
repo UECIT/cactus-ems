@@ -27,24 +27,41 @@ public class UserManagementService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 
-	@Value("${ems.frontend}")
+	@Value("${ems.fhir.server}")
 	private String ems;
+
+	@Value("${ems.frontend}")
+	private String emsUi;
 
 	@Value("${cactus.cdss}")
 	private String cdss;
 
-	@Value("${dos.server")
+	@Value("${dos.server}")
 	private String dos;
 
+	@Value("${logs.server}")
+	private String logs;
+
 	public SupplierAccountDetails createNewSupplierUser(RegisterSupplierRequest request) {
+		var userDetails = new NewUserDTO();
+		userDetails.setUsername("admin_" + request.getSupplierId());
+		userDetails.setPassword(UUID.randomUUID().toString());
+		userDetails.setEnabled(true);
+		userDetails.setName("<Change me>");
+		userDetails.setRole("ROLE_SUPPLIER_ADMIN");
+
+		createUser(userDetails);
+
 		return SupplierAccountDetails.builder()
 				.jwt(UUID.randomUUID().toString())
-				.username(request.getSupplierId())
-				.password("a generated password")
+				.username(userDetails.getUsername())
+				.password(userDetails.getPassword())
 				.endpoints(EndpointDetails.builder()
 						.ems(ems)
+						.emsUi(emsUi)
 						.cdss(cdss)
 						.dos(dos)
+						.logs(logs)
 						.build())
 				.build();
 	}

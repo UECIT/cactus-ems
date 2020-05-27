@@ -50,45 +50,45 @@ public class UserController {
     return userManagementService.getAllUsers();
   }
 
-  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_NHS', 'ROLE_CDSS')")
+  @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SUPPLIER_ADMIN','ROLE_NHS','ROLE_CDSS')")
   @GetMapping(path = "/{username}")
   public @ResponseBody
-  UserDTO getUserByUsername(@PathVariable("username") String username) throws NotFoundException {
+  UserDTO getUserByUsername(@PathVariable("username") String username) {
     return userManagementService.getUserByUsername(username);
   }
 
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @PutMapping
   public @ResponseBody
-  UserEntity updateUser(@RequestBody UserDTO user) throws Exception {
+  UserEntity updateUser(@RequestBody UserDTO user) {
     return userManagementService.updateUser(user);
   }
 
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @PutMapping(path = "/reset")
   public @ResponseBody
-  UserEntity resetPassword(@RequestBody ChangePasswordDTO changePassword) throws Exception {
+  UserEntity resetPassword(@RequestBody ChangePasswordDTO changePassword) {
     return userManagementService.resetPassword(changePassword);
   }
 
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @DeleteMapping(path = "/{username}")
   public @ResponseBody
-  void deleteUser(@PathVariable("username") String username) throws Exception {
+  void deleteUser(@PathVariable("username") String username) {
     userManagementService.deleteUser(username);
   }
 
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @PostMapping
   public @ResponseBody
-  UserEntity createUser(@RequestBody NewUserDTO user) throws Exception {
+  UserEntity createUser(@RequestBody NewUserDTO user) {
     return userManagementService.createUser(user);
   }
 
-  @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_NHS','ROLE_CDSS')")
+  @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SUPPLIER_ADMIN','ROLE_NHS','ROLE_CDSS')")
   @PutMapping(path = "/update")
   public @ResponseBody
-  UserEntity updatePassword(@RequestBody ChangePasswordDTO changePassword) throws Exception {
+  UserEntity updatePassword(@RequestBody ChangePasswordDTO changePassword) {
     return userManagementService.updatePassword(changePassword);
   }
 }

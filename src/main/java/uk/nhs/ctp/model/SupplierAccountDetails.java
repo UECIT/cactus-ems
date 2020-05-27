@@ -18,7 +18,9 @@ public class SupplierAccountDetails {
   public static class EndpointDetails {
     String cdss;
     String ems;
+    String emsUi;
     String dos;
+    String logs;
   }
 
 }

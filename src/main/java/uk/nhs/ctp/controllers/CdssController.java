@@ -36,7 +36,7 @@ public class CdssController {
   private final CdssSupplierService cdssSupplierService;
   private final CdssService cdssService;
 
-  @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_NHS','ROLE_CDSS')")
+  @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SUPPLIER_ADMIN','ROLE_NHS','ROLE_CDSS')")
   @GetMapping
   public @ResponseBody
   List<CdssSupplierDTO> getCdssSuppliers(HttpServletRequest request) {
@@ -51,14 +51,14 @@ public class CdssController {
     return cdssSupplierService.getCdssSuppliersUnfiltered(request.getUserPrincipal().getName());
   }
 
-  @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_NHS','ROLE_CDSS')")
+  @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SUPPLIER_ADMIN','ROLE_NHS','ROLE_CDSS')")
   @GetMapping("/{id}")
   public @ResponseBody
   CdssSupplier getCdssSupplier(@PathVariable Long id, HttpServletRequest request) {
     return cdssSupplierService.getCdssSupplier(id);
   }
 
-  @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_NHS','ROLE_CDSS')")
+  @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SUPPLIER_ADMIN','ROLE_NHS','ROLE_CDSS')")
   @GetMapping("/{id}/ServiceDefinition")
   public @ResponseBody
   List<ServiceDefinitionDTO> getServiceDefinitions(@PathVariable Long id,
@@ -77,13 +77,13 @@ public class CdssController {
 
   @PutMapping
   public @ResponseBody
-  CdssSupplier updateCdssSupplier(@RequestBody CdssSupplier cdssSupplier) throws Exception {
+  CdssSupplier updateCdssSupplier(@RequestBody CdssSupplier cdssSupplier) {
     return cdssSupplierService.updateCdssSupplier(cdssSupplier);
   }
 
   @DeleteMapping(path = "/{id}")
   public @ResponseBody
-  void deleteCdssSupplier(@PathVariable("id") Long id) throws Exception {
+  void deleteCdssSupplier(@PathVariable("id") Long id) {
     cdssSupplierService.deleteCdssSupplier(id);
   }
 }
