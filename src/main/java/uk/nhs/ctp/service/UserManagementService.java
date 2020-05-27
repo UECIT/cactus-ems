@@ -64,6 +64,7 @@ public class UserManagementService {
 					.jwt(UUID.randomUUID().toString())
 					.username(userDetails.getUsername())
 					.password(userDetails.getPassword())
+					.email(request.getEmail())
 					.endpoints(EndpointDetails.builder()
 							.ems(ems)
 							.emsUi(emsUi)

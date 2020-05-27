@@ -8,5 +8,6 @@ import lombok.NoArgsConstructor;
 public class RegisterSupplierRequest {
 
   private String supplierId;
+  private String email;
 
 }

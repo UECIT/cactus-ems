@@ -8,10 +8,10 @@ import lombok.Value;
 public class SupplierAccountDetails {
 
   String username;
+  String email;
   String password;
   String jwt;
   EndpointDetails endpoints;
-
 
   @Value
   @Builder
