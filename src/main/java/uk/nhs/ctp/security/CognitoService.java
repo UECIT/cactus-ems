@@ -1,6 +1,7 @@
 package uk.nhs.ctp.security;
 
 import static java.lang.Boolean.TRUE;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProviderClientBuilder;
@@ -26,7 +27,7 @@ public class CognitoService {
   private static final String SUPPLIER_GROUP_NAME = "cactus_admin_suppliers";
 
   public void signUp(String supplierId, SupplierAccountDetails accountDetails) {
-    if (userPool == null) {
+    if (isEmpty(userPool)) {
       log.warn("No user pool set, skipping creating user in cognito");
       return;
     }
