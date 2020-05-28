@@ -29,6 +29,7 @@ import uk.nhs.ctp.model.SupplierAccountDetails;
 import uk.nhs.ctp.model.SupplierAccountDetails.EndpointDetails;
 import uk.nhs.ctp.repos.UserRepository;
 import uk.nhs.ctp.security.CognitoService;
+import uk.nhs.ctp.security.JWTHandler;
 import uk.nhs.ctp.service.dto.NewUserDTO;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -46,6 +47,9 @@ public class UserManagementServiceTest {
   @Mock
   private CognitoService cognitoService;
 
+  @Mock
+  private JWTHandler jwtHandler;
+
   @InjectMocks
   private UserManagementService userManagementService;
 
@@ -56,6 +60,8 @@ public class UserManagementServiceTest {
 
   @Test
   public void createNewSupplierUser() {
+    when(jwtHandler.generate("supplier_id", Collections.singletonList("ROLE_SUPPLIER_ADMIN")))
+      .thenReturn("random_jwt_value");
     ReflectionTestUtils.setField(userManagementService, "ems", "http://ems.com");
     ReflectionTestUtils.setField(userManagementService, "emsUi", "http://ems-ui.com");
     ReflectionTestUtils.setField(userManagementService, "cdss", "http://cdss.com");
@@ -69,6 +75,7 @@ public class UserManagementServiceTest {
 
     SupplierAccountDetails expected = SupplierAccountDetails.builder()
         .username("admin_supplier_id")
+        .jwt("random_jwt_value")
         .endpoints(EndpointDetails.builder()
             .ems("http://ems.com")
             .emsUi("http://ems-ui.com")
@@ -79,7 +86,6 @@ public class UserManagementServiceTest {
         .build();
 
     assertThat(returned, sameBeanAs(expected)
-      .with("jwt", any(String.class))
       .with("password", any(String.class)));
     verify(cognitoService).signUp("supplier_id", returned);
   }
