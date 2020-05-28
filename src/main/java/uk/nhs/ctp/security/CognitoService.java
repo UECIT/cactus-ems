@@ -76,6 +76,8 @@ public class CognitoService {
     // Login as admin
     var adminInitiateAuthResult = cognitoIdentityProvider
         .adminInitiateAuth(adminInitiateAuthRequest);
+    log.debug("{}", adminInitiateAuthResult);
+    log.debug("{}", adminInitiateAuthResult.getChallengeName());
     String token = adminInitiateAuthResult.getAuthenticationResult().getAccessToken();
     // Change the temporary password to the one we return
     var changePasswordRequest = new ChangePasswordRequest()
