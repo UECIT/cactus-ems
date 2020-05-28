@@ -1,8 +1,8 @@
 package uk.nhs.ctp.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +17,7 @@ import uk.nhs.ctp.model.SupplierAccountDetails;
 import uk.nhs.ctp.model.SupplierAccountDetails.EndpointDetails;
 import uk.nhs.ctp.repos.UserRepository;
 import uk.nhs.ctp.security.CognitoService;
+import uk.nhs.ctp.security.JWTGenerator;
 import uk.nhs.ctp.service.dto.ChangePasswordDTO;
 import uk.nhs.ctp.service.dto.NewUserDTO;
 import uk.nhs.ctp.service.dto.UserDTO;
@@ -31,6 +32,7 @@ public class UserManagementService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final CognitoService cognitoService;
+	private final JWTGenerator jwtGenerator;
 
 	@Value("${ems.fhir.server}")
 	private String ems;
@@ -48,22 +50,24 @@ public class UserManagementService {
 	private String logs;
 
 	public SupplierAccountDetails createNewSupplierUser(RegisterSupplierRequest request) {
-		var userDetails = new NewUserDTO();
+		final String role = "ROLE_SUPPLIER_ADMIN";
 		String supplierId = request.getSupplierId();
 		String username = "admin_" + supplierId;
+
+		var userDetails = new NewUserDTO();
 		userDetails.setUsername(username);
 		userDetails.setPassword(PasswordUtil.getStrongPassword());
 		userDetails.setEnabled(true);
 		userDetails.setName("<Change me>");
 		userDetails.setSupplierId(supplierId);
-		userDetails.setRole("ROLE_SUPPLIER_ADMIN");
+		userDetails.setRole(role);
 
 		try {
 			createUser(userDetails);
 
 			SupplierAccountDetails supplierAccountDetails = SupplierAccountDetails.builder()
-					.jwt(UUID.randomUUID().toString())
-					.username(userDetails.getUsername())
+					.jwt(jwtGenerator.generate(supplierId, Collections.singletonList(role)))
+					.username(username)
 					.password(userDetails.getPassword())
 					.email(request.getEmail())
 					.endpoints(EndpointDetails.builder()
