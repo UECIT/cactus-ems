@@ -3,6 +3,7 @@ package uk.nhs.ctp.service;
 import static com.shazam.shazamcrest.matcher.Matchers.sameBeanAs;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.any;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.verify;
@@ -30,6 +31,7 @@ import uk.nhs.ctp.model.SupplierAccountDetails.EndpointDetails;
 import uk.nhs.ctp.repos.UserRepository;
 import uk.nhs.ctp.security.CognitoService;
 import uk.nhs.ctp.security.JWTHandler;
+import uk.nhs.ctp.security.JWTRequest;
 import uk.nhs.ctp.service.dto.NewUserDTO;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -60,7 +62,12 @@ public class UserManagementServiceTest {
 
   @Test
   public void createNewSupplierUser() {
-    when(jwtHandler.generate("supplier_id", Collections.singletonList("ROLE_SUPPLIER_ADMIN")))
+    var jwtRequest = JWTRequest.builder()
+        .username("admin_supplier_id")
+        .supplierId("supplier_id")
+        .role("ROLE_SUPPLIER_ADMIN")
+        .build();
+    when(jwtHandler.generate(argThat(is(jwtRequest))))
       .thenReturn("random_jwt_value");
     ReflectionTestUtils.setField(userManagementService, "ems", "http://ems.com");
     ReflectionTestUtils.setField(userManagementService, "emsUi", "http://ems-ui.com");

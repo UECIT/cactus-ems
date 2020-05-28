@@ -18,6 +18,7 @@ import uk.nhs.ctp.model.SupplierAccountDetails.EndpointDetails;
 import uk.nhs.ctp.repos.UserRepository;
 import uk.nhs.ctp.security.CognitoService;
 import uk.nhs.ctp.security.JWTHandler;
+import uk.nhs.ctp.security.JWTRequest;
 import uk.nhs.ctp.service.dto.ChangePasswordDTO;
 import uk.nhs.ctp.service.dto.NewUserDTO;
 import uk.nhs.ctp.service.dto.UserDTO;
@@ -66,7 +67,11 @@ public class UserManagementService {
 			createUser(userDetails);
 
 			SupplierAccountDetails supplierAccountDetails = SupplierAccountDetails.builder()
-					.jwt(jwtHandler.generate(supplierId, Collections.singletonList(role)))
+					.jwt(jwtHandler.generate(JWTRequest.builder()
+							.username(username)
+							.supplierId(supplierId)
+							.role(role)
+							.build()))
 					.username(username)
 					.password(userDetails.getPassword())
 					.email(request.getEmail())

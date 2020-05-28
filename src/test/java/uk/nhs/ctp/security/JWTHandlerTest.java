@@ -89,18 +89,6 @@ public class JWTHandlerTest {
   }
 
   @Test
-  public void generate_withNullRoles_returnsTokenWithoutRoleClaim() {
-    var token = handler.generate(JWTRequest.builder()
-        .username("testSubject")
-        .roles(null)
-        .build());
-
-    var parsedToken = parser.parseClaimsJws(token).getBody();
-    assertThat(parsedToken.getSubject(), is("testSubject"));
-    assertThat(parsedToken.get("roles"), nullValue());
-  }
-
-  @Test
   public void generate_withNoRoles_returnsTokenWithoutRoleClaim() {
     var token = handler.generate(JWTRequest.builder()
         .username("testSubject")

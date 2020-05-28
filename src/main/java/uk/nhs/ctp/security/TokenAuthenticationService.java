@@ -35,7 +35,11 @@ public class TokenAuthenticationService {
 				.map(GrantedAuthority::getAuthority)
 				.collect(Collectors.toUnmodifiableList());
 
-		String jwt = jwtHandler.generateExpiring(username, roles, SECONDS_UNTIL_EXPIRY);
+		String jwt = jwtHandler.generate(JWTRequest.builder()
+				.username(username)
+				.roles(roles)
+				.secondsUntilExpiry(SECONDS_UNTIL_EXPIRY)
+				.build());
 		res.addHeader(HEADER_STRING, TOKEN_PREFIX + " " + jwt);
 		res.addHeader(ROLE_STRING, String.join(COMMA_SEPARATOR, roles));
 	}
