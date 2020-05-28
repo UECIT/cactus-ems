@@ -4,6 +4,7 @@ import static java.lang.Boolean.TRUE;
 
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProviderClientBuilder;
+import com.amazonaws.services.cognitoidp.model.AdminAddUserToGroupRequest;
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminSetUserPasswordRequest;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
@@ -22,6 +23,7 @@ public class CognitoService {
 
   private static final String SUPPLIER_ID_ATTRIBUTE = "custom:supplierId";
   private static final String EMAIL_ATTRIBUTE = "email";
+  private static final String SUPPLIER_GROUP_NAME = "cactus_admin_suppliers";
 
   public void signUp(String supplierId, SupplierAccountDetails accountDetails) {
     if (userPool == null) {
@@ -57,6 +59,15 @@ public class CognitoService {
         .withPassword(accountDetails.getPassword())
         .withPermanent(TRUE);
     // Set the password to the permanent one
+    log.info("confirming password");
     cognitoIdentityProvider.adminSetUserPassword(setPasswordRequest);
+
+    // Add user to the suppliers group
+    var addToGroupRequest = new AdminAddUserToGroupRequest()
+        .withUserPoolId(userPool)
+        .withUsername(username)
+        .withGroupName(SUPPLIER_GROUP_NAME);
+    log.info("adding user '{}' to supplier group '{}'", username, SUPPLIER_GROUP_NAME);
+    cognitoIdentityProvider.adminAddUserToGroup(addToGroupRequest);
   }
 }
