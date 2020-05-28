@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -29,26 +30,27 @@ public class JWTHandler {
         .getBody();
   }
 
-  public String generate(String subject, Collection<String> roles) {
-    return getBuilder(subject, roles)
-        .compact();
-  }
-  public String generateExpiring(String subject, Collection<String> roles, long secondsUntilExpiry) {
-    return getBuilder(subject, roles)
-        .setExpiration(new Date(clock.millis() + secondsUntilExpiry*1000))
-        .compact();
-  }
-
-  private JwtBuilder getBuilder(String subject, Collection<String> roles) {
-    Preconditions.checkState(StringUtils.isNotEmpty(subject), "Must provide subject");
+  public String generate(JWTRequest request) {
+    Preconditions.checkState(
+        StringUtils.isNotEmpty(request.getUsername()),
+        "Must provide a username");
     var builder = Jwts.builder();
 
-    if (CollectionUtils.isNotEmpty(roles)) {
-      builder.claim("roles", String.join(",", roles));
+    if (CollectionUtils.isNotEmpty(request.getRoles())) {
+      builder.claim("roles", String.join(",", request.getRoles()));
+    }
+
+    if (StringUtils.isNotEmpty(request.getSupplierId())) {
+      builder.claim("supplierId", request.getSupplierId());
+    }
+
+    if (request.getSecondsUntilExpiry() != null) {
+      builder.setExpiration(new Date(clock.millis() + (request.getSecondsUntilExpiry()*1000)));
     }
 
     return builder
-        .setSubject(subject)
-        .signWith(SignatureAlgorithm.HS512, jwtSecret);
+        .setSubject(request.getUsername())
+        .signWith(SignatureAlgorithm.HS512, jwtSecret)
+        .compact();
   }
 }
