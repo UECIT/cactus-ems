@@ -176,6 +176,13 @@
       <version>1.5.1</version>
     </dependency>
 
+    <!-- AWS -->
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-java-sdk</artifactId>
+      <version>1.11.789</version>
+    </dependency>
+
     <!-- Other -->
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -220,6 +227,11 @@
       <groupId>com.shazam</groupId>
       <artifactId>shazamcrest</artifactId>
       <version>0.11</version>
+    </dependency>
+    <dependency>
+      <groupId>org.passay</groupId>
+      <artifactId>passay</artifactId>
+      <version>1.6.0</version>
     </dependency>
 
   </dependencies>

@@ -4,6 +4,8 @@ import static com.shazam.shazamcrest.matcher.Matchers.sameBeanAs;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 import org.junit.After;
 import org.junit.Rule;
@@ -12,6 +14,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -21,6 +24,7 @@ import uk.nhs.ctp.model.RegisterSupplierRequest;
 import uk.nhs.ctp.model.SupplierAccountDetails;
 import uk.nhs.ctp.model.SupplierAccountDetails.EndpointDetails;
 import uk.nhs.ctp.repos.UserRepository;
+import uk.nhs.ctp.security.CognitoService;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -31,6 +35,9 @@ public class UserControllerTest {
 
   @Autowired
   private UserRepository userRepository;
+
+  @MockBean
+  private CognitoService cognitoService;
 
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
@@ -48,11 +55,13 @@ public class UserControllerTest {
   public void shouldResponseWithAccountDetails() {
     RegisterSupplierRequest request = new RegisterSupplierRequest();
     request.setSupplierId("testid");
+    request.setEmail("testemail");
     ResponseEntity<SupplierAccountDetails> response = userController.signup(request);
     assertThat(response.getStatusCode(), is(HttpStatus.OK));
 
     var body = SupplierAccountDetails.builder()
         .username("admin_testid")
+        .email("testemail")
         .endpoints(EndpointDetails.builder()
             .cdss("http://localhost:8080/fhir")
             .ems("http://localhost:8083/fhir")
@@ -64,6 +73,7 @@ public class UserControllerTest {
     assertThat(response.getBody(), sameBeanAs(body)
         .with("password", any(String.class))
         .with("jwt", any(String.class)));
+    verify(cognitoService).signUp("testid",  response.getBody());
   }
 
   @Test
@@ -74,6 +84,7 @@ public class UserControllerTest {
     ResponseEntity<SupplierAccountDetails> response = userController.signup(request);
 
     assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST));
+    verifyZeroInteractions(cognitoService);
   }
 
   @Test
@@ -84,5 +95,6 @@ public class UserControllerTest {
 
     expectedException.expect(AccessDeniedException.class);
     userController.signup(request);
+    verifyZeroInteractions(cognitoService);
   }
 }

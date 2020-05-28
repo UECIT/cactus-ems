@@ -1,7 +1,6 @@
 package uk.nhs.ctp.controllers;
 
 import java.util.List;
-import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +35,7 @@ public class UserController {
   @PreAuthorize(value = "hasRole('ROLE_ADMIN')") // Only admin users can create suppliers
   public @ResponseBody
   ResponseEntity<SupplierAccountDetails> signup(@RequestBody RegisterSupplierRequest request) {
-    if (request.getSupplierId() == null) {
+    if (request.getSupplierId() == null || request.getEmail() == null) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
     SupplierAccountDetails newSupplierUser = userManagementService.createNewSupplierUser(request);

@@ -9,6 +9,7 @@ import uk.nhs.ctp.entities.UserEntity;
 public class NewUserDTO extends UserDTO {
 
 	private String password;
+	private String supplierId;
 
 	public NewUserDTO(UserEntity entity) {
 		super(entity);
