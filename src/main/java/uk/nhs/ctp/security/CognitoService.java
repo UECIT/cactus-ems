@@ -1,15 +1,14 @@
 package uk.nhs.ctp.security;
 
+import static java.lang.Boolean.TRUE;
+
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProviderClientBuilder;
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
-import com.amazonaws.services.cognitoidp.model.AdminInitiateAuthRequest;
+import com.amazonaws.services.cognitoidp.model.AdminSetUserPasswordRequest;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
-import com.amazonaws.services.cognitoidp.model.AuthFlowType;
-import com.amazonaws.services.cognitoidp.model.ChangePasswordRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.Map;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import lombok.extern.slf4j.Slf4j;
@@ -64,28 +63,46 @@ public class CognitoService {
         );
     // Create the user
     cognitoIdentityProvider.adminCreateUser(adminCreateUserRequest);
-    var adminInitiateAuthRequest = new AdminInitiateAuthRequest()
-        .withAuthFlow(AuthFlowType.ADMIN_USER_PASSWORD_AUTH)
-        .withAuthParameters(Map.ofEntries(
-            Map.entry(USERNAME_PROPERTY, username),
-            Map.entry(PASSWORD_PROPERTY, tempPassword),
-            Map.entry(SECRET_HASH_PROPERTY, calculateSecretHash(clientId, clientSecret, username))
-        ))
+
+    var setPasswordRequest = new AdminSetUserPasswordRequest()
         .withUserPoolId(userPool)
-        .withClientId(clientId);
+        .withUsername(username)
+        .withPassword(accountDetails.getPassword())
+        .withPermanent(TRUE);
+    cognitoIdentityProvider.adminSetUserPassword(setPasswordRequest);
+
+//    var adminInitiateAuthRequest = new AdminInitiateAuthRequest()
+//        .withAuthFlow(AuthFlowType.ADMIN_USER_PASSWORD_AUTH)
+//        .withAuthParameters(Map.ofEntries(
+//            Map.entry(USERNAME_PROPERTY, username),
+//            Map.entry(PASSWORD_PROPERTY, tempPassword),
+//            Map.entry(SECRET_HASH_PROPERTY, calculateSecretHash(clientId, clientSecret, username))
+//        ))
+//        .withUserPoolId(userPool)
+//        .withClientId(clientId);
     // Login as admin
-    var adminInitiateAuthResult = cognitoIdentityProvider
-        .adminInitiateAuth(adminInitiateAuthRequest);
-    log.debug("{}", adminInitiateAuthResult);
-    log.debug("{}", adminInitiateAuthResult.getChallengeName());
-    String token = adminInitiateAuthResult.getAuthenticationResult().getAccessToken();
+
+//    var adminInitiateAuthResult = cognitoIdentityProvider
+//        .adminInitiateAuth(adminInitiateAuthRequest);
+//    log.info("{}", adminInitiateAuthResult);
+//    log.info("{}", adminInitiateAuthResult.getChallengeName());
+//    String token = adminInitiateAuthResult.getAuthenticationResult().getAccessToken();
+//    var challengeRequest = new AdminRespondToAuthChallengeRequest()
+//        .withClientId(clientId)
+//        .withUserPoolId(userPool)
+//        .withSession(adminInitiateAuthResult.getSession())
+//        .withChallengeName(adminInitiateAuthResult.getChallengeName())
+//        .addChallengeResponsesEntry("", "");
+//    var challengeResult = cognitoIdentityProvider
+//        .adminRespondToAuthChallenge(challengeRequest);
+//    String token = challengeResult.getAuthenticationResult().getAccessToken();
     // Change the temporary password to the one we return
-    var changePasswordRequest = new ChangePasswordRequest()
-        .withAccessToken(token)
-        .withPreviousPassword(tempPassword)
-        .withProposedPassword(accountDetails.getPassword());
-    log.info("updating password for user: {}", username);
-    cognitoIdentityProvider.changePassword(changePasswordRequest);
+//    var changePasswordRequest = new ChangePasswordRequest()
+//        .withAccessToken(token)
+//        .withPreviousPassword(tempPassword)
+//        .withProposedPassword(accountDetails.getPassword());
+//    log.info("updating password for user: {}", username);
+//    cognitoIdentityProvider.changePassword(changePasswordRequest);
   }
 
   /**
