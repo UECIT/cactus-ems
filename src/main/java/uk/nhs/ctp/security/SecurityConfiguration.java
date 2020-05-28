@@ -34,6 +34,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
   private DataSource dataSource;
 
   @Autowired
+  private TokenAuthenticationService authService;
+
+  @Autowired
   public void configureGlobalSecurity(AuthenticationManagerBuilder auth) throws Exception {
 
     auth.jdbcAuthentication().dataSource(dataSource).usersByUsernameQuery(usersQuery)
@@ -42,7 +45,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
   }
 
   @Override
-  public void configure(WebSecurity web) throws Exception {
+  public void configure(WebSecurity web) {
     web.ignoring()
         .antMatchers(HttpMethod.OPTIONS, "/**")
         .antMatchers("/v2/api-docs",
@@ -55,7 +58,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
-
     //Use cors
     http.cors().and()
         // Disable CSRF
@@ -68,10 +70,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
           .and()
         //Add the login filter to create authentication
         .addFilterBefore(
-            new JWTLoginFilter("/login", authenticationManager()),
+            new JWTLoginFilter("/login", authenticationManager(), authService),
             UsernamePasswordAuthenticationFilter.class)
         // All other filters retrieve/require the authentication
-        .addFilterBefore(new JWTAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+        .addFilterBefore(new JWTAuthenticationFilter(authService), UsernamePasswordAuthenticationFilter.class)
         .exceptionHandling().authenticationEntryPoint(new Http401AuthenticationEntryPoint(""));
   }
 

@@ -1,6 +1,7 @@
 package uk.nhs.ctp.security;
 
 import com.google.common.base.Preconditions;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -15,13 +16,18 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class JWTGenerator {
+public class JWTHandler {
 
   private final Clock clock;
 
-  @Value("${cactus.jwt.secret}")
+  @Value("${cactus.jwt.secret:}")
   private String jwtSecret;
 
+  public Claims parse(String jwt) {
+    return Jwts.parser().setSigningKey(jwtSecret)
+        .parseClaimsJws(jwt)
+        .getBody();
+  }
 
   public String generate(String subject, Collection<String> roles) {
     return getBuilder(subject, roles)

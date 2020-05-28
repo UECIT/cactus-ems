@@ -9,6 +9,7 @@ import static org.junit.Assert.*;
 
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -21,9 +22,10 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.springframework.test.util.ReflectionTestUtils;
 
-public class JWTGeneratorTest {
+public class JWTHandlerTest {
 
-  private JWTGenerator generator;
+  private static final String TEST_SECRET = "not-really-a-secret";
+  private JWTHandler handler;
   private JwtParser parser;
   private Clock clock;
 
@@ -34,40 +36,51 @@ public class JWTGeneratorTest {
   public void setup() {
     clock = Clock.fixed(Instant.now(), ZoneOffset.UTC);
 
-    generator = new JWTGenerator(clock);
-    final var testSecret = "not-really-a-secret";
-    ReflectionTestUtils.setField(generator, "jwtSecret", testSecret);
+    handler = new JWTHandler(clock);
+    ReflectionTestUtils.setField(handler, "jwtSecret", TEST_SECRET);
 
-    parser = Jwts.parser().setSigningKey(testSecret);
+    parser = Jwts.parser().setSigningKey(TEST_SECRET);
+  }
+
+  @Test
+  public void parse_withCorrectJwt_hasRightSecret() {
+    var jwt = Jwts.builder()
+        .claim("a", "b")
+        .signWith(SignatureAlgorithm.HS512, TEST_SECRET)
+        .compact();
+
+    var claims = handler.parse(jwt);
+
+    assertThat(claims.get("a"), is("b"));
   }
 
   @Test
   public void generate_withNullSubject_fails() {
     expectedException.expect(IllegalStateException.class);
-    generator.generate(null, Collections.singletonList("something"));
+    handler.generate(null, Collections.singletonList("something"));
   }
 
   @Test
   public void generate_withBlankSubject_fails() {
     expectedException.expect(IllegalStateException.class);
-    generator.generate("", Collections.singletonList("something"));
+    handler.generate("", Collections.singletonList("something"));
   }
 
   @Test
   public void generateExpiring_withNullSubject_fails() {
     expectedException.expect(IllegalStateException.class);
-    generator.generateExpiring(null, Collections.singletonList("something"), 2);
+    handler.generateExpiring(null, Collections.singletonList("something"), 2);
   }
 
   @Test
   public void generateExpiring_withBlankSubject_fails() {
     expectedException.expect(IllegalStateException.class);
-    generator.generateExpiring("", Collections.singletonList("something"), 2);
+    handler.generateExpiring("", Collections.singletonList("something"), 2);
   }
 
   @Test
   public void generateExpiring_withFullData_returnsFullToken() {
-    var token = generator.generateExpiring(
+    var token = handler.generateExpiring(
         "testSubject",
         Arrays.asList("role1", "role2"),
         20);
@@ -83,7 +96,7 @@ public class JWTGeneratorTest {
 
   @Test
   public void generate_withFullData_returnsFullToken() {
-    var token = generator.generate(
+    var token = handler.generate(
         "testSubject",
         Arrays.asList("role1", "role2"));
 
@@ -96,7 +109,7 @@ public class JWTGeneratorTest {
 
   @Test
   public void generateExpiring_withNullRoles_returnsTokenWithoutRoleClaim() {
-    var token = generator.generateExpiring(
+    var token = handler.generateExpiring(
         "testSubject",
         null,
         20);
@@ -109,7 +122,7 @@ public class JWTGeneratorTest {
 
   @Test
   public void generate_withNullRoles_returnsTokenWithoutRoleClaim() {
-    var token = generator.generate(
+    var token = handler.generate(
         "testSubject",
         null);
 
@@ -120,7 +133,7 @@ public class JWTGeneratorTest {
 
   @Test
   public void generateExpiring_withNoRoles_returnsTokenWithoutRoleClaim() {
-    var token = generator.generateExpiring(
+    var token = handler.generateExpiring(
         "testSubject",
         Collections.emptyList(),
         20);
@@ -133,7 +146,7 @@ public class JWTGeneratorTest {
 
   @Test
   public void generate_withNoRoles_returnsTokenWithoutRoleClaim() {
-    var token = generator.generate(
+    var token = handler.generate(
         "testSubject",
         Collections.emptyList());
 
