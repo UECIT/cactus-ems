@@ -41,6 +41,4 @@ public final class SystemConstants {
 	public static final String ROLE_NHS = "ROLE_NHS";
 	public static final String ROLE_CDSS = "ROLE_CDSS";
 
-	public static final String AUTH_TOKEN = "RGF2aWRXYXRlcnM6TkhTRGlnaXRhbFBPQw==";
-
 }

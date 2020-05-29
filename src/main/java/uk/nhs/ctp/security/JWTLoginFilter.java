@@ -17,9 +17,15 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
 
-	public JWTLoginFilter(String url, AuthenticationManager authManager) {
+	private final TokenAuthenticationService authService;
+
+	public JWTLoginFilter(
+			String url,
+			AuthenticationManager authManager,
+			TokenAuthenticationService authService) {
 		super(new AntPathRequestMatcher(url));
 		setAuthenticationManager(authManager);
+		this.authService = authService;
 	}
 
 	@Override
@@ -43,6 +49,6 @@ public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
 	@Override
 	protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res, FilterChain chain,
 			Authentication auth) {
-		TokenAuthenticationService.addAuthentication(res, auth.getName(), auth.getAuthorities());
+		authService.addAuthentication(res, auth.getName(), auth.getAuthorities());
 	}
 }
