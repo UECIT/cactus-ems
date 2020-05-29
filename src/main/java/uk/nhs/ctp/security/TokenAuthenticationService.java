@@ -22,7 +22,7 @@ public class TokenAuthenticationService {
 	private final JWTHandler jwtHandler;
 
 	private static final long SECONDS_UNTIL_EXPIRY = 864_000; // 10 days
-	private static final String TOKEN_PREFIX = "Bearer";
+	private static final String TOKEN_PREFIX = "Bearer ";
 	private static final String HEADER_STRING = "Authorization";
 	private static final String ROLE_STRING = "Roles";
 	private static final String COMMA_SEPARATOR = ",";
@@ -40,7 +40,7 @@ public class TokenAuthenticationService {
 				.roles(roles)
 				.secondsUntilExpiry(SECONDS_UNTIL_EXPIRY)
 				.build());
-		res.addHeader(HEADER_STRING, TOKEN_PREFIX + " " + jwt);
+		res.addHeader(HEADER_STRING, TOKEN_PREFIX + jwt);
 		res.addHeader(ROLE_STRING, String.join(COMMA_SEPARATOR, roles));
 	}
 
@@ -50,7 +50,7 @@ public class TokenAuthenticationService {
 			return null;
 		}
 
-		Claims claims = jwtHandler.parse(token.replace(TOKEN_PREFIX, ""));
+		Claims claims = jwtHandler.parse(token.replaceAll("^" + TOKEN_PREFIX, ""));
 		List<? extends GrantedAuthority> roles = Arrays
 				.stream(claims.get("roles").toString().split(COMMA_SEPARATOR))
 				.map(SimpleGrantedAuthority::new).collect(Collectors.toList());

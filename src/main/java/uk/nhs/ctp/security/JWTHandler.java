@@ -2,15 +2,12 @@ package uk.nhs.ctp.security;
 
 import com.google.common.base.Preconditions;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import java.time.Clock;
-import java.util.Collection;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -45,7 +42,7 @@ public class JWTHandler {
     }
 
     if (request.getSecondsUntilExpiry() != null) {
-      builder.setExpiration(new Date(clock.millis() + (request.getSecondsUntilExpiry()*1000)));
+      builder.setExpiration(new Date(clock.millis() + (request.getSecondsUntilExpiry() * 1000)));
     }
 
     return builder
