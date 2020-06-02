@@ -14,17 +14,23 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import uk.nhs.cactus.common.security.TokenAuthenticationService;
+import uk.nhs.ctp.entities.UserEntity;
+import uk.nhs.ctp.repos.UserRepository;
 
 public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
 
   private final TokenAuthenticationService authService;
+  private final UserRepository userRepository;
 
   public JWTLoginFilter(
-      String url,
-      AuthenticationManager authManager,
-      TokenAuthenticationService authService) {
-    super(new AntPathRequestMatcher(url));
+      String url, AuthenticationManager authManager,
+      TokenAuthenticationService authService,
+      UserRepository userRepository) {
+    super(new AntPathRequestMatcher(url))
+    ;
     setAuthenticationManager(authManager);
+    this.userRepository = userRepository;
     this.authService = authService;
   }
 
@@ -50,6 +56,11 @@ public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
   @Override
   protected void successfulAuthentication(
       HttpServletRequest req, HttpServletResponse res, FilterChain chain, Authentication auth) {
-    authService.addAuthentication(res, auth.getName(), auth.getAuthorities());
+
+    UserEntity user = userRepository.findByUsername(auth.getName());
+    String supplierId = user.getSupplierId();
+
+    authService.setAuthentication(
+        res, auth.getName(), supplierId, auth.getAuthorities());
   }
 }

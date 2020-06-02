@@ -16,6 +16,7 @@ import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import uk.nhs.ctp.audit.HttpAudit;
@@ -24,6 +25,7 @@ import uk.nhs.ctp.enums.AuditType;
 @Entity
 @Table(name = "audit")
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

@@ -20,7 +20,7 @@
     <thymeleaf.version>3.0.6.RELEASE</thymeleaf.version>
     <thymeleaf-layout-dialect.version>2.2.1</thymeleaf-layout-dialect.version>
 
-    <cactus-common.version>0.0.1-SNAPSHOT</cactus-common.version>
+    <cactus-common.version>0.0.3.3</cactus-common.version>
   </properties>
 
   <repositories>
@@ -41,11 +41,23 @@
       <url>https://dl.bintray.com/ems-test-harness/EMS-Test-Harness</url>
     </repository>
     <repository>
-      <id>cactus-common</id>
+      <id>github</id>
       <name>GitHub UECIT Apache Maven Packages</name>
       <url>https://maven.pkg.github.com/UECIT/cactus-common</url>
     </repository>
   </repositories>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.amazonaws</groupId>
+        <artifactId>aws-java-sdk-bom</artifactId>
+        <version>1.11.789</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
@@ -62,6 +74,16 @@
         <exclusion>
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-starter-logging</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>com.vaadin.external.google</groupId>
+          <artifactId>android-json</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -101,18 +123,6 @@
       <artifactId>mysql-connector-java</artifactId>
     </dependency>
 
-    <!-- Logging -->
-    <dependency>
-      <groupId>ch.qos.logback.contrib</groupId>
-      <artifactId>logback-json-classic</artifactId>
-      <version>0.1.5</version>
-    </dependency>
-    <dependency>
-      <groupId>ch.qos.logback.contrib</groupId>
-      <artifactId>logback-jackson</artifactId>
-      <version>0.1.5</version>
-    </dependency>
-
     <!-- Java 11 compatibility -->
     <dependency>
       <groupId>com.sun.xml.bind</groupId>
@@ -138,8 +148,7 @@
     <!-- AWS -->
     <dependency>
       <groupId>com.amazonaws</groupId>
-      <artifactId>aws-java-sdk</artifactId>
-      <version>1.11.789</version>
+      <artifactId>aws-java-sdk-cognitoidp</artifactId>
     </dependency>
 
     <!-- Other -->
@@ -197,24 +206,8 @@
       <artifactId>passay</artifactId>
       <version>1.6.0</version>
     </dependency>
-    <dependency>
-      <groupId>org.exparity</groupId>
-      <artifactId>hamcrest-date</artifactId>
-      <version>2.0.7</version>
-    </dependency>
 
     <!-- Test -->
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>com.vaadin.external.google</groupId>
-          <artifactId>android-json</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-test</artifactId>
