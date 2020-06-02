@@ -11,10 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
 import uk.nhs.ctp.entities.Audit;
 import uk.nhs.ctp.repos.AuditRepository;
-import uk.nhs.ctp.service.AuditService;
+import uk.nhs.ctp.service.AuditSearchService;
 import uk.nhs.ctp.service.search.AuditSearchRequest;
 import uk.nhs.ctp.service.search.AuditSearchResultDTO;
 
@@ -25,7 +24,7 @@ import uk.nhs.ctp.service.search.AuditSearchResultDTO;
 public class AuditController {
 
 	private final AuditRepository auditRepository;
-	private final AuditService auditService;
+	private final AuditSearchService auditSearchService;
 
 	@GetMapping(path = "/{id}")
 	public @ResponseBody
@@ -35,7 +34,7 @@ public class AuditController {
 	
 	@PostMapping
 	public @ResponseBody Page<AuditSearchResultDTO> getAudit(@RequestBody AuditSearchRequest request) {
-		return auditService.search(request);
+		return auditSearchService.search(request);
 	}
 
 }

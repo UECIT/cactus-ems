@@ -23,7 +23,6 @@ public class TriageService {
   private CaseService caseService;
   private CdssService cdssService;
   private ResponseService responseService;
-  private AuditService auditService;
   private EncounterService encounterService;
   private EvaluateService evaluateService;
   private CaseObservationTransformer caseObservationTransformer;
@@ -82,9 +81,6 @@ public class TriageService {
 
     Long caseId = requestDetails.getCaseId();
 
-    // start audit
-    auditService.setCaseId(caseId);
-
     CdssResult cdssResult = evaluateService.evaluate(requestDetails);
 
     CdssResponseDTO cdssResponse = buildResponseDtoFromResult(
@@ -108,8 +104,6 @@ public class TriageService {
 
     Long caseId = requestDetails.getCaseId();
 
-    // start audit
-    auditService.setCaseId(caseId);
     CdssResult cdssResult = evaluateService.evaluate(requestDetails);
 
     return buildAmendResponseDtoFromResult(

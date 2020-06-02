@@ -1,23 +1,29 @@
-package uk.nhs.ctp.config.interceptors;
+package uk.nhs.ctp.audit;
 
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import uk.nhs.ctp.service.AuditService;
-import uk.nhs.ctp.audit.HttpRequest;
-import uk.nhs.ctp.audit.HttpResponse;
+import uk.nhs.ctp.audit.model.HttpRequest;
+import uk.nhs.ctp.audit.model.HttpResponse;
 
 @Component
 @RequiredArgsConstructor
-public class AuditFhirClient implements IClientInterceptor {
+public class AuditFhirClientInterceptor implements IClientInterceptor {
+
+  public static final String SOURCE_HEADER = "X-Forwarded-For";
 
   private final AuditService auditService;
 
+  @Value("${server.host}")
+  private String host;
+
   @Override
   public void interceptRequest(IHttpRequest theRequest) {
+    theRequest.addHeader(SOURCE_HEADER, host);
     auditService.startEntry(HttpRequest.from(theRequest));
   }
 

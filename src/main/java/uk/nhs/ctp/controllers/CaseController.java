@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import uk.nhs.ctp.audit.AuditService;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.repos.CaseRepository;
-import uk.nhs.ctp.service.AuditService;
 import uk.nhs.ctp.service.CdssService;
 import uk.nhs.ctp.service.ReferralRequestService;
 import uk.nhs.ctp.service.TriageService;
@@ -33,6 +33,8 @@ import uk.nhs.ctp.service.search.SearchParametersTransformer;
 @AllArgsConstructor
 public class CaseController {
 
+  private static final String CASE_ID = "caseId";
+
   private final CdssService cdssService;
   private final TriageService triageService;
   private final CaseRepository caseRepository;
@@ -45,14 +47,14 @@ public class CaseController {
   public @ResponseBody
   CdssResponseDTO launchTriage(@RequestBody TriageLaunchDTO requestDTO) throws Exception {
     CdssResponseDTO response = triageService.launchTriage(requestDTO);
-    auditService.setCaseId(response.getCaseId());
+    auditService.addAuditProperty(CASE_ID, response.getCaseId().toString());
     return response;
   }
 
   @PostMapping(path = "/serviceDefinitions")
   public @ResponseBody
   List<CdssSupplierDTO> getServiceDefinitions(@RequestBody ServiceDefinitionSearchDTO requestDTO) {
-    auditService.setCaseId(requestDTO.getCaseId());
+    auditService.addAuditProperty(CASE_ID, requestDTO.getCaseId().toString());
     var params = searchParametersTransformer
         .transform(emptyList(), requestDTO.getSettings(), requestDTO.getPatientId());
 
@@ -62,14 +64,14 @@ public class CaseController {
   @PutMapping(path = "/")
   public @ResponseBody
   CdssResponseDTO sendTriageRequest(@RequestBody CdssRequestDTO requestDTO) throws Exception {
-    auditService.setCaseId(requestDTO.getCaseId());
+    auditService.addAuditProperty(CASE_ID, requestDTO.getCaseId().toString());
     return triageService.processTriageRequest(requestDTO);
   }
 
   @PutMapping(path = "/back")
   public @ResponseBody
   CdssResponseDTO amendTriageRequest(@RequestBody CdssRequestDTO requestDTO) throws Exception {
-    auditService.setCaseId(requestDTO.getCaseId());
+    auditService.addAuditProperty(CASE_ID, requestDTO.getCaseId().toString());
     return triageService.processTriageAmendRequest(requestDTO);
   }
 
@@ -81,7 +83,7 @@ public class CaseController {
 
   @PutMapping(path = "/selectedService")
   public @ResponseBody void updateSelectedService(@RequestBody SelectedServiceRequestDTO requestDTO) {
-    auditService.setCaseId(requestDTO.getCaseId());
+    auditService.addAuditProperty(CASE_ID, requestDTO.getCaseId().toString());
     referralRequestService.updateServiceRequested(requestDTO);
   }
 }
