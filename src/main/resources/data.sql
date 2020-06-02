@@ -29,3 +29,7 @@ INSERT IGNORE INTO
  cdss_decoupling.users (username, name, password, enabled, role)
 VALUES
  ('admin', 'Admin User', '$2a$10$hbxecwitQQ.dDT4JOFzQAulNySFwEpaFLw38jda6Td.Y/cOiRzDFu', true, 'ROLE_ADMIN');
+
+UPDATE cdss_decoupling.users
+SET supplierId = 'adminSupplier'
+WHERE username = 'admin';
