@@ -31,14 +31,12 @@ public class RESTConfig {
 
   @Bean
   public RestTemplate restTemplate(RestTemplateBuilder builder) {
-    RestTemplate restTemplate = builder.build();
-    return restTemplate;
+    return builder.build();
   }
 
   @Bean
   public RestTemplate blobRestTemplate(RestTemplateBuilder builder) {
-    RestTemplate restTemplate = builder.build();
-    return restTemplate;
+    return builder.build();
   }
 
 }

@@ -17,10 +17,12 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Entity
 @Table(name = "cases", indexes = @Index(columnList = "supplierId"))
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class Cases extends SupplierPartitioned {
 
   @Id

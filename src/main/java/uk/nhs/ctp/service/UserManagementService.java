@@ -1,7 +1,6 @@
 package uk.nhs.ctp.service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import uk.nhs.cactus.common.security.JWTHandler;
+import uk.nhs.cactus.common.security.JWTRequest;
 import uk.nhs.ctp.entities.UserEntity;
 import uk.nhs.ctp.exception.EMSException;
 import uk.nhs.ctp.model.RegisterSupplierRequest;
@@ -17,8 +18,6 @@ import uk.nhs.ctp.model.SupplierAccountDetails;
 import uk.nhs.ctp.model.SupplierAccountDetails.EndpointDetails;
 import uk.nhs.ctp.repos.UserRepository;
 import uk.nhs.ctp.security.CognitoService;
-import uk.nhs.ctp.security.JWTHandler;
-import uk.nhs.ctp.security.JWTRequest;
 import uk.nhs.ctp.service.dto.ChangePasswordDTO;
 import uk.nhs.ctp.service.dto.NewUserDTO;
 import uk.nhs.ctp.service.dto.UserDTO;
@@ -30,139 +29,139 @@ import uk.nhs.ctp.utils.PasswordUtil;
 @Slf4j
 public class UserManagementService {
 
-	private final UserRepository userRepository;
-	private final PasswordEncoder passwordEncoder;
-	private final CognitoService cognitoService;
-	private final JWTHandler jwtHandler;
+  private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
+  private final CognitoService cognitoService;
+  private final JWTHandler jwtHandler;
 
-	@Value("${ems.fhir.server}")
-	private String ems;
+  @Value("${ems.fhir.server}")
+  private String ems;
 
-	@Value("${ems.frontend}")
-	private String emsUi;
+  @Value("${ems.frontend}")
+  private String emsUi;
 
-	@Value("${cactus.cdss}")
-	private String cdss;
+  @Value("${cactus.cdss}")
+  private String cdss;
 
-	@Value("${dos.server}")
-	private String dos;
+  @Value("${dos.server}")
+  private String dos;
 
-	@Value("${logs.server}")
-	private String logs;
+  @Value("${logs.server}")
+  private String logs;
 
-	public SupplierAccountDetails createNewSupplierUser(RegisterSupplierRequest request) {
-		final String role = "ROLE_SUPPLIER_ADMIN";
-		String supplierId = request.getSupplierId();
-		String username = "admin_" + supplierId;
+  public SupplierAccountDetails createNewSupplierUser(RegisterSupplierRequest request) {
+    final String role = "ROLE_SUPPLIER_ADMIN";
+    String supplierId = request.getSupplierId();
+    String username = "admin_" + supplierId;
 
-		var userDetails = new NewUserDTO();
-		userDetails.setUsername(username);
-		userDetails.setPassword(PasswordUtil.getStrongPassword());
-		userDetails.setEnabled(true);
-		userDetails.setName("<Change me>");
-		userDetails.setSupplierId(supplierId);
-		userDetails.setRole(role);
+    var userDetails = new NewUserDTO();
+    userDetails.setUsername(username);
+    userDetails.setPassword(PasswordUtil.getStrongPassword());
+    userDetails.setEnabled(true);
+    userDetails.setName("<Change me>");
+    userDetails.setSupplierId(supplierId);
+    userDetails.setRole(role);
 
-		try {
-			createUser(userDetails);
+    try {
+      createUser(userDetails);
 
-			SupplierAccountDetails supplierAccountDetails = SupplierAccountDetails.builder()
-					.jwt(jwtHandler.generate(JWTRequest.builder()
-							.username(username)
-							.supplierId(supplierId)
-							.role(role)
-							.build()))
-					.username(username)
-					.password(userDetails.getPassword())
-					.email(request.getEmail())
-					.endpoints(EndpointDetails.builder()
-							.ems(ems)
-							.emsUi(emsUi)
-							.cdss(cdss)
-							.dos(dos)
-							.logs(logs)
-							.build())
-					.build();
-			// Create the user in cognito for ElasticSearch searching.
-			cognitoService.signUp(supplierId, supplierAccountDetails);
-			return supplierAccountDetails;
-		} catch (Exception e) {
-			log.error("Error creating user: {}", supplierId);
-			throw e;
-		}
-	}
+      SupplierAccountDetails supplierAccountDetails = SupplierAccountDetails.builder()
+          .jwt(jwtHandler.generate(JWTRequest.builder()
+              .username(username)
+              .supplierId(supplierId)
+              .role(role)
+              .build()))
+          .username(username)
+          .password(userDetails.getPassword())
+          .email(request.getEmail())
+          .endpoints(EndpointDetails.builder()
+              .ems(ems)
+              .emsUi(emsUi)
+              .cdss(cdss)
+              .dos(dos)
+              .logs(logs)
+              .build())
+          .build();
+      // Create the user in cognito for ElasticSearch searching.
+      cognitoService.signUp(supplierId, supplierAccountDetails);
+      return supplierAccountDetails;
+    } catch (Exception e) {
+      log.error("Error creating user: {}", supplierId);
+      throw e;
+    }
+  }
 
-	public UserDTO getUserByUsername(String username) {
-		UserEntity userEntity = userRepository.findOne(username);
-		ErrorHandlingUtils.checkEntityExists(userEntity, "User");
+  public UserDTO getUserByUsername(String username) {
+    UserEntity userEntity = userRepository.findOne(username);
+    ErrorHandlingUtils.checkEntityExists(userEntity, "User");
 
-		return new UserDTO(userEntity);
-	}
+    return new UserDTO(userEntity);
+  }
 
-	public UserEntity updateUser(UserDTO userDTO) {
-		UserEntity userEntity = userRepository.findOne(userDTO.getUsername());
-		ErrorHandlingUtils.checkEntityExists(userEntity, "User");
+  public UserEntity updateUser(UserDTO userDTO) {
+    UserEntity userEntity = userRepository.findOne(userDTO.getUsername());
+    ErrorHandlingUtils.checkEntityExists(userEntity, "User");
 
-		setUserDetails(userDTO, userEntity);
+    setUserDetails(userDTO, userEntity);
 
-		return userRepository.save(userEntity);
-	}
+    return userRepository.save(userEntity);
+  }
 
-	private void setUserDetails(UserDTO userDTO, UserEntity userEntity) {
-		userEntity.setUsername(userDTO.getUsername());
-		userEntity.setName(userDTO.getName());
-		userEntity.setEnabled(userDTO.isEnabled());
-		userEntity.setRole(userDTO.getRole());
-	}
+  private void setUserDetails(UserDTO userDTO, UserEntity userEntity) {
+    userEntity.setUsername(userDTO.getUsername());
+    userEntity.setName(userDTO.getName());
+    userEntity.setEnabled(userDTO.isEnabled());
+    userEntity.setRole(userDTO.getRole());
+  }
 
-	public List<UserDTO> getAllUsers() {
-		List<UserDTO> userDTOs = new ArrayList<>();
+  public List<UserDTO> getAllUsers() {
+    List<UserDTO> userDTOs = new ArrayList<>();
 
-		userRepository.findAll().stream()
-				.map(UserDTO::new)
-				.forEach(userDTOs::add);
+    userRepository.findAll().stream()
+        .map(UserDTO::new)
+        .forEach(userDTOs::add);
 
-		return userDTOs;
-	}
+    return userDTOs;
+  }
 
-	public UserEntity createUser(NewUserDTO userDTO) {
-		UserEntity userEntity = new UserEntity();
+  public UserEntity createUser(NewUserDTO userDTO) {
+    UserEntity userEntity = new UserEntity();
 
-		if (getExistingUsernames().contains(userDTO.getUsername())) {
-			throw new EMSException(HttpStatus.BAD_REQUEST, "Username already exists");
-		}
+    if (getExistingUsernames().contains(userDTO.getUsername())) {
+      throw new EMSException(HttpStatus.BAD_REQUEST, "Username already exists");
+    }
 
-		setUserDetails(userDTO, userEntity);
-		userEntity.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-		userEntity.setSupplierId(userDTO.getSupplierId());
-		return userRepository.save(userEntity);
-	}
+    setUserDetails(userDTO, userEntity);
+    userEntity.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+    userEntity.setSupplierId(userDTO.getSupplierId());
+    return userRepository.save(userEntity);
+  }
 
-	public UserEntity updatePassword(ChangePasswordDTO changePasswordDTO) {
-		UserEntity user = userRepository.findByUsername(changePasswordDTO.getUsername());
-		ErrorHandlingUtils.checkEntityExists(user, "User");
-		if (passwordEncoder.matches(changePasswordDTO.getOldPassword(), user.getPassword())) {
-			user.setPassword(passwordEncoder.encode(changePasswordDTO.getNewPassword()));
-			return userRepository.save(user);
-		} else {
-			throw new EMSException(HttpStatus.UNAUTHORIZED, "Old password incorrect");
-		}
-	}
+  public UserEntity updatePassword(ChangePasswordDTO changePasswordDTO) {
+    UserEntity user = userRepository.findByUsername(changePasswordDTO.getUsername());
+    ErrorHandlingUtils.checkEntityExists(user, "User");
+    if (passwordEncoder.matches(changePasswordDTO.getOldPassword(), user.getPassword())) {
+      user.setPassword(passwordEncoder.encode(changePasswordDTO.getNewPassword()));
+      return userRepository.save(user);
+    } else {
+      throw new EMSException(HttpStatus.UNAUTHORIZED, "Old password incorrect");
+    }
+  }
 
-	public UserEntity resetPassword(ChangePasswordDTO changePasswordDTO) {
-		UserEntity user = userRepository.findByUsername(changePasswordDTO.getUsername());
-		ErrorHandlingUtils.checkEntityExists(user, "User");
-		user.setPassword(passwordEncoder.encode(changePasswordDTO.getNewPassword()));
-		return userRepository.save(user);
-	}
+  public UserEntity resetPassword(ChangePasswordDTO changePasswordDTO) {
+    UserEntity user = userRepository.findByUsername(changePasswordDTO.getUsername());
+    ErrorHandlingUtils.checkEntityExists(user, "User");
+    user.setPassword(passwordEncoder.encode(changePasswordDTO.getNewPassword()));
+    return userRepository.save(user);
+  }
 
-	public void deleteUser(String username) {
-		userRepository.delete(username);
-	}
+  public void deleteUser(String username) {
+    userRepository.delete(username);
+  }
 
-	private List<String> getExistingUsernames() {
-		return userRepository.findAll().stream()
-				.map(UserEntity::getUsername)
-				.collect(Collectors.toList());
-	}
+  private List<String> getExistingUsernames() {
+    return userRepository.findAll().stream()
+        .map(UserEntity::getUsername)
+        .collect(Collectors.toList());
+  }
 }

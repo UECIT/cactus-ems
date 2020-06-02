@@ -23,6 +23,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
+import uk.nhs.cactus.common.security.JWTHandler;
+import uk.nhs.cactus.common.security.JWTRequest;
 import uk.nhs.ctp.entities.UserEntity;
 import uk.nhs.ctp.exception.EMSException;
 import uk.nhs.ctp.model.RegisterSupplierRequest;
@@ -30,8 +32,6 @@ import uk.nhs.ctp.model.SupplierAccountDetails;
 import uk.nhs.ctp.model.SupplierAccountDetails.EndpointDetails;
 import uk.nhs.ctp.repos.UserRepository;
 import uk.nhs.ctp.security.CognitoService;
-import uk.nhs.ctp.security.JWTHandler;
-import uk.nhs.ctp.security.JWTRequest;
 import uk.nhs.ctp.service.dto.NewUserDTO;
 
 @RunWith(MockitoJUnitRunner.class)
