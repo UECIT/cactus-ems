@@ -25,12 +25,12 @@ jobs:
         SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/cdss_decoupling?useSSL=false
         SPRING_DATASOURCE_USERNAME: root
         SPRING_DATASOURCE_PASSWORD: root
+        GITHUB_USER: UECIT
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         sudo systemctl start mysql
         mysql -uroot -proot < $GITHUB_WORKSPACE/src/main/resources/sql/create_database.sql
-        mkdir -p ~/.m2
-        echo "<settings xmlns='http://maven.apache.org/SETTINGS/1.0.0' xsi:schemaLocation='http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'><servers><server><id>github</id><username>CDSCT</username><password>${{secrets.GITHUB_TOKEN}}</password></server></servers></settings>" > ~/.m2/settings.xml
-        mvn -B package --file pom.xml
+        mvn -B package --file pom.xml --settings settings.xml
 
   publish-app:
     runs-on: ubuntu-latest
@@ -46,6 +46,7 @@ jobs:
         repository: uecit/cactus-ems/cactus-ems
         tag_with_ref: true
         tag_with_sha: true
+        build_args: GITHUB_USER=${{ github.actor }},GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
 
   build-ui:
     runs-on: ubuntu-latest
