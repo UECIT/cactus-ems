@@ -54,7 +54,6 @@ public class CaseController {
   @PostMapping(path = "/serviceDefinitions")
   public @ResponseBody
   List<CdssSupplierDTO> getServiceDefinitions(@RequestBody ServiceDefinitionSearchDTO requestDTO) {
-    auditService.addAuditProperty(CASE_ID, requestDTO.getCaseId().toString());
     var params = searchParametersTransformer
         .transform(emptyList(), requestDTO.getSettings(), requestDTO.getPatientId());
 
