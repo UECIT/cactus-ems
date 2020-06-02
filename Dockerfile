@@ -5,6 +5,7 @@ ARG GITHUB_USER
 ARG GITHUB_TOKEN
 ENV GITHUB_USER=$GITHUB_USER GITHUB_TOKEN=$GITHUB_TOKEN
 COPY src src
+COPY settings.xml /app/
 RUN mvn -B -Dmaven.repo.local=/app/.m2 package -DskipTests --settings settings.xml
 
 FROM openjdk:11-jre-slim
