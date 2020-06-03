@@ -11,6 +11,8 @@ const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
 };
 
+const adminRoles = ['ROLE_ADMIN', 'ROLE_SUPPLIER_ADMIN'];
+
 @Injectable({
   providedIn: 'root'
 })
@@ -49,7 +51,10 @@ export class LoginService {
     const authToken: string = this.sessionStorage['auth_token'];
     if (authToken != null) {
       const tokenInfo: any = jwt_decode(authToken);
-      return tokenInfo.roles != null && tokenInfo.roles === 'ROLE_ADMIN';
+      const roles = (tokenInfo.roles || '').split(',');
+      return roles
+        .filter(role => adminRoles.includes(role))
+        .length > 0;
     }
     return false;
   }

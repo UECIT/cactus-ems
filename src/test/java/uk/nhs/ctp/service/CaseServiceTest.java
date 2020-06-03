@@ -1,14 +1,18 @@
 package uk.nhs.ctp.service;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -28,6 +32,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
@@ -44,6 +49,8 @@ import uk.nhs.ctp.transform.CaseObservationTransformer;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 public class CaseServiceTest {
+
+  public static final String SUPPLIER = "supplier";
 
   @Mock
   private CaseRepository mockCaseRepository;
@@ -67,6 +74,8 @@ public class CaseServiceTest {
   CaseMedication caseMedication;
   @Mock
   Condition condition;
+  @Mock
+  TokenAuthenticationService authService;
 
   @InjectMocks
   private CaseService spyCaseService;
@@ -81,12 +90,6 @@ public class CaseServiceTest {
 
   @Before
   public void setup() {
-    spyCaseService = spy(new CaseService(
-        mockCaseRepository,
-        resourceLocator,
-        storageService,
-        caseObservationTransformer
-    ));
 
     MockitoAnnotations.initMocks(this);
     patient = new PatientEntity();
@@ -125,10 +128,24 @@ public class CaseServiceTest {
     resourcesUnknownType.add(condition);
 
     when(mockPatientRepository.findOne(1L)).thenReturn(patient);
-    when(mockCaseRepository.findOne(1L)).thenReturn(triageCase);
+    when(mockCaseRepository.getOneByIdAndSupplierId(1L, SUPPLIER))
+        .thenReturn(Optional.of(triageCase));
     when(mockCaseRepository.save(any(Cases.class))).thenReturn(triageCase);
     when(observation.getValue()).thenReturn(new BooleanType(true));
     when(caseObservationTransformer.transform(observation)).thenReturn(caseObservation);
+
+    when(authService.requireSupplierId()).thenReturn(SUPPLIER);
+    doNothing().when(authService).requireSupplierId(SUPPLIER);
+    doThrow(AuthenticationException.class).when(authService).requireSupplierId(any());
+
+    spyCaseService = spy(new CaseService(
+        mockCaseRepository,
+        resourceLocator,
+        storageService,
+        caseObservationTransformer,
+        authService
+    ));
+
     doReturn(caseImmunization).when(spyCaseService).createCaseImmunization(immunization);
     doReturn(caseMedication).when(spyCaseService).createCaseMedication(medication);
 

@@ -7,13 +7,18 @@ import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import java.util.Collections;
+import java.util.Optional;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.dstu3.model.CareConnectPatient;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -33,6 +38,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.config.FHIRConfig;
 import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.Cases;
@@ -47,6 +53,7 @@ import uk.nhs.ctp.transform.CompositionTransformer;
 @RunWith(MockitoJUnitRunner.class)
 public class CompositionServiceTest {
 
+  public static final String SUPPLIER = "supplier";
   @Mock
   private ReferenceService referenceService;
 
@@ -73,6 +80,9 @@ public class CompositionServiceTest {
 
   @Mock
   private FhirContext mockedFhirContext;
+
+  @Mock
+  private TokenAuthenticationService authService;
 
   @InjectMocks
   private CompositionService compositionService;
@@ -106,6 +116,10 @@ public class CompositionServiceTest {
     //TODO: CDSCT-129 improve test coverage of this class, these mocks are just to get it to pass
     when(referralRequestService.getByCaseId(1L)).thenReturn(Collections.emptyList());
     when(carePlanService.getByCaseId(1L)).thenReturn(Collections.emptyList());
+
+    when(authService.requireSupplierId()).thenReturn(SUPPLIER);
+    doNothing().when(authService).requireSupplierId(SUPPLIER);
+    doThrow(AuthenticationException.class).when(authService).requireSupplierId(any());
   }
 
   @Test
@@ -162,7 +176,7 @@ public class CompositionServiceTest {
     caseEntity.setId(1L);
     caseEntity.setPatientId("Patient/1");
     caseEntity.addObservation(caseObservation);
-    when(caseRepository.findOne(1L)).thenReturn(caseEntity);
+    when(caseRepository.getOneByIdAndSupplierId(1L, SUPPLIER)).thenReturn(Optional.of(caseEntity));
 
     cdssResult = new CdssResult();
     cdssResult.setRequestId("Request/id");
@@ -176,6 +190,7 @@ public class CompositionServiceTest {
   private void locateResource(String id, DomainResource resource) {
     when(resourceLocator.findResource(argThat(isReferenceTo(id)))).thenReturn(resource);
   }
+
   private static Matcher<Reference> isReferenceTo(String id) {
     return hasProperty("reference", endsWith(id));
   }

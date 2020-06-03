@@ -19,6 +19,7 @@ import uk.nhs.ctp.SystemURL;
 import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.entities.EmsSupplier;
+import uk.nhs.ctp.exception.EMSException;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.dto.EncounterHandoverDTO;
 import uk.nhs.ctp.service.dto.EncounterReportInput;
@@ -39,10 +40,12 @@ public class EncounterService {
   private final EncounterReportInputTransformer encounterReportInputTransformer;
   private final EmsSupplierService emsSupplierService;
   private final FhirContext fhirContext;
-  private final TokenAuthenticationService tokenAuthenticationService;
+  private final TokenAuthenticationService authService;
 
   public Encounter getEncounter(Long caseId) {
-    Cases triageCase = caseRepository.findOne(caseId);
+    Cases triageCase = caseRepository
+        .getOneByIdAndSupplierId(caseId, authService.requireSupplierId())
+        .orElseThrow(EMSException::notFound);
     Encounter encounter = encounterTransformer.transform(triageCase);
     encounter.setId(caseId.toString());
     return encounter;
@@ -50,7 +53,10 @@ public class EncounterService {
 
   @Transactional
   public List<Observation> getObservationsForEncounter(Long caseId) {
-    List<CaseObservation> observations = caseRepository.findOne(caseId).getObservations();
+    List<CaseObservation> observations = caseRepository
+        .getOneByIdAndSupplierId(caseId, authService.requireSupplierId())
+        .orElseThrow(EMSException::notFound)
+        .getObservations();
     return observations.stream()
         .map(observationTransformer::transform)
         .collect(Collectors.toList());
@@ -86,7 +92,7 @@ public class EncounterService {
   }
 
   public List<Encounter> getByPatientIdentifier(String system, String value) {
-    return caseRepository.findAllBySupplierId(tokenAuthenticationService.requireSupplierId())
+    return caseRepository.findAllBySupplierId(authService.requireSupplierId())
         .stream()
         .filter(caseEntity -> {
           if (caseEntity.getPatientId() == null) {

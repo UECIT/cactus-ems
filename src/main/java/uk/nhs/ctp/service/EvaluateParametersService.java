@@ -26,6 +26,7 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.stereotype.Service;
+import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.SystemURL;
 import uk.nhs.ctp.entities.CaseImmunization;
@@ -37,6 +38,7 @@ import uk.nhs.ctp.enums.Language;
 import uk.nhs.ctp.enums.ReferencingType;
 import uk.nhs.ctp.enums.Setting;
 import uk.nhs.ctp.enums.UserType;
+import uk.nhs.ctp.exception.EMSException;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.dto.CdssRequestDTO;
 import uk.nhs.ctp.service.dto.CodeDTO;
@@ -56,17 +58,20 @@ public class EvaluateParametersService {
   private static final Set<String> VALID_RECEIVING_PERSON_TYPES =
       Set.of("Patient", "RelatedPerson");
 
-  private CaseRepository caseRepository;
-  private ReferenceService referenceService;
-  private ObservationTransformer observationTransformer;
-  private QuestionnaireService questionnaireService;
+  private final CaseRepository caseRepository;
+  private final ReferenceService referenceService;
+  private final ObservationTransformer observationTransformer;
+  private final QuestionnaireService questionnaireService;
+  private final TokenAuthenticationService authService;
 
-  Parameters getEvaluateParameters(CdssRequestDTO requestDetails, CdssSupplier cdssSupplier, String requestId) {
+  Parameters getEvaluateParameters(CdssRequestDTO requestDetails, CdssSupplier cdssSupplier,
+      String requestId) {
     Long caseId = requestDetails.getCaseId();
     SettingsDTO settings = requestDetails.getSettings();
-    Cases caseEntity = caseRepository.findOne(caseId);
+    Cases caseEntity = caseRepository
+        .getOneByIdAndSupplierId(caseId, authService.requireSupplierId())
+        .orElseThrow(EMSException::notFound);
 
-    ErrorHandlingUtils.checkEntityExists(caseEntity, "Case");
     Builder builder = new Builder()
         .setRequestId(requestId)
         .setEncounter(caseId)
@@ -125,7 +130,8 @@ public class EvaluateParametersService {
 
     Reference patientRef = new Reference(patientId);
     //Assume RelatedPerson.id = patient.id
-    Reference relatedPersonRef = referenceService.buildRef(ResourceType.RelatedPerson, new IdType(patientId).getIdPart());
+    Reference relatedPersonRef = referenceService
+        .buildRef(ResourceType.RelatedPerson, new IdType(patientId).getIdPart());
 
     builder
         .setUserType(initiatingType)
@@ -145,8 +151,10 @@ public class EvaluateParametersService {
       case PRACTITIONER:
         Preconditions.checkNotNull(settings.getPractitioner(), "No practitioner specified");
         builder.setInitiatingPerson(
-            referenceService.buildRef(ResourceType.Practitioner, settings.getPractitioner().getId()));
-        builder.setReceivingPerson(UserType.PATIENT.equals(receivingType) ? patientRef : relatedPersonRef);
+            referenceService
+                .buildRef(ResourceType.Practitioner, settings.getPractitioner().getId()));
+        builder.setReceivingPerson(
+            UserType.PATIENT.equals(receivingType) ? patientRef : relatedPersonRef);
         break;
       default:
         throw new IllegalStateException("Unexpected value: " + initiatingType);
@@ -161,7 +169,8 @@ public class EvaluateParametersService {
       Boolean amending,
       String supplierBaseUrl
   ) {
-    Reference responseSource = (Reference)builder.getUnique(SystemConstants.RECEIVINGPERSON).getValue();
+    Reference responseSource = (Reference) builder.getUnique(SystemConstants.RECEIVINGPERSON)
+        .getValue();
     List<QuestionnaireResponse> questionnaireResponses = questionnaireService
         .updateEncounterResponses(
             caseEntity, questionnaireId, questionResponse, amending, responseSource,
@@ -207,7 +216,8 @@ public class EvaluateParametersService {
         .map(observationTransformer::transform);
   }
 
-  private void addInputParameters(Cases caseEntity, Builder builder, ReferencingType inputParamsRefType) {
+  private void addInputParameters(Cases caseEntity, Builder builder,
+      ReferencingType inputParamsRefType) {
     // TODO review this in more detail. Non outputData output parameters are included here
     if (!caseEntity.getParameters().isEmpty()) {
       Parameters inputParameters = new Parameters();

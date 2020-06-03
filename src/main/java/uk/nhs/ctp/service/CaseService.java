@@ -21,6 +21,7 @@ import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.springframework.stereotype.Service;
+import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.SystemURL;
 import uk.nhs.ctp.entities.CaseImmunization;
@@ -29,23 +30,29 @@ import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.CaseParameter;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.entities.QuestionResponse;
+import uk.nhs.ctp.exception.EMSException;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.dto.CdssResult;
 import uk.nhs.ctp.service.dto.PractitionerDTO;
 import uk.nhs.ctp.service.fhir.GenericResourceLocator;
 import uk.nhs.ctp.service.fhir.StorageService;
 import uk.nhs.ctp.transform.CaseObservationTransformer;
-import uk.nhs.ctp.utils.ErrorHandlingUtils;
 
 @Service
 @AllArgsConstructor
 @Slf4j
 public class CaseService {
 
-  private CaseRepository caseRepository;
-  private GenericResourceLocator resourceLocator;
-  private StorageService storageService;
-  private CaseObservationTransformer caseObservationTransformer;
+  private final CaseRepository caseRepository;
+  private final GenericResourceLocator resourceLocator;
+  private final StorageService storageService;
+  private final CaseObservationTransformer caseObservationTransformer;
+  private final TokenAuthenticationService authService;
+
+  public Cases findCase(Long id) {
+    return caseRepository.getOneByIdAndSupplierId(id, authService.requireSupplierId())
+        .orElseThrow(EMSException::notFound);
+  }
 
   public Cases createCase(String patientRef, PractitionerDTO practitioner) {
     String resourceType = new Reference(patientRef).getReferenceElement().getResourceType();
@@ -64,6 +71,7 @@ public class CaseService {
     log.info("Creating case for patient: " + patient.getNameFirstRep().getNameAsSingleString());
 
     Cases triageCase = new Cases();
+    triageCase.setSupplierId(authService.requireSupplierId());
     triageCase.setPatientId(patient.getId());
 
     if (practitioner != null) {
@@ -121,8 +129,10 @@ public class CaseService {
    */
   @Transactional
   public Cases updateCase(Long caseId, CdssResult evaluateResponse, String sessionId) {
-    Cases triageCase = caseRepository.findOne(caseId);
-    ErrorHandlingUtils.checkEntityExists(triageCase, "Case");
+    Cases triageCase = caseRepository
+        .getOneByIdAndSupplierId(caseId, authService.requireSupplierId())
+        .orElseThrow(EMSException::notFound);
+
     triageCase.setSessionId(sessionId);
     caseRepository.saveAndFlush(triageCase);
 
@@ -153,7 +163,6 @@ public class CaseService {
   }
 
   private void updateQuestionnaireResponse(Cases triageCase, QuestionnaireResponse response) {
-    //noinspection UnstableApiUsage
     QuestionResponse existingResponse = triageCase.getQuestionResponses().stream()
         .filter(answer -> answer.getQuestionnaireId()
             .equals(response.getQuestionnaire().getReference()))
@@ -270,7 +279,9 @@ public class CaseService {
   }
 
   public void addObservation(Long caseId, CaseObservation observation) {
-    Cases existingCase = caseRepository.findOne(caseId);
+    Cases existingCase = caseRepository
+        .getOneByIdAndSupplierId(caseId, authService.requireSupplierId())
+        .orElseThrow(EMSException::notFound);
     if (!existingCase.getObservations().contains(observation)) {
       existingCase.addObservation(observation);
       caseRepository.save(existingCase);

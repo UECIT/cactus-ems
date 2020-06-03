@@ -147,6 +147,7 @@ public class CdssSupplierServiceTest {
     expectedSd.setCdssSupplierId(99L);
     expectedSd.setServiceDefinitionId("servicedef");
     expectedSd.setDescription("description");
+    expectedSd.setSupplierId(SUPPLIER);
     verify(serviceDefinitionRepository).save(argThat(samePropertyValuesAs(expectedSd)));
   }
 
