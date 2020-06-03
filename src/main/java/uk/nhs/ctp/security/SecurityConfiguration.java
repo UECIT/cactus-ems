@@ -70,11 +70,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         .csrf().disable()
         .authorizeRequests()
         // All permitted
-        .antMatchers("/environment/**", "/document", "/fhir/**").permitAll()
+        .antMatchers("/environment/**", "/document").permitAll()
         // Anything else needs auth
         .anyRequest().authenticated()
         .and()
-        //Add the login filter to create authentication
+        // Add the login filter to create authentication
         .addFilterBefore(
             new JWTLoginFilter("/login", authenticationManager(), authService, userRepository),
             UsernamePasswordAuthenticationFilter.class)

@@ -311,7 +311,7 @@ export class QuestionnaireComponent implements OnInit {
 
   getImageUrl(question: String) {
     if (this.supplierId) {
-      return this.supplierId.replace('/fhir', '/image/') + question.match(/!\[.*?\]\((.*?)\)/)[1];
+      return this.supplierId.replace('/fhir', '/image') + question.match(/!\[.*?\]\((.*?)\)/)[1];
     }
     return 'Image not found';
   }
