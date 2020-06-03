@@ -1,8 +1,8 @@
 package uk.nhs.ctp.service;
 
 import java.util.List;
+import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.entities.EmsSupplier;
@@ -24,15 +24,20 @@ public class EmsSupplierService {
   public EmsSupplier crupdate(EmsSupplier updated) {
     String supplierId = authService.requireSupplierId();
 
-    emsSupplierRepository
+    EmsSupplier existingEntry = emsSupplierRepository
         .getOneByIdAndSupplierId(updated.getId(), supplierId)
-        .orElseThrow(EMSException::notFound);
+        .orElse(null);
+
+    if (existingEntry == null && updated.getId() != null) {
+      throw EMSException.notFound();
+    }
 
     updated.setSupplierId(supplierId);
 
     return emsSupplierRepository.saveAndFlush(updated);
   }
 
+  @Transactional
   public void delete(Long id) {
     emsSupplierRepository.deleteByIdAndSupplierId(id, authService.requireSupplierId());
   }

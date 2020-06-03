@@ -2,6 +2,7 @@ package uk.nhs.ctp.service;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -124,6 +125,7 @@ public class CdssSupplierService {
     return cdssSupplierRepository.saveAndFlush(cdssSupplier);
   }
 
+  @Transactional
   public void deleteCdssSupplier(Long id) {
     cdssSupplierRepository.deleteByIdAndSupplierId(id, authService.requireSupplierId());
   }

@@ -31,8 +31,6 @@ import uk.nhs.ctp.service.search.SearchParameters;
 @RequiredArgsConstructor
 public class CdssController {
 
-  private final Logger log = LoggerFactory.getLogger(getClass());
-
   private final CdssSupplierService cdssSupplierService;
   private final CdssService cdssService;
 
