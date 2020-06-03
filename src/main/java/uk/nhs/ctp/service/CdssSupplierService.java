@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.entities.ServiceDefinition;
@@ -24,6 +25,7 @@ public class CdssSupplierService {
   private final UserRepository userRepository;
   private final CdssSupplierRepository cdssSupplierRepository;
   private final ServiceDefinitionRepository serviceDefinitionRepository;
+  private final TokenAuthenticationService tokenAuthenticationService;
 
   /**
    * Returns a list of CDSS suppliers that the user has access to.
@@ -39,8 +41,7 @@ public class CdssSupplierService {
     if (userEntity.getRole().equals(SystemConstants.ROLE_NHS)
         || userEntity.getRole().equals(SystemConstants.ROLE_ADMIN)
         || userEntity.getRole().equals(SystemConstants.ROLE_SUPPLIER_ADMIN)) {
-      //TODO: CDSCT-139
-      suppliers = cdssSupplierRepository.findAllBySupplierId(null);
+      suppliers = cdssSupplierRepository.findAllBySupplierId(tokenAuthenticationService.requireSupplierId());
     } else {
       throw new EMSException(HttpStatus.FORBIDDEN, "User has invalid role");
     }
@@ -56,8 +57,8 @@ public class CdssSupplierService {
     if (userEntity.getRole().equals(SystemConstants.ROLE_NHS)
         || userEntity.getRole().equals(SystemConstants.ROLE_ADMIN)
         || userEntity.getRole().equals(SystemConstants.ROLE_SUPPLIER_ADMIN)) {
-      //TODO: CDSCT-139
-      suppliers = cdssSupplierRepository.findAllBySupplierId(null);
+      // TODO Should NHS admin be able to see all instances?
+      suppliers = cdssSupplierRepository.findAllBySupplierId(tokenAuthenticationService.requireSupplierId());
     } else {
       throw new EMSException(HttpStatus.FORBIDDEN, "User has invalid role");
     }

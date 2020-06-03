@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponentsBuilder;
+import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.repos.CdssSupplierRepository;
@@ -38,6 +39,7 @@ public class CdssService {
 
   private final CdssSupplierRepository cdssSupplierRepository;
   private final FhirContext fhirContext;
+  private final TokenAuthenticationService tokenAuthenticationService;
 
   /**
    * Sends request to CDSS Supplier (ServiceDefintion $evaluate).
@@ -86,8 +88,7 @@ public class CdssService {
    * @return
    */
   public List<CdssSupplierDTO> queryServiceDefinitions(@NotNull SearchParameters parameters) {
-    //TODO: CDSCT-139
-    return cdssSupplierRepository.findAllBySupplierId(null).stream() //TODO: More efficient in parallel NCTH-536
+    return cdssSupplierRepository.findAllBySupplierId(tokenAuthenticationService.requireSupplierId()).stream() //TODO: More efficient in parallel NCTH-536
         .map(supplier -> queryServiceDefinitions(supplier, parameters))
         .filter(Objects::nonNull)
         .filter(supplier -> !CollectionUtils.isEmpty(supplier.getServiceDefinitions()))

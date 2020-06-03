@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.audit.HttpRequest;
 import uk.nhs.ctp.audit.HttpResponse;
 import uk.nhs.ctp.entities.Audit;
@@ -42,6 +43,7 @@ public class AuditService {
 
   private final AuditRepository auditRepository;
   private final CaseRepository caseRepository;
+  private final TokenAuthenticationService tokenAuthenticationService;
 
   private ThreadLocal<Audit> currentAudit = new ThreadLocal<>();
   private ThreadLocal<AuditEntry> currentEntry = new ThreadLocal<>();
@@ -183,8 +185,7 @@ public class AuditService {
     return caseRepository.search(
         request.getFrom(), request.getTo(),
         request.isIncludeClosed(), request.isIncludeIncomplete(),
-        //TODO: CDSCT-139
-        null,
+        tokenAuthenticationService.requireSupplierId(),
         request);
   }
 

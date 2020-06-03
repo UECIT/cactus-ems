@@ -14,6 +14,7 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.stereotype.Service;
+import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.SystemURL;
 import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.Cases;
@@ -32,12 +33,13 @@ import uk.nhs.ctp.utils.RetryUtils;
 @Slf4j
 public class EncounterService {
 
-  private EncounterTransformer encounterTransformer;
-  private ObservationTransformer observationTransformer;
-  private CaseRepository caseRepository;
-  private EncounterReportInputTransformer encounterReportInputTransformer;
-  private EmsSupplierService emsSupplierService;
-  private FhirContext fhirContext;
+  private final EncounterTransformer encounterTransformer;
+  private final ObservationTransformer observationTransformer;
+  private final CaseRepository caseRepository;
+  private final EncounterReportInputTransformer encounterReportInputTransformer;
+  private final EmsSupplierService emsSupplierService;
+  private final FhirContext fhirContext;
+  private final TokenAuthenticationService tokenAuthenticationService;
 
   public Encounter getEncounter(Long caseId) {
     Cases triageCase = caseRepository.findOne(caseId);
@@ -56,19 +58,21 @@ public class EncounterService {
 
   public EncounterReportInput getEncounterReport(IdType encounterId) {
     String baseUrl = encounterId.getBaseUrl();
-    Bundle encounterReportBundle = RetryUtils.retry(() -> fhirContext.newRestfulGenericClient(baseUrl)
-        .search()
-        .forResource(Encounter.class)
-        .where(Encounter.RES_ID.exactly().identifier(encounterId.getIdPart()))
-        .include(Encounter.INCLUDE_ALL.asRecursive())
-        .revInclude(Encounter.INCLUDE_ALL.asRecursive())
-        .returnBundle(Bundle.class)
-        .execute(),
-        baseUrl);
+    Bundle encounterReportBundle = RetryUtils
+        .retry(() -> fhirContext.newRestfulGenericClient(baseUrl)
+                .search()
+                .forResource(Encounter.class)
+                .where(Encounter.RES_ID.exactly().identifier(encounterId.getIdPart()))
+                .include(Encounter.INCLUDE_ALL.asRecursive())
+                .revInclude(Encounter.INCLUDE_ALL.asRecursive())
+                .returnBundle(Bundle.class)
+                .execute(),
+            baseUrl);
 
     Encounter encounter = ResourceProviderUtils.getResource(encounterReportBundle, Encounter.class);
     Patient patient = ResourceProviderUtils.getResource(encounterReportBundle, Patient.class);
-    List<Observation> observations = ResourceProviderUtils.getResources(encounterReportBundle, Observation.class);
+    List<Observation> observations = ResourceProviderUtils
+        .getResources(encounterReportBundle, Observation.class);
     return EncounterReportInput.builder()
         .encounter(encounter)
         .patient(patient)
@@ -82,8 +86,8 @@ public class EncounterService {
   }
 
   public List<Encounter> getByPatientIdentifier(String system, String value) {
-    //TODO: CDSCT-139
-    return caseRepository.findAllBySupplierId(null).stream()
+    return caseRepository.findAllBySupplierId(tokenAuthenticationService.requireSupplierId())
+        .stream()
         .filter(caseEntity -> {
           if (caseEntity.getPatientId() == null) {
             return false;
@@ -94,16 +98,17 @@ public class EncounterService {
           try {
             String baseUrl = id.getBaseUrl();
             Patient patient = RetryUtils.retry(() -> fhirContext.newRestfulGenericClient(baseUrl)
-                .read().resource(Patient.class)
-                .withId(id)
-                .execute(),
+                    .read().resource(Patient.class)
+                    .withId(id)
+                    .execute(),
                 baseUrl);
 
             return patient.getIdentifier().stream()
                 .anyMatch(identifier -> system.equals(identifier.getSystem())
                     && value.equals(identifier.getValue()));
           } catch (Exception e) {
-            log.error("Unable to find patient {} for encounter {}: {}", id.getValue(), caseEntity.getId(), e.getMessage());
+            log.error("Unable to find patient {} for encounter {}: {}", id.getValue(),
+                caseEntity.getId(), e.getMessage());
             return false;
           }
 
@@ -116,16 +121,17 @@ public class EncounterService {
     List<EmsSupplier> suppliers = emsSupplierService.getAll();
 
     return suppliers.stream()
-        .map(supplier -> RetryUtils.retry(() -> fhirContext.newRestfulGenericClient(supplier.getBaseUrl())
-                .search()
-                .forResource(Encounter.class)
-                .where(Encounter.PATIENT
-                    .hasChainedProperty(
-                        Patient.IDENTIFIER.exactly()
-                            .systemAndIdentifier(SystemURL.NHS_NUMBER, nhsNumber)))
-                .returnBundle(Bundle.class)
-                .execute(), 
-            supplier.getBaseUrl())
+        .map(supplier -> RetryUtils
+            .retry(() -> fhirContext.newRestfulGenericClient(supplier.getBaseUrl())
+                    .search()
+                    .forResource(Encounter.class)
+                    .where(Encounter.PATIENT
+                        .hasChainedProperty(
+                            Patient.IDENTIFIER.exactly()
+                                .systemAndIdentifier(SystemURL.NHS_NUMBER, nhsNumber)))
+                    .returnBundle(Bundle.class)
+                    .execute(),
+                supplier.getBaseUrl())
             .getEntry().stream()
             .map(BundleEntryComponent::getFullUrl)
             .collect(Collectors.toUnmodifiableList()))
