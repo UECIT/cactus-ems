@@ -28,6 +28,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
@@ -67,6 +68,8 @@ public class CaseServiceTest {
   CaseMedication caseMedication;
   @Mock
   Condition condition;
+  @Mock
+  TokenAuthenticationService authenticationService;
 
   @InjectMocks
   private CaseService spyCaseService;
@@ -85,7 +88,8 @@ public class CaseServiceTest {
         mockCaseRepository,
         resourceLocator,
         storageService,
-        caseObservationTransformer
+        caseObservationTransformer,
+        authenticationService
     ));
 
     MockitoAnnotations.initMocks(this);
