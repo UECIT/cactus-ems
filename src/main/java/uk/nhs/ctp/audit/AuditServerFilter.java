@@ -1,22 +1,25 @@
-package uk.nhs.ctp.config.interceptors;
+package uk.nhs.ctp.audit;
 
 import java.io.IOException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
-import uk.nhs.ctp.service.AuditService;
-import uk.nhs.ctp.audit.HttpRequest;
-import uk.nhs.ctp.audit.HttpResponse;
+import uk.nhs.ctp.audit.model.AuditSession;
+import uk.nhs.ctp.audit.model.HttpRequest;
+import uk.nhs.ctp.audit.model.HttpResponse;
 
 @Component
 @RequiredArgsConstructor
-public class AuditFhirServer extends OncePerRequestFilter {
+@Slf4j
+public class AuditServerFilter extends OncePerRequestFilter {
 
   private static final int CONTENT_CACHE_LIMIT = 1 << 20;
 
@@ -24,8 +27,9 @@ public class AuditFhirServer extends OncePerRequestFilter {
 
   @Override
   protected void doFilterInternal(
-      HttpServletRequest request, HttpServletResponse response,
-      FilterChain filterChain) throws ServletException, IOException {
+      @NonNull HttpServletRequest request,
+      @NonNull HttpServletResponse response,
+      @NonNull FilterChain filterChain) throws ServletException, IOException {
 
     ContentCachingRequestWrapper requestWrapper;
     ContentCachingResponseWrapper responseWrapper;
@@ -42,13 +46,18 @@ public class AuditFhirServer extends OncePerRequestFilter {
       responseWrapper = new ContentCachingResponseWrapper(response);
     }
 
-    auditService.startAudit(HttpRequest.from(requestWrapper));
+    auditService.startAuditSession(HttpRequest.from(requestWrapper));
 
     try {
       filterChain.doFilter(requestWrapper, responseWrapper);
-      responseWrapper.copyBodyToResponse();
     } finally {
-      auditService.endAudit(HttpRequest.from(requestWrapper), HttpResponse.from(responseWrapper));
+      AuditSession auditSession = auditService
+          .completeAuditSession(HttpRequest.from(requestWrapper),
+              HttpResponse.from(responseWrapper));
+
+      //TODO: Send audit session to SQS
+      log.info(auditSession.toString());
+      responseWrapper.copyBodyToResponse();
     }
   }
 }

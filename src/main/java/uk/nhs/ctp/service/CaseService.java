@@ -6,7 +6,7 @@ import static uk.nhs.ctp.SystemConstants.DATE_FORMAT;
 import com.google.common.base.Preconditions;
 import java.util.Date;
 import javax.transaction.Transactional;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -39,7 +39,7 @@ import uk.nhs.ctp.service.fhir.StorageService;
 import uk.nhs.ctp.transform.CaseObservationTransformer;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 public class CaseService {
 
@@ -71,8 +71,8 @@ public class CaseService {
     log.info("Creating case for patient: " + patient.getNameFirstRep().getNameAsSingleString());
 
     Cases triageCase = new Cases();
-    triageCase.setSupplierId(authService.requireSupplierId());
     triageCase.setPatientId(patient.getId());
+    triageCase.setSupplierId(authService.requireSupplierId());
 
     if (practitioner != null) {
       triageCase.setPractitionerId(practitioner.getId());

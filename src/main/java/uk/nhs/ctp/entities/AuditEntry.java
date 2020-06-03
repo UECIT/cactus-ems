@@ -20,7 +20,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString.Exclude;
-import uk.nhs.ctp.audit.HttpAudit;
 
 @Entity
 @Table(name = "audit_entry_v2")
@@ -28,7 +27,8 @@ import uk.nhs.ctp.audit.HttpAudit;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuditEntry extends SupplierPartitioned implements HttpAudit {
+// TODO: delete this quickly
+public class AuditEntry extends SupplierPartitioned {
 
   // generic audit details
   @Id
