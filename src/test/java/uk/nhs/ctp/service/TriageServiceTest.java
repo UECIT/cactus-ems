@@ -34,9 +34,6 @@ public class TriageServiceTest {
   private CdssService cdssService;
 
   @Mock
-  private AuditService auditService;
-
-  @Mock
   private ResponseService responseService;
 
   @Mock
@@ -65,7 +62,6 @@ public class TriageServiceTest {
         caseService,
         cdssService,
         responseService,
-        auditService,
         encounterService,
         evaluateService,
         caseObservationTransformer,
@@ -76,7 +72,6 @@ public class TriageServiceTest {
         caseService,
         cdssService,
         responseService,
-        auditService,
         encounterService,
         evaluateService,
         caseObservationTransformer,

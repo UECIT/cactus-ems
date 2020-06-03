@@ -19,7 +19,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import uk.nhs.ctp.audit.HttpAudit;
 import uk.nhs.ctp.enums.AuditType;
 
 @Entity
@@ -29,7 +28,8 @@ import uk.nhs.ctp.enums.AuditType;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Audit extends SupplierPartitioned implements HttpAudit {
+// TODO: delete this quickly
+public class Audit extends SupplierPartitioned {
 
   @JsonIgnore
   private boolean storable;
