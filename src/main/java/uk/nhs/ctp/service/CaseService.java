@@ -6,7 +6,7 @@ import static uk.nhs.ctp.SystemConstants.DATE_FORMAT;
 import com.google.common.base.Preconditions;
 import java.util.Date;
 import javax.transaction.Transactional;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +21,7 @@ import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.springframework.stereotype.Service;
+import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.SystemURL;
 import uk.nhs.ctp.entities.CaseImmunization;
@@ -38,14 +39,15 @@ import uk.nhs.ctp.transform.CaseObservationTransformer;
 import uk.nhs.ctp.utils.ErrorHandlingUtils;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 public class CaseService {
 
-  private CaseRepository caseRepository;
-  private GenericResourceLocator resourceLocator;
-  private StorageService storageService;
-  private CaseObservationTransformer caseObservationTransformer;
+  private final CaseRepository caseRepository;
+  private final GenericResourceLocator resourceLocator;
+  private final StorageService storageService;
+  private final CaseObservationTransformer caseObservationTransformer;
+  private final TokenAuthenticationService authenticationService;
 
   public Cases createCase(String patientRef, PractitionerDTO practitioner) {
     String resourceType = new Reference(patientRef).getReferenceElement().getResourceType();
@@ -65,6 +67,7 @@ public class CaseService {
 
     Cases triageCase = new Cases();
     triageCase.setPatientId(patient.getId());
+    triageCase.setSupplierId(authenticationService.requireSupplierId());
 
     if (practitioner != null) {
       triageCase.setPractitionerId(practitioner.getId());
