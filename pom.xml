@@ -17,6 +17,9 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
+    <!-- https://issues.apache.org/jira/browse/MDEP-82 -->
+    <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
+
     <thymeleaf.version>3.0.6.RELEASE</thymeleaf.version>
     <thymeleaf-layout-dialect.version>2.2.1</thymeleaf-layout-dialect.version>
 

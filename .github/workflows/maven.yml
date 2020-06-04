@@ -75,7 +75,7 @@ jobs:
       env:
         GITHUB_USER: UECIT
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: mvn -B -Dmaven.repo.local=m2cache compile --file pom.xml --settings settings.xml
+      run: mvn -B -Dmaven.repo.local=m2cache dependency:go-offline dependency:resolve-plugins --file pom.xml --settings settings.xml
 
     - name: Push EMS Backend to GitHub Packages
       uses: docker/build-push-action@v1
