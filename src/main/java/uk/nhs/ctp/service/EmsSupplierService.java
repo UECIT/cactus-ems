@@ -1,9 +1,12 @@
 package uk.nhs.ctp.service;
 
 import java.util.List;
+import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.entities.EmsSupplier;
+import uk.nhs.ctp.exception.EMSException;
 import uk.nhs.ctp.repos.EmsSupplierRepository;
 
 @Service
@@ -11,18 +14,32 @@ import uk.nhs.ctp.repos.EmsSupplierRepository;
 public class EmsSupplierService {
 
   private final EmsSupplierRepository emsSupplierRepository;
+  private final TokenAuthenticationService authService;
 
   public List<EmsSupplier> getAll() {
-    //TODO: CDSCT-139
-    return emsSupplierRepository.findAllBySupplierId(null);
+    return emsSupplierRepository
+        .findAllBySupplierId(authService.requireSupplierId());
   }
 
   public EmsSupplier crupdate(EmsSupplier updated) {
+    String supplierId = authService.requireSupplierId();
+
+    EmsSupplier existingEntry = emsSupplierRepository
+        .getOneByIdAndSupplierId(updated.getId(), supplierId)
+        .orElse(null);
+
+    if (existingEntry == null && updated.getId() != null) {
+      throw EMSException.notFound();
+    }
+
+    updated.setSupplierId(supplierId);
+
     return emsSupplierRepository.saveAndFlush(updated);
   }
 
+  @Transactional
   public void delete(Long id) {
-    emsSupplierRepository.delete(id);
+    emsSupplierRepository.deleteByIdAndSupplierId(id, authService.requireSupplierId());
   }
 
 }

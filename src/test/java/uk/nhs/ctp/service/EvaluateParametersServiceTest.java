@@ -3,15 +3,24 @@ package uk.nhs.ctp.service;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import com.google.common.collect.Iterables;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.CareConnectPatient;
@@ -43,6 +52,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
@@ -65,6 +75,7 @@ import uk.nhs.ctp.service.fhir.StorageService;
 public class EvaluateParametersServiceTest {
 
   private static final String BASE_URL = "http://base.url:8754";
+  public static final String SUPPLIER = "supplier";
 
   @Autowired
   private EvaluateParametersService evaluateParametersService;
@@ -75,6 +86,8 @@ public class EvaluateParametersServiceTest {
   private StorageService mockStorageService;
   @MockBean
   private GenericResourceLocator resourceLocator;
+  @MockBean
+  private TokenAuthenticationService authService;
 
   private Cases caseWithNoData, caseWithObservation, caseWithImmunization, caseWithMedication, caseWithData;
   private Calendar calendar;
@@ -179,11 +192,16 @@ public class EvaluateParametersServiceTest {
     });
     when(resourceLocator.<Questionnaire>findResource(any(Reference.class)))
         .thenReturn(questionnaire);
+
+    when(authService.requireSupplierId()).thenReturn(SUPPLIER);
+    doNothing().when(authService).requireSupplierId(SUPPLIER);
+    doThrow(AuthenticationException.class).when(authService).requireSupplierId(any());
   }
 
   @Test
   public void testParametersCreatedCorrectlyWithNoCaseDataStored() {
-    when(mockCaseRepository.findOne(1L)).thenReturn(caseWithNoData);
+    when(mockCaseRepository.getOneByIdAndSupplierId(1L, SUPPLIER))
+        .thenReturn(Optional.of(caseWithNoData));
 
     CdssRequestDTO requestDTO = new CdssRequestDTO();
     requestDTO.setCaseId(1L);
@@ -208,7 +226,8 @@ public class EvaluateParametersServiceTest {
   @Test
   public void testParametersCreatedCorrectlyWithNoCaseDataStoredAndQuestionAnswered()
       throws FHIRException {
-    when(mockCaseRepository.findOne(1L)).thenReturn(caseWithNoData);
+    when(mockCaseRepository.getOneByIdAndSupplierId(1L, SUPPLIER))
+        .thenReturn(Optional.of(caseWithNoData));
 
     CdssRequestDTO requestDTO = new CdssRequestDTO();
     requestDTO.setCaseId(1L);
@@ -242,7 +261,8 @@ public class EvaluateParametersServiceTest {
 
   @Test
   public void testParametersCreatedCorrectlyWithCaseImmunizationStored() {
-    when(mockCaseRepository.findOne(1L)).thenReturn(caseWithImmunization);
+    when(mockCaseRepository.getOneByIdAndSupplierId(1L, SUPPLIER))
+        .thenReturn(Optional.of(caseWithImmunization));
 
     CdssRequestDTO requestDTO = new CdssRequestDTO();
     requestDTO.setCaseId(1L);
@@ -275,7 +295,8 @@ public class EvaluateParametersServiceTest {
 
   @Test
   public void testParametersCreatedCorrectlyWithCaseMedicationStored() throws FHIRException {
-    when(mockCaseRepository.findOne(1L)).thenReturn(caseWithMedication);
+    when(mockCaseRepository.getOneByIdAndSupplierId(1L, SUPPLIER))
+        .thenReturn(Optional.of(caseWithMedication));
 
     CdssRequestDTO requestDTO = new CdssRequestDTO();
     requestDTO.setCaseId(1L);
@@ -305,8 +326,10 @@ public class EvaluateParametersServiceTest {
   }
 
   @Test
-  public void testParametersCreatedCorrectlyWithCaseObservationStored_Resource() throws FHIRException {
-    when(mockCaseRepository.findOne(1L)).thenReturn(caseWithObservation);
+  public void testParametersCreatedCorrectlyWithCaseObservationStored_Resource()
+      throws FHIRException {
+    when(mockCaseRepository.getOneByIdAndSupplierId(1L, SUPPLIER))
+        .thenReturn(Optional.of(caseWithObservation));
 
     CdssRequestDTO requestDTO = new CdssRequestDTO();
     requestDTO.setCaseId(1L);
@@ -337,8 +360,10 @@ public class EvaluateParametersServiceTest {
   }
 
   @Test
-  public void testParametersCreatedCorrectlyWithCaseObservationStored_Reference() throws FHIRException {
-    when(mockCaseRepository.findOne(1L)).thenReturn(caseWithObservation);
+  public void testParametersCreatedCorrectlyWithCaseObservationStored_Reference()
+      throws FHIRException {
+    when(mockCaseRepository.getOneByIdAndSupplierId(1L, SUPPLIER))
+        .thenReturn(Optional.of(caseWithObservation));
 
     CdssRequestDTO requestDTO = new CdssRequestDTO();
     requestDTO.setCaseId(1L);
@@ -368,13 +393,14 @@ public class EvaluateParametersServiceTest {
     assertThat(inputDataParameters, hasSize(1));
     Type value = Iterables.getOnlyElement(inputDataParameters).getValue();
     assertThat(value, instanceOf(Reference.class));
-    assertThat(((Reference)value).getReference(), is("http://localhost:8083/fhir/Observation/1"));
+    assertThat(((Reference) value).getReference(), is("http://localhost:8083/fhir/Observation/1"));
   }
 
   @Test
   public void testParametersCreatedCorrectlyWithCaseDataStoredAndQuestionAnswered()
       throws FHIRException {
-    when(mockCaseRepository.findOne(1L)).thenReturn(caseWithData);
+    when(mockCaseRepository.getOneByIdAndSupplierId(1L, SUPPLIER))
+        .thenReturn(Optional.of(caseWithData));
     CdssRequestDTO requestDTO = new CdssRequestDTO();
     requestDTO.setCaseId(1L);
     requestDTO.setQuestionResponse(questionResponses);

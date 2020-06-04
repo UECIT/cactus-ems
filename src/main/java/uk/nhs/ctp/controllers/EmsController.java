@@ -23,17 +23,20 @@ public class EmsController {
   private final EmsSupplierService emsSupplierService;
 
   @GetMapping
-  public @ResponseBody List<EmsSupplier> getEmsSuppliers() {
+  public @ResponseBody
+  List<EmsSupplier> getEmsSuppliers() {
     return emsSupplierService.getAll();
   }
 
   @PostMapping
-  public @ResponseBody EmsSupplier createorUpdateEMS(@RequestBody EmsSupplier emsSupplier) {
+  public @ResponseBody
+  EmsSupplier createorUpdateEMS(@RequestBody EmsSupplier emsSupplier) {
     return emsSupplierService.crupdate(emsSupplier);
   }
 
   @DeleteMapping(path = "/{id}")
-  public @ResponseBody void deleteEmsSupplier(@PathVariable("id") Long id) {
+  public @ResponseBody
+  void deleteEmsSupplier(@PathVariable("id") Long id) {
     emsSupplierService.delete(id);
   }
 }

@@ -21,8 +21,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponentsBuilder;
+import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.entities.CdssSupplier;
+import uk.nhs.ctp.exception.EMSException;
 import uk.nhs.ctp.repos.CdssSupplierRepository;
 import uk.nhs.ctp.service.dto.CdssSupplierDTO;
 import uk.nhs.ctp.service.dto.ServiceDefinitionDTO;
@@ -38,6 +40,7 @@ public class CdssService {
 
   private final CdssSupplierRepository cdssSupplierRepository;
   private final FhirContext fhirContext;
+  private final TokenAuthenticationService tokenAuthenticationService;
 
   /**
    * Sends request to CDSS Supplier (ServiceDefintion $evaluate).
@@ -53,12 +56,12 @@ public class CdssService {
     String baseUrl = getBaseUrl(cdssSupplierId);
     IGenericClient fhirClient = fhirContext.newRestfulGenericClient(baseUrl);
     return RetryUtils.retry(() -> fhirClient
-        .operation()
-        .onInstance(new IdType(SystemConstants.SERVICE_DEFINITION, serviceDefinitionId))
-        .named(SystemConstants.EVALUATE)
-        .withParameters(parameters)
-        .returnResourceType(GuidanceResponse.class)
-        .execute(),
+            .operation()
+            .onInstance(new IdType(SystemConstants.SERVICE_DEFINITION, serviceDefinitionId))
+            .named(SystemConstants.EVALUATE)
+            .withParameters(parameters)
+            .returnResourceType(GuidanceResponse.class)
+            .execute(),
         baseUrl);
   }
 
@@ -71,11 +74,11 @@ public class CdssService {
   public ServiceDefinition getServiceDefinition(Long cdssSupplierId, String serviceDefId) {
     String baseUrl = getBaseUrl(cdssSupplierId);
     return RetryUtils.retry(() ->
-        fhirContext.newRestfulGenericClient(baseUrl)
-            .read()
-            .resource(ServiceDefinition.class)
-            .withId(serviceDefId)
-            .execute(),
+            fhirContext.newRestfulGenericClient(baseUrl)
+                .read()
+                .resource(ServiceDefinition.class)
+                .withId(serviceDefId)
+                .execute(),
         baseUrl
     );
   }
@@ -86,8 +89,9 @@ public class CdssService {
    * @return
    */
   public List<CdssSupplierDTO> queryServiceDefinitions(@NotNull SearchParameters parameters) {
-    //TODO: CDSCT-139
-    return cdssSupplierRepository.findAllBySupplierId(null).stream() //TODO: More efficient in parallel NCTH-536
+    return cdssSupplierRepository
+        .findAllBySupplierId(tokenAuthenticationService.requireSupplierId())
+        .stream() //TODO: More efficient in parallel NCTH-536
         .map(supplier -> queryServiceDefinitions(supplier, parameters))
         .filter(Objects::nonNull)
         .filter(supplier -> !CollectionUtils.isEmpty(supplier.getServiceDefinitions()))
@@ -103,10 +107,10 @@ public class CdssService {
     CdssSupplierDTO supplierDTO = new CdssSupplierDTO(supplier);
     try {
       Bundle bundle = RetryUtils.retry(() ->
-          fhirContext.newRestfulGenericClient(baseUrl).search()
-          .byUrl(url)
-          .returnBundle(Bundle.class)
-          .execute(),
+              fhirContext.newRestfulGenericClient(baseUrl).search()
+                  .byUrl(url)
+                  .returnBundle(Bundle.class)
+                  .execute(),
           baseUrl
       );
 
@@ -148,8 +152,11 @@ public class CdssService {
     return sb.toString();
   }
 
-  private String getBaseUrl(Long cdssSupplierId) {
-    return cdssSupplierRepository.findOne(cdssSupplierId).getBaseUrl();
+  private String getBaseUrl(Long id) {
+    return cdssSupplierRepository
+        .getOneByIdAndSupplierId(id, tokenAuthenticationService.requireSupplierId())
+        .orElseThrow(EMSException::notFound)
+        .getBaseUrl();
   }
 
   /**
@@ -161,10 +168,10 @@ public class CdssService {
   public Questionnaire getQuestionnaire(Long cdssSupplierId, String questionnaireRef) {
     String baseUrl = getBaseUrl(cdssSupplierId);
     return RetryUtils.retry(() ->
-        fhirContext.newRestfulGenericClient(baseUrl).read()
-        .resource(Questionnaire.class)
-        .withId(questionnaireRef)
-        .execute(),
+            fhirContext.newRestfulGenericClient(baseUrl).read()
+                .resource(Questionnaire.class)
+                .withId(questionnaireRef)
+                .execute(),
         baseUrl);
   }
 

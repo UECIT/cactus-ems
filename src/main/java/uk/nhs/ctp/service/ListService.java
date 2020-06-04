@@ -14,9 +14,12 @@ import org.hl7.fhir.dstu3.model.ListResource.ListEntryComponent;
 import org.hl7.fhir.dstu3.model.ListResource.ListStatus;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ResourceType;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.enums.ListOrder;
+import uk.nhs.ctp.exception.EMSException;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.fhir.ReferenceService;
 
@@ -28,10 +31,13 @@ public class ListService {
   private final ReferenceService referenceService;
   private final ReferralRequestService referralRequestService;
   private final CarePlanService carePlanService;
+  private final TokenAuthenticationService authService;
 
   @Transactional
   public ListResource buildFromCase(long caseId) {
-    Cases caseEntity = caseRepository.findOne(caseId);
+    Cases caseEntity = caseRepository
+        .getOneByIdAndSupplierId(caseId, authService.requireSupplierId())
+        .orElseThrow(EMSException::notFound);
 
     ListResource listResource = new ListResource();
     listResource.setStatus(ListStatus.CURRENT)
@@ -56,7 +62,8 @@ public class ListService {
     addReferralRequest(caseEntity, entityTimeList);
 
     entityTimeList.stream()
-        .filter(dateReferencePair -> dateReferencePair.getKey() != null) //Filter out old data that was not timestamped.
+        .filter(dateReferencePair -> dateReferencePair.getKey()
+            != null) //Filter out old data that was not timestamped.
         .sorted(comparingByKey())
         .map(Pair::getValue)
         .map(ListEntryComponent::new)
@@ -98,8 +105,10 @@ public class ListService {
   }
 
   private void addCarePlans(Cases caseEntity, List<Pair<Date, Reference>> dateRefList) {
-    List<Pair<Date, Reference>> carePlanRefs = carePlanService.getByCaseId(caseEntity.getId()).stream()
-        .map(carePlan -> Pair.of(new Date(), new Reference(carePlan))) //Todo: what should this be sorted by.
+    List<Pair<Date, Reference>> carePlanRefs = carePlanService.getByCaseId(caseEntity.getId())
+        .stream()
+        .map(carePlan -> Pair
+            .of(new Date(), new Reference(carePlan))) //Todo: what should this be sorted by.
         .collect(Collectors.toList());
     dateRefList.addAll(carePlanRefs);
   }
@@ -111,7 +120,8 @@ public class ListService {
     dateRefList.addAll(dateRefPairs);
   }
 
-  private void addQuestionnaireResponses(Cases caseEntity, List<Pair<Date, Reference>> dateRefList) {
+  private void addQuestionnaireResponses(Cases caseEntity,
+      List<Pair<Date, Reference>> dateRefList) {
     List<Pair<Date, Reference>> qrRefs = caseEntity.getQuestionResponses().stream()
         .map(qr -> Pair.of(qr.getDateCreated(), new Reference(qr.getReference())))
         .collect(Collectors.toUnmodifiableList());

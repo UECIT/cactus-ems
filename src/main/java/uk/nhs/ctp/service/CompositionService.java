@@ -21,7 +21,9 @@ import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.Narrative;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ResourceType;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
@@ -31,6 +33,7 @@ import uk.nhs.ctp.entities.QuestionResponse;
 import uk.nhs.ctp.enums.DocumentSectionCode;
 import uk.nhs.ctp.enums.DocumentType;
 import uk.nhs.ctp.enums.ListOrder;
+import uk.nhs.ctp.exception.EMSException;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.repos.CompositionRepository;
 import uk.nhs.ctp.service.dto.CdssResult;
@@ -54,6 +57,7 @@ public class CompositionService {
   private final NarrativeService narrativeService;
   private final ReferralRequestService referralRequestService;
   private final CarePlanService carePlanService;
+  private final TokenAuthenticationService authService;
 
   @Transactional
   public List<Composition> getAllByEncounter(long encounterId) {
@@ -61,7 +65,8 @@ public class CompositionService {
       return Collections.emptyList();
     }
 
-    return caseRepository.findOne(encounterId)
+    return caseRepository.getOneByIdAndSupplierId(encounterId, authService.requireSupplierId())
+        .orElseThrow(EMSException::notFound)
         .getCompositions()
         .stream()
         .map(compositionEntityTransformer::transform)
@@ -74,12 +79,14 @@ public class CompositionService {
 
   /**
    * Create or update the active composition associated with a service.
-   * @param caseId The id of the encounter to crupdate compositions for.
+   *
+   * @param caseId     The id of the encounter to crupdate compositions for.
    * @param cdssResult The result of $evaluate, contains the data to add to the composition.
    */
   public void crupdate(long caseId, CdssResult cdssResult) {
 
-    var caseEntity = caseRepository.findOne(caseId);
+    var caseEntity = caseRepository.getOneByIdAndSupplierId(caseId, authService.requireSupplierId())
+        .orElseThrow(EMSException::notFound);
 
     var compositionEntity = caseEntity.getCompositions()
         .stream()
@@ -125,7 +132,7 @@ public class CompositionService {
         .setConfidentiality(DocumentConfidentiality.N)
         .setCustodian(referenceService.buildRef(ResourceType.Organization, "self"));
 
-    var entity =  compositionTransformer.transform(composition);
+    var entity = compositionTransformer.transform(composition);
     caseEntity.addComposition(entity);
     return entity;
   }

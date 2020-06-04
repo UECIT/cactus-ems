@@ -31,7 +31,6 @@ public class ReportController {
 
   private final ReportService reportService;
   private final EncounterService encounterService;
-  private final EncounterReportInputTransformer encounterReportInputTransformer;
   private final FhirContext fhirContext;
 
   @Value("${reports.enabled}")

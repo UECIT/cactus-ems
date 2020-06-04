@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -20,6 +21,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.entities.ServiceDefinition;
 import uk.nhs.ctp.entities.UserEntity;
@@ -35,6 +37,8 @@ import uk.nhs.ctp.service.dto.ServiceDefinitionDTO;
 @RunWith(MockitoJUnitRunner.class)
 public class CdssSupplierServiceTest {
 
+  private static final String SUPPLIER = "supplier";
+
   @InjectMocks
   private CdssSupplierService cdssSupplierService;
 
@@ -47,8 +51,16 @@ public class CdssSupplierServiceTest {
   @Mock
   private ServiceDefinitionRepository serviceDefinitionRepository;
 
+  @Mock
+  private TokenAuthenticationService tokenAuthenticationService;
+
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
+
+  @Before
+  public void setup() {
+    when(tokenAuthenticationService.requireSupplierId()).thenReturn(SUPPLIER);
+  }
 
   @Test
   public void testAllSuppliersReturnedWhenRoleIsNhsUser() {
@@ -59,7 +71,7 @@ public class CdssSupplierServiceTest {
     CdssSupplier input = new CdssSupplier();
     input.setName("test");
     when(userRepository.findByUsername(username)).thenReturn(nhsUser);
-    when(cdssSupplierRepository.findAllBySupplierId(null))
+    when(cdssSupplierRepository.findAllBySupplierId(SUPPLIER))
         .thenReturn(Collections.singletonList(input));
 
     List<CdssSupplierDTO> suppliers = cdssSupplierService.getCdssSuppliers("nhs");
@@ -79,7 +91,7 @@ public class CdssSupplierServiceTest {
     CdssSupplier input = new CdssSupplier();
     input.setName("test");
     when(userRepository.findByUsername(username)).thenReturn(nhsUser);
-    when(cdssSupplierRepository.findAllBySupplierId(null))
+    when(cdssSupplierRepository.findAllBySupplierId(SUPPLIER))
         .thenReturn(Collections.singletonList(input));
 
     List<CdssSupplierDTO> suppliers = cdssSupplierService.getCdssSuppliers("admin");
@@ -135,6 +147,7 @@ public class CdssSupplierServiceTest {
     expectedSd.setCdssSupplierId(99L);
     expectedSd.setServiceDefinitionId("servicedef");
     expectedSd.setDescription("description");
+    expectedSd.setSupplierId(SUPPLIER);
     verify(serviceDefinitionRepository).save(argThat(samePropertyValuesAs(expectedSd)));
   }
 

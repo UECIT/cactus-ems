@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.nhs.ctp.audit.AuditService;
 import uk.nhs.ctp.entities.Cases;
-import uk.nhs.ctp.repos.CaseRepository;
+import uk.nhs.ctp.service.CaseService;
 import uk.nhs.ctp.service.CdssService;
 import uk.nhs.ctp.service.ReferralRequestService;
 import uk.nhs.ctp.service.TriageService;
@@ -37,7 +37,7 @@ public class CaseController {
 
   private final CdssService cdssService;
   private final TriageService triageService;
-  private final CaseRepository caseRepository;
+  private final CaseService caseService;
   private final AuditService auditService;
   private final ReferralRequestService referralRequestService;
 
@@ -77,11 +77,12 @@ public class CaseController {
   @GetMapping(path = "/{id}")
   public @ResponseBody
   Cases getCase(@PathVariable Long id) {
-    return caseRepository.findOne(id);
+    return caseService.findCase(id);
   }
 
   @PutMapping(path = "/selectedService")
-  public @ResponseBody void updateSelectedService(@RequestBody SelectedServiceRequestDTO requestDTO) {
+  public @ResponseBody
+  void updateSelectedService(@RequestBody SelectedServiceRequestDTO requestDTO) {
     auditService.addAuditProperty(CASE_ID, requestDTO.getCaseId().toString());
     referralRequestService.updateServiceRequested(requestDTO);
   }
