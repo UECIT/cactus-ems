@@ -2,9 +2,9 @@ package uk.nhs.ctp.entities;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -16,6 +16,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import uk.nhs.ctp.entities.converter.SupportedVersionConverter;
 import uk.nhs.ctp.enums.ReferencingType;
 
 @EqualsAndHashCode(callSuper = true)
@@ -40,7 +43,21 @@ public class CdssSupplier extends SupplierPartitioned {
   @Column(name = "input_data_referencing_type")
   private ReferencingType inputDataRefType;
 
+  @Column(name = "supported_version")
+  @Convert(converter = SupportedVersionConverter.class)
+  private SupportedVersion supportedVersion;
+
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
   @JoinColumn(name = "cdss_supplier_id")
   private List<ServiceDefinition> serviceDefinitions = new ArrayList<>();
+
+  @Getter
+  @RequiredArgsConstructor
+  public enum SupportedVersion {
+    ONE_ONE("1.1"),
+    TWO("2.0");
+
+    private final String version;
+  }
+
 }
