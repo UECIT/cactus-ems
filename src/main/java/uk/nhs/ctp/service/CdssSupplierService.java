@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.entities.CdssSupplier;
-import uk.nhs.ctp.entities.CdssSupplier.SupportedVersion;
 import uk.nhs.ctp.entities.ServiceDefinition;
 import uk.nhs.ctp.entities.UserEntity;
 import uk.nhs.ctp.exception.EMSException;
@@ -91,7 +90,7 @@ public class CdssSupplierService {
     cdssSupplier.setBaseUrl(newCdssSupplierDTO.getBaseUrl());
     cdssSupplier.setInputDataRefType(newCdssSupplierDTO.getInputDataRefType());
     cdssSupplier.setInputParamsRefType(newCdssSupplierDTO.getInputParamsRefType());
-    cdssSupplier.setSupportedVersion(SupportedVersion.TWO); //TODO: CDSCT-221 Get from UI
+    cdssSupplier.setSupportedVersion(newCdssSupplierDTO.getSupportedVersion());
     cdssSupplier.setSupplierId(supplierId);
     cdssSupplier = cdssSupplierRepository.save(cdssSupplier);
 
