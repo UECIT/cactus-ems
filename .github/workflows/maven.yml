@@ -52,7 +52,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Reuse maven cache cache
+    - name: Reuse maven cache
       uses: actions/cache@v2
       env:
         cache-name: cache-maven
