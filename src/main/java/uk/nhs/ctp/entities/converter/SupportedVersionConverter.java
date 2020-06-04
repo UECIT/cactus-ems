@@ -5,7 +5,7 @@ import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 import uk.nhs.ctp.entities.CdssSupplier.SupportedVersion;
 
-@Converter
+@Converter(autoApply = true)
 public class SupportedVersionConverter implements AttributeConverter<SupportedVersion, String> {
 
   @Override
