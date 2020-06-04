@@ -75,6 +75,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - name: Cache node modules
         uses: actions/cache@v1
         with:
@@ -82,9 +83,11 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
+
       - uses: actions/setup-node@v1
         with:
           node-version: '10.x'
+
       - name: Build and run angular ui tests
         run: |
           cd EMS-UI
@@ -96,6 +99,7 @@ jobs:
     needs: build-ui
     steps:
       - uses: actions/checkout@v2
+
       - name: Push EMS UI to GitHub Packages
         uses: docker/build-push-action@v1
         with:
