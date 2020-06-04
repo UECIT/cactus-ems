@@ -23,7 +23,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.entities.CdssSupplier;
-import uk.nhs.ctp.entities.CdssSupplier.SupportedVersion;
+import uk.nhs.ctp.enums.CdsApiVersion;
 import uk.nhs.ctp.entities.ServiceDefinition;
 import uk.nhs.ctp.entities.UserEntity;
 import uk.nhs.ctp.enums.ReferencingType;
@@ -125,14 +125,14 @@ public class CdssSupplierServiceTest {
     request.setInputDataRefType(ReferencingType.BY_REFERENCE);
     request.setInputParamsRefType(ReferencingType.BY_RESOURCE);
     request.setServiceDefinitions(Collections.singletonList(sd));
-    request.setSupportedVersion(SupportedVersion.ONE_ONE);
+    request.setSupportedVersion(CdsApiVersion.ONE_ONE);
     CdssSupplier expected = new CdssSupplier();
     expected.setId(99L);
     expected.setName("Test");
     expected.setInputDataRefType(ReferencingType.BY_REFERENCE);
     expected.setInputParamsRefType(ReferencingType.BY_RESOURCE);
     expected.setBaseUrl("http://base.com/fhir");
-    expected.setSupportedVersion(SupportedVersion.ONE_ONE);
+    expected.setSupportedVersion(CdsApiVersion.ONE_ONE);
 
     when(cdssSupplierRepository.save(any(CdssSupplier.class)))
         .then(invocationOnMock -> {
@@ -161,14 +161,14 @@ public class CdssSupplierServiceTest {
     request.setName("Test");
     request.setInputDataRefType(ReferencingType.BY_REFERENCE);
     request.setInputParamsRefType(ReferencingType.BY_RESOURCE);
-    request.setSupportedVersion(SupportedVersion.TWO);
+    request.setSupportedVersion(CdsApiVersion.TWO);
     CdssSupplier expected = new CdssSupplier();
     expected.setId(99L);
     expected.setName("Test");
     expected.setInputDataRefType(ReferencingType.BY_REFERENCE);
     expected.setInputParamsRefType(ReferencingType.BY_RESOURCE);
     expected.setBaseUrl("http://base.com/fhir");
-    expected.setSupportedVersion(SupportedVersion.TWO);
+    expected.setSupportedVersion(CdsApiVersion.TWO);
 
     when(cdssSupplierRepository.save(any(CdssSupplier.class)))
         .then(invocationOnMock -> {
