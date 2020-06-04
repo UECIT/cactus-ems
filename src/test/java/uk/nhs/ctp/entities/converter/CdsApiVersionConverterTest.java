@@ -9,18 +9,19 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import uk.nhs.ctp.entities.CdssSupplier.SupportedVersion;
+import uk.nhs.ctp.enums.CdsApiVersion;
+import uk.nhs.ctp.enums.CdsApiVersion.Converter;
 
-public class SupportedVersionConverterTest {
+public class CdsApiVersionConverterTest {
 
-  public SupportedVersionConverter converter;
+  public Converter converter;
 
   @Rule
   public ExpectedException expected = ExpectedException.none();
 
   @Before
   public void setup() {
-    converter = new SupportedVersionConverter();
+    converter = new Converter();
   }
 
   @Test
@@ -31,13 +32,13 @@ public class SupportedVersionConverterTest {
 
   @Test
   public void convertToDatabaseColumn_withValue() {
-    String returned = converter.convertToDatabaseColumn(SupportedVersion.TWO);
+    String returned = converter.convertToDatabaseColumn(CdsApiVersion.TWO);
     assertThat(returned, is("2.0"));
   }
 
   @Test
   public void convertToEntity_whenNull() {
-    SupportedVersion supportedVersion = converter.convertToEntityAttribute(null);
+    CdsApiVersion supportedVersion = converter.convertToEntityAttribute(null);
     assertThat(supportedVersion, nullValue());
   }
 
@@ -49,8 +50,8 @@ public class SupportedVersionConverterTest {
 
   @Test
   public void convertToEntity_supportedVersion() {
-    SupportedVersion returned = converter.convertToEntityAttribute("1.1");
-    assertThat(returned, is(SupportedVersion.ONE_ONE));
+    CdsApiVersion returned = converter.convertToEntityAttribute("1.1");
+    assertThat(returned, is(CdsApiVersion.ONE_ONE));
   }
 
 }

@@ -3,7 +3,7 @@ package uk.nhs.ctp.service.dto;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
-import uk.nhs.ctp.entities.CdssSupplier.SupportedVersion;
+import uk.nhs.ctp.enums.CdsApiVersion;
 import uk.nhs.ctp.enums.ReferencingType;
 
 @Data
@@ -14,6 +14,6 @@ public class NewCdssSupplierDTO {
 	private List<ServiceDefinitionDTO> serviceDefinitions = new ArrayList<>();
 	private ReferencingType inputParamsRefType;
 	private ReferencingType inputDataRefType;
-	private SupportedVersion supportedVersion;
+	private CdsApiVersion supportedVersion;
 
 }

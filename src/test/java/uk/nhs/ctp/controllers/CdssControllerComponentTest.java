@@ -14,7 +14,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.entities.CdssSupplier;
-import uk.nhs.ctp.entities.CdssSupplier.SupportedVersion;
+import uk.nhs.ctp.enums.CdsApiVersion;
 import uk.nhs.ctp.enums.ReferencingType;
 import uk.nhs.ctp.repos.CdssSupplierRepository;
 import uk.nhs.ctp.service.dto.NewCdssSupplierDTO;
@@ -57,7 +57,7 @@ public class CdssControllerComponentTest {
     request.setInputParamsRefType(ReferencingType.BY_RESOURCE);
     request.setInputDataRefType(ReferencingType.BY_REFERENCE);
     request.setBaseUrl("base.url.com/fhir");
-    request.setSupportedVersion(SupportedVersion.TWO);
+    request.setSupportedVersion(CdsApiVersion.TWO);
     return request;
   }
 

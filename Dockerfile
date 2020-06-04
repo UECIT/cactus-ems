@@ -5,8 +5,9 @@ ARG GITHUB_USER
 ARG GITHUB_TOKEN
 ENV GITHUB_USER=$GITHUB_USER GITHUB_TOKEN=$GITHUB_TOKEN
 COPY pom.xml settings.xml /app/
+COPY m2cache m2cache
 COPY src src
-RUN mvn -B package -DskipTests --settings settings.xml
+RUN mvn -B package -DskipTests -Dmaven.repo.local=m2cache --settings settings.xml
 
 FROM openjdk:11-jre-slim
 WORKDIR /app
