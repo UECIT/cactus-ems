@@ -5,6 +5,8 @@ ARG GITHUB_USER
 ARG GITHUB_TOKEN
 ENV GITHUB_USER=$GITHUB_USER GITHUB_TOKEN=$GITHUB_TOKEN
 COPY pom.xml settings.xml /app/
+RUN pwd ; whoami
+COPY m2cache /root/.m2
 COPY src src
 RUN mvn -B package -DskipTests --settings settings.xml
 
