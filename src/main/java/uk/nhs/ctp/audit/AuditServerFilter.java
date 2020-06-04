@@ -5,9 +5,9 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
@@ -24,6 +24,7 @@ public class AuditServerFilter extends OncePerRequestFilter {
   private static final int CONTENT_CACHE_LIMIT = 1 << 20;
 
   private final AuditService auditService;
+  private final SQSService sqsService;
 
   @Override
   protected void doFilterInternal(
@@ -55,8 +56,7 @@ public class AuditServerFilter extends OncePerRequestFilter {
           .completeAuditSession(HttpRequest.from(requestWrapper),
               HttpResponse.from(responseWrapper));
 
-      //TODO: Send audit session to SQS
-      log.info(auditSession.toString());
+      sqsService.sendAudit(auditSession);
       responseWrapper.copyBodyToResponse();
     }
   }
