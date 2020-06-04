@@ -52,13 +52,18 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Reuse maven cache
+    - name: Cache maven artifacts
       uses: actions/cache@v2
       env:
         cache-name: cache-maven
       with:
         path: m2cache
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+      run: mvn -B -Dmaven.repo.local=m2cache dependency:go-offline --file pom.xml --settings settings.xml
 
     - name: Push EMS Backend to GitHub Packages
       uses: docker/build-push-action@v1
