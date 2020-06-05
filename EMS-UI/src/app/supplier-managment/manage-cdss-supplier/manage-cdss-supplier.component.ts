@@ -23,7 +23,7 @@ export class ManageCdssSupplierComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.manageCdssService.getCdssSuppliersUnfiltered().subscribe(
+    this.manageCdssService.getCdssSuppliers().subscribe(
       suppliers => {
         this.suppliers = suppliers;
         this.loaded = true;
