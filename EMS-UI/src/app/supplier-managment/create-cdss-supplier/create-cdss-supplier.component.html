@@ -72,6 +72,15 @@
         </mat-button-toggle-group>
       </div>
 
+      <div>
+        <mat-form-field>
+          <mat-label>CDS API Version:</mat-label>
+          <mat-select formControlName="supportedVersion">
+            <mat-option *ngFor="let version of supportedVersions" [value]="version">{{version}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
       <div class="buttons">
         <button type="submit" [disabled]="!formData.valid" class="actionButton">Save</button>
         <span class="cancelButton" [routerLink]="['/suppliers']">Cancel</span>

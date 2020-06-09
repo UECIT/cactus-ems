@@ -1,5 +1,6 @@
 package uk.nhs.ctp.enums;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.stream.Stream;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Convert;
@@ -11,7 +12,9 @@ import uk.nhs.ctp.enums.CdsApiVersion.Converter;
 @RequiredArgsConstructor
 @Convert(converter = Converter.class)
 public enum CdsApiVersion {
+  @JsonProperty("1.1")
   ONE_ONE("1.1"),
+  @JsonProperty("2.0")
   TWO("2.0");
 
   private final String version;
