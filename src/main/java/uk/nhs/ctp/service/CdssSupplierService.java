@@ -51,10 +51,6 @@ public class CdssSupplierService {
       throw new EMSException(HttpStatus.FORBIDDEN, "User has invalid role");
     }
 
-    return convertToSupplierDTO(suppliers);
-  }
-
-  protected List<CdssSupplierDTO> convertToSupplierDTO(List<CdssSupplier> suppliers) {
     return suppliers.stream()
         .map(cdssTransformer::transform)
         .collect(Collectors.toList());
