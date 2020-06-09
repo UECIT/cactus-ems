@@ -15,5 +15,6 @@ public class NewCdssSupplierDTO {
 	private ReferencingType inputParamsRefType;
 	private ReferencingType inputDataRefType;
 	private CdsApiVersion supportedVersion;
+	private String authToken;
 
 }

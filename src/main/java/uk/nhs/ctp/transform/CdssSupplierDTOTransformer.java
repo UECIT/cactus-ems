@@ -24,6 +24,7 @@ public class CdssSupplierDTOTransformer implements Transformer<CdssSupplier, Cds
     supplierDTO.setInputDataRefType(supplier.getInputDataRefType());
     supplierDTO.setInputParamsRefType(supplier.getInputParamsRefType());
     supplierDTO.setSupportedVersion(supplier.getSupportedVersion());
+    supplierDTO.setAuthToken(supplier.getAuthToken());
     return supplierDTO;
   }
 }
