@@ -1,4 +1,4 @@
-package uk.nhs.ctp.service.search;
+package uk.nhs.ctp.caseSearch;
 
 import java.util.Date;
 import lombok.AllArgsConstructor;
@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class AuditSearchResultDTO {
+public class CaseSearchResultDTO {
 
 	private Long id;
 	private String firstName;

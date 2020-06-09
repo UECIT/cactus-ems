@@ -50,7 +50,9 @@ public class AuditService {
 
     auditThreadStore.getCurrentAuditSession()
         .orElseThrow(IllegalStateException::new)
-        .getEntries().add(entry);
+        .toBuilder()
+        .entry(entry)
+        .build();
     auditThreadStore.setCurrentEntry(entry);
   }
 

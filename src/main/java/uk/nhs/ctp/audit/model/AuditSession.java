@@ -14,7 +14,7 @@ import lombok.experimental.FieldDefaults;
  */
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Builder
+@Builder(toBuilder = true)
 public class AuditSession {
 
   String requestOrigin;
@@ -27,8 +27,9 @@ public class AuditSession {
   String responseHeaders;
   String responseBody;
 
-  List<AuditEntry> entries;
   Instant createdDate;
+  @Singular
+  List<AuditEntry> entries;
   @Singular
   Map<String, String> additionalProperties;
 

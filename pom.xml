@@ -23,6 +23,8 @@
     <thymeleaf.version>3.0.6.RELEASE</thymeleaf.version>
     <thymeleaf-layout-dialect.version>2.2.1</thymeleaf-layout-dialect.version>
 
+    <elastic-search-version>7.7.1</elastic-search-version>
+
     <cactus-common.version>0.0.4</cactus-common.version>
   </properties>
 
@@ -203,6 +205,20 @@
       <groupId>org.passay</groupId>
       <artifactId>passay</artifactId>
       <version>1.6.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.elasticsearch.client</groupId>
+      <artifactId>elasticsearch-rest-high-level-client</artifactId>
+      <version>${elastic-search-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.elasticsearch</groupId>
+      <artifactId>elasticsearch</artifactId>
+      <version>${elastic-search-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
     </dependency>
 
     <!-- Test -->

@@ -1,4 +1,4 @@
-package uk.nhs.ctp.service.search;
+package uk.nhs.ctp.caseSearch;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -17,7 +17,7 @@ public abstract class SearchRequest extends PageRequest {
 	
 	private static Sort createSort(Collection<SearchSort> sorts) {
 		return new Sort(sorts.stream().map(sort -> 
-			new Order(sort.getDirection(), sort.getSortField().getFieldName()))
+			new Order(sort.getDirection(), sort.getSortField().getName()))
 				.collect(Collectors.toList()));
 	}
 }
