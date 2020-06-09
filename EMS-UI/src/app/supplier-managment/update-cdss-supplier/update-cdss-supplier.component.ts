@@ -27,6 +27,8 @@ export class UpdateCdssSupplierComponent implements OnInit {
   error: boolean;
   errorMessage: string;
 
+  supportedVersions: string[] = ["1.1", "2.0"];
+
   constructor(
     private cdssService: CdssService,
     private route: ActivatedRoute,
@@ -49,7 +51,8 @@ export class UpdateCdssSupplierComponent implements OnInit {
       name: new FormControl(this.supplier.name, [Validators.required]),
       baseUrl: new FormControl(this.supplier.baseUrl, [Validators.required]),
       serviceDefinitionId: new FormControl('', []),
-      serviceDescription: new FormControl('', [])
+      serviceDescription: new FormControl('', []),
+      supportedVersion: new FormControl(this.supplier.supportedVersion, [Validators.required])
     });
   }
 
@@ -66,13 +69,17 @@ export class UpdateCdssSupplierComponent implements OnInit {
     return this.formData.get('serviceDescription');
   }
 
+  get supportedVersion() {
+    return this.formData.get('supportedVersion');
+  }
+
   async getSupplier(supplierId: string) {
     this.supplier = await this.cdssService.getCdssSupplier(supplierId)
-    .catch(err => {
-      this.toastr.error(
-        err.error.target.__zone_symbol__xhrURL + ' - ' +
-        err.message);
-    });
+      .catch(err => {
+        this.toastr.error(
+          err.error.target.__zone_symbol__xhrURL + ' - ' +
+          err.message);
+      });
     this.setFormData();
     this.loaded = true;
   }
@@ -102,6 +109,7 @@ export class UpdateCdssSupplierComponent implements OnInit {
   updateSupplier(data) {
     this.supplier.name = data.name;
     this.supplier.baseUrl = data.baseUrl;
+    this.supplier.supportedVersion = data.supportedVersion;
 
     this.cdssService.updateCdssSupplier(this.supplier).subscribe(
       supplier => {

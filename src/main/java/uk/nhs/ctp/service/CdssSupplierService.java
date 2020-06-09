@@ -18,6 +18,7 @@ import uk.nhs.ctp.repos.UserRepository;
 import uk.nhs.ctp.service.dto.CdssSupplierDTO;
 import uk.nhs.ctp.service.dto.NewCdssSupplierDTO;
 import uk.nhs.ctp.service.dto.ServiceDefinitionDTO;
+import uk.nhs.ctp.transform.CdssSupplierDTOTransformer;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +28,7 @@ public class CdssSupplierService {
   private final CdssSupplierRepository cdssSupplierRepository;
   private final ServiceDefinitionRepository serviceDefinitionRepository;
   private final TokenAuthenticationService authService;
+  private final CdssSupplierDTOTransformer cdssTransformer;
 
   /**
    * Returns a list of CDSS suppliers that the user has access to.
@@ -49,31 +51,8 @@ public class CdssSupplierService {
       throw new EMSException(HttpStatus.FORBIDDEN, "User has invalid role");
     }
 
-    return convertToSupplierDTO(suppliers);
-  }
-
-  public List<CdssSupplier> getCdssSuppliersUnfiltered(String username) {
-    UserEntity userEntity = userRepository.findByUsername(username);
-    authService.requireSupplierId(userEntity.getSupplierId());
-
-    List<CdssSupplier> suppliers;
-
-    if (userEntity.getRole().equals(SystemConstants.ROLE_NHS)
-        || userEntity.getRole().equals(SystemConstants.ROLE_ADMIN)
-        || userEntity.getRole().equals(SystemConstants.ROLE_SUPPLIER_ADMIN)) {
-      // TODO Should NHS admin be able to see all instances?
-      suppliers = cdssSupplierRepository
-          .findAllBySupplierId(authService.requireSupplierId());
-    } else {
-      throw new EMSException(HttpStatus.FORBIDDEN, "User has invalid role");
-    }
-
-    return suppliers;
-  }
-
-  protected List<CdssSupplierDTO> convertToSupplierDTO(List<CdssSupplier> suppliers) {
     return suppliers.stream()
-        .map(CdssSupplierDTO::new)
+        .map(cdssTransformer::transform)
         .collect(Collectors.toList());
   }
 

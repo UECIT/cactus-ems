@@ -48,17 +48,6 @@ export class CdssService {
     }
   }
 
-  getCdssSuppliersUnfiltered() {
-    if (this.sessionStorage['auth_token'] != null) {
-      httpOptions.headers = httpOptions.headers.set(
-          'Authorization',
-          this.sessionStorage['auth_token']
-      );
-      const url = `${environment.EMS_API}/cdss?admin=true`;
-      return this.http.get<CdssSupplier[]>(url, httpOptions);
-    }
-  }
-
   getCdssSupplier(id: any) {
     if (this.sessionStorage['auth_token'] != null) {
       httpOptions.headers = httpOptions.headers.set(

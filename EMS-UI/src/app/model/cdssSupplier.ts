@@ -5,6 +5,7 @@ export class CdssSupplier {
   serviceDefinitions: ServiceDefinition[];
   inputParamsRefType: ResourceReferenceType;
   inputDataRefType: ResourceReferenceType;
+  supportedVersion: string;
   constructor() {
     this.id = 0;
     this.name = '';

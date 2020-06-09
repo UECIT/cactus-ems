@@ -2,10 +2,10 @@ package uk.nhs.ctp.service.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.nhs.ctp.entities.CdssSupplier;
+import uk.nhs.ctp.enums.CdsApiVersion;
+import uk.nhs.ctp.enums.ReferencingType;
 
 @Data
 @NoArgsConstructor
@@ -13,19 +13,10 @@ public class CdssSupplierDTO {
 
   private Long id;
   private String name;
+  private String baseUrl;
   private List<ServiceDefinitionDTO> serviceDefinitions = new ArrayList<>();
+  private ReferencingType inputParamsRefType;
+  private ReferencingType inputDataRefType;
+  private CdsApiVersion supportedVersion;
 
-  public CdssSupplierDTO(CdssSupplier supplier) {
-    this.setId(supplier.getId());
-    this.setName(supplier.getName());
-    this.setServiceDefinitions(
-        supplier.getServiceDefinitions().stream()
-            .map(ServiceDefinitionDTO::new)
-            .collect(Collectors.toList())
-		);
-  }
-
-  public void addServiceDefinition(ServiceDefinitionDTO serviceDefinition) {
-    this.serviceDefinitions.add(serviceDefinition);
-  }
 }
