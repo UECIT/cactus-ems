@@ -103,7 +103,11 @@ export class CreateCdssSupplierComponent implements OnInit {
       this.supplier.serviceDefinitions.push(serviceDefinition);
     });
     this.cdssService.createCdssSupplier(this.supplier).subscribe(
-      () => this.router.navigate(['/suppliers']),
+      () => {
+        console.log("Getting here");
+        this.router.navigate(['/suppliers'])
+      }
+        ,
       error => {
         this.error = true;
         if (error.status === 401) {
