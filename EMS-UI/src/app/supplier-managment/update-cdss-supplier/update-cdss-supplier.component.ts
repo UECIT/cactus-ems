@@ -1,12 +1,12 @@
-import { ResourceReferenceType } from './../../model/cdssSupplier';
-import { Component, OnInit } from '@angular/core';
-import { CdssService } from 'src/app/service/cdss.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import { LoginService } from 'src/app/service/login.service';
-import { User } from 'src/app/model/user';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { ServiceDefinition } from 'src/app/model/cdssSupplier';
-import { ToastrService } from 'ngx-toastr';
+import {ResourceReferenceType} from '../../model';
+import {Component, OnInit} from '@angular/core';
+import {CdssService} from 'src/app/service/cdss.service';
+import {ActivatedRoute, Router} from '@angular/router';
+import {LoginService} from 'src/app/service/login.service';
+import {User} from 'src/app/model/user';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {ServiceDefinition} from 'src/app/model/cdssSupplier';
+import {ToastrService} from 'ngx-toastr';
 
 @Component({
   selector: 'app-update-cdss-supplier',
@@ -21,21 +21,22 @@ export class UpdateCdssSupplierComponent implements OnInit {
   supplier: any;
   loaded = false;
   title: String = 'Update Supplier';
-  formData: FormGroup = new FormGroup({ password: new FormControl() });
+  formData: FormGroup = new FormGroup({password: new FormControl()});
   warning: boolean;
   warningMessage: string;
   error: boolean;
   errorMessage: string;
 
-  supportedVersions: string[] = ["1.1", "2.0"];
+  supportedVersions: string[] = ['1.1', '2.0'];
 
   constructor(
-    private cdssService: CdssService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private loginService: LoginService,
-    private toastr: ToastrService
-  ) {}
+      private cdssService: CdssService,
+      private route: ActivatedRoute,
+      private router: Router,
+      private loginService: LoginService,
+      private toastr: ToastrService
+  ) {
+  }
 
   ngOnInit() {
     this.sub = this.route.queryParams.subscribe(params => {
@@ -50,6 +51,7 @@ export class UpdateCdssSupplierComponent implements OnInit {
     this.formData = new FormGroup({
       name: new FormControl(this.supplier.name, [Validators.required]),
       baseUrl: new FormControl(this.supplier.baseUrl, [Validators.required]),
+      authToken: new FormControl(this.supplier.authToken, [Validators.required]),
       serviceDefinitionId: new FormControl('', []),
       serviceDescription: new FormControl('', []),
       supportedVersion: new FormControl(this.supplier.supportedVersion, [Validators.required])
@@ -59,12 +61,15 @@ export class UpdateCdssSupplierComponent implements OnInit {
   get name() {
     return this.formData.get('name');
   }
+
   get baseUrl() {
     return this.formData.get('baseUrl');
   }
+
   get serviceDefinitionId() {
     return this.formData.get('serviceDefinitionId');
   }
+
   get serviceDescription() {
     return this.formData.get('serviceDescription');
   }
@@ -75,11 +80,11 @@ export class UpdateCdssSupplierComponent implements OnInit {
 
   async getSupplier(supplierId: string) {
     this.supplier = await this.cdssService.getCdssSupplier(supplierId)
-      .catch(err => {
-        this.toastr.error(
+    .catch(err => {
+      this.toastr.error(
           err.error.target.__zone_symbol__xhrURL + ' - ' +
           err.message);
-      });
+    });
     this.setFormData();
     this.loaded = true;
   }
@@ -95,13 +100,13 @@ export class UpdateCdssSupplierComponent implements OnInit {
 
   removeServiceDefinition(serviceDefinition: ServiceDefinition) {
     this.supplier.serviceDefinitions = this.arrayRemove(
-      this.supplier.serviceDefinitions,
-      serviceDefinition
+        this.supplier.serviceDefinitions,
+        serviceDefinition
     );
   }
 
   arrayRemove(arr, value) {
-    return arr.filter(function(ele) {
+    return arr.filter(function (ele) {
       return ele !== value;
     });
   }
@@ -110,19 +115,20 @@ export class UpdateCdssSupplierComponent implements OnInit {
     this.supplier.name = data.name;
     this.supplier.baseUrl = data.baseUrl;
     this.supplier.supportedVersion = data.supportedVersion;
+    this.supplier.authToken = data.authToken;
 
     this.cdssService.updateCdssSupplier(this.supplier).subscribe(
-      supplier => {
-        this.router.navigate(['/suppliers']);
-      },
-      error => {
-        this.error = true;
-        if (error.status === 401) {
-          this.loginService.logout(null, null);
-        } else {
-          this.errorMessage = 'Error updating supplier.';
+        supplier => {
+          this.router.navigate(['/suppliers']);
+        },
+        error => {
+          this.error = true;
+          if (error.status === 401) {
+            this.loginService.logout(null, null);
+          } else {
+            this.errorMessage = 'Error updating supplier.';
+          }
         }
-      }
     );
   }
 }
