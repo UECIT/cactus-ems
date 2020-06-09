@@ -29,6 +29,7 @@ import uk.nhs.ctp.repos.CdssSupplierRepository;
 import uk.nhs.ctp.service.dto.CdssSupplierDTO;
 import uk.nhs.ctp.service.dto.ServiceDefinitionDTO;
 import uk.nhs.ctp.service.search.SearchParameters;
+import uk.nhs.ctp.transform.CdssSupplierDTOTransformer;
 import uk.nhs.ctp.utils.RetryUtils;
 
 @Service
@@ -41,6 +42,7 @@ public class CdssService {
   private final CdssSupplierRepository cdssSupplierRepository;
   private final FhirContext fhirContext;
   private final TokenAuthenticationService tokenAuthenticationService;
+  private final CdssSupplierDTOTransformer cdssTransformer;
 
   /**
    * Sends request to CDSS Supplier (ServiceDefintion $evaluate).
@@ -104,7 +106,7 @@ public class CdssService {
     String baseUrl = supplier.getBaseUrl();
     String url = buildSearchUrl(
         String.format("%s/ServiceDefinition", baseUrl), parameters);
-    CdssSupplierDTO supplierDTO = new CdssSupplierDTO(supplier);
+    CdssSupplierDTO supplierDTO = cdssTransformer.transform(supplier);
     try {
       Bundle bundle = RetryUtils.retry(() ->
               fhirContext.newRestfulGenericClient(baseUrl).search()
