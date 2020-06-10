@@ -26,6 +26,8 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HttpContext;
 
 /**
+ * See https://stackoverflow.com/questions/59890232/unable-to-resolve-awsrequestsigningapacheinterceptor
+ * for source.
  * An {@link HttpRequestInterceptor} that signs requests using any AWS {@link Signer}
  * and {@link AWSCredentialsProvider}.
  */
