@@ -24,4 +24,7 @@ public class EmsSupplier extends SupplierPartitioned {
   @Column(name = "base_url")
   private String baseUrl;
 
+  @Column(name = "auth_token")
+  private String authToken;
+
 }
