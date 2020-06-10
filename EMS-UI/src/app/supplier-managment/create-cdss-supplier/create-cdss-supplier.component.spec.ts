@@ -24,15 +24,14 @@ let fixture: ComponentFixture<CreateCdssSupplierComponent>;
 let page: Page;
 
 class Page {
-    constructor(fixture: ComponentFixture<CreateCdssSupplierComponent>) {}
-
-    get nameInput() {return this.query<HTMLInputElement>(By.css("#cdssNameInput"))}
-    get baseUrlInput() {return this.query<HTMLInputElement>(By.css("#cdssBaseUrlInput"))}
-    get supportedApiVersionDropdown() {return this.query<HTMLSelectElement>(By.css('#supportedVersion'))}
-    get saveButton() {return this.query<HTMLButtonElement>(By.css("#saveCdssSupplier"))}
+    get nameInput() {return this.query<HTMLInputElement>(By.css('#cdssNameInput')); }
+    get baseUrlInput() {return this.query<HTMLInputElement>(By.css('#cdssBaseUrlInput')); }
+    get supportedApiVersionDropdown() {return this.query<HTMLSelectElement>(By.css('#supportedVersion')); }
+    get saveButton() {return this.query<HTMLButtonElement>(By.css('#saveCdssSupplier')); }
+    get authToken() {return this.query<HTMLInputElement>(By.css('#authToken')); }
 
     supportedApiVersionOptions(option: number): HTMLOptionElement {
-        return this.queryAll(By.css(".versionOption"))[option].nativeElement
+        return this.queryAll(By.css('.versionOption'))[option].nativeElement;
     }
 
     private query<T>(by: Predicate<DebugElement>): T {
@@ -49,9 +48,9 @@ describe('Create CDSS Supplier Component', () => {
     let cdssServiceSpy: {createCdssSupplier: jasmine.Spy};
 
     beforeEach(() => {
-        cdssServiceSpy = jasmine.createSpyObj("CdssService", ['createCdssSupplier']);
-        const routerSpy = jasmine.createSpyObj("Router", ['navigate']); //router stub
-        const loginServiceSpy = jasmine.createSpyObj("LoginService", ['logout']);
+        cdssServiceSpy = jasmine.createSpyObj('CdssService', ['createCdssSupplier']);
+        const routerSpy = jasmine.createSpyObj('Router', ['navigate']); // router stub
+        const loginServiceSpy = jasmine.createSpyObj('LoginService', ['logout']);
 
         configureSessionProviders();
         TestBed.configureTestingModule({
@@ -65,54 +64,71 @@ describe('Create CDSS Supplier Component', () => {
                 {provide: LoginService, useValue: loginServiceSpy},
                 {provide: Router, useValue: routerSpy}
             ]
-        })
+        });
         fixture = TestBed.createComponent(CreateCdssSupplierComponent);
         comp = fixture.componentInstance;
         fixture.detectChanges();
-        page = new Page(fixture);
+        page = new Page();
     });
 
     it('should display supported api versions dropdown', () => {
         page.supportedApiVersionDropdown.click(); // have to click the dropdown to add options to DOM
         fixture.detectChanges();
 
-        expect(page.supportedApiVersionOptions(0).textContent).toBe("1.1");
-        expect(page.supportedApiVersionOptions(1).textContent).toBe("2.0");
-    })
+        expect(page.supportedApiVersionOptions(0).textContent).toBe('1.1');
+        expect(page.supportedApiVersionOptions(1).textContent).toBe('2.0');
+    });
 
     it('should create a new cdss supplier with defaults', () => {
-        setInput(page.nameInput, "test name");
-        setInput(page.baseUrlInput, "test base url");
+        setInput(page.nameInput, 'test name');
+        setInput(page.baseUrlInput, 'test base url');
         fixture.detectChanges();
-        
-        cdssServiceSpy.createCdssSupplier.and.returnValue(of())
+
+        cdssServiceSpy.createCdssSupplier.and.returnValue(of());
         page.saveButton.click();
 
         expect(cdssServiceSpy.createCdssSupplier.calls.count()).toEqual(1);
         expect(cdssServiceSpy.createCdssSupplier)
             .toHaveBeenCalledWith(jasmine.objectContaining({
-                name: "test name",
-                baseUrl: "test base url",
+                name: 'test name',
+                baseUrl: 'test base url',
                 inputDataRefType: ResourceReferenceType.ByReference,
                 inputParamsRefType: ResourceReferenceType.ByReference,
-                supportedVersion: "1.1"
+                supportedVersion: '1.1',
+                authToken: '',
             }));
     });
 
     it('should create a new cdss supplier with changed supported api version', () => {
-        setInput(page.nameInput, "test name");
-        setInput(page.baseUrlInput, "test base url");
+        setInput(page.nameInput, 'test name');
+        setInput(page.baseUrlInput, 'test base url');
         page.supportedApiVersionDropdown.click(); // have to click the dropdown to add options to DOM
         fixture.detectChanges();
         page.supportedApiVersionOptions(1).click();
         fixture.detectChanges();
-        
-        cdssServiceSpy.createCdssSupplier.and.returnValue(of())
+
+        cdssServiceSpy.createCdssSupplier.and.returnValue(of());
         page.saveButton.click();
 
         expect(cdssServiceSpy.createCdssSupplier.calls.count()).toEqual(1);
         expect(cdssServiceSpy.createCdssSupplier)
-            .toHaveBeenCalledWith(jasmine.objectContaining({supportedVersion: "2.0"}));
+            .toHaveBeenCalledWith(jasmine.objectContaining({supportedVersion: '2.0'}));
     });
 
-})
+    it('should create a new cdss supplier with authToken', () => {
+        setInput(page.nameInput, 'test name');
+        setInput(page.baseUrlInput, 'test base url');
+        setInput(page.authToken, 'token');
+        fixture.detectChanges();
+
+        cdssServiceSpy.createCdssSupplier.and.returnValue(of());
+        page.saveButton.click();
+
+        expect(cdssServiceSpy.createCdssSupplier.calls.count()).toEqual(1);
+        expect(cdssServiceSpy.createCdssSupplier)
+        .toHaveBeenCalledWith(jasmine.objectContaining({
+            authToken: 'token',
+        }));
+    });
+
+});
