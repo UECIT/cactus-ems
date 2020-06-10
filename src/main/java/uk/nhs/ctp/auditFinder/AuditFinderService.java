@@ -25,7 +25,7 @@ public class AuditFinderService {
 
   private static final String EMS_NAME = "ems.cactus-staging";
 
-  private static final String OWNER_FIELD = "@owner";
+  private static final String OWNER_FIELD = "@owner.keyword";
   private static final String TIMESTAMP_FIELD = "@timestamp";
   private static final String SUPPLIER_ID_FIELD = "additionalProperties.supplierId";
   private static final String CASE_ID_FIELD = "additionalProperties.caseId";
