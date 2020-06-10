@@ -1,10 +1,9 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {environment} from '../../environments/environment';
-import {Token} from '../model/token';
 import {SessionStorage} from 'h5webstorage';
 import {ToastrService} from 'ngx-toastr';
-import {CdssSupplier} from '../model/cdssSupplier';
+import {CdssSupplier} from '../model';
 
 const httpOptions = {
   headers: new HttpHeaders()
@@ -14,8 +13,6 @@ const httpOptions = {
   providedIn: 'root'
 })
 export class ServiceDefinitionService {
-  tokenInfo: Token;
-
   constructor(private http: HttpClient, private sessionStorage: SessionStorage, private toastr: ToastrService) {
   }
 

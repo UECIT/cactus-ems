@@ -15,8 +15,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import uk.nhs.ctp.enums.ReferencingType;
 import uk.nhs.ctp.enums.CdsApiVersion;
+import uk.nhs.ctp.enums.ReferencingType;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -42,6 +42,9 @@ public class CdssSupplier extends SupplierPartitioned {
 
   @Column(name = "supported_version")
   private CdsApiVersion supportedVersion;
+
+  @Column(name = "auth_token")
+  private String authToken;
 
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
   @JoinColumn(name = "cdss_supplier_id")

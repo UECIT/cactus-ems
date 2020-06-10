@@ -6,6 +6,8 @@ export class CdssSupplier {
   inputParamsRefType: ResourceReferenceType;
   inputDataRefType: ResourceReferenceType;
   supportedVersion: string;
+  authToken: string;
+
   constructor() {
     this.id = 0;
     this.name = '';
@@ -13,6 +15,8 @@ export class CdssSupplier {
     this.serviceDefinitions = [];
     this.inputDataRefType = ResourceReferenceType.ByReference;
     this.inputParamsRefType = ResourceReferenceType.ByReference;
+    this.supportedVersion = '';
+    this.authToken = '';
   }
 }
 

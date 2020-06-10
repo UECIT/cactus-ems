@@ -12,7 +12,7 @@
       <div class="alert alert-warning" *ngIf="warning">
           {{ warningMessage }}
       </div>
-      <div class="input">
+      <div>
         <mat-form-field class="full-width">
           <input matInput placeholder="Name" formControlName="name">
           <mat-error *ngIf="name.invalid && (name.dirty || name.touched)">
@@ -20,12 +20,18 @@
           </mat-error>
         </mat-form-field>
       </div>
-      <div class="input">
+      <div>
         <mat-form-field class="full-width">
-          <input matInput placeholder="BaseURL" formControlName="baseUrl">
+          <input matInput placeholder="Base URL" formControlName="baseUrl">
           <mat-error *ngIf="baseUrl.invalid && (baseUrl.dirty || baseUrl.touched)">
             BaseUrl is required (max 1000)
           </mat-error>
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field class="full-width">
+          <input matInput placeholder="Bearer token (included in Authorization header)"
+                 id="authToken" formControlName="authToken">
         </mat-form-field>
       </div>
 

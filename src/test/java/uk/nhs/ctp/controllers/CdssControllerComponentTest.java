@@ -48,6 +48,8 @@ public class CdssControllerComponentTest {
     assertThat(returned.getBaseUrl(), is(request.getBaseUrl()));
     assertThat(returned.getSupplierId(), is("mockSupplierId"));
     assertThat(returned.getId(), notNullValue());
+    assertThat(returned.getAuthToken(), is("token"));
+    assertThat(returned.getSupportedVersion(), is(CdsApiVersion.TWO));
     assertThat(stored, is(returned));
   }
 
@@ -58,6 +60,7 @@ public class CdssControllerComponentTest {
     request.setInputDataRefType(ReferencingType.BY_REFERENCE);
     request.setBaseUrl("base.url.com/fhir");
     request.setSupportedVersion(CdsApiVersion.TWO);
+    request.setAuthToken("token");
     return request;
   }
 
