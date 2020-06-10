@@ -62,6 +62,9 @@ public class ElasticSearchClient {
         .indices(index)
         .source(source);
 
+    log.info("Sending ElasticSearch request to index " + index + ":");
+    log.info(request.toString());
+
     var response = baseClient.search(request, RequestOptions.DEFAULT);
     return Arrays.asList(response.getHits().getHits());
   }
