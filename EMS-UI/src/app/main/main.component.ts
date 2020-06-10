@@ -1,21 +1,21 @@
-import { ReportService } from 'src/app/service/report.service';
+import {ReportService} from 'src/app/service/report.service';
 import {Component, OnInit} from '@angular/core';
-import {Router, ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {MatSnackBar} from '@angular/material';
 import {Store} from '@ngrx/store';
 import {ToastrService} from 'ngx-toastr';
 import {SessionStorage} from 'h5webstorage';
 import {
-  Patient,
   CdssSupplier,
-  ServiceDefinition,
-  SelectService,
   Code,
-  Settings,
+  EncounterReportInput,
+  Patient,
   Practitioner,
-  EncounterReportInput
+  SelectService,
+  ServiceDefinition,
+  Settings
 } from '../model';
-import {PatientService, CdssService, TriageService, PractitionerService} from '../service';
+import {CdssService, PatientService, PractitionerService, TriageService} from '../service';
 import {AppState} from '../app.state';
 import * as PatientActions from '../actions/patient.actions';
 
@@ -48,7 +48,7 @@ export class MainComponent implements OnInit {
   selectionModeOptions: any[];
   encounterReportInput: EncounterReportInput;
 
-  setup: boolean = true;
+  setup = true;
 
   constructor(
       public router: Router,
@@ -68,45 +68,44 @@ export class MainComponent implements OnInit {
 
   disableLaunch() {
     return this.selectedPatient == null ||
-           this.selectedSupplier == null ||
-           this.selectedServiceDefinition == null ||
-           (this.isPractitioner() && this.selectedPractitioner == null);
+        this.selectedSupplier == null ||
+        this.selectedServiceDefinition == null ||
+        (this.isPractitioner() && this.selectedPractitioner == null);
   }
 
   ngOnInit() {
-    let encounterId = this.route.snapshot.queryParamMap.get("encounterId");
+    const encounterId = this.route.snapshot.queryParamMap.get('encounterId');
 
-    let setup = new Promise(async (resolve) => {
+    const setup = new Promise(async (resolve) => {
       if (encounterId) {
         this.getEncounterReport(encounterId)
-          .then(er => {
-            this.encounterReportInput = er;
-            this.sessionStorage.setItem('encounterHandover', JSON.stringify(er));
-            this.getPatients(this.encounterReportInput.patientId, this.encounterReportInput.encounterId);
-          });
-  
-      }
-      else {
-        this.sessionStorage.removeItem("encounterHandover");
-        this.getPatients()
+        .then(er => {
+          this.encounterReportInput = er;
+          this.sessionStorage.setItem('encounterHandover', JSON.stringify(er));
+          this.getPatients(this.encounterReportInput.patientId, this.encounterReportInput.encounterId);
+        });
+
+      } else {
+        this.sessionStorage.removeItem('encounterHandover');
+        this.getPatients();
       }
       this.getCdssSuppliers();
       this.getRoles();
       this.getSettings();
       this.getJurisdictions();
       this.getSelectionModeOptions();
-  
-      var settings: Settings = this.sessionStorage['settings'];
+
+      const settings: Settings = this.sessionStorage['settings'];
       settings.jurisdiction = this.jurisdictions[0];
       settings.setting = this.settings[0];
       settings.userType = this.roles[0];
       await this.getPractitioners();
-      settings.practitioner = null; //By default
+      settings.practitioner = null; // By default
       this.sessionStorage.setItem('settings', JSON.stringify(settings));
-  
+
       this.autoSelectServiceDefinition(true);
       this.openSnackBar();
-  
+
       this.sessionStorage.setItem('triageItems', '[]');
       resolve();
     });
@@ -118,10 +117,11 @@ export class MainComponent implements OnInit {
   }
 
   openSnackBar() {
-    var hasDisplayed = this.sessionStorage['displayedTestWarningMessage']
+    const hasDisplayed = this.sessionStorage['displayedTestWarningMessage'];
     if (hasDisplayed === 'false' || hasDisplayed == null) {
-      setTimeout(() => 
-        this.snackBar.open('This Test Harness is for demonstration purposes only and is not representative of any EMS final product.', 'I Understand'));
+      setTimeout(() => this.snackBar.open(
+          'This Test Harness is for demonstration purposes only and is not representative of any EMS final product.',
+          'I Understand'));
     }
     this.sessionStorage.setItem('displayedTestWarningMessage', 'true');
   }
@@ -141,8 +141,8 @@ export class MainComponent implements OnInit {
 
   async getPatients(patientId?: string, encounterId?: string) {
     this.patients = patientId && encounterId
-      ? [await this.patientService.getPatient(patientId, encounterId).toPromise()]
-      : await this.patientService.getAllPatients().toPromise();
+        ? [await this.patientService.getPatient(patientId, encounterId).toPromise()]
+        : await this.patientService.getAllPatients().toPromise();
 
     this.selectedPatient = this.patients[0];
     this.store.dispatch(new PatientActions.AddPatient(this.selectedPatient));
@@ -217,11 +217,11 @@ export class MainComponent implements OnInit {
   getSelectionModeOptions() {
     this.selectionModeOptions = [
       {
-        'id':'automated',
+        'id': 'automated',
         'display': 'Automated'
       },
       {
-        'id':'manual',
+        'id': 'manual',
         'display': 'Manual'
       }
     ];
@@ -248,25 +248,25 @@ export class MainComponent implements OnInit {
   }
 
   addSettingToStore(setting: Code) {
-    var settings: Settings = this.sessionStorage['settings'];
+    const settings: Settings = this.sessionStorage['settings'];
     settings.setting = setting;
     this.sessionStorage.setItem('settings', JSON.stringify(settings));
     this.selectedSetting = setting.code;
     if (!this.isPractitioner()) {
-      this.addPractitionerToStore()
+      this.addPractitionerToStore();
     }
     this.autoSelectServiceDefinition(false);
   }
 
   addJurisdictionToStore(jurisdiction: Code) {
-    var settings: Settings = this.sessionStorage['settings'];
+    const settings: Settings = this.sessionStorage['settings'];
     settings.jurisdiction = jurisdiction;
     this.sessionStorage.setItem('settings', JSON.stringify(settings));
     this.autoSelectServiceDefinition(false);
   }
 
   addPractitionerToStore(practitioner?: Practitioner) {
-    var settings: Settings = this.sessionStorage['settings'];
+    const settings: Settings = this.sessionStorage['settings'];
     this.selectedPractitioner = practitioner;
     settings.practitioner = practitioner;
     this.sessionStorage.setItem('settings', JSON.stringify(settings));
@@ -284,7 +284,7 @@ export class MainComponent implements OnInit {
     if (this.serviceDefinitionMode === 'automated') {
       this.autoSelectServiceDefinition(false);
     } else if (this.cdssSuppliers.length > 0) {
-      this.setSelectedSupplier(this.cdssSuppliers[0])
+      this.setSelectedSupplier(this.cdssSuppliers[0]);
     }
   }
 
@@ -297,7 +297,7 @@ export class MainComponent implements OnInit {
       if (this.selectedPatient) {
         request.patientId = this.selectedPatient.id;
       }
-      var settings: Settings = this.sessionStorage['settings'];
+      const settings: Settings = this.sessionStorage['settings'];
       request.settings = settings;
 
       const selectedSDs = await this.triageService.selectServiceDefinitions(request);
@@ -320,7 +320,7 @@ export class MainComponent implements OnInit {
     return serviceDefinition.description || serviceDefinition.serviceDefinitionId;
   }
 
- // Phone call/face to face implies practitioner as initiating person
+  // Phone call/face to face implies practitioner as initiating person
   isPractitioner() {
     return this.selectedSetting !== 'online';
   }

@@ -26,6 +26,8 @@ export class CreateCdssSupplierComponent implements OnInit {
   errorMessage: string;
   errorObject: any;
 
+  supportedVersions: string[] = ['1.1', '2.0'];
+
   constructor(
     private cdssService: CdssService,
     private router: Router,
@@ -64,7 +66,10 @@ export class CreateCdssSupplierComponent implements OnInit {
       name: new FormControl('', [Validators.required]),
       baseUrl: new FormControl('', [Validators.required]),
       serviceDefinitionId: new FormControl('', []),
-      serviceDescription: new FormControl('', [])
+      serviceDescription: new FormControl('', []),
+      // Support version 1.1 by default
+      supportedVersion: new FormControl(this.supportedVersions[0], [Validators.required]),
+      authToken: new FormControl('', []),
     });
   }
 
@@ -81,6 +86,10 @@ export class CreateCdssSupplierComponent implements OnInit {
     return this.formData.get('serviceDescription');
   }
 
+  get supportedVersion() {
+    return this.formData.get('supportedVersion');
+  }
+
   createSupplier(data) {
     this.supplier = {
       id: data.id,
@@ -88,7 +97,9 @@ export class CreateCdssSupplierComponent implements OnInit {
       baseUrl: data.baseUrl,
       serviceDefinitions: [],
       inputDataRefType: this.inputDataRefType,
-      inputParamsRefType: this.inputParamRefType
+      inputParamsRefType: this.inputParamRefType,
+      supportedVersion: data.supportedVersion,
+      authToken: data.authToken
     };
     this.serviceDefinitions.forEach(serviceDefinition => {
       this.supplier.serviceDefinitions.push(serviceDefinition);

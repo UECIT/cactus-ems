@@ -12,7 +12,7 @@
       <div class="alert alert-warning" *ngIf="warning">
           {{ warningMessage }}
       </div>
-      <div class="input">
+      <div>
         <mat-form-field class="full-width">
           <input matInput placeholder="Name" formControlName="name">
           <mat-error *ngIf="name.invalid && (name.dirty || name.touched)">
@@ -20,12 +20,18 @@
           </mat-error>
         </mat-form-field>
       </div>
-      <div class="input">
+      <div>
         <mat-form-field class="full-width">
-          <input matInput placeholder="BaseURL" formControlName="baseUrl">
+          <input matInput placeholder="Base URL" formControlName="baseUrl">
           <mat-error *ngIf="baseUrl.invalid && (baseUrl.dirty || baseUrl.touched)">
             BaseUrl is required (max 1000)
           </mat-error>
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field class="full-width">
+          <input matInput placeholder="Bearer token (included in Authorization header)"
+                 id="authToken" formControlName="authToken">
         </mat-form-field>
       </div>
 
@@ -65,6 +71,15 @@
           <mat-button-toggle value="resourceReferenceType.ByReference">References</mat-button-toggle>
           <mat-button-toggle value="resourceReferenceType.ByResource">Contained</mat-button-toggle>
         </mat-button-toggle-group>
+      </div>
+
+      <div>
+        <mat-form-field>
+          <mat-label>CDS API Version:</mat-label>
+          <mat-select formControlName="supportedVersion">
+            <mat-option *ngFor="let version of supportedVersions" [value]="version">{{version}}</mat-option>
+          </mat-select>
+        </mat-form-field>
       </div>
 
       <div class="buttons">

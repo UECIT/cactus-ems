@@ -34,6 +34,7 @@ import uk.nhs.ctp.repos.UserRepository;
 import uk.nhs.ctp.service.dto.CdssSupplierDTO;
 import uk.nhs.ctp.service.dto.NewCdssSupplierDTO;
 import uk.nhs.ctp.service.dto.ServiceDefinitionDTO;
+import uk.nhs.ctp.transform.CdssSupplierDTOTransformer;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CdssSupplierServiceTest {
@@ -55,6 +56,9 @@ public class CdssSupplierServiceTest {
   @Mock
   private TokenAuthenticationService tokenAuthenticationService;
 
+  @Mock
+  private CdssSupplierDTOTransformer cdssTransformer;
+
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
 
@@ -75,11 +79,14 @@ public class CdssSupplierServiceTest {
     when(cdssSupplierRepository.findAllBySupplierId(SUPPLIER))
         .thenReturn(Collections.singletonList(input));
 
-    List<CdssSupplierDTO> suppliers = cdssSupplierService.getCdssSuppliers("nhs");
-
     CdssSupplierDTO expected = new CdssSupplierDTO();
     expected.setName("test");
-    assertThat(suppliers, contains(samePropertyValuesAs(expected)));
+    when(cdssTransformer.transform(input))
+        .thenReturn(expected);
+
+    List<CdssSupplierDTO> suppliers = cdssSupplierService.getCdssSuppliers("nhs");
+
+    assertThat(suppliers, contains(expected));
 
   }
 
@@ -95,11 +102,14 @@ public class CdssSupplierServiceTest {
     when(cdssSupplierRepository.findAllBySupplierId(SUPPLIER))
         .thenReturn(Collections.singletonList(input));
 
-    List<CdssSupplierDTO> suppliers = cdssSupplierService.getCdssSuppliers("admin");
-
     CdssSupplierDTO expected = new CdssSupplierDTO();
     expected.setName("test");
-    assertThat(suppliers, contains(samePropertyValuesAs(expected)));
+    when(cdssTransformer.transform(input))
+        .thenReturn(expected);
+
+    List<CdssSupplierDTO> suppliers = cdssSupplierService.getCdssSuppliers("admin");
+
+    assertThat(suppliers, contains(expected));
   }
 
   @Test

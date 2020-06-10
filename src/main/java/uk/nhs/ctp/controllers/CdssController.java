@@ -3,8 +3,6 @@ package uk.nhs.ctp.controllers;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.nhs.ctp.entities.CdssSupplier;
@@ -39,14 +36,6 @@ public class CdssController {
   public @ResponseBody
   List<CdssSupplierDTO> getCdssSuppliers(HttpServletRequest request) {
     return cdssSupplierService.getCdssSuppliers(request.getUserPrincipal().getName());
-  }
-
-  @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-  @GetMapping(params = "admin")
-  public @ResponseBody
-  List<CdssSupplier> getCdssSuppliers(@RequestParam(name = "admin") Boolean admin,
-      HttpServletRequest request) {
-    return cdssSupplierService.getCdssSuppliersUnfiltered(request.getUserPrincipal().getName());
   }
 
   @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SUPPLIER_ADMIN','ROLE_NHS','ROLE_CDSS')")

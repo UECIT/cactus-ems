@@ -77,7 +77,7 @@ export class ServiceDefinitionComponent implements OnInit, OnChanges {
     // &trigger-eventdata-id={{data_req_id}}
     if (this.tempSelectedQueryType.includes('attributes') && this.tempSelectedServiceDefinition !== undefined) {
 
-    if (this.tempSelectedServiceDefinition == 107257) {
+    if (this.tempSelectedServiceDefinition === 107257) {
       this.serviceDefinitionService
       .getServiceDefinitionByQuery2(
         this.CdssUrl + 'ServiceDefinition?',

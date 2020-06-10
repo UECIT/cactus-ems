@@ -13,11 +13,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.nhs.ctp.entities.CdssSupplier;
-import uk.nhs.ctp.entities.ServiceDefinition;
 import uk.nhs.ctp.service.CdssService;
 import uk.nhs.ctp.service.dto.CdssSupplierDTO;
 import uk.nhs.ctp.service.dto.CodeDTO;
+import uk.nhs.ctp.service.dto.ServiceDefinitionDTO;
 import uk.nhs.ctp.service.dto.SettingsDTO;
 import uk.nhs.ctp.service.search.SearchParameters;
 import uk.nhs.ctp.service.search.SearchParametersTransformer;
@@ -56,17 +55,16 @@ public class SwitchTriggerResolverTest {
         .status("active")
         .build();
 
-    CdssSupplier supplier = new CdssSupplier();
+    CdssSupplierDTO supplier = new CdssSupplierDTO();
     supplier.setId(4L);
-    ServiceDefinition serviceDefinition = new ServiceDefinition();
+    ServiceDefinitionDTO serviceDefinition = new ServiceDefinitionDTO();
     serviceDefinition.setServiceDefinitionId("theredirect");
     supplier.setServiceDefinitions(Collections.singletonList(serviceDefinition));
-    List<CdssSupplierDTO> returnedSuppliers = Collections
-        .singletonList(new CdssSupplierDTO(supplier));
     when(searchParametersTransformer.transform(dataRequirements, settingsDTO, "3"))
         .thenReturn(searchParameters);
     when(cdssService.queryServiceDefinitions(searchParameters))
-        .thenReturn(returnedSuppliers);
+        .thenReturn(Collections
+            .singletonList(supplier));
 
     String newServiceDef = switchTriggerResolver
         .getSwitchTrigger(guidanceResponse, settingsDTO, "3");
