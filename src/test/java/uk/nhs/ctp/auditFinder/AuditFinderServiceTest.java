@@ -1,25 +1,52 @@
 package uk.nhs.ctp.auditFinder;
 
+import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.nhs.ctp.testhelper.matchers.IsEqualJSON.equalToJSON;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import org.elasticsearch.client.RestHighLevelClient;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import lombok.SneakyThrows;
+import org.elasticsearch.common.bytes.BytesReference;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortBuilder;
+import org.hamcrest.Matcher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
+import uk.nhs.ctp.audit.model.AuditEntry;
+import uk.nhs.ctp.audit.model.AuditSession;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AuditFinderServiceTest {
 
   @Mock
-  private RestHighLevelClient restHighLevelClient;
+  private ElasticSearchClient elasticSearchClient;
 
   @Mock
   private TokenAuthenticationService tokenAuthenticationService;
@@ -29,32 +56,95 @@ public class AuditFinderServiceTest {
 
   @InjectMocks
   private AuditFinderService auditFinder;
+  private SortBuilder<? extends SortBuilder<?>> sort;
 
   @Test
   public void findAll_withNullClient_shouldWorkForNow() throws IOException {
     // TODO CDSCT-164: require non-empty ES client
-    var auditFinder = new AuditFinderService(
-        null,
-        mock(TokenAuthenticationService.class),
-        mock(ObjectMapper.class));
+    var authService = mock(TokenAuthenticationService.class);
+    when(authService.requireSupplierId()).thenReturn("test-supplier");
+    var auditFinder = new AuditFinderService(null, authService, mock(ObjectMapper.class));
 
     var audits = auditFinder.findAll(1L);
 
     assertThat(audits, is(empty()));
   }
 
+  @Test
+  public void findAll_withCaseIdAndSupplierId_buildsRequest() throws IOException {
+    when(tokenAuthenticationService.requireSupplierId())
+        .thenReturn("test-supplier");
+    when(elasticSearchClient.search(
+        argThat(is("test-supplier-audit")),
+        any(SearchSourceBuilder.class)))
+        .thenReturn(Collections.emptyList());
 
-  // TODO: upgrade to Mockito 2 in order to test this further
-  // cannot currently test fully due to the RestHighLevelClient using final methods
-  // also cannot meaningfully extract generic client logic to a new interface
+    auditFinder.findAll(76L);
 
-//  @Test
-//  public void findAll_withCaseIdAndSupplierId_buildsRequest() throws IOException {
-//  }
-//
-//  @Test
-//  public void findAll_withCaseIdAndSupplierId_returnsAudits() throws IOException {
-//
-//  }
+    var searchSourceCaptor = ArgumentCaptor.forClass(SearchSourceBuilder.class);
+    verify(elasticSearchClient)
+        .search(argThat(is("test-supplier-audit")), searchSourceCaptor.capture());
 
+    var searchSource = searchSourceCaptor.getValue();
+
+    assertThat(searchSource.sorts(), hasSize(1));
+    assertThat(searchSource.sorts().get(0), hasToString(equalToJSON(
+        "{ @timestamp : {order : asc } }")));
+    assertThat(searchSource.query(), hasToString(equalToJSON(
+        "{ bool : { must : ["
+        + " { term : { @owner : { value : ems.cactus-staging } } },"
+        + " { term : { additionalProperties.supplierId : { value : test-supplier } } },"
+        + " { term : { additionalProperties.caseId : { value : \"76\" } } }"
+        + "] } }")));
+  }
+
+  @Test
+  public void findAll_withCaseIdAndSupplierId_returnsAudits() throws IOException {
+    var auditSessionJson = "{ \"requestUrl\": \"/test-url\" }";
+    var auditSession = AuditSession.builder().requestUrl("/test-url").build();
+    var auditSessionWithEntryJson = "{"
+        + " \"requestUrl\": \"/test-url-2\","
+        + " \"entries\": ["
+        + " { \"requestUrl\": \"/test-url-3\" }"
+        + "] }";
+    var auditSessionWithEntry = AuditSession.builder()
+        .requestUrl("/test-url-2")
+        .entry(AuditEntry.builder().requestUrl("/test-url-3").build())
+        .build();
+
+    var searchHits = Stream.of(auditSessionJson, auditSessionWithEntryJson)
+        .map(this::buildSearchHit)
+        .collect(Collectors.toUnmodifiableList());
+
+    when(tokenAuthenticationService.requireSupplierId())
+        .thenReturn("test-supplier");
+    when(elasticSearchClient.search(
+        argThat(is("test-supplier-audit")),
+        any(SearchSourceBuilder.class)))
+        .thenReturn(searchHits);
+    when(objectMapper.readValue(auditSessionJson, AuditSession.class))
+        .thenReturn(auditSession);
+    when(objectMapper.readValue(auditSessionWithEntryJson, AuditSession.class))
+        .thenReturn(auditSessionWithEntry);
+
+    var audits = auditFinder.findAll(76L);
+
+    assertThat(audits, hasItems(
+        hasRequestUrl("/test-url"),
+        both(hasRequestUrl("/test-url-2"))
+        .and(hasProperty("entries",
+            hasItem(hasRequestUrl("/test-url-3"))))));
+  }
+
+  private Matcher<Object> hasRequestUrl(final String url) {
+    return hasProperty("requestUrl", equalTo(url));
+  }
+
+  @SneakyThrows
+  private SearchHit buildSearchHit(String audit) {
+    var encoder = StandardCharsets.UTF_8.newEncoder();
+    var byteBuffer = encoder.encode(CharBuffer.wrap(audit));
+    var bytesReference = BytesReference.fromByteBuffers(new ByteBuffer[]{ byteBuffer });
+    return SearchHit.createFromMap(Map.of("_source", bytesReference));
+  }
 }

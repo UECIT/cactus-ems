@@ -2,16 +2,12 @@ package uk.nhs.ctp.auditFinder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.ObjectUtils;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -34,7 +30,7 @@ public class AuditFinderService {
   private static final String SUPPLIER_ID_FIELD = "additionalProperties.supplierId";
   private static final String CASE_ID_FIELD = "additionalProperties.caseId";
 
-  private final RestHighLevelClient esClient;
+  private final ElasticSearchClient esClient;
   private final TokenAuthenticationService authenticationService;
   private final ObjectMapper mapper;
 
@@ -56,13 +52,8 @@ public class AuditFinderService {
         .size(MAX_RETURNED_AUDITS)
         .sort(new FieldSortBuilder(TIMESTAMP_FIELD).order(SortOrder.ASC));
 
-    var index = supplierId + "-audit";
-    var request = new SearchRequest()
-        .indices(index)
-        .source(source);
-
-    var response = esClient.search(request, RequestOptions.DEFAULT);
-    return Arrays.stream(response.getHits().getHits())
+    return esClient.search(supplierId + "-audit", source)
+        .stream()
         .map(SearchHit::getSourceAsString)
         .map(this::asAudit)
         .collect(Collectors.toUnmodifiableList());
