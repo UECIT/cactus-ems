@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.search.SearchRequest;
@@ -18,6 +19,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 
+@Slf4j
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class ElasticSearchClient {
 
@@ -36,6 +38,8 @@ public class ElasticSearchClient {
 
     var awsEndpointMatcher = AWS_ES_PATTERN.matcher(endpoint);
     if (awsEndpointMatcher.matches()) {
+      log.info("Creating an ElasticSearchClient for an AWS endpoint");
+
       var signer = new AWS4Signer();
       signer.setServiceName(ES_SERVICE_NAME);
       signer.setRegionName(awsEndpointMatcher.group(1));
@@ -46,6 +50,8 @@ public class ElasticSearchClient {
           new DefaultAWSCredentialsProviderChain());
       baseClientBuilder.setHttpClientConfigCallback(clientConfig ->
           clientConfig.addInterceptorLast(interceptor));
+    } else {
+      log.info("Creating an ElasticSearchClient for a non-AWS endpoint");
     }
 
     return new ElasticSearchClient(new RestHighLevelClient(baseClientBuilder));
