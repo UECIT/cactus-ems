@@ -92,7 +92,7 @@ public class AuditFinderServiceTest {
         "{ @timestamp : {order : asc } }")));
     assertThat(searchSource.query(), hasToString(equalToJSON(
         "{ bool : { must : ["
-        + " { term : { @owner : { value : ems.cactus-staging } } },"
+        + " { term : { @owner.keyword : { value : ems.cactus-staging } } },"
         + " { term : { additionalProperties.supplierId : { value : test-supplier } } },"
         + " { term : { additionalProperties.caseId : { value : \"76\" } } }"
         + "] } }")));
