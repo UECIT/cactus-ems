@@ -228,10 +228,6 @@
       <artifactId>elasticsearch</artifactId>
       <version>${elastic-search-version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-core</artifactId>
-    </dependency>
 
     <!-- Test -->
     <dependency>
