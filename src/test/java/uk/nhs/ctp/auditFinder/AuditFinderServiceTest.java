@@ -17,16 +17,21 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.nhs.ctp.testhelper.matchers.IsEqualJSON.equalToJSON;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
+import org.apache.commons.io.IOUtils;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -129,11 +134,30 @@ public class AuditFinderServiceTest {
 
     var audits = auditFinder.findAll(76L);
 
+    //noinspection unchecked
     assertThat(audits, hasItems(
         hasRequestUrl("/test-url"),
         both(hasRequestUrl("/test-url-2"))
         .and(hasProperty("entries",
             hasItem(hasRequestUrl("/test-url-3"))))));
+  }
+
+  @Test
+  public void objectMapper_readValue_canDeserialiseAudit() throws IOException {
+    var auditFile = getClass().getClassLoader().getResource("exampleAudit.json");
+    var auditJson = IOUtils.toString(Objects.requireNonNull(auditFile), StandardCharsets.UTF_8);
+
+    var mapper = new ObjectMapper();
+    mapper.registerModule(new JavaTimeModule());
+    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    mapper.disable(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES);
+    mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
+    var audit = mapper.readValue(auditJson, AuditSession.class);
+
+    assertThat(audit.getRequestUrl(), is("/case/"));
+    assertThat(audit.getResponseStatus(), is("200"));
+    assertThat(audit.getAdditionalProperties().get("caseId"), is("51"));
   }
 
   private Matcher<Object> hasRequestUrl(final String url) {

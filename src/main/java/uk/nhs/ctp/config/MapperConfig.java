@@ -1,53 +1,60 @@
 package uk.nhs.ctp.config;
 
+import com.arakelian.jackson.databind.EnumUppercaseDeserializerModifier;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.DeserializationConfig;
-import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes"})
 @Configuration
 public class MapperConfig {
 
+  /**
+   * Provides an {@see ObjectMapper} that can serialise and deserialise enums in a case-insensitive way.
+   * This is mainly useful for our {@see Concept} interfaces as we store them UPPERCASE_STYLE in the
+   * Enum values (as per Java style) and in lowercase_style in the JSON resources.
+   * Additionally, this is configured to serialise Java 8 java.time objects (Instant, LocalDate &c.)
+   * as ISO 8601 dates, behaviour which was not yet the default in our version of jackson.
+   * @return The mapper with the configured modifiers.
+   */
   @Bean("enhanced")
   public ObjectMapper registryObjectMapper() {
     var mapper = new ObjectMapper();
-    mapper.configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false);
-    var module = new SimpleModule();
-    module.setDeserializerModifier(new BeanDeserializerModifier() {
-      @Override
-      public JsonDeserializer<Enum> modifyEnumDeserializer(DeserializationConfig config,
-          final JavaType type,
-          BeanDescription beanDesc,
-          final JsonDeserializer<?> deserializer) {
-        return new JsonDeserializer<>() {
-          @Override
-          public Enum deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
-            Class<? extends Enum> rawClass = (Class<Enum<?>>) type.getRawClass();
-            return Enum.valueOf(rawClass, jp.getValueAsString().toUpperCase());
-          }
-        };
-      }
-    });
-    module.addSerializer(Enum.class, new StdSerializer<>(Enum.class) {
-      @Override
-      public void serialize(Enum value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
-        jgen.writeString(value.name().toLowerCase());
-      }
-    });
-    mapper.registerModule(module);
+
+    mapper.registerModule(new LowercaseEnumModule());
+    mapper.registerModule(new JavaTimeModule());
+
+    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    mapper.disable(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES);
+    mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
     return mapper;
+  }
+
+  public static class LowercaseEnumSerializer extends StdSerializer<Enum> {
+    protected LowercaseEnumSerializer() {
+      super(Enum.class);
+    }
+
+    @Override
+    public void serialize(Enum value, JsonGenerator gen, SerializerProvider provider)
+        throws IOException {
+      gen.writeString(value.name().toLowerCase());
+    }
+  }
+
+  public static class LowercaseEnumModule extends SimpleModule {
+    protected LowercaseEnumModule() {
+      this.setDeserializerModifier(new EnumUppercaseDeserializerModifier());
+      this.addSerializer(Enum.class, new LowercaseEnumSerializer());
+    }
   }
 }

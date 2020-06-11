@@ -4,8 +4,10 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.Singular;
 import lombok.experimental.FieldDefaults;
 
@@ -13,6 +15,8 @@ import lombok.experimental.FieldDefaults;
  * Represents a call to this server containing calls to other servers
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder(toBuilder = true)
 public class AuditSession {
