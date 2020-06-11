@@ -13,7 +13,6 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class AuditDisplayComponent implements OnInit {
   audit: any;
-  auditString: string;
   _caseId: number;
 
   constructor(private auditService: AuditService, private toastr: ToastrService) {}
@@ -33,7 +32,6 @@ export class AuditDisplayComponent implements OnInit {
         err.error.target.__zone_symbol__xhrURL + ' - ' +
         err.message);
     });
-    this.auditString = JSON.stringify(this.audit);
   }
 
   async ngOnInit() {}
