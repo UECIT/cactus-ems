@@ -6,32 +6,30 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.attribute.FileTime;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import uk.nhs.ctp.entities.Audit;
-import uk.nhs.ctp.entities.AuditEntry;
-import uk.nhs.ctp.repos.AuditRepository;
+import uk.nhs.ctp.audit.model.AuditEntry;
+import uk.nhs.ctp.auditFinder.AuditFinderService;
 
 @Service
 @RequiredArgsConstructor
 public class ValidationService {
 
-  private final AuditRepository auditRepository;
+  private final AuditFinderService auditFinder;
 
   public byte[] zipResources(Long caseId) throws IOException {
-    List<Audit> audits = auditRepository.findAllByCaseId(caseId);
-    AuditEntry[] auditEntries = audits.stream()
-        .flatMap(a -> a.getAuditEntries().stream())
-        .toArray(AuditEntry[]::new);
+    var audits = auditFinder.findAll(caseId);
+    var auditEntries = audits.stream()
+        .flatMap(a -> a.getEntries().stream())
+        .collect(Collectors.toUnmodifiableList());
 
-    ByteArrayOutputStream output = new ByteArrayOutputStream();
-    ZipOutputStream zip = new ZipOutputStream(output);
+    var output = new ByteArrayOutputStream();
+    var zip = new ZipOutputStream(output);
 
-    Set<String> bundledResources = new HashSet<>();
+    var bundledResources = new HashSet<String>();
 
     for (AuditEntry entry : auditEntries) {
       if (!entry.getRequestMethod().equals("GET")) {
@@ -53,7 +51,7 @@ public class ValidationService {
       }
 
       ZipEntry zipEntry = new ZipEntry(path);
-      zipEntry.setCreationTime(FileTime.from(entry.getCreatedDate().toInstant()));
+      zipEntry.setCreationTime(FileTime.from(entry.getDateOfEntry()));
       zip.putNextEntry(zipEntry);
       zip.write(entry.getResponseBody().getBytes(StandardCharsets.UTF_8));
     }

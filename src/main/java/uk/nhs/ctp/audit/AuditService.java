@@ -48,9 +48,12 @@ public class AuditService {
         .requestMethod(request.getMethod())
         .build();
 
-    auditThreadStore.getCurrentAuditSession()
+    var session = auditThreadStore.getCurrentAuditSession()
         .orElseThrow(IllegalStateException::new)
-        .getEntries().add(entry);
+        .toBuilder()
+        .entry(entry)
+        .build();
+    auditThreadStore.setCurrentSession(session);
     auditThreadStore.setCurrentEntry(entry);
   }
 
