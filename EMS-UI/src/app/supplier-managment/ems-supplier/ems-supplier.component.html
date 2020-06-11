@@ -14,9 +14,9 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let supplier of suppliers">
-              <td>{{ supplier.name }}</td>
-              <td>{{ supplier.baseUrl }}</td>
+            <tr class="emsSupplier" *ngFor="let supplier of suppliers">
+              <td class="emsSupplierName">{{ supplier.name }}</td>
+              <td class="emsSupplierBaseUrl">{{ supplier.baseUrl }}</td>
               <td>
                 <div class="actions">
                   <span class="actionButton" (click)="edit(supplier)">Edit</span>

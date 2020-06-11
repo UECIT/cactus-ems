@@ -1,5 +1,5 @@
-import { EmsService } from './../../service/ems.service';
-import { EmsSupplier } from './../../model/emsSupplier';
+import { EmsService } from '../../service/ems.service';
+import { EmsSupplier } from '../../model';
 import { Component, OnInit, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialog } from '@angular/material/dialog';
 
@@ -31,7 +31,7 @@ export class EmsSupplierComponent implements OnInit {
           this.loaded = true;
           this.error = error;
         }
-    )
+    );
   }
 
   remove(supplier: EmsSupplier) {
@@ -67,13 +67,14 @@ export class EditEmsDialog implements OnInit {
 
   constructor(public dialogRef: MatDialogRef<EditEmsDialog>,
               @Inject(MAT_DIALOG_DATA) public supplier: EmsSupplier) {
-      
+
   }
   ngOnInit() {
     this.updatedSupplier = {
       id: this.supplier.id,
       name:  this.supplier.name,
-      baseUrl: this.supplier.baseUrl
+      baseUrl: this.supplier.baseUrl,
+      authToken: this.supplier.authToken
     };
   }
 
