@@ -11,12 +11,15 @@ import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.nhs.ctp.testhelper.matchers.IsEqualJSON.equalToJSON;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -35,9 +38,10 @@ import org.apache.commons.io.IOUtils;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.sort.SortBuilder;
 import org.hamcrest.Matcher;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -59,9 +63,11 @@ public class AuditFinderServiceTest {
   @Mock
   private ObjectMapper objectMapper;
 
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
+
   @InjectMocks
   private AuditFinderService auditFinder;
-  private SortBuilder<? extends SortBuilder<?>> sort;
 
   @Test
   public void findAll_withNullClient_shouldWorkForNow() throws IOException {
@@ -140,6 +146,24 @@ public class AuditFinderServiceTest {
         both(hasRequestUrl("/test-url-2"))
         .and(hasProperty("entries",
             hasItem(hasRequestUrl("/test-url-3"))))));
+  }
+
+  @Test
+  public void findAll_withFailedParsing_shouldFail() throws IOException {
+    var auditSessionJson = "{ \"requestUrl\": \"/test-url\" }";
+    var auditSession = AuditSession.builder().requestUrl("/test-url").build();
+
+    when(tokenAuthenticationService.requireSupplierId())
+        .thenReturn("test-supplier");
+    when(elasticSearchClient.search(
+        argThat(is("test-supplier-audit")),
+        any(SearchSourceBuilder.class)))
+        .thenReturn(Collections.singletonList(buildSearchHit(auditSessionJson)));
+    when(objectMapper.readValue(anyString(), eq(AuditSession.class)))
+      .thenThrow(new JsonParseException(null, "Failed to parse"));
+
+    expectedException.expect(JsonParseException.class);
+    var audits = auditFinder.findAll(76L);
   }
 
   @Test
