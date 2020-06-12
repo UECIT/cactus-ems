@@ -8,7 +8,7 @@ import uk.nhs.ctp.enums.CdsApiVersion;
 public class ImplementationResolver {
 
   public <T, R extends T> T resolve(CdsApiVersion apiVersion, R v1Impl, R v2Impl) {
-    Preconditions.checkNotNull(apiVersion);
+    Preconditions.checkNotNull(apiVersion, "No api version set");
     switch (apiVersion) {
       case ONE_ONE:
         return v1Impl;
