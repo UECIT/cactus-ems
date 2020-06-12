@@ -22,7 +22,6 @@ import static uk.nhs.ctp.testhelper.matchers.IsEqualJSON.equalToJSON;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -173,15 +172,14 @@ public class AuditFinderServiceTest {
 
     var mapper = new ObjectMapper();
     mapper.registerModule(new JavaTimeModule());
-    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-    mapper.disable(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES);
     mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
     var audit = mapper.readValue(auditJson, AuditSession.class);
 
     assertThat(audit.getRequestUrl(), is("/case/"));
     assertThat(audit.getResponseStatus(), is("200"));
-    assertThat(audit.getAdditionalProperties().get("caseId"), is("51"));
+    assertThat(audit.getAdditionalProperties().get("caseId"), is("57"));
+    assertThat(audit.getEntries(), hasSize(28));
   }
 
   private Matcher<Object> hasRequestUrl(final String url) {
