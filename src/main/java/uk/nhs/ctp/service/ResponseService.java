@@ -22,12 +22,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.OperationOutcomeFactory;
 import uk.nhs.ctp.SystemCode;
+import uk.nhs.ctp.enums.CdsApiVersion;
 import uk.nhs.ctp.service.dto.CdssResponseDTO;
 import uk.nhs.ctp.service.dto.CdssResult;
 import uk.nhs.ctp.service.dto.ExtensionDTO;
 import uk.nhs.ctp.service.dto.TriageOption;
 import uk.nhs.ctp.service.dto.TriageQuestion;
 import uk.nhs.ctp.transform.ErrorMessageTransformer;
+import uk.nhs.ctp.transform.ReferralRequestDTOTransformer;
 import uk.nhs.ctp.transform.one_one.ReferralRequestDTOOneOneTransformer;
 import uk.nhs.ctp.transform.two.ReferralRequestDTOTwoTransformer;
 import uk.nhs.ctp.utils.ImplementationResolver;
@@ -72,10 +74,7 @@ public class ResponseService {
 		}
 		
 		if (cdssResult.hasReferralRequest()) {
-			var referralRequestDTOTransformer = implementationResolver.resolve(
-					cdssResult.getApiVersion(),
-					referralRequestVOneOneTransformer,
-					referralRequestVTwoTransformer);
+			var referralRequestDTOTransformer = resolveTransformer(cdssResult.getApiVersion());
 			response.setReferralRequest(referralRequestDTOTransformer.transform(cdssResult.getReferralRequest()));
 		}
 		if (cdssResult.hasCareAdvice()) {
@@ -115,10 +114,7 @@ public class ResponseService {
 
 			setTriageQuestion(questionnaire, response, triageResponses);
 			if (cdssResult.hasReferralRequest()) {
-				var referralRequestDTOTransformer = implementationResolver.resolve(
-						cdssResult.getApiVersion(),
-						referralRequestVOneOneTransformer,
-						referralRequestVTwoTransformer);
+				var referralRequestDTOTransformer = resolveTransformer(cdssResult.getApiVersion());
 				response.setReferralRequest(referralRequestDTOTransformer.transform(cdssResult.getReferralRequest()));
 			}
 		}
@@ -135,10 +131,7 @@ public class ResponseService {
 				response.setSwitchTrigger(cdssResult.getSwitchTrigger());
 			}
 			if (cdssResult.hasReferralRequest()) {
-				var referralRequestDTOTransformer = implementationResolver.resolve(
-						cdssResult.getApiVersion(),
-						referralRequestVOneOneTransformer,
-						referralRequestVTwoTransformer);
+				var referralRequestDTOTransformer = resolveTransformer(cdssResult.getApiVersion());
 				response.setReferralRequest(referralRequestDTOTransformer.transform(cdssResult.getReferralRequest()));
 			}
 			if (cdssResult.getCareAdvice() != null) {
@@ -301,6 +294,14 @@ public class ResponseService {
 					SystemCode.BAD_REQUEST, IssueType.INVALID);
 		}
 
+	}
+
+	private ReferralRequestDTOTransformer resolveTransformer(CdsApiVersion version) {
+		return implementationResolver.resolve(
+				version,
+				referralRequestVOneOneTransformer,
+				referralRequestVTwoTransformer
+		);
 	}
 
 }
