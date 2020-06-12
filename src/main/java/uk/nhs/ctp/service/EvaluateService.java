@@ -79,6 +79,7 @@ public class EvaluateService {
       caseService.updateCase(caseId, result, result.getSessionId());
     }
 
+    result.setApiVersion(cdssSupplier.getSupportedVersion());
     return result;
   }
 

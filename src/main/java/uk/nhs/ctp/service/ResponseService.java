@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.CareConnectCarePlan;
@@ -28,17 +28,21 @@ import uk.nhs.ctp.service.dto.ExtensionDTO;
 import uk.nhs.ctp.service.dto.TriageOption;
 import uk.nhs.ctp.service.dto.TriageQuestion;
 import uk.nhs.ctp.transform.ErrorMessageTransformer;
-import uk.nhs.ctp.transform.ReferralRequestDTOTransformer;
+import uk.nhs.ctp.transform.one_one.ReferralRequestDTOOneOneTransformer;
+import uk.nhs.ctp.transform.two.ReferralRequestDTOTwoTransformer;
+import uk.nhs.ctp.utils.ImplementationResolver;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ResponseService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ResponseService.class);
 
 	private final ErrorMessageTransformer errorMessageTransformer;
-	private final ReferralRequestDTOTransformer referralRequestDTOTransformer;
+	private final ImplementationResolver implementationResolver;
+	private final ReferralRequestDTOOneOneTransformer referralRequestVOneOneTransformer;
+	private final ReferralRequestDTOTwoTransformer referralRequestVTwoTransformer;
 
 	/**
 	 * Build response DTO with a summary of the CDSS response
@@ -68,6 +72,10 @@ public class ResponseService {
 		}
 		
 		if (cdssResult.hasReferralRequest()) {
+			var referralRequestDTOTransformer = implementationResolver.resolve(
+					cdssResult.getApiVersion(),
+					referralRequestVOneOneTransformer,
+					referralRequestVTwoTransformer);
 			response.setReferralRequest(referralRequestDTOTransformer.transform(cdssResult.getReferralRequest()));
 		}
 		if (cdssResult.hasCareAdvice()) {
@@ -107,6 +115,10 @@ public class ResponseService {
 
 			setTriageQuestion(questionnaire, response, triageResponses);
 			if (cdssResult.hasReferralRequest()) {
+				var referralRequestDTOTransformer = implementationResolver.resolve(
+						cdssResult.getApiVersion(),
+						referralRequestVOneOneTransformer,
+						referralRequestVTwoTransformer);
 				response.setReferralRequest(referralRequestDTOTransformer.transform(cdssResult.getReferralRequest()));
 			}
 		}
@@ -130,6 +142,10 @@ public class ResponseService {
 				response.setSwitchTrigger(cdssResult.getSwitchTrigger());
 			}
 			if (cdssResult.hasReferralRequest()) {
+				var referralRequestDTOTransformer = implementationResolver.resolve(
+						cdssResult.getApiVersion(),
+						referralRequestVOneOneTransformer,
+						referralRequestVTwoTransformer);
 				response.setReferralRequest(referralRequestDTOTransformer.transform(cdssResult.getReferralRequest()));
 			}
 			if (cdssResult.getCareAdvice() != null) {

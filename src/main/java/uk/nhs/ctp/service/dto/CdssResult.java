@@ -8,6 +8,7 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.RequestGroup;
 import org.hl7.fhir.dstu3.model.Resource;
+import uk.nhs.ctp.enums.CdsApiVersion;
 
 @Data
 public class CdssResult {
@@ -24,6 +25,7 @@ public class CdssResult {
   private OperationOutcome operationOutcome;
 
   private String requestId;
+  private CdsApiVersion apiVersion;
 
   public boolean hasOutputData() {
     return !this.outputData.getParameter().isEmpty();
