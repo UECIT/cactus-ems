@@ -126,14 +126,7 @@ public class ResponseService {
 		return response;
 	}
 
-	/**
-	 * Add result to the CDSS response
-	 * 
-	 * @param cdssResult
-	 * @param response
-	 * @throws FHIRException
-	 */
-	void addCdssResult(CdssResult cdssResult, CdssResponseDTO response) throws FHIRException {
+	private void addCdssResult(CdssResult cdssResult, CdssResponseDTO response) throws FHIRException {
 		if (cdssResult.hasResult()) {
 			CarePlan careplan = ResourceProviderUtils
 					.castToType(cdssResult.getResult().getActionFirstRep().getResource().getResource(), CareConnectCarePlan.class);
@@ -154,15 +147,7 @@ public class ResponseService {
 		}
 	}
 
-	/**
-	 * Add basic details to CdssResponse
-	 * 
-	 * @param caseId
-	 * @param cdssSupplierId
-	 * @param serviceDefinitionId
-	 * @param response
-	 */
-	void setTriageRequestDetails(Long caseId, Long cdssSupplierId, String serviceDefinitionId,
+	private void setTriageRequestDetails(Long caseId, Long cdssSupplierId, String serviceDefinitionId,
 			CdssResponseDTO response) {
 		response.setCaseId(caseId);
 		response.setCdssSupplierId(cdssSupplierId);
