@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.CareConnectCarePlan;
@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.OperationOutcomeFactory;
 import uk.nhs.ctp.SystemCode;
+import uk.nhs.ctp.enums.CdsApiVersion;
 import uk.nhs.ctp.service.dto.CdssResponseDTO;
 import uk.nhs.ctp.service.dto.CdssResult;
 import uk.nhs.ctp.service.dto.ExtensionDTO;
@@ -29,16 +30,17 @@ import uk.nhs.ctp.service.dto.TriageOption;
 import uk.nhs.ctp.service.dto.TriageQuestion;
 import uk.nhs.ctp.transform.ErrorMessageTransformer;
 import uk.nhs.ctp.transform.ReferralRequestDTOTransformer;
+import uk.nhs.ctp.utils.ImplementationResolver;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ResponseService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ResponseService.class);
 
 	private final ErrorMessageTransformer errorMessageTransformer;
-	private final ReferralRequestDTOTransformer referralRequestDTOTransformer;
+	private final ImplementationResolver<ReferralRequestDTOTransformer> referralRequestTransformerResolver;
 
 	/**
 	 * Build response DTO with a summary of the CDSS response
@@ -68,6 +70,7 @@ public class ResponseService {
 		}
 		
 		if (cdssResult.hasReferralRequest()) {
+			var referralRequestDTOTransformer = resolveTransformer(cdssResult.getApiVersion());
 			response.setReferralRequest(referralRequestDTOTransformer.transform(cdssResult.getReferralRequest()));
 		}
 		if (cdssResult.hasCareAdvice()) {
@@ -107,6 +110,7 @@ public class ResponseService {
 
 			setTriageQuestion(questionnaire, response, triageResponses);
 			if (cdssResult.hasReferralRequest()) {
+				var referralRequestDTOTransformer = resolveTransformer(cdssResult.getApiVersion());
 				response.setReferralRequest(referralRequestDTOTransformer.transform(cdssResult.getReferralRequest()));
 			}
 		}
@@ -114,14 +118,7 @@ public class ResponseService {
 		return response;
 	}
 
-	/**
-	 * Add result to the CDSS response
-	 * 
-	 * @param cdssResult
-	 * @param response
-	 * @throws FHIRException
-	 */
-	void addCdssResult(CdssResult cdssResult, CdssResponseDTO response) throws FHIRException {
+	private void addCdssResult(CdssResult cdssResult, CdssResponseDTO response) throws FHIRException {
 		if (cdssResult.hasResult()) {
 			CarePlan careplan = ResourceProviderUtils
 					.castToType(cdssResult.getResult().getActionFirstRep().getResource().getResource(), CareConnectCarePlan.class);
@@ -130,6 +127,7 @@ public class ResponseService {
 				response.setSwitchTrigger(cdssResult.getSwitchTrigger());
 			}
 			if (cdssResult.hasReferralRequest()) {
+				var referralRequestDTOTransformer = resolveTransformer(cdssResult.getApiVersion());
 				response.setReferralRequest(referralRequestDTOTransformer.transform(cdssResult.getReferralRequest()));
 			}
 			if (cdssResult.getCareAdvice() != null) {
@@ -138,15 +136,7 @@ public class ResponseService {
 		}
 	}
 
-	/**
-	 * Add basic details to CdssResponse
-	 * 
-	 * @param caseId
-	 * @param cdssSupplierId
-	 * @param serviceDefinitionId
-	 * @param response
-	 */
-	void setTriageRequestDetails(Long caseId, Long cdssSupplierId, String serviceDefinitionId,
+	private void setTriageRequestDetails(Long caseId, Long cdssSupplierId, String serviceDefinitionId,
 			CdssResponseDTO response) {
 		response.setCaseId(caseId);
 		response.setCdssSupplierId(cdssSupplierId);
@@ -300,6 +290,10 @@ public class ResponseService {
 					SystemCode.BAD_REQUEST, IssueType.INVALID);
 		}
 
+	}
+
+	private ReferralRequestDTOTransformer resolveTransformer(CdsApiVersion version) {
+		return referralRequestTransformerResolver.resolve(version);
 	}
 
 }
