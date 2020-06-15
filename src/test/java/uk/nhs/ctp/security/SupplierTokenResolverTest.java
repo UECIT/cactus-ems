@@ -44,7 +44,6 @@ public class SupplierTokenResolverTest {
     ReflectionTestUtils.setField(tokenResolver, "fhirServer", "fhir.server");
     ReflectionTestUtils.setField(tokenResolver, "blobServer", "blob.server");
     ReflectionTestUtils.setField(tokenResolver, "emsFhirServer", "ems.fhir.server");
-    ReflectionTestUtils.setField(tokenResolver, "cactusCdss", "cdss.server");
     ReflectionTestUtils.setField(tokenResolver, "dosServer", "dos.server");
   }
 
