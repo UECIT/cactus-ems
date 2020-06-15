@@ -17,6 +17,7 @@ public class SupplierAccountDetails {
   @Builder
   public static class EndpointDetails {
     String cdss;
+    String cdss2;
     String ems;
     String emsUi;
     String dos;

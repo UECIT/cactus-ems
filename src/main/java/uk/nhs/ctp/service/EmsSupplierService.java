@@ -1,7 +1,5 @@
 package uk.nhs.ctp.service;
 
-import static com.google.common.collect.MoreCollectors.toOptional;
-
 import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
@@ -25,9 +23,8 @@ public class EmsSupplierService {
   }
 
   public Optional<EmsSupplier> findEmsSupplierByBaseUrl(String baseUrl) {
-    return emsSupplierRepository.findAllBySupplierId(authService.requireSupplierId()).stream()
-        .filter(supplier -> supplier.getBaseUrl().equals(baseUrl))
-        .collect(toOptional());
+    return emsSupplierRepository
+        .getOneBySupplierIdAndBaseUrl(authService.requireSupplierId(), baseUrl);
   }
 
   public EmsSupplier crupdate(EmsSupplier updated) {

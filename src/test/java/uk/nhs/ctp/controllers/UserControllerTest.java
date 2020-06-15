@@ -64,6 +64,7 @@ public class UserControllerTest {
         .email("testemail")
         .endpoints(EndpointDetails.builder()
             .cdss("http://localhost:8080/fhir")
+            .cdss2("http://localhost:8080/fhir")
             .ems("http://localhost:8083/fhir")
             .emsUi("http://localhost:4200")
             .dos("http://localhost:8085/fhir")

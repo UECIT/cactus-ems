@@ -20,7 +20,11 @@ import uk.nhs.ctp.enums.ReferencingType;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "cdss_supplier", indexes = @Index(columnList = "supplierId"))
+@Table(name = "cdss_supplier",
+    indexes = {
+      @Index(columnList = "supplierId"),
+      @Index(columnList = "supplierId,base_url"),
+    })
 @Data
 public class CdssSupplier extends SupplierPartitioned {
 

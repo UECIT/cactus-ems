@@ -27,9 +27,6 @@ public class SupplierTokenResolver {
   @Value("${ems.fhir.server}")
   private String emsFhirServer;
 
-  @Value("${cactus.cdss}")
-  private String cactusCdss;
-
   @Value("${dos.server}")
   private String dosServer;
 
@@ -48,7 +45,7 @@ public class SupplierTokenResolver {
    */
   public Optional<String> resolve(String requestUrl) {
     final List<String> cactusServices =
-        Arrays.asList(fhirServer, blobServer, emsFhirServer, cactusCdss, dosServer);
+        Arrays.asList(fhirServer, blobServer, emsFhirServer, dosServer);
 
     if (cactusServices.stream().anyMatch(requestUrl::startsWith)) {
       return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())

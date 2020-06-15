@@ -64,11 +64,6 @@ public class SupplierTokenResolverTest {
   }
 
   @Test
-  public void resolveToken_UrlMatchesCactusCdssServer() {
-    resolveCactusTest("cdss.server");
-  }
-
-  @Test
   public void resolveToken_UrlMatchesCactusDosServer() {
     resolveCactusTest("dos.server");
   }

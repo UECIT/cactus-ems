@@ -5,8 +5,6 @@ import static com.github.npathai.hamcrestopt.OptionalMatchers.isPresentAndIs;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Rule;
@@ -45,10 +43,8 @@ public class EmsSupplierServiceTest {
   public void testFindCdssSupplierByUrl_matches() {
     EmsSupplier matched = new EmsSupplier();
     matched.setBaseUrl("matched.base");
-    EmsSupplier notMatched = new EmsSupplier();
-    notMatched.setBaseUrl("not.matched.base");
-    when(emsSupplierRepository.findAllBySupplierId(SUPPLIER))
-        .thenReturn(Arrays.asList(matched, notMatched));
+    when(emsSupplierRepository.getOneBySupplierIdAndBaseUrl(SUPPLIER, "matched.base"))
+        .thenReturn(Optional.of(matched));
 
     Optional<EmsSupplier> found = emsSupplierService
         .findEmsSupplierByBaseUrl("matched.base");
@@ -58,29 +54,12 @@ public class EmsSupplierServiceTest {
 
   @Test
   public void testFindCdssSupplierByUrl_noMatches() {
-    EmsSupplier notMatched = new EmsSupplier();
-    notMatched.setBaseUrl("not.matched.base");
-    when(emsSupplierRepository.findAllBySupplierId(SUPPLIER))
-        .thenReturn(Collections.singletonList(notMatched));
+    when(emsSupplierRepository.getOneBySupplierIdAndBaseUrl(SUPPLIER, "matched.base"))
+        .thenReturn(Optional.empty());
 
     Optional<EmsSupplier> found = emsSupplierService
         .findEmsSupplierByBaseUrl("matched.base");
 
     assertThat(found, isEmpty());
   }
-
-  @Test
-  public void testFindCdssSupplierByUrl_multipleMatches_throws() {
-    EmsSupplier matched = new EmsSupplier();
-    matched.setBaseUrl("matched.base");
-    EmsSupplier matched2 = new EmsSupplier();
-    matched2.setBaseUrl("matched.base");
-    when(emsSupplierRepository.findAllBySupplierId(SUPPLIER))
-        .thenReturn(Arrays.asList(matched, matched2));
-
-    expectedException.expect(IllegalArgumentException.class);
-
-    emsSupplierService.findEmsSupplierByBaseUrl("matched.base");
-  }
-
 }

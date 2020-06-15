@@ -13,7 +13,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -203,10 +202,8 @@ public class CdssSupplierServiceTest {
   public void testFindCdssSupplierByUrl_matches() {
     CdssSupplier matched = new CdssSupplier();
     matched.setBaseUrl("matched.base");
-    CdssSupplier notMatched = new CdssSupplier();
-    notMatched.setBaseUrl("not.matched.base");
-    when(cdssSupplierRepository.findAllBySupplierId(SUPPLIER))
-        .thenReturn(Arrays.asList(matched, notMatched));
+    when(cdssSupplierRepository.getOneBySupplierIdAndBaseUrl(SUPPLIER, "matched.base"))
+        .thenReturn(Optional.of(matched));
 
     Optional<CdssSupplier> found = cdssSupplierService
         .findCdssSupplierByBaseUrl("matched.base");
@@ -216,29 +213,13 @@ public class CdssSupplierServiceTest {
 
   @Test
   public void testFindCdssSupplierByUrl_noMatches() {
-    CdssSupplier notMatched = new CdssSupplier();
-    notMatched.setBaseUrl("not.matched.base");
-    when(cdssSupplierRepository.findAllBySupplierId(SUPPLIER))
-        .thenReturn(Collections.singletonList(notMatched));
+    when(cdssSupplierRepository.getOneBySupplierIdAndBaseUrl(SUPPLIER, "matched.base"))
+        .thenReturn(Optional.empty());
 
     Optional<CdssSupplier> found = cdssSupplierService
         .findCdssSupplierByBaseUrl("matched.base");
 
     assertThat(found, isEmpty());
-  }
-
-  @Test
-  public void testFindCdssSupplierByUrl_multipleMatches_throws() {
-    CdssSupplier matched = new CdssSupplier();
-    matched.setBaseUrl("matched.base");
-    CdssSupplier matched2 = new CdssSupplier();
-    matched2.setBaseUrl("matched.base");
-    when(cdssSupplierRepository.findAllBySupplierId(SUPPLIER))
-        .thenReturn(Arrays.asList(matched, matched2));
-
-    expectedException.expect(IllegalArgumentException.class);
-
-    cdssSupplierService.findCdssSupplierByBaseUrl("matched.base");
   }
 
 }
