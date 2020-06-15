@@ -8,7 +8,6 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.dstu3.model.CareConnectCarePlan;
@@ -31,14 +30,14 @@ import org.hl7.fhir.dstu3.model.CoordinateResource;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.core.context.SecurityContextHolder;
-import uk.nhs.cactus.common.security.CactusToken;
+import uk.nhs.ctp.security.SupplierTokenResolver;
 
 @Configuration
 @RequiredArgsConstructor
 public class FHIRConfig {
 
   private final List<IClientInterceptor> clientInterceptors;
+  private final SupplierTokenResolver tokenResolver;
 
   @Bean
   public FhirContext fhirContext() {
@@ -86,10 +85,8 @@ public class FHIRConfig {
         }
 
         // Authentication
-        // TODO match base URL to configurable authentication per service
-        Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
-            .map(auth -> (CactusToken) auth.getCredentials())
-            .map(credentials -> new BearerTokenAuthInterceptor(credentials.getToken()))
+        tokenResolver.resolve(theServerBase)
+            .map(BearerTokenAuthInterceptor::new)
             .ifPresent(client::registerInterceptor);
 
         return client;
