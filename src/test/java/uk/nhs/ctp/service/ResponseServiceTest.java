@@ -36,6 +36,7 @@ import uk.nhs.ctp.service.dto.ErrorMessageDTO;
 import uk.nhs.ctp.service.dto.ReferralRequestDTO;
 import uk.nhs.ctp.service.dto.TriageQuestion;
 import uk.nhs.ctp.transform.ErrorMessageTransformer;
+import uk.nhs.ctp.transform.ReferralRequestDTOTransformer;
 import uk.nhs.ctp.transform.one_one.ReferralRequestDTOOneOneTransformer;
 import uk.nhs.ctp.transform.two.ReferralRequestDTOTwoTransformer;
 import uk.nhs.ctp.utils.ImplementationResolver;
@@ -49,7 +50,7 @@ public class ResponseServiceTest {
 	@Mock
 	private ErrorMessageTransformer errorMessageTransformer;
 	@Mock
-	private ImplementationResolver implementationResolver;
+	private ImplementationResolver<ReferralRequestDTOTransformer> implementationResolver;
 	@Mock
 	private ReferralRequestDTOOneOneTransformer referralRequestVOneOneTransformer;
 	@Mock
@@ -211,10 +212,8 @@ public class ResponseServiceTest {
 				.description("Something")
 				.build();
 
-		when(implementationResolver.resolve(
-				CdsApiVersion.ONE_ONE,
-				referralRequestVOneOneTransformer,
-				referralRequestVTwoTransformer)).thenReturn(referralRequestVOneOneTransformer);
+		when(implementationResolver.resolve(CdsApiVersion.ONE_ONE))
+				.thenReturn(referralRequestVOneOneTransformer);
 		when(referralRequestVOneOneTransformer.transform(referralRequest))
 				.thenReturn(expectedReferral);
 
@@ -239,10 +238,8 @@ public class ResponseServiceTest {
 				.description("Something")
 				.build();
 
-		when(implementationResolver.resolve(
-				CdsApiVersion.TWO,
-				referralRequestVOneOneTransformer,
-				referralRequestVTwoTransformer)).thenReturn(referralRequestVTwoTransformer);
+		when(implementationResolver.resolve(CdsApiVersion.TWO))
+				.thenReturn(referralRequestVTwoTransformer);
 		when(referralRequestVTwoTransformer.transform(referralRequest))
 				.thenReturn(expectedReferral);
 
@@ -275,10 +272,8 @@ public class ResponseServiceTest {
 				.description("Something")
 				.build();
 
-		when(implementationResolver.resolve(
-				CdsApiVersion.ONE_ONE,
-				referralRequestVOneOneTransformer,
-				referralRequestVTwoTransformer)).thenReturn(referralRequestVOneOneTransformer);
+		when(implementationResolver.resolve(CdsApiVersion.ONE_ONE))
+				.thenReturn(referralRequestVOneOneTransformer);
 		when(referralRequestVOneOneTransformer.transform(referralRequest))
 				.thenReturn(expectedReferral);
 
@@ -312,10 +307,8 @@ public class ResponseServiceTest {
 				.description("Something")
 				.build();
 
-		when(implementationResolver.resolve(
-				CdsApiVersion.TWO,
-				referralRequestVOneOneTransformer,
-				referralRequestVTwoTransformer)).thenReturn(referralRequestVTwoTransformer);
+		when(implementationResolver.resolve(CdsApiVersion.TWO))
+				.thenReturn(referralRequestVTwoTransformer);
 		when(referralRequestVTwoTransformer.transform(referralRequest))
 				.thenReturn(expectedReferral);
 
@@ -352,10 +345,8 @@ public class ResponseServiceTest {
 								.setValue(new Coding("optionSys2", "optionCode2", "optionDisplay2"))));
 		questionnaire.setId("1");
 
-		when(implementationResolver.resolve(
-				CdsApiVersion.ONE_ONE,
-				referralRequestVOneOneTransformer,
-				referralRequestVTwoTransformer)).thenReturn(referralRequestVOneOneTransformer);
+		when(implementationResolver.resolve(CdsApiVersion.ONE_ONE))
+				.thenReturn(referralRequestVOneOneTransformer);
 		when(referralRequestVOneOneTransformer.transform(referralRequest))
 				.thenReturn(expectedReferral);
 
@@ -403,10 +394,8 @@ public class ResponseServiceTest {
 								.setValue(new Coding("optionSys2", "optionCode2", "optionDisplay2"))));
 		questionnaire.setId("1");
 
-		when(implementationResolver.resolve(
-				CdsApiVersion.TWO,
-				referralRequestVOneOneTransformer,
-				referralRequestVTwoTransformer)).thenReturn(referralRequestVTwoTransformer);
+		when(implementationResolver.resolve(CdsApiVersion.TWO))
+				.thenReturn(referralRequestVTwoTransformer);
 		when(referralRequestVTwoTransformer.transform(referralRequest))
 				.thenReturn(expectedReferral);
 

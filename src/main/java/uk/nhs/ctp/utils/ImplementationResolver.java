@@ -1,19 +1,22 @@
 package uk.nhs.ctp.utils;
 
 import com.google.common.base.Preconditions;
-import org.springframework.stereotype.Component;
+import lombok.Builder;
 import uk.nhs.ctp.enums.CdsApiVersion;
 
-@Component
-public class ImplementationResolver {
+@Builder
+public class ImplementationResolver<T> {
 
-  public <T, R extends T> T resolve(CdsApiVersion apiVersion, R v1Impl, R v2Impl) {
+  T v1Impl;
+  T v2Impl;
+
+  public T resolve(CdsApiVersion apiVersion) {
     Preconditions.checkNotNull(apiVersion, "No api version set");
     switch (apiVersion) {
       case ONE_ONE:
-        return v1Impl;
+        return this.v1Impl;
       case TWO:
-        return v2Impl;
+        return this.v2Impl;
     }
     throw new IllegalStateException("Api version " + apiVersion + " not supported");
   }

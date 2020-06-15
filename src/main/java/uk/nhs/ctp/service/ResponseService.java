@@ -30,8 +30,6 @@ import uk.nhs.ctp.service.dto.TriageOption;
 import uk.nhs.ctp.service.dto.TriageQuestion;
 import uk.nhs.ctp.transform.ErrorMessageTransformer;
 import uk.nhs.ctp.transform.ReferralRequestDTOTransformer;
-import uk.nhs.ctp.transform.one_one.ReferralRequestDTOOneOneTransformer;
-import uk.nhs.ctp.transform.two.ReferralRequestDTOTwoTransformer;
 import uk.nhs.ctp.utils.ImplementationResolver;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
 
@@ -42,9 +40,7 @@ public class ResponseService {
 	private static final Logger LOG = LoggerFactory.getLogger(ResponseService.class);
 
 	private final ErrorMessageTransformer errorMessageTransformer;
-	private final ImplementationResolver implementationResolver;
-	private final ReferralRequestDTOOneOneTransformer referralRequestVOneOneTransformer;
-	private final ReferralRequestDTOTwoTransformer referralRequestVTwoTransformer;
+	private final ImplementationResolver<ReferralRequestDTOTransformer> referralRequestTransformerResolver;
 
 	/**
 	 * Build response DTO with a summary of the CDSS response
@@ -297,11 +293,7 @@ public class ResponseService {
 	}
 
 	private ReferralRequestDTOTransformer resolveTransformer(CdsApiVersion version) {
-		return implementationResolver.resolve(
-				version,
-				referralRequestVOneOneTransformer,
-				referralRequestVTwoTransformer
-		);
+		return referralRequestTransformerResolver.resolve(version);
 	}
 
 }

@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.is;
 import static uk.nhs.ctp.enums.CdsApiVersion.ONE_ONE;
 import static uk.nhs.ctp.enums.CdsApiVersion.TWO;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -14,30 +13,33 @@ import uk.nhs.ctp.model.SupplierAccountDetails;
 
 public class ImplementationResolverTest {
 
-  private ImplementationResolver resolver;
+  private ImplementationResolver<Object> resolver;
 
   @Rule
   public ExpectedException expect = ExpectedException.none();
 
-  @Before
-  public void setup() {
-    resolver = new ImplementationResolver();
-  }
-
   @Test
   public void shouldFail_noCdsApiVersionSet() {
+    resolver = ImplementationResolver.builder()
+        .v1Impl("v1String")
+        .v2Impl("v2String")
+        .build();
     expect.expectMessage("No api version set");
     expect.expect(NullPointerException.class);
 
-    resolver.resolve(null, "v1String", "v2String");
+    resolver.resolve(null);
   }
 
   @Test
   public void returnsVersionOnePointOneImplementation() {
     Appointment v1 = Appointment.builder().comment("v1 Comment").build();
     Appointment v2 = Appointment.builder().comment("v2 Comment").build();
+    resolver = ImplementationResolver.builder()
+        .v1Impl(v1)
+        .v2Impl(v2)
+        .build();
 
-    Appointment resolved = resolver.resolve(ONE_ONE, v1, v2);
+    Object resolved = resolver.resolve(ONE_ONE);
 
     assertThat(resolved, is(v1));
   }
@@ -46,8 +48,12 @@ public class ImplementationResolverTest {
   public void returnsVersionTwoImplementation() {
     SupplierAccountDetails v1 = SupplierAccountDetails.builder().email("v1 Email").build();
     SupplierAccountDetails v2 = SupplierAccountDetails.builder().email("v2 Email").build();
+    resolver = ImplementationResolver.builder()
+        .v1Impl(v1)
+        .v2Impl(v2)
+        .build();
 
-    SupplierAccountDetails resolved = resolver.resolve(TWO, v1, v2);
+    Object resolved = resolver.resolve(TWO);
 
     assertThat(resolved, is(v2));
   }
