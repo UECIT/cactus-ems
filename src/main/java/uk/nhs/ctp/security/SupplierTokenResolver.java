@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import uk.nhs.ctp.service.EmsSupplierService;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class SupplierTokenResolver {
 
   @Value("${fhir.server}")
@@ -47,12 +49,16 @@ public class SupplierTokenResolver {
     final List<String> cactusServices =
         Arrays.asList(fhirServer, blobServer, emsFhirServer, dosServer);
 
+    log.info("Resolve token for {}", requestUrl);
+
     if (cactusServices.stream().anyMatch(requestUrl::startsWith)) {
+      log.info("Using Cactus token");
       return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
           .map(auth -> (CactusToken) auth.getCredentials())
           .map(CactusToken::getToken);
     }
 
+    log.info("Looking up token in supplier records");
     Supplier<Optional<String>> emsProviderAuthTokenSupplier = () -> emsSupplierService
         .findEmsSupplierByBaseUrl(requestUrl)
         .map(EmsSupplier::getAuthToken);
