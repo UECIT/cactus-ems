@@ -25,7 +25,7 @@
 
     <elastic-search-version>7.7.1</elastic-search-version>
 
-    <cactus-common.version>0.0.4</cactus-common.version>
+    <cactus-common.version>0.0.5.1</cactus-common.version>
   </properties>
 
   <repositories>
@@ -239,6 +239,12 @@
       <groupId>com.shazam</groupId>
       <artifactId>shazamcrest</artifactId>
       <version>0.11</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.npathai</groupId>
+      <artifactId>hamcrest-optional</artifactId>
+      <version>2.0.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>

@@ -1,6 +1,7 @@
 package uk.nhs.ctp.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -59,6 +60,11 @@ public class CdssSupplierService {
   public CdssSupplier getCdssSupplier(Long id) {
     return cdssSupplierRepository.getOneByIdAndSupplierId(id, authService.requireSupplierId())
         .orElseThrow(EMSException::notFound);
+  }
+
+  public Optional<CdssSupplier> findCdssSupplierByBaseUrl(String baseUrl) {
+    return cdssSupplierRepository
+        .getOneBySupplierIdAndBaseUrl(authService.requireSupplierId(), baseUrl);
   }
 
   public CdssSupplier createCdssSupplier(NewCdssSupplierDTO newCdssSupplierDTO) {

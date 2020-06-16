@@ -1,5 +1,7 @@
 package uk.nhs.ctp.service;
 
+import static com.github.npathai.hamcrestopt.OptionalMatchers.isEmpty;
+import static com.github.npathai.hamcrestopt.OptionalMatchers.isPresentAndIs;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
@@ -13,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -23,9 +26,9 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.entities.CdssSupplier;
-import uk.nhs.ctp.enums.CdsApiVersion;
 import uk.nhs.ctp.entities.ServiceDefinition;
 import uk.nhs.ctp.entities.UserEntity;
+import uk.nhs.ctp.enums.CdsApiVersion;
 import uk.nhs.ctp.enums.ReferencingType;
 import uk.nhs.ctp.exception.EMSException;
 import uk.nhs.ctp.repos.CdssSupplierRepository;
@@ -193,6 +196,30 @@ public class CdssSupplierServiceTest {
     assertThat(returned, is(expected));
     verify(serviceDefinitionRepository, never()).save(any(ServiceDefinition.class));
 
+  }
+
+  @Test
+  public void testFindCdssSupplierByUrl_matches() {
+    CdssSupplier matched = new CdssSupplier();
+    matched.setBaseUrl("matched.base");
+    when(cdssSupplierRepository.getOneBySupplierIdAndBaseUrl(SUPPLIER, "matched.base"))
+        .thenReturn(Optional.of(matched));
+
+    Optional<CdssSupplier> found = cdssSupplierService
+        .findCdssSupplierByBaseUrl("matched.base");
+
+    assertThat(found, isPresentAndIs(matched));
+  }
+
+  @Test
+  public void testFindCdssSupplierByUrl_noMatches() {
+    when(cdssSupplierRepository.getOneBySupplierIdAndBaseUrl(SUPPLIER, "matched.base"))
+        .thenReturn(Optional.empty());
+
+    Optional<CdssSupplier> found = cdssSupplierService
+        .findCdssSupplierByBaseUrl("matched.base");
+
+    assertThat(found, isEmpty());
   }
 
 }

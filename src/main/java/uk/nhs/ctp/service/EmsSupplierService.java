@@ -1,6 +1,7 @@
 package uk.nhs.ctp.service;
 
 import java.util.List;
+import java.util.Optional;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,11 @@ public class EmsSupplierService {
   public List<EmsSupplier> getAll() {
     return emsSupplierRepository
         .findAllBySupplierId(authService.requireSupplierId());
+  }
+
+  public Optional<EmsSupplier> findEmsSupplierByBaseUrl(String baseUrl) {
+    return emsSupplierRepository
+        .getOneBySupplierIdAndBaseUrl(authService.requireSupplierId(), baseUrl);
   }
 
   public EmsSupplier crupdate(EmsSupplier updated) {

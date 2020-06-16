@@ -43,6 +43,9 @@ public class UserManagementService {
   @Value("${cactus.cdss}")
   private String cdss;
 
+  @Value("${cactus.cdss.v2}")
+  private String cdss2;
+
   @Value("${dos.server}")
   private String dos;
 
@@ -78,6 +81,7 @@ public class UserManagementService {
               .ems(ems)
               .emsUi(emsUi)
               .cdss(cdss)
+              .cdss2(cdss2)
               .dos(dos)
               .logs(logs)
               .build())

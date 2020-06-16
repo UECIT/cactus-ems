@@ -93,7 +93,7 @@ public class CompositionServiceTest {
 
   @Before
   public void setup() {
-    fhirContext = new FHIRConfig(null).fhirContext();
+    fhirContext = new FHIRConfig(null, null).fhirContext();
     when(mockedFhirContext.newJsonParser()).thenReturn(fhirContext.newJsonParser());
 
     buildInterimCase();

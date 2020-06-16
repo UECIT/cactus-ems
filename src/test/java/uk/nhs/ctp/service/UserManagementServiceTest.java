@@ -72,6 +72,7 @@ public class UserManagementServiceTest {
     ReflectionTestUtils.setField(userManagementService, "ems", "http://ems.com");
     ReflectionTestUtils.setField(userManagementService, "emsUi", "http://ems-ui.com");
     ReflectionTestUtils.setField(userManagementService, "cdss", "http://cdss.com");
+    ReflectionTestUtils.setField(userManagementService, "cdss2", "http://cdss2.com");
     ReflectionTestUtils.setField(userManagementService, "dos", "http://dos.com");
     ReflectionTestUtils.setField(userManagementService, "logs", "http://elastic.com");
 
@@ -87,6 +88,7 @@ public class UserManagementServiceTest {
             .ems("http://ems.com")
             .emsUi("http://ems-ui.com")
             .cdss("http://cdss.com")
+            .cdss2("http://cdss2.com")
             .dos("http://dos.com")
             .logs("http://elastic.com")
             .build())

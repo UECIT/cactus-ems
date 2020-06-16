@@ -11,7 +11,11 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "ems_supplier", indexes = @Index(columnList = "supplierId"))
+@Table(name = "ems_supplier",
+    indexes = {
+        @Index(columnList = "supplierId"),
+        @Index(columnList = "supplierId,base_url"),
+    })
 public class EmsSupplier extends SupplierPartitioned {
 
   @Id
