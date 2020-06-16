@@ -15,12 +15,6 @@ import uk.nhs.ctp.security.SupplierTokenResolver;
 @RequiredArgsConstructor
 public class AuthRestClient implements ClientHttpRequestInterceptor {
 
-  @Value("${blob.server}")
-  private String blobServer;
-
-  @Value("${blob.server.auth.token}")
-  private String blobServerAuthToken;
-
   private final SupplierTokenResolver tokenResolver;
 
   @Override
