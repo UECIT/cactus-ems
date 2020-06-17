@@ -1,6 +1,6 @@
 /* TODO: handle duplicate key insert errors */
 INSERT IGNORE INTO
- cdss_decoupling.patient (id, title, first_name, last_name, date_of_birth, gender, nhs_number, address, city, postal_code, home_phone, mobile, email, language)
+ patient (id, title, first_name, last_name, date_of_birth, gender, nhs_number, address, city, postal_code, home_phone, mobile, email, language)
 VALUES
  (1, "Miss", "Joanne", "Bloggs", "2011-09-07", "female", "9476719915", "Flat 3, 123 A Road", "London", "W1 123", "020 123 456", "0700 123 456", null, "en"),
  (2, "Mrs", "Jenny", "Bloggs", "1942-09-07", "female", "9476719916", "Flat 3, 123 A Road", "London", "W1 123", "020 123 456", "0700 123 456", null, "en"),
@@ -11,7 +11,7 @@ VALUES
 
 /*St. Georges Test Patients*/
 INSERT IGNORE INTO
- cdss_decoupling.patient (id, first_name, last_name, date_of_birth, gender, nhs_number, address, city, postal_code, home_phone, mobile, language)
+ patient (id, first_name, last_name, date_of_birth, gender, nhs_number, address, city, postal_code, home_phone, mobile, language)
 VALUES
  (7, "Testing-01", "STGTesting", "1970-01-01", "male", "5900086461", "St Georges", "Leeds", "LS1 1AA", "111 111 111", "0799 999 999", "en"),
  (8, "CAB - TEST", "STGTESTING", "1988-01-08", "male", "5900029409", "Flat 1 77A", "Leeds", "LS1 1AA", "111 111 111", "0799 999 999", "en"),
@@ -26,11 +26,11 @@ VALUES
 
 
 INSERT IGNORE INTO
- cdss_decoupling.users (username, name, password, enabled, role, supplierId)
+ users (username, name, password, enabled, role, supplierId)
 VALUES
- ('admin', 'Admin User', '$2a$10$hbxecwitQQ.dDT4JOFzQAulNySFwEpaFLw38jda6Td.Y/cOiRzDFu', true, 'ROLE_ADMIN', 'adminSupplier'),
+ ('admin', 'Admin User', '$2a$10$hbxecwitQQ.dDT4JOFzQAulNySFwEpaFLw38jda6Td.Y/cOiRzDFu', true, 'ROLE_ADMIN', 'admin_supplier'),
  ('supplier1', 'Supplier 1 User', '$2a$10$hbxecwitQQ.dDT4JOFzQAulNySFwEpaFLw38jda6Td.Y/cOiRzDFu', true, 'ROLE_SUPPLIER_ADMIN', 'supplier1');
 
-UPDATE cdss_decoupling.users
-SET supplierId = 'adminSupplier'
+UPDATE users
+SET supplierId = 'admin_supplier'
 WHERE username = 'admin';
