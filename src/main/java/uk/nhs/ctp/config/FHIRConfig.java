@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.dstu3.model.CareConnectCarePlan;
 import org.hl7.fhir.dstu3.model.CareConnectCareTeam;
 import org.hl7.fhir.dstu3.model.CareConnectEncounter;
@@ -35,7 +34,6 @@ import uk.nhs.ctp.security.SupplierTokenResolver;
 
 @Configuration
 @RequiredArgsConstructor
-@Slf4j
 public class FHIRConfig {
 
   private final List<IClientInterceptor> clientInterceptors;
@@ -89,10 +87,6 @@ public class FHIRConfig {
         // Authentication
         tokenResolver.resolve(theServerBase)
             .map(BearerTokenAuthInterceptor::new)
-            .map(interceptor -> {
-              log.info("Installing auth interceptor for requests to {}", theServerBase);
-              return interceptor;
-            })
             .ifPresent(client::registerInterceptor);
 
         return client;

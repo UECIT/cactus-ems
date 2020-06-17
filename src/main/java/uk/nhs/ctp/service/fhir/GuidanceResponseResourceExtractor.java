@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.dstu3.model.GuidanceResponse;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Parameters;
@@ -18,7 +17,6 @@ import uk.nhs.ctp.utils.ResourceProviderUtils;
 
 @Component
 @AllArgsConstructor
-@Slf4j
 public class GuidanceResponseResourceExtractor {
 
   private FhirContext fhirContext;
@@ -32,21 +30,17 @@ public class GuidanceResponseResourceExtractor {
       String baseUrl = cdssSupplier.getBaseUrl();
       Reference result = guidanceResponse.getResult();
 
-      log.info("Resolving {} relative to {}", result.getReference(), baseUrl);
       referenceService.resolve(baseUrl, result);
 
       RequestGroup requestGroup;
       if (result.getResource() instanceof RequestGroup) {
-        log.info("Resolved reference to contained resource");
         requestGroup = (RequestGroup) result.getResource();
       } else {
-        log.info("Requesting from {}", result.getReference());
         requestGroup = ResourceProviderUtils.getResource(fhirContext,
             result.getReferenceElement().getBaseUrl(), RequestGroup.class, result.getReference());
       }
 
       var requestBaseUrl = requestGroup.getIdElement().getBaseUrl();
-      log.info("Resolving references in RequestGroup {} relative to {}", requestGroup.getId(), requestBaseUrl);
       referenceService.resolveRelative(requestBaseUrl, requestGroup);
 
       for (var child : requestGroup.getAction()) {
