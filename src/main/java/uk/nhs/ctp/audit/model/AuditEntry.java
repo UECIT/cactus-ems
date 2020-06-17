@@ -1,12 +1,9 @@
 package uk.nhs.ctp.audit.model;
 
-import java.time.Instant;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.time.Instant;
 
 /**
  * Represents calls made by this web service's FHIR client during an audit session
@@ -28,8 +25,5 @@ public class AuditEntry {
   String responseBody;
 
   Instant dateOfEntry;
-  String supplierId;
-  String requestId;
-  String sessionId;
 
 }

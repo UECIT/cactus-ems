@@ -14,7 +14,6 @@ import uk.nhs.ctp.service.dto.HealthcareServiceDTO;
 @RequiredArgsConstructor
 public class ResourceRegistryConfig {
 
-  @Qualifier("enhanced")
   private final ObjectMapper mapper;
 
   @Bean

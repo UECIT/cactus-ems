@@ -3,12 +3,6 @@ package uk.nhs.ctp.auditFinder;
 import com.amazonaws.auth.AWS4Signer;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.google.common.base.Preconditions;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.regex.Pattern;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
@@ -18,9 +12,18 @@ import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Pattern;
+
+@Component
 @Slf4j
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@Profile("!dev")
 public class ElasticSearchClient {
 
   private static final String ES_SERVICE_NAME = "es";
@@ -29,7 +32,7 @@ public class ElasticSearchClient {
 
   private final RestHighLevelClient baseClient;
 
-  public static ElasticSearchClient forEndpoint(String endpoint) {
+  public ElasticSearchClient(@Value("${es.audit}") String endpoint) {
     Preconditions.checkState(
         StringUtils.isNotEmpty(endpoint),
         "Expected non-empty endpoint for ElasticSearch client");
@@ -54,7 +57,7 @@ public class ElasticSearchClient {
       log.info("Creating an ElasticSearchClient for a non-AWS endpoint");
     }
 
-    return new ElasticSearchClient(new RestHighLevelClient(baseClientBuilder));
+    this.baseClient = new RestHighLevelClient(baseClientBuilder);
   }
 
   public List<SearchHit> search(String index, SearchSourceBuilder source) throws IOException {

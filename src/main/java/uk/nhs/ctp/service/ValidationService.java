@@ -12,13 +12,13 @@ import java.util.zip.ZipOutputStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.audit.model.AuditEntry;
-import uk.nhs.ctp.auditFinder.AuditFinderService;
+import uk.nhs.ctp.auditFinder.finder.AuditFinder;
 
 @Service
 @RequiredArgsConstructor
 public class ValidationService {
 
-  private final AuditFinderService auditFinder;
+  private final AuditFinder auditFinder;
 
   public byte[] zipResources(Long caseId) throws IOException {
     var audits = auditFinder.findAll(caseId);
