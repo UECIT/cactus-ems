@@ -1,9 +1,12 @@
 package uk.nhs.ctp.audit.model;
 
-import lombok.*;
-import lombok.experimental.FieldDefaults;
-
 import java.time.Instant;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 /**
  * Represents calls made by this web service's FHIR client during an audit session
