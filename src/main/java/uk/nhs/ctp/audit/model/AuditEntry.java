@@ -28,8 +28,5 @@ public class AuditEntry {
   String responseBody;
 
   Instant dateOfEntry;
-  String supplierId;
-  String requestId;
-  String sessionId;
 
 }

@@ -1,21 +1,12 @@
 package uk.nhs.ctp.audit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
-
 import com.amazonaws.services.sqs.AmazonSQSClient;
 import com.amazonaws.services.sqs.model.MessageAttributeValue;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.Instant;
-import java.util.Collections;
-import java.util.Optional;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -25,12 +16,20 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.audit.model.AuditEntry;
 import uk.nhs.ctp.audit.model.AuditSession;
+import uk.nhs.ctp.audit.sqs.AWSAuditSender;
+
+import java.time.Instant;
+import java.util.Collections;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SQSServiceTest {
+public class AWSAuditSenderTest {
 
   @InjectMocks
-  private SQSService sqsService;
+  private AWSAuditSender sqsService;
 
   @Mock
   private ObjectMapper mockMapper;
@@ -41,23 +40,14 @@ public class SQSServiceTest {
   @Mock
   private TokenAuthenticationService mockAuthService;
 
-  @Test
-  public void shouldNotSendIfNoQueue() {
-    ReflectionTestUtils.setField(sqsService, "loggingQueue", null);
-    when(mockAuthService.requireSupplierId())
-        .thenReturn("mocksupplierid");
-
-    sqsService.sendAudit(AuditSession.builder().build());
-
-    verifyZeroInteractions(mockSqs);
-  }
+  @Rule
+  public ExpectedException exception = ExpectedException.none();
 
   @Test
-  public void shouldNotSendIfNoSession() {
+  public void shouldFailIfNoQueue() {
     ReflectionTestUtils.setField(sqsService, "loggingQueue", null);
-    when(mockAuthService.getCurrentSupplierId())
-        .thenReturn(Optional.empty());
 
+    exception.expect(IllegalArgumentException.class);
     sqsService.sendAudit(AuditSession.builder().build());
 
     verifyZeroInteractions(mockSqs);
@@ -67,8 +57,8 @@ public class SQSServiceTest {
   public void shouldSendAuditSessionToSqs() throws Exception {
     ReflectionTestUtils.setField(sqsService, "loggingQueue", "mock.queue");
     ReflectionTestUtils.setField(sqsService, "serviceName", "cdss");
-    when(mockAuthService.getCurrentSupplierId())
-        .thenReturn(Optional.of("mocksupplierid"));
+    when(mockAuthService.requireSupplierId())
+        .thenReturn("mocksupplierid");
 
     AuditSession session = testSession();
     when(mockMapper.writeValueAsString(session))

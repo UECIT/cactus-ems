@@ -15,13 +15,13 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.nhs.ctp.audit.model.AuditEntry;
 import uk.nhs.ctp.audit.model.AuditSession;
-import uk.nhs.ctp.auditFinder.AuditFinderService;
+import uk.nhs.ctp.auditFinder.finder.AuditFinder;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ValidationServiceTest {
 
   @Mock
-  AuditFinderService auditFinder;
+  AuditFinder auditFinder;
 
   @InjectMocks
   ValidationService validationService;

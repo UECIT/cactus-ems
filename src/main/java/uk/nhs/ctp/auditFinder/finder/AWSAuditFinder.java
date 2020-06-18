@@ -1,25 +1,29 @@
-package uk.nhs.ctp.auditFinder;
+package uk.nhs.ctp.auditFinder.finder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.google.common.base.Preconditions;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.apache.commons.lang3.ObjectUtils;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.audit.model.AuditSession;
+import uk.nhs.ctp.auditFinder.ElasticSearchClient;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 @Service
 @RequiredArgsConstructor
-public class AuditFinderService {
+@Profile("!dev")
+public class AWSAuditFinder implements AuditFinder {
 
   private static final int MAX_RETURNED_AUDITS = 100;
 
@@ -34,11 +38,10 @@ public class AuditFinderService {
   private final TokenAuthenticationService authenticationService;
   private final ObjectMapper mapper;
 
-  public List<AuditSession> findAll(Long caseId) throws IOException {
-    // TODO CDSCT-164: require non-empty ES client
-    if (ObjectUtils.isEmpty(esClient)) {
-      return Collections.emptyList();
-    }
+  @SneakyThrows
+  @Override
+  public List<AuditSession> findAll(Long caseId) {
+    Preconditions.checkArgument(isNotEmpty(esClient), "ES url must be provided");
 
     var supplierId = authenticationService.requireSupplierId();
 

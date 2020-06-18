@@ -1,7 +1,6 @@
 package uk.nhs.ctp.auditFinder;
 
 import static org.hamcrest.Matchers.both;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
@@ -49,9 +48,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.audit.model.AuditEntry;
 import uk.nhs.ctp.audit.model.AuditSession;
+import uk.nhs.ctp.auditFinder.finder.AWSAuditFinder;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AuditFinderServiceTest {
+public class AWSAuditFinderTest {
 
   @Mock
   private ElasticSearchClient elasticSearchClient;
@@ -66,18 +66,16 @@ public class AuditFinderServiceTest {
   public ExpectedException expectedException = ExpectedException.none();
 
   @InjectMocks
-  private AuditFinderService auditFinder;
+  private AWSAuditFinder auditFinder;
 
   @Test
-  public void findAll_withNullClient_shouldWorkForNow() throws IOException {
-    // TODO CDSCT-164: require non-empty ES client
+  public void findAll_withNullClient_shouldFail() {
     var authService = mock(TokenAuthenticationService.class);
     when(authService.requireSupplierId()).thenReturn("test-supplier");
-    var auditFinder = new AuditFinderService(null, authService, mock(ObjectMapper.class));
+    var auditFinder = new AWSAuditFinder(null, authService, mock(ObjectMapper.class));
 
-    var audits = auditFinder.findAll(1L);
-
-    assertThat(audits, is(empty()));
+    expectedException.expect(IllegalArgumentException.class);
+    auditFinder.findAll(1L);
   }
 
   @Test
@@ -150,7 +148,6 @@ public class AuditFinderServiceTest {
   @Test
   public void findAll_withFailedParsing_shouldFail() throws IOException {
     var auditSessionJson = "{ \"requestUrl\": \"/test-url\" }";
-    var auditSession = AuditSession.builder().requestUrl("/test-url").build();
 
     when(tokenAuthenticationService.requireSupplierId())
         .thenReturn("test-supplier");
@@ -162,7 +159,7 @@ public class AuditFinderServiceTest {
       .thenThrow(new JsonParseException(null, "Failed to parse"));
 
     expectedException.expect(JsonParseException.class);
-    var audits = auditFinder.findAll(76L);
+    auditFinder.findAll(76L);
   }
 
   @Test
