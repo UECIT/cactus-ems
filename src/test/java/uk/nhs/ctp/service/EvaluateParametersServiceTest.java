@@ -51,6 +51,7 @@ import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.entities.CaseImmunization;
@@ -72,6 +73,7 @@ import uk.nhs.ctp.service.fhir.StorageService;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
+@ActiveProfiles("dev")
 public class EvaluateParametersServiceTest {
 
   private static final String BASE_URL = "http://base.url:8754";

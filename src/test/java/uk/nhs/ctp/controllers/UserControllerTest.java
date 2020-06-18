@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.nhs.ctp.model.RegisterSupplierRequest;
 import uk.nhs.ctp.model.SupplierAccountDetails;
@@ -28,6 +29,7 @@ import uk.nhs.ctp.security.CognitoService;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
+@ActiveProfiles("dev")
 public class UserControllerTest {
 
   @Autowired

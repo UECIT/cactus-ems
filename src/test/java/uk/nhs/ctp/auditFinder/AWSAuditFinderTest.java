@@ -1,9 +1,36 @@
 package uk.nhs.ctp.auditFinder;
 
+import static org.hamcrest.Matchers.both;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.hasToString;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.nhs.ctp.testhelper.matchers.IsEqualJSON.equalToJSON;
+
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import org.apache.commons.io.IOUtils;
 import org.elasticsearch.common.bytes.BytesReference;
@@ -22,23 +49,6 @@ import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.audit.model.AuditEntry;
 import uk.nhs.ctp.audit.model.AuditSession;
 import uk.nhs.ctp.auditFinder.finder.AWSAuditFinder;
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-import static uk.nhs.ctp.testhelper.matchers.IsEqualJSON.equalToJSON;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AWSAuditFinderTest {
@@ -59,14 +69,13 @@ public class AWSAuditFinderTest {
   private AWSAuditFinder auditFinder;
 
   @Test
-  public void findAll_withNullClient_shouldWorkForNow() {
+  public void findAll_withNullClient_shouldFail() {
     var authService = mock(TokenAuthenticationService.class);
     when(authService.requireSupplierId()).thenReturn("test-supplier");
     var auditFinder = new AWSAuditFinder(null, authService, mock(ObjectMapper.class));
 
-    var audits = auditFinder.findAll(1L);
-
-    assertThat(audits, is(empty()));
+    expectedException.expect(IllegalArgumentException.class);
+    auditFinder.findAll(1L);
   }
 
   @Test
@@ -139,7 +148,6 @@ public class AWSAuditFinderTest {
   @Test
   public void findAll_withFailedParsing_shouldFail() throws IOException {
     var auditSessionJson = "{ \"requestUrl\": \"/test-url\" }";
-    var auditSession = AuditSession.builder().requestUrl("/test-url").build();
 
     when(tokenAuthenticationService.requireSupplierId())
         .thenReturn("test-supplier");
@@ -151,7 +159,7 @@ public class AWSAuditFinderTest {
       .thenThrow(new JsonParseException(null, "Failed to parse"));
 
     expectedException.expect(JsonParseException.class);
-    var audits = auditFinder.findAll(76L);
+    auditFinder.findAll(76L);
   }
 
   @Test
