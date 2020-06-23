@@ -21,8 +21,6 @@ export class ValidationReportComponent implements OnInit {
   loadedEncounterAudits = false;
   loadedSearchAudits = false;
 
-  error: any;
-
   constructor(
     private emsService: EmsService, 
     private cdssService: CdssService,
@@ -35,11 +33,10 @@ export class ValidationReportComponent implements OnInit {
   }
 
   get loaded() {
-    return this.error || 
-      (this.loadedCdss 
+    return this.loadedCdss 
         && this.loadedEms 
         && this.loadedEncounterAudits 
-        && this.loadedSearchAudits);
+        && this.loadedSearchAudits;
   }
 
   fetchEndpoints() {
@@ -48,16 +45,14 @@ export class ValidationReportComponent implements OnInit {
         suppliers => {
           this.endpoints = this.endpoints.concat(suppliers);
           this.loadedEms = true;
-        },
-        error => this.error = error
+        }
       );
     this.cdssService.getCdssSuppliers()
       .subscribe(
         suppliers => {
           this.endpoints = this.endpoints.concat(suppliers);
           this.loadedCdss = true;
-        },
-        error => this.error = error
+        }
       );
   }
 
@@ -67,16 +62,14 @@ export class ValidationReportComponent implements OnInit {
         interactions => {
           this.interactions = this.interactions.concat(interactions);
           this.loadedEncounterAudits = true;
-        },
-        error => this.error = error
+        }
       );
     this.auditService.getServiceDefinitionSearchAudits()
       .subscribe(
         interactions => {
           this.interactions = this.interactions.concat(interactions);
           this.loadedSearchAudits = true;
-        },
-        error => this.error = error
+        }
       );
   }
 

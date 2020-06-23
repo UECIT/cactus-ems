@@ -1,10 +1,10 @@
 <h4>Request Validation Report</h4>
-<div class="container-fluid" *ngIf="!error && loaded">
+<div class="container-fluid" *ngIf="loaded">
   <div class="row">
     <div class="col-xs-12 col-md-10 offset-md-1">
       <div class="header">Select a registered endpoint</div>
       <mat-progress-bar mode="indeterminate" *ngIf="!loaded"></mat-progress-bar>
-      <div *ngIf="!error && loaded" class="endpoints table-responsive">
+      <div *ngIf="loaded" class="endpoints table-responsive">
         <table class="table table-borderless table-hover">
           <thead>
             <tr>
@@ -20,9 +20,6 @@
             </tr>
           </tbody>
         </table>
-      </div>
-      <div class="alert alert-danger" *ngIf="error">
-            <app-error-display [(errorObject)]="error"></app-error-display>
       </div>
     </div>
   </div>
@@ -41,16 +38,13 @@
             </tr>
           </thead>
           <tbody>
-            <tr class="emsSupplier" *ngFor="let interaction of interactions">
-              <td>{{ interaction.requestOrigin }}</td>
-              <td>{{ interaction.createdDate }}</td>
-              <td>{{ interaction.caseId }}</td>
+            <tr class="interaction" *ngFor="let interaction of interactions">
+              <td class="interactionRequestOrigin">{{ interaction.requestOrigin }}</td>
+              <td class="interactionCreatedDate">{{ interaction.createdDate }}</td>
+              <td class="interactionCaseId">{{ interaction.caseId }}</td>
             </tr>
           </tbody>
         </table>
-      </div>
-      <div class="alert alert-danger" *ngIf="error">
-            <app-error-display [(errorObject)]="error"></app-error-display>
       </div>
     </div>
   </div>
