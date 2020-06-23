@@ -1,7 +1,6 @@
-export class CdssSupplier {
+import { SupplierInstance } from './emsSupplier';
+export class CdssSupplier extends SupplierInstance{
   id: number;
-  name: string;
-  baseUrl: string;
   serviceDefinitions: ServiceDefinition[];
   inputParamsRefType: ResourceReferenceType;
   inputDataRefType: ResourceReferenceType;
@@ -9,6 +8,7 @@ export class CdssSupplier {
   authToken: string;
 
   constructor() {
+    super()
     this.id = 0;
     this.name = '';
     this.baseUrl = '';

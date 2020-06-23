@@ -1,3 +1,4 @@
+import { ValidationReportComponent } from './validation-report/validation-report.component';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { LoginComponent } from './login/login.component';
@@ -34,7 +35,8 @@ const routes: Routes = [
   { path: 'settings', component: ManageSettingsComponent, canActivate: [AuthGuard]  },
   { path: 'triage', component: TriageComponent, canActivate: [AuthGuard]  },
   { path: 'account/password', component: ResetPasswordComponent, canActivate: [AuthGuard]  },
-  { path: 'view-audits', component: ViewAuditsComponent, canActivate: [AuthGuard]  }
+  { path: 'view-audits', component: ViewAuditsComponent, canActivate: [AuthGuard]  },
+  { path: 'create_report', component: ValidationReportComponent, canActivate: [AuthGuard]}
 ];
 
 @NgModule({
