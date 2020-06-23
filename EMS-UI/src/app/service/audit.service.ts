@@ -28,14 +28,27 @@ export class AuditService {
     }
   }
 
-  getEncounterAudits(): Observable<Interaction[]> {
-    let int1: Interaction = {createdDate: "2020-06-23", caseId: 4, requestOrigin: "https://cdss.com/fhir/ServiceDefinition/initial.initial/$evaluate..."};
-    return of([int1]);
+  getEncounterAudits(): Promise<Interaction[]> {
+    console.log("Got here");
+    if (this.sessionStorage['auth_token'] != null) {
+      httpOptions.headers = httpOptions.headers.set(
+        'Authorization',
+        this.sessionStorage['auth_token']
+      );
+      const url = `${environment.EMS_API}/audit/encounters/`;
+      return this.http.get<Interaction[]>(url, httpOptions).toPromise();
+    }
   }
 
-  getServiceDefinitionSearchAudits(): Observable<Interaction[]> {
-    let int1: Interaction = {createdDate: "2020-06-23", requestOrigin: "https://cdss.com/fhir/ServiceDefinition?..."};
-    return of([int1]);
+  getServiceDefinitionSearchAudits(): Promise<Interaction[]> {
+    if (this.sessionStorage['auth_token'] != null) {
+      httpOptions.headers = httpOptions.headers.set(
+        'Authorization',
+        this.sessionStorage['auth_token']
+      );
+      const url = `${environment.EMS_API}/audit/servicesearches/`;
+      return this.http.get<Interaction[]>(url, httpOptions).toPromise();
+    }
   }
 
   searchAudits(fromDate: any, toDate: any, pageNumber: any, pageSize: any, includeClosed: boolean, includeIncomplete: boolean) {

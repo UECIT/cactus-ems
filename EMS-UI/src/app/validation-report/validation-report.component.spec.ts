@@ -4,7 +4,7 @@ import { CdssSupplier } from 'src/app/model/cdssSupplier';
 import { of } from 'rxjs';
 import { AuditService } from './../service/audit.service';
 import { EmsService } from './../service/ems.service';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { async, ComponentFixture, TestBed, tick, fakeAsync } from '@angular/core/testing';
 
 import { ValidationReportComponent } from './validation-report.component';
 import { Predicate, DebugElement, Component, Input } from '@angular/core';
@@ -50,7 +50,7 @@ class ValidationReportComponentPage {
   }
 }
 
-fdescribe('ValidationReportComponent', () => {
+describe('ValidationReportComponent', () => {
 
   let emsServiceSpy: { getAllEmsSuppliers: jasmine.Spy };
   let cdssServiceSpy: { getCdssSuppliers: jasmine.Spy };
@@ -83,7 +83,7 @@ fdescribe('ValidationReportComponent', () => {
     expect(comp).toBeTruthy();
   });
 
-  it('should display end points', () => {
+  it('should display end points', fakeAsync(() => {
     let cdss = new CdssSupplier();
     cdss.name = "A cdss name";
     cdss.baseUrl = "http://cdss.base.url/fhir";
@@ -94,47 +94,51 @@ fdescribe('ValidationReportComponent', () => {
 
     cdssServiceSpy.getCdssSuppliers.and.returnValue(of([cdss]));
     emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([ems]));
-    auditServiceSpy.getEncounterAudits.and.returnValue(of([]));
-    auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(of([]));
+    auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
+    auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
 
     fixture.detectChanges(); // init
+    tick();
+    fixture.detectChanges();
 
     expect(comp.loaded).toBeTruthy();
     expect(page.endpoints).toContain(
       {name: cdss.name, baseUrl: cdss.baseUrl}, 
       {name: ems.name, baseUrl: ems.baseUrl}
     );
-  });
+  }));
 
-  it('should display interactions', () => {
+  fit('should display interactions', fakeAsync(() => {
     let encounter = new Interaction();
-    encounter.caseId = 4;
-    encounter.createdDate = "23/06/2020 12:12:12";
+    encounter.additionalProperties["caseId"] = 4;
+    encounter.createdDate = +Date.parse("2011-10-10T14:48");
     encounter.requestOrigin = "https://some-encounter-location/fhir";
 
     let sdSearch = new Interaction();
-    sdSearch.createdDate = "23/06/2020 12:12:10";
+    sdSearch.createdDate = +Date.parse("2011-10-10T14:48:00");
     sdSearch.requestOrigin = "https://some-service-location/fhir";
 
     cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
     emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
-    auditServiceSpy.getEncounterAudits.and.returnValue(of([encounter]));
-    auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(of([sdSearch]));
+    auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([encounter]));
+    auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([sdSearch]));
 
     fixture.detectChanges(); // init
+    tick();
+    fixture.detectChanges();
 
     expect(comp.loaded).toBeTruthy();
     expect(page.interactions).toContain(
-      {origin: encounter.requestOrigin, createdDate: encounter.createdDate, caseId: encounter.caseId},
-      {origin: sdSearch.requestOrigin, createdDate: sdSearch.createdDate, caseId: ''}
+      {origin: encounter.requestOrigin, createdDate: encounter.createdDate, caseId: encounter.additionalProperties['caseId']},
+      {origin: sdSearch.requestOrigin, createdDate: sdSearch.createdDate, caseId: 0}
     );
-  });
+  }));
 
   it('should not display when loading fails', () => {
     cdssServiceSpy.getCdssSuppliers.and.returnValue(of());
     emsServiceSpy.getAllEmsSuppliers.and.returnValue(of());
-    auditServiceSpy.getEncounterAudits.and.returnValue(of());
-    auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(of());
+    auditServiceSpy.getEncounterAudits.and.returnValue(Promise.reject(""));
+    auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.reject(""));
 
     fixture.detectChanges(); // init
 

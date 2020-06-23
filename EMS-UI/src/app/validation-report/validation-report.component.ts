@@ -58,21 +58,18 @@ export class ValidationReportComponent implements OnInit {
 
   fetchAudits() {
     this.auditService.getEncounterAudits()
-      .subscribe(
+      .then(
         interactions => {
           this.interactions = this.interactions.concat(interactions);
           this.loadedEncounterAudits = true;
         }
       );
     this.auditService.getServiceDefinitionSearchAudits()
-      .subscribe(
+      .then(
         interactions => {
           this.interactions = this.interactions.concat(interactions);
           this.loadedSearchAudits = true;
         }
       );
   }
-
-
-
 }
