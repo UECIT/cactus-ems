@@ -1,11 +1,9 @@
-import { SupplierInstance } from './../model/emsSupplier';
 import { Interaction } from './../model/audit';
 import { AuditService } from './../service/audit.service';
-import { CdssSupplier } from './../model/cdssSupplier';
 import { Component, OnInit } from '@angular/core';
 import { EmsService } from '../service/ems.service';
-import { EmsSupplier } from '../model';
 import { CdssService } from '../service';
+import { SupplierInstance } from '../model/supplierInstance';
 
 @Component({
   selector: 'validation-report',
