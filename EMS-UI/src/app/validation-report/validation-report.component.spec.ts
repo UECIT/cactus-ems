@@ -99,7 +99,7 @@ describe('ValidationReportComponent', () => {
 
     fixture.detectChanges(); // init
     tick();
-    fixture.detectChanges();
+    fixture.detectChanges(); // resolve async promises
 
     expect(comp.loaded).toBeTruthy();
     expect(page.endpoints).toContain(
@@ -108,14 +108,14 @@ describe('ValidationReportComponent', () => {
     );
   }));
 
-  fit('should display interactions', fakeAsync(() => {
+  it('should display interactions', fakeAsync(() => {
     let encounter = new Interaction();
     encounter.additionalProperties["caseId"] = 4;
-    encounter.createdDate = +Date.parse("2011-10-10T14:48");
+    encounter.createdDate = 835222942; //'Jun 19, 1996, 11:22:22 PM'
     encounter.requestOrigin = "https://some-encounter-location/fhir";
 
     let sdSearch = new Interaction();
-    sdSearch.createdDate = +Date.parse("2011-10-10T14:48:00");
+    sdSearch.createdDate = 955335783; //'Apr 10, 2000, 4:03:03 AM'
     sdSearch.requestOrigin = "https://some-service-location/fhir";
 
     cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
@@ -125,12 +125,12 @@ describe('ValidationReportComponent', () => {
 
     fixture.detectChanges(); // init
     tick();
-    fixture.detectChanges();
+    fixture.detectChanges(); // resolve async promises
 
     expect(comp.loaded).toBeTruthy();
     expect(page.interactions).toContain(
-      {origin: encounter.requestOrigin, createdDate: encounter.createdDate, caseId: encounter.additionalProperties['caseId']},
-      {origin: sdSearch.requestOrigin, createdDate: sdSearch.createdDate, caseId: 0}
+      {origin: encounter.requestOrigin, createdDate: 'Jun 19, 1996, 11:22:22 PM', caseId: encounter.additionalProperties['caseId']},
+      {origin: sdSearch.requestOrigin, createdDate: 'Apr 10, 2000, 4:03:03 AM', caseId: 0}
     );
   }));
 
