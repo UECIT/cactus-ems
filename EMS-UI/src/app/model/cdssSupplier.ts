@@ -1,4 +1,5 @@
-import { SupplierInstance } from './emsSupplier';
+import { SupplierInstance } from "./supplierInstance";
+
 export class CdssSupplier extends SupplierInstance{
   id: number;
   serviceDefinitions: ServiceDefinition[];

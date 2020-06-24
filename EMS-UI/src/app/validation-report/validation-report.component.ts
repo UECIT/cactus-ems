@@ -64,6 +64,7 @@ export class ValidationReportComponent implements OnInit {
           this.loadedEncounterAudits = true;
         }
       )
+      //TODO: handle errors properly
       .catch(err => this.loadedEncounterAudits = true);
     this.auditService.getServiceDefinitionSearchAudits()
       .then(
@@ -71,6 +72,7 @@ export class ValidationReportComponent implements OnInit {
           this.interactions = this.interactions.concat(interactions);
           this.loadedSearchAudits = true;
         }
-      ).catch(err => this.loadedEncounterAudits = true);
+        //TODO: handle errors properly
+      ).catch(err => this.loadedSearchAudits = true);
   }
 }

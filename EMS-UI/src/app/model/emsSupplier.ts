@@ -1,7 +1,4 @@
-export class SupplierInstance {
-    name: string;
-    baseUrl: string;
-}
+import { SupplierInstance } from "./supplierInstance";
 
 export class EmsSupplier extends SupplierInstance{
     id: number;
