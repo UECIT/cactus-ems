@@ -17,3 +17,4 @@ export * from './token';
 export * from './user';
 export * from './emsSupplier';
 export * from './environment';
+export * from './audit'

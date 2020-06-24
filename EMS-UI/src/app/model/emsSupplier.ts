@@ -1,6 +1,6 @@
-export class EmsSupplier {
+import { SupplierInstance } from "./supplierInstance";
+
+export class EmsSupplier extends SupplierInstance{
     id: number;
-    name: string;
-    baseUrl: string;
     authToken: string;
 }

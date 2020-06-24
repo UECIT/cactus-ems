@@ -1,7 +1,11 @@
 package uk.nhs.ctp.auditFinder.finder;
 
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -14,11 +18,6 @@ import org.springframework.stereotype.Service;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.audit.model.AuditSession;
 import uk.nhs.ctp.auditFinder.ElasticSearchClient;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 @Service
 @RequiredArgsConstructor

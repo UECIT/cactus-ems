@@ -65,6 +65,7 @@ import { EnvironmentService } from './service/environment.service';
 import { EmsSupplierComponent, EditEmsDialog } from './supplier-managment/ems-supplier/ems-supplier.component';
 import { EmsService } from './service/ems.service';
 import { ReportSearchDialogComponent } from './main/report-search-dialog/report-search-dialog.component';
+import { ValidationReportComponent } from './validation-report/validation-report.component';
 
 export function hljsLanguages() {
   return [
@@ -113,7 +114,8 @@ export function hljsLanguages() {
     PractitionerSelectionComponent,
     EmsSupplierComponent,
     EditEmsDialog,
-    ReportSearchDialogComponent
+    ReportSearchDialogComponent,
+    ValidationReportComponent
   ],
   entryComponents: [
     SwitchSupplierDialogComponent, 

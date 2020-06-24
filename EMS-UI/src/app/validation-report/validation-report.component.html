@@ -1,0 +1,52 @@
+<h4>Request Validation Report</h4>
+<div class="container-fluid" *ngIf="loaded">
+  <div class="row">
+    <div class="col-xs-12 col-md-10 offset-md-1">
+      <div class="header">Select a registered endpoint</div>
+      <mat-progress-bar mode="indeterminate" *ngIf="!loaded"></mat-progress-bar>
+      <div *ngIf="loaded" class="endpoints table-responsive">
+        <table class="table table-borderless table-hover">
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">URL</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="endpoint" *ngFor="let endpoint of endpoints">
+              <td class="endpointName">{{ endpoint.name }}</td>
+              <td class="endpointBaseUrl">{{ endpoint.baseUrl }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-xs-12 col-md-10 offset-md-1">
+      <div class="header">Select interactions</div>
+      <div class="table-responsive interactions">
+        <table class="table table-borderless table-hover">
+          <thead>
+            <tr>
+              <th scope="col">URL</th>
+              <th scope="col">Date</th>
+              <th scope="col">Case ID</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="interaction" *ngFor="let interaction of interactions">
+              <td class="interactionRequestOrigin">{{ interaction.requestOrigin }}</td>
+              <td class="interactionCreatedDate">{{ interaction.createdDate * 1000 | date:'medium':'UTC' }}</td>
+              <td class="interactionCaseId">{{ interaction.additionalProperties["caseId"] }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+  
