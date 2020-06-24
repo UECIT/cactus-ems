@@ -33,7 +33,7 @@ public class AWSAuditFinder implements AuditFinder {
   private static final String TIMESTAMP_FIELD = "@timestamp";
   private static final String SUPPLIER_ID_FIELD = "additionalProperties.supplierId";
   private static final String CASE_ID_FIELD = "additionalProperties.caseId";
-  private static final String REQUEST_URL_FIELD = "requestURL.keyword";
+  private static final String REQUEST_URL_FIELD = "requestUrl.keyword";
 
   private static final String AUDIT_SUFFIX = "-audit";
   private static final String EVALUATE_WILDCARD = "*$evaluate";
