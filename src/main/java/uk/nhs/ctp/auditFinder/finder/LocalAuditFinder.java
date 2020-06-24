@@ -3,6 +3,7 @@ package uk.nhs.ctp.auditFinder.finder;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -43,5 +44,15 @@ public class LocalAuditFinder implements AuditFinder {
             log.info("Audit finder configured but cannot connect");
             return Collections.emptyList();
         }
+    }
+
+    @Override
+    public List<AuditSession> findAllEncounters() {
+        throw new NotImplementedException("TODO: CDSCT-281");
+    }
+
+    @Override
+    public List<AuditSession> findAllServiceSearches() {
+        throw new NotImplementedException("TODO: CDSCT-281");
     }
 }
