@@ -29,7 +29,6 @@ export class AuditService {
   }
 
   getEncounterAudits(): Promise<Interaction[]> {
-    console.log("Got here");
     if (this.sessionStorage['auth_token'] != null) {
       httpOptions.headers = httpOptions.headers.set(
         'Authorization',
