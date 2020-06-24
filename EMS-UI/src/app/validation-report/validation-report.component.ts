@@ -63,13 +63,14 @@ export class ValidationReportComponent implements OnInit {
           this.interactions = this.interactions.concat(interactions);
           this.loadedEncounterAudits = true;
         }
-      );
+      )
+      .catch(err => this.loadedEncounterAudits = true);
     this.auditService.getServiceDefinitionSearchAudits()
       .then(
         interactions => {
           this.interactions = this.interactions.concat(interactions);
           this.loadedSearchAudits = true;
         }
-      );
+      ).catch(err => this.loadedEncounterAudits = true);
   }
 }
