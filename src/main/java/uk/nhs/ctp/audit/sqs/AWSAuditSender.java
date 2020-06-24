@@ -1,22 +1,20 @@
 package uk.nhs.ctp.audit.sqs;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.MessageAttributeValue;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.audit.model.AuditSession;
-
-import java.util.UUID;
-
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Service
 @RequiredArgsConstructor
@@ -41,14 +39,19 @@ public class AWSAuditSender implements AuditSender {
     public void sendAudit(AuditSession session) {
         Preconditions.checkArgument(isNotEmpty(loggingQueue), "SQS Queue url must be provided");
 
-        var supplierId = authenticationService.requireSupplierId();
+        var supplierId = authenticationService.getCurrentSupplierId();
+
+        if (supplierId.isEmpty()) {
+            log.warn("No supplier id, not sending audit");
+            return;
+        }
 
         try {
             SendMessageRequest request = new SendMessageRequest()
-                .withMessageGroupId(supplierId)
+                .withMessageGroupId(supplierId.get())
                 .withMessageDeduplicationId(UUID.randomUUID().toString())
                 .addMessageAttributesEntry(SENDER, stringAttribute(serviceName))
-                .addMessageAttributesEntry(SUPPLIER, stringAttribute(supplierId))
+                .addMessageAttributesEntry(SUPPLIER, stringAttribute(supplierId.get()))
                 .withQueueUrl(loggingQueue)
                 .withMessageBody(mapper.writeValueAsString(session));
             sqsClient.sendMessage(request);
