@@ -63,14 +63,6 @@ public class AWSAuditFinderTest {
   private AWSAuditFinder auditFinder;
 
   @Test
-  public void findAll_withNullClient_shouldFail() {
-    var auditFinder = new AWSAuditFinder(null, authService, objectMapper);
-
-    expectedException.expect(IllegalArgumentException.class);
-    auditFinder.findAll(1L);
-  }
-
-  @Test
   public void findAll_withCaseIdAndSupplierId_buildsRequest() throws IOException {
     when(authService.requireSupplierId()).thenReturn("test-supplier");
     when(elasticSearchClient.search(eq("test-supplier-audit"), any(SearchSourceBuilder.class)))
@@ -139,14 +131,6 @@ public class AWSAuditFinderTest {
 
     expectedException.expect(JsonParseException.class);
     auditFinder.findAll(76L);
-  }
-
-  @Test
-  public void findEncounters_nullClient_shouldFail() {
-    var auditFinder = new AWSAuditFinder(null, authService, objectMapper);
-
-    expectedException.expect(IllegalArgumentException.class);
-    auditFinder.findAllEncounters();
   }
 
   @Test
