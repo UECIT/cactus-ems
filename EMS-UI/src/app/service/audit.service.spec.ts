@@ -1,4 +1,4 @@
-import { Interaction } from './../model/audit';
+import { Interaction, InteractionType } from './../model/audit';
 import { HttpClient } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { AuditService } from './audit.service';
@@ -28,7 +28,7 @@ xdescribe('Audit Service', () => {
 
     it('should get encounter audits', () => {
         const expectedInteraction: Interaction = {
-            requestOrigin: "http://a-place.com",
+            interactionType: InteractionType.ENCOUNTER,
             createdDate: 835222942,
             additionalProperties: new Map([['caseId', '4']])
         };
@@ -47,7 +47,7 @@ xdescribe('Audit Service', () => {
 
     it('should get service definition search audits', () => {
         const expectedInteraction: Interaction = {
-            requestOrigin: "http://another-place.com",
+            interactionType: InteractionType.SERVICE_SEARCH,
             createdDate: 835222942,
             additionalProperties: new Map([])
         };

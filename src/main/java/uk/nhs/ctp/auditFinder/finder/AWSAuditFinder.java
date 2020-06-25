@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.NotImplementedException;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -33,6 +34,8 @@ public class AWSAuditFinder implements AuditFinder {
   private static final String SUPPLIER_ID_FIELD = "additionalProperties.supplierId";
   private static final String CASE_ID_FIELD = "additionalProperties.caseId";
 
+  private static final String AUDIT_SUFFIX = "-audit";
+
   private final ElasticSearchClient esClient;
   private final TokenAuthenticationService authenticationService;
   private final ObjectMapper mapper;
@@ -54,12 +57,41 @@ public class AWSAuditFinder implements AuditFinder {
         .size(MAX_RETURNED_AUDITS)
         .sort(new FieldSortBuilder(TIMESTAMP_FIELD).order(SortOrder.ASC));
 
-    return esClient.search(supplierId + "-audit", source)
+    return esClient.search(supplierId + AUDIT_SUFFIX, source)
         .stream()
         .map(SearchHit::getSourceAsString)
         .map(this::asAudit)
         .collect(Collectors.toUnmodifiableList());
   }
+
+  @SneakyThrows
+  @Override
+  public List<AuditSession> findAllEncounters() {
+    Preconditions.checkArgument(isNotEmpty(esClient), "ES url must be provided");
+
+    var supplierId = authenticationService.requireSupplierId();
+
+    var query = QueryBuilders.boolQuery()
+        .must(QueryBuilders.termQuery(SUPPLIER_ID_FIELD, supplierId))
+        .must(QueryBuilders.existsQuery(CASE_ID_FIELD));
+
+    var source = new SearchSourceBuilder()
+        .query(query)
+        .size(MAX_RETURNED_AUDITS)
+        .sort(new FieldSortBuilder(TIMESTAMP_FIELD).order(SortOrder.ASC));
+
+    return esClient.search(supplierId + AUDIT_SUFFIX, source)
+        .stream()
+        .map(SearchHit::getSourceAsString)
+        .map(this::asAudit)
+        .collect(Collectors.toUnmodifiableList());
+  }
+
+  @Override
+  public List<AuditSession> findAllServiceSearches() {
+    throw new NotImplementedException("TODO: CDSCT-276");
+  }
+
 
   @SneakyThrows
   private AuditSession asAudit(String source) {

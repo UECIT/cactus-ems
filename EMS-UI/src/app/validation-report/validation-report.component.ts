@@ -1,9 +1,10 @@
-import { Interaction } from './../model/audit';
+import { Interaction, InteractionType } from './../model/audit';
 import { AuditService } from './../service/audit.service';
 import { Component, OnInit } from '@angular/core';
 import { EmsService } from '../service/ems.service';
 import { CdssService } from '../service';
 import { SupplierInstance } from '../model/supplierInstance';
+import { firstGroupedBy } from '../utils/functions';
 
 @Component({
   selector: 'validation-report',
@@ -58,7 +59,10 @@ export class ValidationReportComponent implements OnInit {
     this.auditService.getEncounterAudits()
       .then(
         interactions => {
-          this.interactions = this.interactions.concat(interactions);
+          let encounterInteractions = firstGroupedBy(interactions, int => int.additionalProperties["caseId"]); //One interaction per case
+          encounterInteractions
+            .forEach(int => int.interactionType = InteractionType.ENCOUNTER);
+          this.interactions = this.interactions.concat(encounterInteractions);
           this.loadedEncounterAudits = true;
         }
       )
@@ -67,10 +71,13 @@ export class ValidationReportComponent implements OnInit {
     this.auditService.getServiceDefinitionSearchAudits()
       .then(
         interactions => {
+          interactions
+            .forEach(int => int.interactionType = InteractionType.SERVICE_SEARCH);
           this.interactions = this.interactions.concat(interactions);
           this.loadedSearchAudits = true;
         }
         //TODO: handle errors properly
       ).catch(err => this.loadedSearchAudits = true);
   }
+
 }

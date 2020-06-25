@@ -3,6 +3,7 @@ package uk.nhs.ctp.audit.sqs;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import com.amazonaws.services.sqs.AmazonSQS;
+import com.amazonaws.services.sqs.model.AmazonSQSException;
 import com.amazonaws.services.sqs.model.MessageAttributeValue;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -55,6 +56,12 @@ public class AWSAuditSender implements AuditSender {
                 .withQueueUrl(loggingQueue)
                 .withMessageBody(mapper.writeValueAsString(session));
             sqsClient.sendMessage(request);
+        } catch (AmazonSQSException e) {
+            if (e.getStatusCode() == 413) {
+                log.warn("Audit request exceeded max size SQS can handle", e);
+                //TODO: CDSCT-338 - Should we be auditing/paging audit search audits or excluding things
+            }
+            log.error("an error occurred sending audit session {} to SQS", session, e);
         } catch (Exception e) {
             log.error("an error occurred sending audit session {} to SQS", session, e);
         }

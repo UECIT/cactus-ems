@@ -1,10 +1,6 @@
 package uk.nhs.ctp.auditFinder;
 
-import static org.hamcrest.Matchers.both;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
@@ -13,7 +9,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.nhs.ctp.testhelper.matchers.IsEqualJSON.equalToJSON;
@@ -36,7 +31,6 @@ import org.apache.commons.io.IOUtils;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.hamcrest.Matcher;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -57,7 +51,7 @@ public class AWSAuditFinderTest {
   private ElasticSearchClient elasticSearchClient;
 
   @Mock
-  private TokenAuthenticationService tokenAuthenticationService;
+  private TokenAuthenticationService authService;
 
   @Mock
   private ObjectMapper objectMapper;
@@ -69,29 +63,15 @@ public class AWSAuditFinderTest {
   private AWSAuditFinder auditFinder;
 
   @Test
-  public void findAll_withNullClient_shouldFail() {
-    var authService = mock(TokenAuthenticationService.class);
-    when(authService.requireSupplierId()).thenReturn("test-supplier");
-    var auditFinder = new AWSAuditFinder(null, authService, mock(ObjectMapper.class));
-
-    expectedException.expect(IllegalArgumentException.class);
-    auditFinder.findAll(1L);
-  }
-
-  @Test
   public void findAll_withCaseIdAndSupplierId_buildsRequest() throws IOException {
-    when(tokenAuthenticationService.requireSupplierId())
-        .thenReturn("test-supplier");
-    when(elasticSearchClient.search(
-        argThat(is("test-supplier-audit")),
-        any(SearchSourceBuilder.class)))
+    when(authService.requireSupplierId()).thenReturn("test-supplier");
+    when(elasticSearchClient.search(eq("test-supplier-audit"), any(SearchSourceBuilder.class)))
         .thenReturn(Collections.emptyList());
 
     auditFinder.findAll(76L);
 
     var searchSourceCaptor = ArgumentCaptor.forClass(SearchSourceBuilder.class);
-    verify(elasticSearchClient)
-        .search(argThat(is("test-supplier-audit")), searchSourceCaptor.capture());
+    verify(elasticSearchClient).search(eq("test-supplier-audit"), searchSourceCaptor.capture());
 
     var searchSource = searchSourceCaptor.getValue();
 
@@ -124,11 +104,8 @@ public class AWSAuditFinderTest {
         .map(this::buildSearchHit)
         .collect(Collectors.toUnmodifiableList());
 
-    when(tokenAuthenticationService.requireSupplierId())
-        .thenReturn("test-supplier");
-    when(elasticSearchClient.search(
-        argThat(is("test-supplier-audit")),
-        any(SearchSourceBuilder.class)))
+    when(authService.requireSupplierId()).thenReturn("test-supplier");
+    when(elasticSearchClient.search(eq("test-supplier-audit"), any(SearchSourceBuilder.class)))
         .thenReturn(searchHits);
     when(objectMapper.readValue(auditSessionJson, AuditSession.class))
         .thenReturn(auditSession);
@@ -137,20 +114,14 @@ public class AWSAuditFinderTest {
 
     var audits = auditFinder.findAll(76L);
 
-    //noinspection unchecked
-    assertThat(audits, hasItems(
-        hasRequestUrl("/test-url"),
-        both(hasRequestUrl("/test-url-2"))
-        .and(hasProperty("entries",
-            hasItem(hasRequestUrl("/test-url-3"))))));
+    assertThat(audits, contains(auditSession, auditSessionWithEntry));
   }
 
   @Test
   public void findAll_withFailedParsing_shouldFail() throws IOException {
     var auditSessionJson = "{ \"requestUrl\": \"/test-url\" }";
 
-    when(tokenAuthenticationService.requireSupplierId())
-        .thenReturn("test-supplier");
+    when(authService.requireSupplierId()).thenReturn("test-supplier");
     when(elasticSearchClient.search(
         argThat(is("test-supplier-audit")),
         any(SearchSourceBuilder.class)))
@@ -160,6 +131,60 @@ public class AWSAuditFinderTest {
 
     expectedException.expect(JsonParseException.class);
     auditFinder.findAll(76L);
+  }
+
+  @Test
+  public void findEncounters_buildsRequest() throws Exception {
+    when(authService.requireSupplierId()).thenReturn("test-supplier");
+    when(elasticSearchClient.search(eq("test-supplier-audit"), any(SearchSourceBuilder.class)))
+        .thenReturn(Collections.emptyList());
+
+    auditFinder.findAllEncounters();
+
+    var searchSourceCaptor = ArgumentCaptor.forClass(SearchSourceBuilder.class);
+    verify(elasticSearchClient).search(eq("test-supplier-audit"), searchSourceCaptor.capture());
+
+    var searchSource = searchSourceCaptor.getValue();
+
+    assertThat(searchSource.sorts(), hasSize(1));
+    assertThat(searchSource.sorts().get(0),
+        hasToString(equalToJSON("{ @timestamp : {order : asc } }")));
+    assertThat(searchSource.query(), hasToString(equalToJSON(
+        "{ bool : { must : ["
+            + " { term : { additionalProperties.supplierId : { value : test-supplier } } },"
+            + " { exists : { field : additionalProperties.caseId } }"
+            + "] } }")));
+  }
+
+  @Test
+  public void findEncounter_returnsAudits() throws IOException {
+    var auditSessionJson = "{ \"requestUrl\": \"/test-url\" }";
+    var auditSession = AuditSession.builder().requestUrl("/test-url").build();
+    var auditSessionWithEntryJson = "{"
+        + " \"requestUrl\": \"/test-url-2\","
+        + " \"entries\": ["
+        + " { \"requestUrl\": \"/test-url-3\" }"
+        + "] }";
+    var auditSessionWithEntry = AuditSession.builder()
+        .requestUrl("/test-url-2")
+        .entry(AuditEntry.builder().requestUrl("/test-url-3").build())
+        .build();
+
+    var searchHits = Stream.of(auditSessionJson, auditSessionWithEntryJson)
+        .map(this::buildSearchHit)
+        .collect(Collectors.toUnmodifiableList());
+
+    when(authService.requireSupplierId()).thenReturn("test-supplier");
+    when(elasticSearchClient.search(eq("test-supplier-audit"), any(SearchSourceBuilder.class)))
+        .thenReturn(searchHits);
+    when(objectMapper.readValue(auditSessionJson, AuditSession.class))
+        .thenReturn(auditSession);
+    when(objectMapper.readValue(auditSessionWithEntryJson, AuditSession.class))
+        .thenReturn(auditSessionWithEntry);
+
+    var audits = auditFinder.findAllEncounters();
+
+    assertThat(audits, contains(auditSession, auditSessionWithEntry));
   }
 
   @Test
@@ -177,10 +202,6 @@ public class AWSAuditFinderTest {
     assertThat(audit.getResponseStatus(), is("200"));
     assertThat(audit.getAdditionalProperties().get("caseId"), is("57"));
     assertThat(audit.getEntries(), hasSize(28));
-  }
-
-  private Matcher<Object> hasRequestUrl(final String url) {
-    return hasProperty("requestUrl", equalTo(url));
   }
 
   @SneakyThrows

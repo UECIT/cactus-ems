@@ -31,7 +31,7 @@
         <table class="table table-borderless table-hover">
           <thead>
             <tr>
-              <th scope="col">URL</th>
+              <th scope="col">Type</th>
               <th scope="col">Date</th>
               <th scope="col">Case ID</th>
               <th></th>
@@ -39,7 +39,7 @@
           </thead>
           <tbody>
             <tr class="interaction" *ngFor="let interaction of interactions">
-              <td class="interactionRequestOrigin">{{ interaction.requestOrigin }}</td>
+              <td class="interactionType">{{ interaction.interactionType }}</td>
               <td class="interactionCreatedDate">{{ interaction.createdDate * 1000 | date:'medium':'UTC' }}</td>
               <td class="interactionCaseId">{{ interaction.additionalProperties["caseId"] }}</td>
             </tr>

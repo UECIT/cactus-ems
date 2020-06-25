@@ -2,9 +2,6 @@ package uk.nhs.ctp.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.Month;
-import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -45,23 +42,12 @@ public class AuditController {
 
 	@GetMapping(path = "/encounters")
 	public List<AuditSession> getAuditEncounters() {
-		return Collections.singletonList(
-				AuditSession.builder()
-						.additionalProperty("caseId", "4")
-						.createdDate(LocalDateTime.of(2020, Month.JUNE, 19, 15, 30).toInstant(ZoneOffset.UTC))
-						.requestOrigin("http://hardcoded-encounter-origin/fhir")
-						.build()
-		);
+		return auditFinder.findAllEncounters();
 	}
 
 	@GetMapping(path = "/servicesearches")
 	public List<AuditSession> getAuditServiceSearch() {
-		return Collections.singletonList(
-				AuditSession.builder()
-						.createdDate(LocalDateTime.of(2020, Month.JUNE, 19, 15, 30).toInstant(ZoneOffset.UTC))
-						.requestOrigin("http://hardcoded-search-origin/fhir")
-						.build()
-		);
+		return Collections.emptyList();
 	}
 	
 	@PostMapping
