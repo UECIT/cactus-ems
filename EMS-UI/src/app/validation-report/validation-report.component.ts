@@ -4,6 +4,7 @@ import { Component, OnInit } from '@angular/core';
 import { EmsService } from '../service/ems.service';
 import { CdssService } from '../service';
 import { SupplierInstance } from '../model/supplierInstance';
+import { firstGroupedBy } from '../utils/functions';
 
 @Component({
   selector: 'validation-report',
@@ -58,7 +59,7 @@ export class ValidationReportComponent implements OnInit {
     this.auditService.getEncounterAudits()
       .then(
         interactions => {
-          let encounterInteractions = this.groupByCase(interactions); //One interaction per case
+          let encounterInteractions = firstGroupedBy(interactions, int => int.additionalProperties["caseId"]); //One interaction per case
           encounterInteractions
             .forEach(int => int.interactionType = InteractionType.ENCOUNTER);
           this.interactions = this.interactions.concat(encounterInteractions);
@@ -79,19 +80,4 @@ export class ValidationReportComponent implements OnInit {
       ).catch(err => this.loadedSearchAudits = true);
   }
 
-  private groupByCase(interactions: Interaction[]) : Interaction[] {
-    let grouped = interactions.reduce(function(r, a) {
-      r[a.additionalProperties["caseId"]] = r[a.additionalProperties["caseId"]] || [];
-      r[a.additionalProperties["caseId"]].push(a);
-      return r;
-    }, Object.create(null));
-
-    var firstByCase = [];
-    let cases = Object.keys(grouped);
-    // Only need to display the first interaction
-    for (let i = 0; i < cases.length; i++) {
-      firstByCase.push(grouped[cases[i]][0]);
-    }
-    return firstByCase;
-  }
 }
