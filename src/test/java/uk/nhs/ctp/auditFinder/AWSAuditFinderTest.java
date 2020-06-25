@@ -1,10 +1,6 @@
 package uk.nhs.ctp.auditFinder;
 
-import static org.hamcrest.Matchers.both;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
@@ -35,7 +31,6 @@ import org.apache.commons.io.IOUtils;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.hamcrest.Matcher;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -127,12 +122,7 @@ public class AWSAuditFinderTest {
 
     var audits = auditFinder.findAll(76L);
 
-    //noinspection unchecked
-    assertThat(audits, hasItems(
-        hasRequestUrl("/test-url"),
-        both(hasRequestUrl("/test-url-2"))
-        .and(hasProperty("entries",
-            hasItem(hasRequestUrl("/test-url-3"))))));
+    assertThat(audits, contains(auditSession, auditSessionWithEntry));
   }
 
   @Test
@@ -210,12 +200,7 @@ public class AWSAuditFinderTest {
 
     var audits = auditFinder.findAllEncounters();
 
-    //noinspection unchecked
-    assertThat(audits, hasItems(
-        hasRequestUrl("/test-url"),
-        both(hasRequestUrl("/test-url-2"))
-            .and(hasProperty("entries",
-                hasItem(hasRequestUrl("/test-url-3"))))));
+    assertThat(audits, contains(auditSession, auditSessionWithEntry));
   }
 
   @Test
@@ -233,10 +218,6 @@ public class AWSAuditFinderTest {
     assertThat(audit.getResponseStatus(), is("200"));
     assertThat(audit.getAdditionalProperties().get("caseId"), is("57"));
     assertThat(audit.getEntries(), hasSize(28));
-  }
-
-  private Matcher<Object> hasRequestUrl(final String url) {
-    return hasProperty("requestUrl", equalTo(url));
   }
 
   @SneakyThrows

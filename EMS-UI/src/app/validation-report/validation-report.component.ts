@@ -4,7 +4,6 @@ import { Component, OnInit } from '@angular/core';
 import { EmsService } from '../service/ems.service';
 import { CdssService } from '../service';
 import { SupplierInstance } from '../model/supplierInstance';
-import { first } from 'rxjs/operators';
 
 @Component({
   selector: 'validation-report',

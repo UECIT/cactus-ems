@@ -37,7 +37,7 @@ class ValidationReportComponentPage {
   get interactions() {
     const rows = this.queryAll(By.css('.interaction'));
     return rows.map(row => {
-      const origin = row.query(By.css('.interactionRequestUrl')).nativeElement.innerText;
+      const origin = row.query(By.css('.interactionType')).nativeElement.innerText;
       const createdDate = row.query(By.css('.interactionCreatedDate')).nativeElement.innerText;
       const caseId: number = +row.query(By.css('.interactionCaseId')).nativeElement.innerText;
 

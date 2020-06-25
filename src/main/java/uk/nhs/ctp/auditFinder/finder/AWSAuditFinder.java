@@ -80,7 +80,7 @@ public class AWSAuditFinder implements AuditFinder {
         .size(MAX_RETURNED_AUDITS)
         .sort(new FieldSortBuilder(TIMESTAMP_FIELD).order(SortOrder.ASC));
 
-    return esClient.search(supplierId + "-audit", source)
+    return esClient.search(supplierId + AUDIT_SUFFIX, source)
         .stream()
         .map(SearchHit::getSourceAsString)
         .map(this::asAudit)
