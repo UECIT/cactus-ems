@@ -39,7 +39,7 @@
           </thead>
           <tbody>
             <tr class="interaction" *ngFor="let interaction of interactions">
-              <td class="interactionRequestOrigin">{{ interaction.requestOrigin }}</td>
+              <td class="interactionRequestUrl">{{ interaction.requestUrl }}</td>
               <td class="interactionCreatedDate">{{ interaction.createdDate * 1000 | date:'medium':'UTC' }}</td>
               <td class="interactionCaseId">{{ interaction.additionalProperties["caseId"] }}</td>
             </tr>

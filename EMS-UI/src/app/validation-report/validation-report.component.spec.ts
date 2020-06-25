@@ -37,7 +37,7 @@ class ValidationReportComponentPage {
   get interactions() {
     const rows = this.queryAll(By.css('.interaction'));
     return rows.map(row => {
-      const origin = row.query(By.css('.interactionRequestOrigin')).nativeElement.innerText;
+      const origin = row.query(By.css('.interactionRequestUrl')).nativeElement.innerText;
       const createdDate = row.query(By.css('.interactionCreatedDate')).nativeElement.innerText;
       const caseId: number = +row.query(By.css('.interactionCaseId')).nativeElement.innerText;
 
@@ -112,11 +112,11 @@ describe('ValidationReportComponent', () => {
     let encounter = new Interaction();
     encounter.additionalProperties["caseId"] = 4;
     encounter.createdDate = 835222942; //'Jun 19, 1996, 10:22:22 PM'
-    encounter.requestOrigin = "https://some-encounter-location/fhir";
+    encounter.requestUrl = "https://some-encounter-location/fhir";
 
     let sdSearch = new Interaction();
     sdSearch.createdDate = 955335783; //'Apr 10, 2000, 3:03:03 AM'
-    sdSearch.requestOrigin = "https://some-service-location/fhir";
+    sdSearch.requestUrl = "https://some-service-location/fhir";
 
     cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
     emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
@@ -129,8 +129,8 @@ describe('ValidationReportComponent', () => {
 
     expect(comp.loaded).toBeTruthy();
     expect(page.interactions).toContain(
-      {origin: encounter.requestOrigin, createdDate: 'Jun 19, 1996, 10:22:22 PM', caseId: encounter.additionalProperties['caseId']},
-      {origin: sdSearch.requestOrigin, createdDate: 'Apr 10, 2000, 3:03:03 AM', caseId: 0}
+      {origin: encounter.requestUrl, createdDate: 'Jun 19, 1996, 10:22:22 PM', caseId: encounter.additionalProperties['caseId']},
+      {origin: sdSearch.requestUrl, createdDate: 'Apr 10, 2000, 3:03:03 AM', caseId: 0}
     );
   }));
 

@@ -28,7 +28,7 @@ xdescribe('Audit Service', () => {
 
     it('should get encounter audits', () => {
         const expectedInteraction: Interaction = {
-            requestOrigin: "http://a-place.com",
+            requestUrl: "http://a-place.com",
             createdDate: 835222942,
             additionalProperties: new Map([['caseId', '4']])
         };
@@ -47,7 +47,7 @@ xdescribe('Audit Service', () => {
 
     it('should get service definition search audits', () => {
         const expectedInteraction: Interaction = {
-            requestOrigin: "http://another-place.com",
+            requestUrl: "http://another-place.com",
             createdDate: 835222942,
             additionalProperties: new Map([])
         };
