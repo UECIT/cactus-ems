@@ -1,4 +1,4 @@
-import { Interaction } from './../model/audit';
+import { Interaction, InteractionType } from './../model/audit';
 import { EmsSupplier } from './../model/emsSupplier';
 import { CdssSupplier } from 'src/app/model/cdssSupplier';
 import { of } from 'rxjs';
@@ -112,11 +112,11 @@ describe('ValidationReportComponent', () => {
     let encounter = new Interaction();
     encounter.additionalProperties["caseId"] = 4;
     encounter.createdDate = 835222942; //'Jun 19, 1996, 10:22:22 PM'
-    encounter.requestUrl = "https://some-encounter-location/fhir";
+    encounter.interactionType = InteractionType.ENCOUNTER;
 
     let sdSearch = new Interaction();
     sdSearch.createdDate = 955335783; //'Apr 10, 2000, 3:03:03 AM'
-    sdSearch.requestUrl = "https://some-service-location/fhir";
+    sdSearch.interactionType = InteractionType.SERVICE_SEARCH;
 
     cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
     emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
@@ -129,8 +129,40 @@ describe('ValidationReportComponent', () => {
 
     expect(comp.loaded).toBeTruthy();
     expect(page.interactions).toContain(
-      {origin: encounter.requestUrl, createdDate: 'Jun 19, 1996, 10:22:22 PM', caseId: encounter.additionalProperties['caseId']},
-      {origin: sdSearch.requestUrl, createdDate: 'Apr 10, 2000, 3:03:03 AM', caseId: 0}
+      {origin: encounter.interactionType, createdDate: 'Jun 19, 1996, 10:22:22 PM', caseId: encounter.additionalProperties['caseId']},
+      {origin: sdSearch.interactionType, createdDate: 'Apr 10, 2000, 3:03:03 AM', caseId: 0}
+    );
+  }));
+
+  it('should display one interaction per encounter', fakeAsync(() => {
+    let encounter = new Interaction();
+    encounter.additionalProperties["caseId"] = 4;
+    encounter.createdDate = 835222942; //'Jun 19, 1996, 10:22:22 PM'
+    encounter.interactionType = InteractionType.ENCOUNTER;
+
+    let encounter2 = new Interaction();
+    encounter2.additionalProperties["caseId"] = 4;
+    encounter2.createdDate = 955335783; //'Apr 10, 2000, 3:03:03 AM'
+    encounter2.interactionType = InteractionType.ENCOUNTER;
+
+    let encounter3 = new Interaction();
+    encounter3.additionalProperties["caseId"] = 5;
+    encounter3.createdDate = 955335783; //'Apr 10, 2000, 3:03:03 AM'
+    encounter3.interactionType = InteractionType.ENCOUNTER;
+
+    cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
+    emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
+    auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([encounter, encounter2, encounter3]));
+    auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+
+    fixture.detectChanges(); // init
+    tick();
+    fixture.detectChanges(); // resolve async promises
+
+    expect(comp.loaded).toBeTruthy();
+    expect(page.interactions).toContain(
+      {origin: encounter.interactionType, createdDate: 'Jun 19, 1996, 10:22:22 PM', caseId: encounter.additionalProperties['caseId']},
+      {origin: encounter3.interactionType, createdDate: 'Apr 10, 2000, 3:03:03 AM', caseId: encounter3.additionalProperties['caseId']},
     );
   }));
 

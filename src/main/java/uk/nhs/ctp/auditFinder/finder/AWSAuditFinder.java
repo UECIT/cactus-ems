@@ -33,10 +33,8 @@ public class AWSAuditFinder implements AuditFinder {
   private static final String TIMESTAMP_FIELD = "@timestamp";
   private static final String SUPPLIER_ID_FIELD = "additionalProperties.supplierId";
   private static final String CASE_ID_FIELD = "additionalProperties.caseId";
-  private static final String REQUEST_URL_FIELD = "requestUrl.keyword";
 
   private static final String AUDIT_SUFFIX = "-audit";
-  private static final String EVALUATE_WILDCARD = "*$evaluate";
 
   private final ElasticSearchClient esClient;
   private final TokenAuthenticationService authenticationService;
@@ -75,9 +73,7 @@ public class AWSAuditFinder implements AuditFinder {
 
     var query = QueryBuilders.boolQuery()
         .must(QueryBuilders.termQuery(SUPPLIER_ID_FIELD, supplierId))
-        .must(QueryBuilders.boolQuery()
-            .should(QueryBuilders.wildcardQuery(REQUEST_URL_FIELD, EVALUATE_WILDCARD))
-            .should(QueryBuilders.existsQuery(CASE_ID_FIELD)));
+        .must(QueryBuilders.existsQuery(CASE_ID_FIELD));
 
     var source = new SearchSourceBuilder()
         .query(query)
