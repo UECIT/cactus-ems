@@ -188,6 +188,60 @@ public class AWSAuditFinderTest {
   }
 
   @Test
+  public void findServiceSearches_buildsRequest() throws Exception {
+    when(authService.requireSupplierId()).thenReturn("test-supplier");
+    when(elasticSearchClient.search(eq("test-supplier-audit"), any(SearchSourceBuilder.class)))
+        .thenReturn(Collections.emptyList());
+
+    auditFinder.findAllServiceSearches();
+
+    var searchSourceCaptor = ArgumentCaptor.forClass(SearchSourceBuilder.class);
+    verify(elasticSearchClient).search(eq("test-supplier-audit"), searchSourceCaptor.capture());
+
+    var searchSource = searchSourceCaptor.getValue();
+
+    assertThat(searchSource.sorts(), hasSize(1));
+    assertThat(searchSource.sorts().get(0),
+        hasToString(equalToJSON("{ @timestamp : {order : asc } }")));
+    assertThat(searchSource.query(), hasToString(equalToJSON(
+        "{ bool : { must : ["
+            + " { term : { additionalProperties.supplierId : { value : test-supplier } } },"
+            + " { term : { additionalProperties.operation : { value : service_search } } }"
+            + "] } }")));
+  }
+
+  @Test
+  public void findServiceSearches_returnsAudits() throws IOException {
+    var auditSessionJson = "{ \"requestUrl\": \"/test-url\" }";
+    var auditSession = AuditSession.builder().requestUrl("/test-url").build();
+    var auditSessionWithEntryJson = "{"
+        + " \"requestUrl\": \"/test-url-2\","
+        + " \"entries\": ["
+        + " { \"requestUrl\": \"/test-url-3\" }"
+        + "] }";
+    var auditSessionWithEntry = AuditSession.builder()
+        .requestUrl("/test-url-2")
+        .entry(AuditEntry.builder().requestUrl("/test-url-3").build())
+        .build();
+
+    var searchHits = Stream.of(auditSessionJson, auditSessionWithEntryJson)
+        .map(this::buildSearchHit)
+        .collect(Collectors.toUnmodifiableList());
+
+    when(authService.requireSupplierId()).thenReturn("test-supplier");
+    when(elasticSearchClient.search(eq("test-supplier-audit"), any(SearchSourceBuilder.class)))
+        .thenReturn(searchHits);
+    when(objectMapper.readValue(auditSessionJson, AuditSession.class))
+        .thenReturn(auditSession);
+    when(objectMapper.readValue(auditSessionWithEntryJson, AuditSession.class))
+        .thenReturn(auditSessionWithEntry);
+
+    var audits = auditFinder.findAllServiceSearches();
+
+    assertThat(audits, contains(auditSession, auditSessionWithEntry));
+  }
+
+  @Test
   public void objectMapper_readValue_canDeserialiseAudit() throws IOException {
     var auditFile = getClass().getClassLoader().getResource("exampleAudit.json");
     var auditJson = IOUtils.toString(Objects.requireNonNull(auditFile), StandardCharsets.UTF_8);

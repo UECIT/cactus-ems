@@ -1,14 +1,11 @@
 package uk.nhs.ctp.auditFinder.finder;
 
-import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Preconditions;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.apache.commons.lang3.NotImplementedException;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -33,6 +30,8 @@ public class AWSAuditFinder implements AuditFinder {
   private static final String TIMESTAMP_FIELD = "@timestamp";
   private static final String SUPPLIER_ID_FIELD = "additionalProperties.supplierId";
   private static final String CASE_ID_FIELD = "additionalProperties.caseId";
+  private static final String OPERATION_FIELD = "additionalProperties.operation";
+  private static final String SEARCH_OPERATION = "service_search";
 
   private static final String AUDIT_SUFFIX = "-audit";
 
@@ -40,11 +39,8 @@ public class AWSAuditFinder implements AuditFinder {
   private final TokenAuthenticationService authenticationService;
   private final ObjectMapper mapper;
 
-  @SneakyThrows
   @Override
   public List<AuditSession> findAll(Long caseId) {
-    Preconditions.checkArgument(isNotEmpty(esClient), "ES url must be provided");
-
     var supplierId = authenticationService.requireSupplierId();
 
     var query = QueryBuilders.boolQuery()
@@ -52,34 +48,39 @@ public class AWSAuditFinder implements AuditFinder {
         .must(QueryBuilders.termQuery(SUPPLIER_ID_FIELD, supplierId))
         .must(QueryBuilders.termQuery(CASE_ID_FIELD, caseId.toString()));
 
-    var source = new SearchSourceBuilder()
-        .query(query)
-        .size(MAX_RETURNED_AUDITS)
-        .sort(new FieldSortBuilder(TIMESTAMP_FIELD).order(SortOrder.ASC));
+    var source = buildSearchSource(query);
 
-    return esClient.search(supplierId + AUDIT_SUFFIX, source)
-        .stream()
-        .map(SearchHit::getSourceAsString)
-        .map(this::asAudit)
-        .collect(Collectors.toUnmodifiableList());
+    return search(supplierId, source);
   }
 
-  @SneakyThrows
   @Override
   public List<AuditSession> findAllEncounters() {
-    Preconditions.checkArgument(isNotEmpty(esClient), "ES url must be provided");
-
     var supplierId = authenticationService.requireSupplierId();
 
     var query = QueryBuilders.boolQuery()
         .must(QueryBuilders.termQuery(SUPPLIER_ID_FIELD, supplierId))
         .must(QueryBuilders.existsQuery(CASE_ID_FIELD));
 
-    var source = new SearchSourceBuilder()
-        .query(query)
-        .size(MAX_RETURNED_AUDITS)
-        .sort(new FieldSortBuilder(TIMESTAMP_FIELD).order(SortOrder.ASC));
+    var source = buildSearchSource(query);
 
+    return search(supplierId, source);
+  }
+
+  @Override
+  public List<AuditSession> findAllServiceSearches() {
+    var supplierId = authenticationService.requireSupplierId();
+
+    var query = QueryBuilders.boolQuery()
+        .must(QueryBuilders.termQuery(SUPPLIER_ID_FIELD, supplierId))
+        .must(QueryBuilders.termQuery(OPERATION_FIELD, SEARCH_OPERATION));
+
+    var source = buildSearchSource(query);
+
+    return search(supplierId, source);
+  }
+
+  @SneakyThrows
+  private List<AuditSession> search(String supplierId, SearchSourceBuilder source) {
     return esClient.search(supplierId + AUDIT_SUFFIX, source)
         .stream()
         .map(SearchHit::getSourceAsString)
@@ -87,11 +88,12 @@ public class AWSAuditFinder implements AuditFinder {
         .collect(Collectors.toUnmodifiableList());
   }
 
-  @Override
-  public List<AuditSession> findAllServiceSearches() {
-    throw new NotImplementedException("TODO: CDSCT-276");
+  private SearchSourceBuilder buildSearchSource(BoolQueryBuilder query) {
+    return new SearchSourceBuilder()
+        .query(query)
+        .size(MAX_RETURNED_AUDITS)
+        .sort(new FieldSortBuilder(TIMESTAMP_FIELD).order(SortOrder.ASC));
   }
-
 
   @SneakyThrows
   private AuditSession asAudit(String source) {
