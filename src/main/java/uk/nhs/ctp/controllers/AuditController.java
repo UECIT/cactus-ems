@@ -2,7 +2,6 @@ package uk.nhs.ctp.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -47,7 +46,7 @@ public class AuditController {
 
 	@GetMapping(path = "/servicesearches")
 	public List<AuditSession> getAuditServiceSearch() {
-		return Collections.emptyList();
+		return auditFinder.findAllServiceSearches();
 	}
 	
 	@PostMapping

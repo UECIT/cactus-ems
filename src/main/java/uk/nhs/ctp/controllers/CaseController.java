@@ -34,6 +34,8 @@ import uk.nhs.ctp.service.search.SearchParametersTransformer;
 public class CaseController {
 
   private static final String CASE_ID = "caseId";
+  private static final String OPERATION = "operation";
+  private static final String SERVICE_SEARCH = "service_search";
 
   private final CdssService cdssService;
   private final TriageService triageService;
@@ -56,7 +58,7 @@ public class CaseController {
   List<CdssSupplierDTO> getServiceDefinitions(@RequestBody ServiceDefinitionSearchDTO requestDTO) {
     var params = searchParametersTransformer
         .transform(emptyList(), requestDTO.getSettings(), requestDTO.getPatientId());
-
+    auditService.addAuditProperty(OPERATION, SERVICE_SEARCH);
     return cdssService.queryServiceDefinitions(params);
   }
 
