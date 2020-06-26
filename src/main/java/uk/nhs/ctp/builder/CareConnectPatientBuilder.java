@@ -141,13 +141,13 @@ public class CareConnectPatientBuilder {
     if (StringUtils.isNotEmpty(nhsNumber)) {
       nhsIdentifier.setNhsNumberVerificationStatus(new CodeableConcept().addCoding(new Coding()
           .setSystem(
-              "https://fhir.hl7.org.uk/STU3/ValueSet/CareConnect-NHSNumberVerificationStatus-1")
+              "https://fhir.hl7.org.uk/STU3/CodeSystem/CareConnect-NHSNumberVerificationStatus-1")
           .setDisplay("Number present and verified")
           .setCode("01")));
     } else {
       nhsIdentifier.setNhsNumberVerificationStatus(new CodeableConcept().addCoding(new Coding()
           .setSystem(
-              "https://fhir.hl7.org.uk/STU3/ValueSet/CareConnect-NHSNumberVerificationStatus-1")
+              "https://fhir.hl7.org.uk/STU3/CodeSystem/CareConnect-NHSNumberVerificationStatus-1")
           .setDisplay("Number not present and trace not required")
           .setCode("07")));
     }

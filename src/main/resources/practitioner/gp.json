@@ -8,12 +8,12 @@
   "identifiers": [
     {
       "issuerId": "erp",
-      "system": "https://fhir.hl7.org.uk/Id/sds-user-id",
+      "system": "https://fhir.nhs.uk/Id/sds-user-id",
       "value": "1111111",
       "type": "sds"
     }, {
       "issuerId": "erp",
-      "system": "https://fhir.hl7.org.uk/Id/sds-role-profile-id",
+      "system": "https://fhir.nhs.uk/Id/sds-role-profile-id",
       "value": "1111112",
       "type": "sdsr"
   }],
