@@ -111,11 +111,11 @@ describe('ValidationReportComponent', () => {
   it('should display interactions', fakeAsync(() => {
     let encounter = new Interaction();
     encounter.additionalProperties["caseId"] = 4;
-    encounter.createdDate = 835222942; //'Jun 19, 1996, 10:22:22 PM'
+    encounter.createdDate = 835222942; //'Jun 19, 1996, 11:22:22 PM' (BST)
     encounter.interactionType = InteractionType.ENCOUNTER;
 
     let sdSearch = new Interaction();
-    sdSearch.createdDate = 955335783; //'Apr 10, 2000, 3:03:03 AM'
+    sdSearch.createdDate = 955335783; //'Apr 10, 2000, 4:03:03 AM' (BST)
     sdSearch.interactionType = InteractionType.SERVICE_SEARCH;
 
     cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
@@ -129,25 +129,25 @@ describe('ValidationReportComponent', () => {
 
     expect(comp.loaded).toBeTruthy();
     expect(page.interactions).toContain(
-      {origin: encounter.interactionType, createdDate: 'Jun 19, 1996, 10:22:22 PM', caseId: encounter.additionalProperties['caseId']},
-      {origin: sdSearch.interactionType, createdDate: 'Apr 10, 2000, 3:03:03 AM', caseId: 0}
+      {origin: encounter.interactionType, createdDate: 'Jun 19, 1996, 11:22:22 PM', caseId: encounter.additionalProperties['caseId']},
+      {origin: sdSearch.interactionType, createdDate: 'Apr 10, 2000, 4:03:03 AM', caseId: 0}
     );
   }));
 
   it('should display one interaction per encounter', fakeAsync(() => {
     let encounter = new Interaction();
     encounter.additionalProperties["caseId"] = 4;
-    encounter.createdDate = 835222942; //'Jun 19, 1996, 10:22:22 PM'
+    encounter.createdDate = 835222942; //'Jun 19, 1996, 11:22:22 PM' (BST)
     encounter.interactionType = InteractionType.ENCOUNTER;
 
     let encounter2 = new Interaction();
     encounter2.additionalProperties["caseId"] = 4;
-    encounter2.createdDate = 955335783; //'Apr 10, 2000, 3:03:03 AM'
+    encounter2.createdDate = 955335783; //'Apr 10, 2000, 4:03:03 AM' (BST)
     encounter2.interactionType = InteractionType.ENCOUNTER;
 
     let encounter3 = new Interaction();
     encounter3.additionalProperties["caseId"] = 5;
-    encounter3.createdDate = 955335783; //'Apr 10, 2000, 3:03:03 AM'
+    encounter3.createdDate = 955335783; //'Apr 10, 2000, 4:03:03 AM' (BST)
     encounter3.interactionType = InteractionType.ENCOUNTER;
 
     cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
@@ -161,8 +161,8 @@ describe('ValidationReportComponent', () => {
 
     expect(comp.loaded).toBeTruthy();
     expect(page.interactions).toContain(
-      {origin: encounter.interactionType, createdDate: 'Jun 19, 1996, 10:22:22 PM', caseId: encounter.additionalProperties['caseId']},
-      {origin: encounter3.interactionType, createdDate: 'Apr 10, 2000, 3:03:03 AM', caseId: encounter3.additionalProperties['caseId']},
+      {origin: encounter.interactionType, createdDate: 'Jun 19, 1996, 11:22:22 PM', caseId: encounter.additionalProperties['caseId']},
+      {origin: encounter3.interactionType, createdDate: 'Apr 10, 2000, 4:03:03 AM', caseId: encounter3.additionalProperties['caseId']},
     );
   }));
 
