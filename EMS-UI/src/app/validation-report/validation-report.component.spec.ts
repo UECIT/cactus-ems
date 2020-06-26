@@ -7,7 +7,7 @@ import { EmsService } from './../service/ems.service';
 import { async, ComponentFixture, TestBed, tick, fakeAsync } from '@angular/core/testing';
 
 import { ValidationReportComponent } from './validation-report.component';
-import { Predicate, DebugElement, Component, Input } from '@angular/core';
+import { Predicate, DebugElement, Component, Input, PipeTransform, Pipe } from '@angular/core';
 import { CdssService } from '../service';
 import { MaterialModule } from '../material.module';
 import { By } from '@angular/platform-browser';
@@ -16,6 +16,14 @@ import { By } from '@angular/platform-browser';
 class ErrorDisplayStub {
     @Input('errorObject')
     public errorObject: any;
+}
+
+@Pipe({name: 'date'})
+class MockDatePipe implements PipeTransform {
+  transform(value: number): string {
+    var date = new Date(value);
+    return date.toUTCString(); //for testing, always return UTC
+  }
 }
 
 let comp: ValidationReportComponent;
@@ -67,7 +75,7 @@ describe('ValidationReportComponent', () => {
 
     TestBed.configureTestingModule({
         imports: [MaterialModule],
-        declarations: [ValidationReportComponent, ErrorDisplayStub],
+        declarations: [ValidationReportComponent, ErrorDisplayStub, MockDatePipe],
         providers: [
             {provide: CdssService, useValue: cdssServiceSpy},
             {provide: EmsService, useValue: emsServiceSpy},
@@ -111,11 +119,11 @@ describe('ValidationReportComponent', () => {
   it('should display interactions', fakeAsync(() => {
     let encounter = new Interaction();
     encounter.additionalProperties["caseId"] = 4;
-    encounter.createdDate = 835222942; //'Jun 19, 1996, 11:22:22 PM' (BST)
+    encounter.createdDate = 835222942; //'Jun 19, 1996, 10:22:22 PM' (UTC)
     encounter.interactionType = InteractionType.ENCOUNTER;
 
     let sdSearch = new Interaction();
-    sdSearch.createdDate = 955335783; //'Apr 10, 2000, 4:03:03 AM' (BST)
+    sdSearch.createdDate = 955335783; //'Apr 10, 2000, 3:03:03 AM' (UTC)
     sdSearch.interactionType = InteractionType.SERVICE_SEARCH;
 
     cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
@@ -129,25 +137,33 @@ describe('ValidationReportComponent', () => {
 
     expect(comp.loaded).toBeTruthy();
     expect(page.interactions).toContain(
-      {origin: encounter.interactionType, createdDate: 'Jun 19, 1996, 11:22:22 PM', caseId: encounter.additionalProperties['caseId']},
-      {origin: sdSearch.interactionType, createdDate: 'Apr 10, 2000, 4:03:03 AM', caseId: 0}
+      {
+        origin: encounter.interactionType, 
+        createdDate: new Date(encounter.createdDate * 1000).toUTCString(), 
+        caseId: encounter.additionalProperties['caseId']
+      },
+      {
+        origin: sdSearch.interactionType, 
+        createdDate: new Date(sdSearch.createdDate * 1000).toUTCString(), 
+        caseId: 0
+      }
     );
   }));
 
   it('should display one interaction per encounter', fakeAsync(() => {
     let encounter = new Interaction();
     encounter.additionalProperties["caseId"] = 4;
-    encounter.createdDate = 835222942; //'Jun 19, 1996, 11:22:22 PM' (BST)
+    encounter.createdDate = 835222942; //'Jun 19, 1996, 10:22:22 PM' (UTC)
     encounter.interactionType = InteractionType.ENCOUNTER;
 
     let encounter2 = new Interaction();
     encounter2.additionalProperties["caseId"] = 4;
-    encounter2.createdDate = 955335783; //'Apr 10, 2000, 4:03:03 AM' (BST)
+    encounter2.createdDate = 955335783; //'Apr 10, 2000, 3:03:03 AM' (UTC)
     encounter2.interactionType = InteractionType.ENCOUNTER;
 
     let encounter3 = new Interaction();
     encounter3.additionalProperties["caseId"] = 5;
-    encounter3.createdDate = 955335783; //'Apr 10, 2000, 4:03:03 AM' (BST)
+    encounter3.createdDate = 955335783; //'Apr 10, 2000, 3:03:03 AM' (UTC)
     encounter3.interactionType = InteractionType.ENCOUNTER;
 
     cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
@@ -161,8 +177,16 @@ describe('ValidationReportComponent', () => {
 
     expect(comp.loaded).toBeTruthy();
     expect(page.interactions).toContain(
-      {origin: encounter.interactionType, createdDate: 'Jun 19, 1996, 11:22:22 PM', caseId: encounter.additionalProperties['caseId']},
-      {origin: encounter3.interactionType, createdDate: 'Apr 10, 2000, 4:03:03 AM', caseId: encounter3.additionalProperties['caseId']},
+      {
+        origin: encounter.interactionType, 
+        createdDate: new Date(encounter.createdDate * 1000).toUTCString(), 
+        caseId: encounter.additionalProperties['caseId']
+      },
+      {
+        origin: encounter3.interactionType, 
+        createdDate: new Date(encounter3.createdDate * 1000).toUTCString(), 
+        caseId: encounter3.additionalProperties['caseId']
+      },
     );
   }));
 
