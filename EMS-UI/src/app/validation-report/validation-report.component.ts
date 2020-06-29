@@ -1,10 +1,9 @@
-import { Interaction, InteractionType } from './../model/audit';
-import { AuditService } from './../service/audit.service';
+import { Interaction, InteractionType } from '../model';
+import { AuditService, EmsService, CdssService } from '../service';
 import { Component, OnInit } from '@angular/core';
-import { EmsService } from '../service/ems.service';
-import { CdssService } from '../service';
 import { SupplierInstance } from '../model/supplierInstance';
 import { firstGroupedBy } from '../utils/functions';
+import { SelectionModel } from "@angular/cdk/collections";
 
 @Component({
   selector: 'validation-report',
@@ -19,6 +18,9 @@ export class ValidationReportComponent implements OnInit {
   interactions: Interaction[] = [];
   loadedEncounterAudits = false;
   loadedSearchAudits = false;
+
+  public endpointSelection = new SelectionModel<SupplierInstance>();
+  public interactionSelection = new SelectionModel<Interaction>();
 
   constructor(
     private emsService: EmsService, 

@@ -14,9 +14,17 @@
             </tr>
           </thead>
           <tbody>
-            <tr class="endpoint" *ngFor="let endpoint of endpoints">
+            <tr class="endpoint" *ngFor="let endpoint of endpoints"
+                (click)="endpointSelection.toggle(endpoint)">
               <td class="endpointName">{{ endpoint.name }}</td>
               <td class="endpointBaseUrl">{{ endpoint.baseUrl }}</td>
+              <td>
+                <mat-checkbox class="endpointCheckbox"
+                    (click)="$event.stopPropagation()"
+                    (change)="$event ? endpointSelection.toggle(endpoint) : null"
+                    [checked]="endpointSelection.isSelected(endpoint)">
+                </mat-checkbox>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -38,10 +46,18 @@
             </tr>
           </thead>
           <tbody>
-            <tr class="interaction" *ngFor="let interaction of interactions">
+            <tr class="interaction" *ngFor="let interaction of interactions"
+                (click)="interactionSelection.toggle(interaction)">
               <td class="interactionType">{{ interaction.interactionType }}</td>
               <td class="interactionCreatedDate">{{ interaction.createdDate * 1000 | date:'medium' }}</td>
               <td class="interactionCaseId">{{ interaction.additionalProperties["caseId"] }}</td>
+              <td>
+                <mat-checkbox class="interactionCheckbox"
+                    (click)="$event.stopPropagation()"
+                    (change)="$event ? interactionSelection.toggle(interaction) : null"
+                    [checked]="interactionSelection.isSelected(interaction)">
+                </mat-checkbox>
+              </td>
             </tr>
           </tbody>
         </table>
