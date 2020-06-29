@@ -1,4 +1,5 @@
 export class Interaction {
+    id: string;
     interactionType: InteractionType;
     createdDate: number; //instant
     additionalProperties: Map<string, string> = new Map<string, string>();
@@ -10,7 +11,7 @@ export enum InteractionType {
 }
 
 export class ValidationRequest {
-    endpoint: string;
-    createdDate: number //instant
-    caseId: string;
+    supplierInstanceId: number;
+    searchAuditId: string // for service search
+    caseId: string; //for encounters
 }

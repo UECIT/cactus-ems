@@ -87,63 +87,63 @@ class ValidationReportComponentPage {
   }
 }
 
-describe('ValidationReportComponent', () => {
+let emsServiceSpy: { getAllEmsSuppliers: jasmine.Spy };
+let cdssServiceSpy: { getCdssSuppliers: jasmine.Spy };
+let auditServiceSpy: { 
+  getEncounterAudits: jasmine.Spy, 
+  getServiceDefinitionSearchAudits: jasmine.Spy,
+  sendValidationRequest: jasmine.Spy
+ };
 
-  let emsServiceSpy: { getAllEmsSuppliers: jasmine.Spy };
-  let cdssServiceSpy: { getCdssSuppliers: jasmine.Spy };
-  let auditServiceSpy: { 
-    getEncounterAudits: jasmine.Spy, 
-    getServiceDefinitionSearchAudits: jasmine.Spy,
-    sendValidationRequest: jasmine.Spy
-   };
+beforeEach(() => {
+  emsServiceSpy = jasmine.createSpyObj('EmsService', ['getAllEmsSuppliers']);
+  cdssServiceSpy = jasmine.createSpyObj('CdssService', ['getCdssSuppliers']);
+  auditServiceSpy = jasmine.createSpyObj('AuditService', 
+    ['getEncounterAudits', 'getServiceDefinitionSearchAudits', 'sendValidationRequest']);
 
-  function setupSupplierSpies() {
-    let cdss = new CdssSupplier();
-    cdss.name = "A cdss name";
-    cdss.baseUrl = "http://cdss.base.url/fhir";
-
-    let ems = new EmsSupplier();
-    ems.name = "An ems name";
-    ems.baseUrl = "http://ems.base.url/fhir";
-
-    cdssServiceSpy.getCdssSuppliers.and.returnValue(of([cdss]));
-    emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([ems]));
-    return {cdss, ems};
-  }
-  function setupInteractionSpies() {
-    let encounter = new Interaction();
-    encounter.additionalProperties["caseId"] = 4;
-    encounter.createdDate = 835222942; //'Jun 19, 1996, 10:22:22 PM' (UTC)
-    encounter.interactionType = InteractionType.ENCOUNTER;
-
-    let sdSearch = new Interaction();
-    sdSearch.createdDate = 955335783; //'Apr 10, 2000, 3:03:03 AM' (UTC)
-    sdSearch.interactionType = InteractionType.SERVICE_SEARCH;
-
-    auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([encounter]));
-    auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([sdSearch]));
-    return {encounter, sdSearch};
-  }
-
-  beforeEach(() => {
-    emsServiceSpy = jasmine.createSpyObj('EmsService', ['getAllEmsSuppliers']);
-    cdssServiceSpy = jasmine.createSpyObj('CdssService', ['getCdssSuppliers']);
-    auditServiceSpy = jasmine.createSpyObj('AuditService', 
-      ['getEncounterAudits', 'getServiceDefinitionSearchAudits', 'sendValidationRequest']);
-
-    TestBed.configureTestingModule({
-        imports: [MaterialModule],
-        declarations: [ValidationReportComponent, ErrorDisplayStub, MockDatePipe],
-        providers: [
-            {provide: CdssService, useValue: cdssServiceSpy},
-            {provide: EmsService, useValue: emsServiceSpy},
-            {provide: AuditService, useValue: auditServiceSpy}
-        ]
-    });
-    fixture = TestBed.createComponent(ValidationReportComponent);
-    comp = fixture.componentInstance;
-    page = new ValidationReportComponentPage();
+  TestBed.configureTestingModule({
+      imports: [MaterialModule],
+      declarations: [ValidationReportComponent, ErrorDisplayStub, MockDatePipe],
+      providers: [
+          {provide: CdssService, useValue: cdssServiceSpy},
+          {provide: EmsService, useValue: emsServiceSpy},
+          {provide: AuditService, useValue: auditServiceSpy}
+      ]
   });
+  fixture = TestBed.createComponent(ValidationReportComponent);
+  comp = fixture.componentInstance;
+  page = new ValidationReportComponentPage();
+});
+
+function setupSupplierSpies() {
+  let cdss = new CdssSupplier();
+  cdss.name = "A cdss name";
+  cdss.baseUrl = "http://cdss.base.url/fhir";
+
+  let ems = new EmsSupplier();
+  ems.name = "An ems name";
+  ems.baseUrl = "http://ems.base.url/fhir";
+
+  cdssServiceSpy.getCdssSuppliers.and.returnValue(of([cdss]));
+  emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([ems]));
+  return {cdss, ems};
+}
+function setupInteractionSpies() {
+  let encounter = new Interaction();
+  encounter.additionalProperties["caseId"] = 4;
+  encounter.createdDate = 835222942; //'Jun 19, 1996, 10:22:22 PM' (UTC)
+  encounter.interactionType = InteractionType.ENCOUNTER;
+
+  let sdSearch = new Interaction();
+  sdSearch.createdDate = 955335783; //'Apr 10, 2000, 3:03:03 AM' (UTC)
+  sdSearch.interactionType = InteractionType.SERVICE_SEARCH;
+
+  auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([encounter]));
+  auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([sdSearch]));
+  return {encounter, sdSearch};
+}
+
+describe('ValidationReportComponent', () => {
 
   it('should create', () => {
     expect(comp).toBeTruthy();
@@ -256,6 +256,7 @@ describe('ValidationReportComponent', () => {
     expect(comp.endpointSelection.selected).toContain(cdss);
     expect(comp.endpointSelection.selected).not.toContain(ems);
   }));
+
   it('should select one when clicking on endpoint checkbox', fakeAsync(() => {
     let {cdss,ems} = setupSupplierSpies();
     auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
@@ -273,6 +274,7 @@ describe('ValidationReportComponent', () => {
     expect(comp.endpointSelection.selected).toContain(cdss);
     expect(comp.endpointSelection.selected).not.toContain(ems);
   }));
+
   it('should deselect when clicking on endpoint row', fakeAsync(() => {
     let {cdss} = setupSupplierSpies();
     auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
@@ -291,6 +293,7 @@ describe('ValidationReportComponent', () => {
 
     expect(comp.endpointSelection.selected).toEqual([]);
   }));
+
   it('should deselect when clicking on endpoint checkbox', fakeAsync(() => {
     let {cdss} = setupSupplierSpies();
     auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
@@ -309,6 +312,7 @@ describe('ValidationReportComponent', () => {
 
     expect(comp.endpointSelection.selected).toEqual([]);
   }));
+
   it('should deselect existing when selecting a different endpoint', fakeAsync(() => {
     let {cdss,ems} = setupSupplierSpies();
     auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
@@ -345,6 +349,7 @@ describe('ValidationReportComponent', () => {
     expect(comp.interactionSelection.selected).toContain(encounter);
     expect(comp.interactionSelection.selected).not.toContain(sdSearch);
   }));
+
   it('should select one when clicking on interaction checkbox', fakeAsync(() => {
     cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
     emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
@@ -362,6 +367,7 @@ describe('ValidationReportComponent', () => {
     expect(comp.interactionSelection.selected).toContain(encounter);
     expect(comp.interactionSelection.selected).not.toContain(sdSearch);
   }));
+
   it('should deselect when clicking on interaction row', fakeAsync(() => {
     cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
     emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
@@ -380,6 +386,7 @@ describe('ValidationReportComponent', () => {
 
     expect(comp.interactionSelection.selected).toEqual([]);
   }));
+
   it('should deselect when clicking on interaction checkbox', fakeAsync(() => {
     cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
     emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
@@ -398,6 +405,7 @@ describe('ValidationReportComponent', () => {
 
     expect(comp.interactionSelection.selected).toEqual([]);
   }));
+
   it('should deselect existing when selecting a different interaction', fakeAsync(() => {
     cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
     emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
@@ -418,25 +426,63 @@ describe('ValidationReportComponent', () => {
     expect(comp.interactionSelection.selected).toContain(sdSearch);
   }));
 
-  fit('should send validation request to validation service', fakeAsync(() => {
-    cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
-    emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
-    auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
-    auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+  describe("Send Validation Report", () => {
 
-    fixture.detectChanges(); //init
-    tick();
-    fixture.detectChanges();
+    function initEmpty() {
+      cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
+      emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
+      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
+      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+    }
 
-    page.validateButton.click();
-    fixture.detectChanges();
+    it('should send validation request to validation service', fakeAsync(() => {
+      initEmpty();
+  
+      let selectedSupplier = new EmsSupplier();
+      selectedSupplier.id = 5;
+      let selectedInteraction = new Interaction();
+      selectedInteraction.id = "someguid";
+      selectedInteraction.additionalProperties["caseId"] = "6";
+  
+      comp.endpointSelection.select(selectedSupplier);
+      comp.interactionSelection.select(selectedInteraction);
+  
+      fixture.detectChanges(); //init
+      tick();
+      fixture.detectChanges();
+  
+      page.validateButton.click();
+      fixture.detectChanges();
+  
+      expect(auditServiceSpy.sendValidationRequest).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          supplierInstanceId: 5,
+          searchAuditId: "someguid",
+          caseId: "6"
+        })
+      );
+    }));
+    
+    fit('should disable button if both tables don\'t have selection', fakeAsync(() => {
+      initEmpty();
 
-    expect(auditServiceSpy.sendValidationRequest).toHaveBeenCalledWith(
-      jasmine.objectContaining({
-        endpoint: "this.is.a.fake",
-        createdDate: 955335783,
-        caseId: "43"
-      })
-    );
-  }));
+      let selectedSupplier = new EmsSupplier();
+      selectedSupplier.id = 5;
+
+      comp.endpointSelection.select(selectedSupplier);
+
+      fixture.detectChanges(); //init
+      tick();
+      fixture.detectChanges();
+
+      expect(page.validateButton);
+
+    }));
+
+    fit('should enable button if both tables have selection', fakeAsync(() => {
+      initEmpty();
+
+    }));
+
+  })
 });

@@ -1,7 +1,6 @@
 import { SupplierInstance } from "./supplierInstance";
 
 export class CdssSupplier extends SupplierInstance{
-  id: number;
   serviceDefinitions: ServiceDefinition[];
   inputParamsRefType: ResourceReferenceType;
   inputDataRefType: ResourceReferenceType;

@@ -22,8 +22,8 @@ export class ValidationReportComponent implements OnInit {
   sentSuccess = false;
   sentError: string;
 
-  public endpointSelection = new SelectionModel<SupplierInstance>();
-  public interactionSelection = new SelectionModel<Interaction>();
+  endpointSelection = new SelectionModel<SupplierInstance>();
+  interactionSelection = new SelectionModel<Interaction>();
 
   constructor(
     private emsService: EmsService, 
@@ -86,25 +86,22 @@ export class ValidationReportComponent implements OnInit {
   }
 
   sendValidationRequest() {
-    //TODO: Get actual selections
-    let fakeEndpointSelection: SupplierInstance = {
-      name: "This is a fake",
-      baseUrl: "this.is.a.fake"
-    };
-    let fakeInteractionSelection: Interaction = {
-      interactionType: InteractionType.ENCOUNTER,
-      createdDate: 955335783,
-      additionalProperties: new Map<string, string>([["caseId", "43"]])
-    };
+    let endpointSelection = this.endpointSelection.selected[0];
+    let interactionSelection = this.interactionSelection.selected[0];
 
     let request: ValidationRequest = {
-      endpoint: fakeEndpointSelection.baseUrl,
-      createdDate: fakeInteractionSelection.createdDate,
-      caseId: fakeInteractionSelection.additionalProperties.get("caseId"),
+      supplierInstanceId: endpointSelection.id,
+      searchAuditId: interactionSelection.id,
+      caseId: interactionSelection.additionalProperties["caseId"],
     };
+    
     this.auditService.sendValidationRequest(request)
       .then(res => this.sentSuccess = true)
       .catch(err => this.sentError = err.message)
+  }
+
+  get eitherNotSelected() {
+    return this.endpointSelection.isEmpty() || this.interactionSelection.isEmpty();
   }
 
 }

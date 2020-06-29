@@ -1,13 +1,12 @@
 package uk.nhs.ctp.auditFinder.model;
 
-import java.time.Instant;
 import lombok.Data;
 
 @Data
 public class AuditValidationRequest {
 
-  private String endpoint;
-  private Instant createdDate;
+  private Long supplierInstanceId;
+  private String searchAuditId; // For service searches
   private String caseId; // For encounters
 
 }

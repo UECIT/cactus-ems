@@ -68,8 +68,7 @@
   <div class="row">
     <div class="col-xs-12 col-md-10 offset-md-5">
       <div class="actions">
-        <!--TODO: Disable if endpoint/interaction not selected-->
-        <span class="actionButton" (click)="sendValidationRequest()">Validate</span>
+        <span [disabled]="bothSelected" class="actionButton" (click)="sendValidationRequest()">Validate</span>
       </div>
     </div>
     <div class="col-xs-12 col-md-10 offset-md-1">
