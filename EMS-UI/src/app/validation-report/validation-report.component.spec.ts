@@ -449,7 +449,7 @@ describe('ValidationReportComponent', () => {
       initEmpty();
   
       let selectedSupplier = new EmsSupplier();
-      selectedSupplier.id = 5;
+      selectedSupplier.baseUrl = "this.is.a.fake";
       let selectedInteraction = new Interaction();
       selectedInteraction.id = "someguid";
       selectedInteraction.additionalProperties["caseId"] = "6";
@@ -466,7 +466,7 @@ describe('ValidationReportComponent', () => {
   
       expect(auditServiceSpy.sendValidationRequest).toHaveBeenCalledWith(
         jasmine.objectContaining({
-          supplierInstanceId: 5,
+          instanceBaseUrl: "this.is.a.fake",
           searchAuditId: "someguid",
           caseId: "6"
         })

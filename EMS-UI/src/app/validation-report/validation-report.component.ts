@@ -90,7 +90,7 @@ export class ValidationReportComponent implements OnInit {
     let interactionSelection = this.interactionSelection.selected[0];
 
     let request: ValidationRequest = {
-      supplierInstanceId: endpointSelection.id,
+      instanceBaseUrl: endpointSelection.baseUrl,
       searchAuditId: interactionSelection.id,
       caseId: interactionSelection.additionalProperties["caseId"],
     };
