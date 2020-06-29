@@ -19,9 +19,10 @@
               <td class="endpointName">{{ endpoint.name }}</td>
               <td class="endpointBaseUrl">{{ endpoint.baseUrl }}</td>
               <td>
-                <mat-checkbox (click)="$event.stopPropagation()"
-                              (change)="$event ? endpointSelection.toggle(endpoint) : null"
-                              [checked]="endpointSelection.isSelected(endpoint)">
+                <mat-checkbox class="endpointCheckbox"
+                    (click)="$event.stopPropagation()"
+                    (change)="$event ? endpointSelection.toggle(endpoint) : null"
+                    [checked]="endpointSelection.isSelected(endpoint)">
                 </mat-checkbox>
               </td>
             </tr>
@@ -51,9 +52,10 @@
               <td class="interactionCreatedDate">{{ interaction.createdDate * 1000 | date:'medium' }}</td>
               <td class="interactionCaseId">{{ interaction.additionalProperties["caseId"] }}</td>
               <td>
-                <mat-checkbox (click)="$event.stopPropagation()"
-                              (change)="$event ? interactionSelection.toggle(interaction) : null"
-                              [checked]="interactionSelection.isSelected(interaction)">
+                <mat-checkbox class="interactionCheckbox"
+                    (click)="$event.stopPropagation()"
+                    (change)="$event ? interactionSelection.toggle(interaction) : null"
+                    [checked]="interactionSelection.isSelected(interaction)">
                 </mat-checkbox>
               </td>
             </tr>
