@@ -12,6 +12,7 @@ export enum InteractionType {
 
 export class ValidationRequest {
     instanceBaseUrl: string;
+    type: InteractionType;
     searchAuditId: string // for service search
     caseId: string; //for encounters
 }

@@ -90,14 +90,21 @@ export class ValidationReportComponent implements OnInit {
     let interactionSelection = this.interactionSelection.selected[0];
 
     let request: ValidationRequest = {
+      type: interactionSelection.interactionType,
       instanceBaseUrl: endpointSelection.baseUrl,
       searchAuditId: interactionSelection.id,
       caseId: interactionSelection.additionalProperties["caseId"],
     };
     
     this.auditService.sendValidationRequest(request)
-      .then(res => this.sentSuccess = true)
-      .catch(err => this.sentError = err.message)
+      .then(res => {
+        this.sentSuccess = true;
+        this.sentError = null;
+      })
+      .catch(err => {
+        this.sentError = err.message;
+        this.sentSuccess = false;
+      })
   }
 
   get eitherNotSelected() {

@@ -452,6 +452,7 @@ describe('ValidationReportComponent', () => {
       selectedSupplier.baseUrl = "this.is.a.fake";
       let selectedInteraction = new Interaction();
       selectedInteraction.id = "someguid";
+      selectedInteraction.interactionType = InteractionType.ENCOUNTER;
       selectedInteraction.additionalProperties["caseId"] = "6";
   
       comp.endpointSelection.select(selectedSupplier);
@@ -468,6 +469,7 @@ describe('ValidationReportComponent', () => {
         jasmine.objectContaining({
           instanceBaseUrl: "this.is.a.fake",
           searchAuditId: "someguid",
+          type: InteractionType.ENCOUNTER,
           caseId: "6"
         })
       );

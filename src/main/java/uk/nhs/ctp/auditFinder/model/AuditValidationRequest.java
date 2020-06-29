@@ -5,7 +5,8 @@ import lombok.Data;
 @Data
 public class AuditValidationRequest {
 
-  private Long supplierInstanceId;
+  private OperationType type;
+  private String instanceBaseUrl;
   private String searchAuditId; // For service searches
   private String caseId; // For encounters
 

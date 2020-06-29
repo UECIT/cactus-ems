@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.audit.model.AuditSession;
 import uk.nhs.ctp.auditFinder.ElasticSearchClient;
+import uk.nhs.ctp.auditFinder.model.OperationType;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +32,6 @@ public class AWSAuditFinder implements AuditFinder {
   private static final String SUPPLIER_ID_FIELD = "additionalProperties.supplierId";
   private static final String CASE_ID_FIELD = "additionalProperties.caseId";
   private static final String OPERATION_FIELD = "additionalProperties.operation";
-  private static final String SEARCH_OPERATION = "service_search";
 
   private static final String AUDIT_SUFFIX = "-audit";
 
@@ -72,7 +72,7 @@ public class AWSAuditFinder implements AuditFinder {
 
     var query = QueryBuilders.boolQuery()
         .must(QueryBuilders.termQuery(SUPPLIER_ID_FIELD, supplierId))
-        .must(QueryBuilders.termQuery(OPERATION_FIELD, SEARCH_OPERATION));
+        .must(QueryBuilders.termQuery(OPERATION_FIELD, OperationType.SERVICE_SEARCH.getName()));
 
     var source = buildSearchSource(query);
 
