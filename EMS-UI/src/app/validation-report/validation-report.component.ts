@@ -100,7 +100,7 @@ export class ValidationReportComponent implements OnInit {
     let request: ValidationRequest = {
       endpoint: fakeEndpointSelection.baseUrl,
       createdDate: fakeInteractionSelection.createdDate,
-      caseId: fakeInteractionSelection.additionalProperties.get("caseId");
+      caseId: fakeInteractionSelection.additionalProperties.get("caseId"),
     };
     this.auditService.sendValidationRequest(request)
       .then(res => this.sentSuccess = true)

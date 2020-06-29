@@ -74,8 +74,16 @@ class ValidationReportComponentPage {
     });
   }
 
+  get validateButton() {
+    return this.query<HTMLSpanElement>(By.css(".actionButton"));
+  }
+
   private queryAll(by: Predicate<DebugElement>): DebugElement[] {
     return fixture.debugElement.queryAll(by);
+  }
+
+  private query<T>(by: Predicate<DebugElement>): T {
+    return fixture.debugElement.query(by).nativeElement;
   }
 }
 
@@ -85,8 +93,9 @@ describe('ValidationReportComponent', () => {
   let cdssServiceSpy: { getCdssSuppliers: jasmine.Spy };
   let auditServiceSpy: { 
     getEncounterAudits: jasmine.Spy, 
-    getServiceDefinitionSearchAudits: jasmine.Spy
-  };
+    getServiceDefinitionSearchAudits: jasmine.Spy,
+    sendValidationRequest: jasmine.Spy
+   };
 
   function setupSupplierSpies() {
     let cdss = new CdssSupplier();
@@ -120,7 +129,7 @@ describe('ValidationReportComponent', () => {
     emsServiceSpy = jasmine.createSpyObj('EmsService', ['getAllEmsSuppliers']);
     cdssServiceSpy = jasmine.createSpyObj('CdssService', ['getCdssSuppliers']);
     auditServiceSpy = jasmine.createSpyObj('AuditService', 
-      ['getEncounterAudits', 'getServiceDefinitionSearchAudits']);
+      ['getEncounterAudits', 'getServiceDefinitionSearchAudits', 'sendValidationRequest']);
 
     TestBed.configureTestingModule({
         imports: [MaterialModule],
@@ -407,5 +416,27 @@ describe('ValidationReportComponent', () => {
 
     expect(comp.interactionSelection.selected).not.toContain(encounter);
     expect(comp.interactionSelection.selected).toContain(sdSearch);
+  }));
+
+  fit('should send validation request to validation service', fakeAsync(() => {
+    cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
+    emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
+    auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
+    auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+
+    fixture.detectChanges(); //init
+    tick();
+    fixture.detectChanges();
+
+    page.validateButton.click();
+    fixture.detectChanges();
+
+    expect(auditServiceSpy.sendValidationRequest).toHaveBeenCalledWith(
+      jasmine.objectContaining({
+        endpoint: "this.is.a.fake",
+        createdDate: 955335783,
+        caseId: "43"
+      })
+    );
   }));
 });
