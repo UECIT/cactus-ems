@@ -1,6 +1,7 @@
 export * from './audit.service';
 export * from './case.service';
 export * from './cdss.service';
+export * from './ems.service';
 export * from './dos.service';
 export * from './login.service';
 export * from './manage-users.service';
