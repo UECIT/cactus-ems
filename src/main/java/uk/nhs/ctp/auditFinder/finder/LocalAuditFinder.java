@@ -1,6 +1,7 @@
 package uk.nhs.ctp.auditFinder.finder;
 
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
@@ -27,7 +28,17 @@ public class LocalAuditFinder implements AuditFinder {
     private String auditFinderEndpoint;
 
     @Override
-    public List<AuditSession> findAll(Long caseId) {
+    public Optional<AuditSession> findByAuditId(String auditId) {
+        throw new NotImplementedException("TODO: CDSCT-281");
+    }
+
+    @Override
+    public List<AuditSession> findAllEncountersByCaseId(String caseId) {
+        throw new NotImplementedException("TODO: CDSCT-281");
+    }
+
+    @Override
+    public List<AuditSession> findAllEmsEncountersByCaseId(String caseId) {
         if (StringUtils.isEmpty(auditFinderEndpoint)) {
             log.info("No audit finder endpoint configured");
             return Collections.emptyList();
@@ -35,9 +46,9 @@ public class LocalAuditFinder implements AuditFinder {
 
         try {
             var audits = auditRestTemplate.getForObject(
-                    auditFinderEndpoint + "/caseId/{caseId}",
-                    AuditSession[].class,
-                    caseId);
+                auditFinderEndpoint + "/caseId/{caseId}",
+                AuditSession[].class,
+                caseId);
 
             return List.of(audits);
         } catch (ResourceAccessException e) {

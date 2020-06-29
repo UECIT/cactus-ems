@@ -3,6 +3,7 @@ package uk.nhs.ctp.service;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -37,7 +38,7 @@ public class ValidationServiceTest {
             .build())
         .build();
 
-    when(auditFinder.findAll(anyLong()))
+    when(auditFinder.findAllEmsEncountersByCaseId(anyString()))
         .thenReturn(List.of(audit));
 
     byte[] output = validationService.zipResources(1L);

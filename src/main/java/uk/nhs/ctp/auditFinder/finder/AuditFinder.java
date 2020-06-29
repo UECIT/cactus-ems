@@ -1,17 +1,21 @@
 package uk.nhs.ctp.auditFinder.finder;
 
+import java.util.Optional;
 import uk.nhs.ctp.audit.model.AuditSession;
 
 import java.util.List;
 
 public interface AuditFinder {
+    Optional<AuditSession> findByAuditId(String auditId);
+
+    List<AuditSession> findAllEncountersByCaseId(String caseId);
 
     /**
      * Find all audit sessions based on the caseId
      * @param caseId case id property to search for
      * @return audit sessions matching the case id
      */
-    List<AuditSession> findAll(Long caseId);
+    List<AuditSession> findAllEmsEncountersByCaseId(String caseId);
 
     /**
      * Find all audit sessions that were part of an encounter.

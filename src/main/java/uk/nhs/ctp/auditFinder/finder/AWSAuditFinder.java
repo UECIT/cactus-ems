@@ -1,8 +1,12 @@
 package uk.nhs.ctp.auditFinder.finder;
 
+import static com.google.common.collect.MoreCollectors.toOptional;
+import static java.util.stream.Collectors.toUnmodifiableList;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -31,6 +35,7 @@ public class AWSAuditFinder implements AuditFinder {
   private static final String SUPPLIER_ID_FIELD = "additionalProperties.supplierId";
   private static final String CASE_ID_FIELD = "additionalProperties.caseId";
   private static final String OPERATION_FIELD = "additionalProperties.operation";
+  private static final String REQUEST_ID_FIELD = "requestId";
   private static final String SEARCH_OPERATION = "service_search";
 
   private static final String AUDIT_SUFFIX = "-audit";
@@ -40,17 +45,43 @@ public class AWSAuditFinder implements AuditFinder {
   private final ObjectMapper mapper;
 
   @Override
-  public List<AuditSession> findAll(Long caseId) {
+  public Optional<AuditSession> findByAuditId(String auditId) {
+    var supplierId = authenticationService.requireSupplierId();
+
+    var query = QueryBuilders.boolQuery()
+        .must(QueryBuilders.termQuery(SUPPLIER_ID_FIELD, supplierId))
+        .must(QueryBuilders.termQuery(REQUEST_ID_FIELD, auditId));
+
+    var source = buildSingularSource(query);
+
+    return search(supplierId, source).collect(toOptional());
+  }
+
+  @Override
+  public List<AuditSession> findAllEncountersByCaseId(String caseId) {
+    var supplierId = authenticationService.requireSupplierId();
+
+    var query = QueryBuilders.boolQuery()
+        .must(QueryBuilders.termQuery(SUPPLIER_ID_FIELD, supplierId))
+        .must(QueryBuilders.termQuery(CASE_ID_FIELD, caseId));
+
+    var source = buildSearchSource(query);
+
+    return search(supplierId, source).collect(toUnmodifiableList());
+  }
+
+  @Override
+  public List<AuditSession> findAllEmsEncountersByCaseId(String caseId) {
     var supplierId = authenticationService.requireSupplierId();
 
     var query = QueryBuilders.boolQuery()
         .must(QueryBuilders.termQuery(OWNER_FIELD, EMS_NAME))
         .must(QueryBuilders.termQuery(SUPPLIER_ID_FIELD, supplierId))
-        .must(QueryBuilders.termQuery(CASE_ID_FIELD, caseId.toString()));
+        .must(QueryBuilders.termQuery(CASE_ID_FIELD, caseId));
 
     var source = buildSearchSource(query);
 
-    return search(supplierId, source);
+    return search(supplierId, source).collect(toUnmodifiableList());
   }
 
   @Override
@@ -63,7 +94,7 @@ public class AWSAuditFinder implements AuditFinder {
 
     var source = buildSearchSource(query);
 
-    return search(supplierId, source);
+    return search(supplierId, source).collect(toUnmodifiableList());
   }
 
   @Override
@@ -76,16 +107,15 @@ public class AWSAuditFinder implements AuditFinder {
 
     var source = buildSearchSource(query);
 
-    return search(supplierId, source);
+    return search(supplierId, source).collect(toUnmodifiableList());
   }
 
   @SneakyThrows
-  private List<AuditSession> search(String supplierId, SearchSourceBuilder source) {
+  private Stream<AuditSession> search(String supplierId, SearchSourceBuilder source) {
     return esClient.search(supplierId + AUDIT_SUFFIX, source)
         .stream()
         .map(SearchHit::getSourceAsString)
-        .map(this::asAudit)
-        .collect(Collectors.toUnmodifiableList());
+        .map(this::asAudit);
   }
 
   private SearchSourceBuilder buildSearchSource(BoolQueryBuilder query) {
@@ -93,6 +123,12 @@ public class AWSAuditFinder implements AuditFinder {
         .query(query)
         .size(MAX_RETURNED_AUDITS)
         .sort(new FieldSortBuilder(TIMESTAMP_FIELD).order(SortOrder.ASC));
+  }
+
+  private SearchSourceBuilder buildSingularSource(BoolQueryBuilder query) {
+    return new SearchSourceBuilder()
+        .query(query)
+        .size(1);
   }
 
   @SneakyThrows

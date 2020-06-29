@@ -68,7 +68,7 @@ public class AWSAuditFinderTest {
     when(elasticSearchClient.search(eq("test-supplier-audit"), any(SearchSourceBuilder.class)))
         .thenReturn(Collections.emptyList());
 
-    auditFinder.findAll(76L);
+    auditFinder.findAllEmsEncountersByCaseId("76");
 
     var searchSourceCaptor = ArgumentCaptor.forClass(SearchSourceBuilder.class);
     verify(elasticSearchClient).search(eq("test-supplier-audit"), searchSourceCaptor.capture());
@@ -112,7 +112,7 @@ public class AWSAuditFinderTest {
     when(objectMapper.readValue(auditSessionWithEntryJson, AuditSession.class))
         .thenReturn(auditSessionWithEntry);
 
-    var audits = auditFinder.findAll(76L);
+    var audits = auditFinder.findAllEmsEncountersByCaseId("76");
 
     assertThat(audits, contains(auditSession, auditSessionWithEntry));
   }
@@ -130,7 +130,7 @@ public class AWSAuditFinderTest {
       .thenThrow(new JsonParseException(null, "Failed to parse"));
 
     expectedException.expect(JsonParseException.class);
-    auditFinder.findAll(76L);
+    auditFinder.findAllEmsEncountersByCaseId("76");
   }
 
   @Test
