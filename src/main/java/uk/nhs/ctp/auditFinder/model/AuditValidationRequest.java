@@ -7,7 +7,7 @@ import lombok.Data;
 public class AuditValidationRequest {
 
   private String endpoint;
-  private Instant auditDateTime;
+  private Instant createdDate;
   private String caseId; // For encounters
 
 }

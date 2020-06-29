@@ -68,7 +68,15 @@
   <div class="row">
     <div class="col-xs-12 col-md-10 offset-md-5">
       <div class="actions">
-        <span class="actionButton" (click)="sendValidationRequest()">Validate</span> 
+        <span class="actionButton" (click)="sendValidationRequest()">Validate</span>
+      </div>
+    </div>
+    <div class="col-xs-12 col-md-10 offset-md-1">
+      <div class="alert alert-danger" *ngIf="sentError">
+        An error occurred: {{ sentError }}
+      </div>
+      <div class="alert alert-info" *ngIf="sentSuccess">
+        Validation request sent succesfully.
       </div>
     </div>
   </div>

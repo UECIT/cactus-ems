@@ -1,3 +1,4 @@
+import { ValidationRequest } from './../model/audit';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment';
@@ -46,6 +47,22 @@ export class AuditService {
       );
       const url = `${environment.EMS_API}/audit/servicesearches/`;
       return this.http.get<Interaction[]>(url, httpOptions).toPromise();
+    }
+  }
+
+  sendValidationRequest(request: ValidationRequest) {
+    if (this.sessionStorage['auth_token'] != null) {
+      httpOptions.headers = httpOptions.headers.set(
+        'Authorization',
+        this.sessionStorage['auth_token']
+      );
+      httpOptions.headers = httpOptions.headers.set(
+        'Content-Type',
+        'application/json'
+    );
+      
+      const url = `${environment.EMS_API}/audit/validate/`;
+      return this.http.post(url, JSON.stringify(request), httpOptions).toPromise();
     }
   }
 

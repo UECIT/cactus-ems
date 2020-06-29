@@ -8,3 +8,9 @@ export enum InteractionType {
     ENCOUNTER = "Encounter",
     SERVICE_SEARCH = "Service Search"
 }
+
+export class ValidationRequest {
+    endpoint: string;
+    createdDate: number //instant
+    caseId: string;
+}

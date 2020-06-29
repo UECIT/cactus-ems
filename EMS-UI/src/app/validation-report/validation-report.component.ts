@@ -1,4 +1,4 @@
-import { Interaction, InteractionType } from '../model';
+import { Interaction, InteractionType, ValidationRequest } from '../model';
 import { AuditService, EmsService, CdssService } from '../service';
 import { Component, OnInit } from '@angular/core';
 import { SupplierInstance } from '../model/supplierInstance';
@@ -18,6 +18,9 @@ export class ValidationReportComponent implements OnInit {
   interactions: Interaction[] = [];
   loadedEncounterAudits = false;
   loadedSearchAudits = false;
+
+  sentSuccess = false;
+  sentError: string;
 
   public endpointSelection = new SelectionModel<SupplierInstance>();
   public interactionSelection = new SelectionModel<Interaction>();
@@ -80,6 +83,28 @@ export class ValidationReportComponent implements OnInit {
         }
         //TODO: handle errors properly
       ).catch(err => this.loadedSearchAudits = true);
+  }
+
+  sendValidationRequest() {
+    //TODO: Get actual selections
+    let fakeEndpointSelection: SupplierInstance = {
+      name: "This is a fake",
+      baseUrl: "this.is.a.fake"
+    };
+    let fakeInteractionSelection: Interaction = {
+      interactionType: InteractionType.ENCOUNTER,
+      createdDate: 955335783,
+      additionalProperties: new Map<string, string>([["caseId", "43"]])
+    };
+
+    let request: ValidationRequest = {
+      endpoint: fakeEndpointSelection.baseUrl,
+      createdDate: fakeInteractionSelection.createdDate,
+      caseId: fakeInteractionSelection.additionalProperties.get("caseId");
+    };
+    this.auditService.sendValidationRequest(request)
+      .then(res => this.sentSuccess = true)
+      .catch(err => this.sentError = err.message)
   }
 
 }
