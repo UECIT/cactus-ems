@@ -36,8 +36,7 @@ public class AWSAuditFinder implements AuditFinder {
   private static final String SUPPLIER_ID_FIELD = "additionalProperties.supplierId";
   private static final String CASE_ID_FIELD = "additionalProperties.caseId";
   private static final String OPERATION_FIELD = "additionalProperties.operation";
-  private static final String REQUEST_ID_FIELD = "requestId";
-  private static final String SEARCH_OPERATION = "service_search";
+  private static final String REQUEST_ID_FIELD = "requestId.keyword";
 
   private static final String AUDIT_SUFFIX = "-audit";
 

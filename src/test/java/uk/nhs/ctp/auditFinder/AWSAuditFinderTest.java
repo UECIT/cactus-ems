@@ -76,7 +76,7 @@ public class AWSAuditFinderTest {
     assertThat(searchSource.query(), hasToString(equalToJSON(
         "{ bool : { must : ["
             + " { term : { additionalProperties.supplierId : { value : test-supplier } } },"
-            + " { term : { requestId : { value : validAuditId } } }"
+            + " { term : { requestId.keyword : { value : validAuditId } } }"
             + "] } }")));
   }
 
