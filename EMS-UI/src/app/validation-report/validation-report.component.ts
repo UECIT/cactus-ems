@@ -95,7 +95,7 @@ export class ValidationReportComponent implements OnInit {
       searchAuditId: interactionSelection.requestId,
       caseId: interactionSelection.additionalProperties["caseId"],
     };
-    
+
     this.auditService.sendValidationRequest(request)
       .then(res => {
         this.sentSuccess = true;

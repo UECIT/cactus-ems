@@ -21,7 +21,7 @@ public class ValidationService {
   private final AuditFinder auditFinder;
 
   public byte[] zipResources(Long caseId) throws IOException {
-    var audits = auditFinder.findAll(caseId);
+    var audits = auditFinder.findAllEmsEncountersByCaseId(caseId.toString());
     var auditEntries = audits.stream()
         .flatMap(a -> a.getEntries().stream())
         .collect(Collectors.toUnmodifiableList());

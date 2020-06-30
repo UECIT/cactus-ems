@@ -1,11 +1,14 @@
 package uk.nhs.ctp.controllers;
 
+import static org.thymeleaf.util.StringUtils.isEmpty;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException;
 import uk.nhs.ctp.audit.model.AuditSession;
 import uk.nhs.ctp.auditFinder.finder.AuditFinder;
 import uk.nhs.ctp.auditFinder.model.AuditValidationRequest;
@@ -39,7 +43,7 @@ public class AuditController {
 	 */
 	@GetMapping(path = "/{id}")
 	public String getAudit(@PathVariable Long id) throws IOException {
-		return mapper.writeValueAsString(auditFinder.findAll(id));
+		return mapper.writeValueAsString(auditFinder.findAllEmsEncountersByCaseId(id.toString()));
 	}
 
 	@GetMapping(path = "/encounters")
@@ -53,9 +57,28 @@ public class AuditController {
 	}
 
 	@PostMapping(path = "/validate")
-	public void validate(@RequestBody AuditValidationRequest validationRequest) {
-		log.info("Creating validation report for {}", validationRequest);
-		//TODO: CDSCT-285
+	public void validate(@RequestBody AuditValidationRequest request) {
+		if (!isEmpty(request.getCaseId())) {
+			// client must be asking for evaluate requests
+			var audits = auditFinder.findAllEncountersByCaseId(request.getCaseId());
+			log.info("retrieved {} encounter audits", audits.size());
+
+			// TODO: CDSCT-94
+			return;
+		}
+
+		if (!isEmpty(request.getSearchAuditId())) {
+			var audit = auditFinder.findByAuditId(request.getSearchAuditId())
+					.orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
+			log.info("retrieved service definition search request audit");
+
+			// TODO: CDSCT-94
+			return;
+		}
+
+		throw new HttpClientErrorException(
+				HttpStatus.BAD_REQUEST,
+				"Must specify either caseId or searchAuditId");
 	}
 	
 	@PostMapping
