@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.nhs.ctp.audit.model.AuditSession;
 import uk.nhs.ctp.auditFinder.finder.AuditFinder;
+import uk.nhs.ctp.auditFinder.model.AuditValidationRequest;
 import uk.nhs.ctp.caseSearch.CaseSearchRequest;
 import uk.nhs.ctp.caseSearch.CaseSearchResultDTO;
 import uk.nhs.ctp.caseSearch.CaseSearchService;
@@ -22,6 +24,7 @@ import uk.nhs.ctp.caseSearch.CaseSearchService;
 @RestController
 @RequestMapping(path = "/audit")
 @RequiredArgsConstructor
+@Slf4j
 public class AuditController {
 
 	private final ObjectMapper mapper;
@@ -47,6 +50,12 @@ public class AuditController {
 	@GetMapping(path = "/servicesearches")
 	public List<AuditSession> getAuditServiceSearch() {
 		return auditFinder.findAllServiceSearches();
+	}
+
+	@PostMapping(path = "/validate")
+	public void validate(@RequestBody AuditValidationRequest validationRequest) {
+		log.info("Creating validation report for {}", validationRequest);
+		//TODO: CDSCT-285
 	}
 	
 	@PostMapping

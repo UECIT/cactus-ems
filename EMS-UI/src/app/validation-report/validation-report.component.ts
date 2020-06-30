@@ -1,4 +1,4 @@
-import { Interaction, InteractionType } from '../model';
+import { Interaction, InteractionType, ValidationRequest } from '../model';
 import { AuditService, EmsService, CdssService } from '../service';
 import { Component, OnInit } from '@angular/core';
 import { SupplierInstance } from '../model/supplierInstance';
@@ -19,8 +19,11 @@ export class ValidationReportComponent implements OnInit {
   loadedEncounterAudits = false;
   loadedSearchAudits = false;
 
-  public endpointSelection = new SelectionModel<SupplierInstance>();
-  public interactionSelection = new SelectionModel<Interaction>();
+  sentSuccess = false;
+  sentError: string;
+
+  endpointSelection = new SelectionModel<SupplierInstance>();
+  interactionSelection = new SelectionModel<Interaction>();
 
   constructor(
     private emsService: EmsService, 
@@ -80,6 +83,32 @@ export class ValidationReportComponent implements OnInit {
         }
         //TODO: handle errors properly
       ).catch(err => this.loadedSearchAudits = true);
+  }
+
+  sendValidationRequest() {
+    let endpointSelection = this.endpointSelection.selected[0];
+    let interactionSelection = this.interactionSelection.selected[0];
+
+    let request: ValidationRequest = {
+      type: interactionSelection.interactionType,
+      instanceBaseUrl: endpointSelection.baseUrl,
+      searchAuditId: interactionSelection.id,
+      caseId: interactionSelection.additionalProperties["caseId"],
+    };
+    
+    this.auditService.sendValidationRequest(request)
+      .then(res => {
+        this.sentSuccess = true;
+        this.sentError = null;
+      })
+      .catch(err => {
+        this.sentError = err.message;
+        this.sentSuccess = false;
+      })
+  }
+
+  get eitherNotSelected() {
+    return this.endpointSelection.isEmpty() || this.interactionSelection.isEmpty();
   }
 
 }

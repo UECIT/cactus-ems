@@ -74,8 +74,16 @@ class ValidationReportComponentPage {
     });
   }
 
+  get validateButton() {
+    return this.query<HTMLButtonElement>(By.css(".actionButton"));
+  }
+
   private queryAll(by: Predicate<DebugElement>): DebugElement[] {
     return fixture.debugElement.queryAll(by);
+  }
+
+  private query<T>(by: Predicate<DebugElement>): T {
+    return fixture.debugElement.query(by).nativeElement;
   }
 }
 
@@ -85,42 +93,15 @@ describe('ValidationReportComponent', () => {
   let cdssServiceSpy: { getCdssSuppliers: jasmine.Spy };
   let auditServiceSpy: { 
     getEncounterAudits: jasmine.Spy, 
-    getServiceDefinitionSearchAudits: jasmine.Spy
+    getServiceDefinitionSearchAudits: jasmine.Spy,
+    sendValidationRequest: jasmine.Spy
   };
-
-  function setupSupplierSpies() {
-    let cdss = new CdssSupplier();
-    cdss.name = "A cdss name";
-    cdss.baseUrl = "http://cdss.base.url/fhir";
-
-    let ems = new EmsSupplier();
-    ems.name = "An ems name";
-    ems.baseUrl = "http://ems.base.url/fhir";
-
-    cdssServiceSpy.getCdssSuppliers.and.returnValue(of([cdss]));
-    emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([ems]));
-    return {cdss, ems};
-  }
-  function setupInteractionSpies() {
-    let encounter = new Interaction();
-    encounter.additionalProperties["caseId"] = 4;
-    encounter.createdDate = 835222942; //'Jun 19, 1996, 10:22:22 PM' (UTC)
-    encounter.interactionType = InteractionType.ENCOUNTER;
-
-    let sdSearch = new Interaction();
-    sdSearch.createdDate = 955335783; //'Apr 10, 2000, 3:03:03 AM' (UTC)
-    sdSearch.interactionType = InteractionType.SERVICE_SEARCH;
-
-    auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([encounter]));
-    auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([sdSearch]));
-    return {encounter, sdSearch};
-  }
 
   beforeEach(() => {
     emsServiceSpy = jasmine.createSpyObj('EmsService', ['getAllEmsSuppliers']);
     cdssServiceSpy = jasmine.createSpyObj('CdssService', ['getCdssSuppliers']);
     auditServiceSpy = jasmine.createSpyObj('AuditService', 
-      ['getEncounterAudits', 'getServiceDefinitionSearchAudits']);
+      ['getEncounterAudits', 'getServiceDefinitionSearchAudits', 'sendValidationRequest']);
 
     TestBed.configureTestingModule({
         imports: [MaterialModule],
@@ -136,276 +117,396 @@ describe('ValidationReportComponent', () => {
     page = new ValidationReportComponentPage();
   });
 
-  it('should create', () => {
-    expect(comp).toBeTruthy();
-  });
+  function setupSupplierSpies() {
+    let cdss = new CdssSupplier();
+    cdss.name = "A cdss name";
+    cdss.baseUrl = "http://cdss.base.url/fhir";
 
-  it('should display end points', fakeAsync(() => {
-    let {cdss, ems} = setupSupplierSpies();
-    auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
-    auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+    let ems = new EmsSupplier();
+    ems.name = "An ems name";
+    ems.baseUrl = "http://ems.base.url/fhir";
 
-    fixture.detectChanges(); // init
-    tick();
-    fixture.detectChanges(); // resolve async promises
+    cdssServiceSpy.getCdssSuppliers.and.returnValue(of([cdss]));
+    emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([ems]));
+    return {cdss, ems};
+  }
 
-    expect(comp.loaded).toBeTruthy();
-    expect(page.endpoints).toContain(
-      {name: cdss.name, baseUrl: cdss.baseUrl}, 
-      {name: ems.name, baseUrl: ems.baseUrl}
-    );
-  }));
-
-  it('should display interactions', fakeAsync(() => {
-    let {encounter, sdSearch} = setupInteractionSpies();
-    cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
-    emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
-
-    fixture.detectChanges(); // init
-    tick();
-    fixture.detectChanges(); // resolve async promises
-
-    expect(comp.loaded).toBeTruthy();
-    expect(page.interactions).toContain(
-      {
-        origin: encounter.interactionType, 
-        createdDate: new Date(encounter.createdDate * 1000).toUTCString(), 
-        caseId: encounter.additionalProperties['caseId']
-      },
-      {
-        origin: sdSearch.interactionType, 
-        createdDate: new Date(sdSearch.createdDate * 1000).toUTCString(), 
-        caseId: 0
-      }
-    );
-  }));
-
-  it('should display one interaction per encounter', fakeAsync(() => {
+  function setupInteractionSpies() {
     let encounter = new Interaction();
     encounter.additionalProperties["caseId"] = 4;
     encounter.createdDate = 835222942; //'Jun 19, 1996, 10:22:22 PM' (UTC)
     encounter.interactionType = InteractionType.ENCOUNTER;
 
-    let encounter2 = new Interaction();
-    encounter2.additionalProperties["caseId"] = 4;
-    encounter2.createdDate = 955335783; //'Apr 10, 2000, 3:03:03 AM' (UTC)
-    encounter2.interactionType = InteractionType.ENCOUNTER;
+    let sdSearch = new Interaction();
+    sdSearch.createdDate = 955335783; //'Apr 10, 2000, 3:03:03 AM' (UTC)
+    sdSearch.interactionType = InteractionType.SERVICE_SEARCH;
 
-    let encounter3 = new Interaction();
-    encounter3.additionalProperties["caseId"] = 5;
-    encounter3.createdDate = 955335783; //'Apr 10, 2000, 3:03:03 AM' (UTC)
-    encounter3.interactionType = InteractionType.ENCOUNTER;
+    auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([encounter]));
+    auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([sdSearch]));
+    return {encounter, sdSearch};
+  }
 
-    cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
-    emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
-    auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([encounter, encounter2, encounter3]));
-    auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+  describe('Component', () => {
 
-    fixture.detectChanges(); // init
-    tick();
-    fixture.detectChanges(); // resolve async promises
-
-    expect(comp.loaded).toBeTruthy();
-    expect(page.interactions).toContain(
-      {
-        origin: encounter.interactionType, 
-        createdDate: new Date(encounter.createdDate * 1000).toUTCString(), 
-        caseId: encounter.additionalProperties['caseId']
-      },
-      {
-        origin: encounter3.interactionType, 
-        createdDate: new Date(encounter3.createdDate * 1000).toUTCString(), 
-        caseId: encounter3.additionalProperties['caseId']
-      },
-    );
-  }));
-
-  it('should not display when loading fails', () => {
-    cdssServiceSpy.getCdssSuppliers.and.returnValue(of());
-    emsServiceSpy.getAllEmsSuppliers.and.returnValue(of());
-    auditServiceSpy.getEncounterAudits.and.returnValue(Promise.reject(""));
-    auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.reject(""));
-
-    fixture.detectChanges(); // init
-
-    expect(comp.loaded).toBeFalsy();
+    it('should create', () => {
+      expect(comp).toBeTruthy();
+    });
+  
+    it('should display end points', fakeAsync(() => {
+      let {cdss, ems} = setupSupplierSpies();
+      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
+      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+  
+      fixture.detectChanges(); // init
+      tick();
+      fixture.detectChanges(); // resolve async promises
+  
+      expect(comp.loaded).toBeTruthy();
+      expect(page.endpoints).toContain(
+        {name: cdss.name, baseUrl: cdss.baseUrl}, 
+        {name: ems.name, baseUrl: ems.baseUrl}
+      );
+    }));
+  
+    it('should display interactions', fakeAsync(() => {
+      let {encounter, sdSearch} = setupInteractionSpies();
+      cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
+      emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
+  
+      fixture.detectChanges(); // init
+      tick();
+      fixture.detectChanges(); // resolve async promises
+  
+      expect(comp.loaded).toBeTruthy();
+      expect(page.interactions).toContain(
+        {
+          origin: encounter.interactionType, 
+          createdDate: new Date(encounter.createdDate * 1000).toUTCString(), 
+          caseId: encounter.additionalProperties['caseId']
+        },
+        {
+          origin: sdSearch.interactionType, 
+          createdDate: new Date(sdSearch.createdDate * 1000).toUTCString(), 
+          caseId: 0
+        }
+      );
+    }));
+  
+    it('should display one interaction per encounter', fakeAsync(() => {
+      let encounter = new Interaction();
+      encounter.additionalProperties["caseId"] = 4;
+      encounter.createdDate = 835222942; //'Jun 19, 1996, 10:22:22 PM' (UTC)
+      encounter.interactionType = InteractionType.ENCOUNTER;
+  
+      let encounter2 = new Interaction();
+      encounter2.additionalProperties["caseId"] = 4;
+      encounter2.createdDate = 955335783; //'Apr 10, 2000, 3:03:03 AM' (UTC)
+      encounter2.interactionType = InteractionType.ENCOUNTER;
+  
+      let encounter3 = new Interaction();
+      encounter3.additionalProperties["caseId"] = 5;
+      encounter3.createdDate = 955335783; //'Apr 10, 2000, 3:03:03 AM' (UTC)
+      encounter3.interactionType = InteractionType.ENCOUNTER;
+  
+      cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
+      emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
+      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([encounter, encounter2, encounter3]));
+      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+  
+      fixture.detectChanges(); // init
+      tick();
+      fixture.detectChanges(); // resolve async promises
+  
+      expect(comp.loaded).toBeTruthy();
+      expect(page.interactions).toContain(
+        {
+          origin: encounter.interactionType, 
+          createdDate: new Date(encounter.createdDate * 1000).toUTCString(), 
+          caseId: encounter.additionalProperties['caseId']
+        },
+        {
+          origin: encounter3.interactionType, 
+          createdDate: new Date(encounter3.createdDate * 1000).toUTCString(), 
+          caseId: encounter3.additionalProperties['caseId']
+        },
+      );
+    }));
+  
+    it('should not display when loading fails', () => {
+      cdssServiceSpy.getCdssSuppliers.and.returnValue(of());
+      emsServiceSpy.getAllEmsSuppliers.and.returnValue(of());
+      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.reject(""));
+      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.reject(""));
+  
+      fixture.detectChanges(); // init
+  
+      expect(comp.loaded).toBeFalsy();
+    });
   });
 
-  it('should select one when clicking on endpoint row', fakeAsync(() => {
-    let {cdss,ems} = setupSupplierSpies();
-    auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
-    auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+  describe('Endpont Table Selection', () => {
 
-    fixture.detectChanges(); // init
-    tick();
-    fixture.detectChanges();
+    it('should select one when clicking on endpoint row', fakeAsync(() => {
+      let {cdss,ems} = setupSupplierSpies();
+      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
+      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+  
+      fixture.detectChanges(); // init
+      tick();
+      fixture.detectChanges();
+  
+      page.getEndpointRow(1).click();
+  
+      fixture.detectChanges(); // clicked
+  
+      expect(comp.endpointSelection.selected).toContain(cdss);
+      expect(comp.endpointSelection.selected).not.toContain(ems);
+    }));
+  
+    it('should select one when clicking on endpoint checkbox', fakeAsync(() => {
+      let {cdss,ems} = setupSupplierSpies();
+      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
+      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+  
+      fixture.detectChanges(); // init
+      tick();
+      fixture.detectChanges();
+  
+      page.getEndpointRowCheckbox(1).click();
+  
+      tick(10000); // we don't know why this is necessary; $event.stopPropagation is a possible suspect
+      fixture.detectChanges(); // clicked
+  
+      expect(comp.endpointSelection.selected).toContain(cdss);
+      expect(comp.endpointSelection.selected).not.toContain(ems);
+    }));
+  
+    it('should deselect when clicking on endpoint row', fakeAsync(() => {
+      let {cdss} = setupSupplierSpies();
+      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
+      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+  
+      comp.endpointSelection.select(cdss);
+  
+      fixture.detectChanges(); // init
+      tick();
+      fixture.detectChanges();
+  
+      page.getEndpointRow(1).click();
+  
+      tick(10000); // we don't know why this is necessary; $event.stopPropagation is a possible suspect
+      fixture.detectChanges(); // clicked
+  
+      expect(comp.endpointSelection.selected).toEqual([]);
+    }));
+  
+    it('should deselect when clicking on endpoint checkbox', fakeAsync(() => {
+      let {cdss} = setupSupplierSpies();
+      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
+      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+  
+      comp.endpointSelection.select(cdss);
+  
+      fixture.detectChanges(); // init
+      tick();
+      fixture.detectChanges();
+  
+      page.getEndpointRowCheckbox(1).click();
+  
+      tick(10000); // we don't know why this is necessary; $event.stopPropagation is a possible suspect
+      fixture.detectChanges(); // clicked
+  
+      expect(comp.endpointSelection.selected).toEqual([]);
+    }));
+  
+    it('should deselect existing when selecting a different endpoint', fakeAsync(() => {
+      let {cdss,ems} = setupSupplierSpies();
+      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
+      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+  
+      comp.endpointSelection.select(cdss);
+  
+      fixture.detectChanges(); // init
+      tick();
+      fixture.detectChanges();
+  
+      page.getEndpointRow(0).click();
+  
+      tick(10000); // we don't know why this is necessary; $event.stopPropagation is a possible suspect
+      fixture.detectChanges(); // clicked
+  
+      expect(comp.endpointSelection.selected).not.toContain(cdss);
+      expect(comp.endpointSelection.selected).toContain(ems);
+    }));
+  });
 
-    page.getEndpointRow(1).click();
+  describe("Interaction Table Selection", () => {
 
-    fixture.detectChanges(); // clicked
+    it('should select one when clicking on interaction row', fakeAsync(() => {
+      cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
+      emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
+      let {encounter, sdSearch} = setupInteractionSpies();
+  
+      fixture.detectChanges(); // init
+      tick();
+      fixture.detectChanges();
+  
+      page.getInteractionRow(0).click();
+  
+      fixture.detectChanges(); // clicked
+  
+      expect(comp.interactionSelection.selected).toContain(encounter);
+      expect(comp.interactionSelection.selected).not.toContain(sdSearch);
+    }));
+  
+    it('should select one when clicking on interaction checkbox', fakeAsync(() => {
+      cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
+      emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
+      let {encounter, sdSearch} = setupInteractionSpies();
+  
+      fixture.detectChanges(); // init
+      tick();
+      fixture.detectChanges();
+  
+      page.getInteractionRowCheckbox(0).click();
+  
+      tick(10000); // we don't know why this is necessary; $event.stopPropagation is a possible suspect
+      fixture.detectChanges(); // clicked
+  
+      expect(comp.interactionSelection.selected).toContain(encounter);
+      expect(comp.interactionSelection.selected).not.toContain(sdSearch);
+    }));
+  
+    it('should deselect when clicking on interaction row', fakeAsync(() => {
+      cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
+      emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
+      let {encounter} = setupInteractionSpies();
+  
+      comp.interactionSelection.select(encounter);
+  
+      fixture.detectChanges(); // init
+      tick();
+      fixture.detectChanges();
+  
+      page.getInteractionRow(0).click();
+  
+      tick(10000); // we don't know why this is necessary; $event.stopPropagation is a possible suspect
+      fixture.detectChanges(); // clicked
+  
+      expect(comp.interactionSelection.selected).toEqual([]);
+    }));
+  
+    it('should deselect when clicking on interaction checkbox', fakeAsync(() => {
+      cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
+      emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
+      let {encounter} = setupInteractionSpies();
+  
+      comp.interactionSelection.select(encounter);
+  
+      fixture.detectChanges(); // init
+      tick();
+      fixture.detectChanges();
+  
+      page.getInteractionRowCheckbox(0).click();
+  
+      tick(10000); // we don't know why this is necessary; $event.stopPropagation is a possible suspect
+      fixture.detectChanges(); // clicked
+  
+      expect(comp.interactionSelection.selected).toEqual([]);
+    }));
+  
+    it('should deselect existing when selecting a different interaction', fakeAsync(() => {
+      cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
+      emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
+      let {encounter, sdSearch} = setupInteractionSpies();
+  
+      comp.interactionSelection.select(encounter);
+  
+      fixture.detectChanges(); // init
+      tick();
+      fixture.detectChanges();
+  
+      page.getInteractionRow(1).click();
+  
+      tick(10000); // we don't know why this is necessary; $event.stopPropagation is a possible suspect
+      fixture.detectChanges(); // clicked
+  
+      expect(comp.interactionSelection.selected).not.toContain(encounter);
+      expect(comp.interactionSelection.selected).toContain(sdSearch);
+    }));
+  });
 
-    expect(comp.endpointSelection.selected).toContain(cdss);
-    expect(comp.endpointSelection.selected).not.toContain(ems);
-  }));
-  it('should select one when clicking on endpoint checkbox', fakeAsync(() => {
-    let {cdss,ems} = setupSupplierSpies();
-    auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
-    auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+  describe("Send Validation Report", () => {
 
-    fixture.detectChanges(); // init
-    tick();
-    fixture.detectChanges();
+    function initEmpty() {
+      cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
+      emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
+      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
+      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+    }
 
-    page.getEndpointRowCheckbox(1).click();
+    it('should send validation request to validation service', fakeAsync(() => {
+      initEmpty();
+  
+      let selectedSupplier = new EmsSupplier();
+      selectedSupplier.baseUrl = "this.is.a.fake";
+      let selectedInteraction = new Interaction();
+      selectedInteraction.id = "someguid";
+      selectedInteraction.interactionType = InteractionType.ENCOUNTER;
+      selectedInteraction.additionalProperties["caseId"] = "6";
+  
+      comp.endpointSelection.select(selectedSupplier);
+      comp.interactionSelection.select(selectedInteraction);
+  
+      fixture.detectChanges(); //init
+      tick();
+      fixture.detectChanges();
+  
+      page.validateButton.click();
+      fixture.detectChanges();
+  
+      expect(auditServiceSpy.sendValidationRequest).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          instanceBaseUrl: "this.is.a.fake",
+          searchAuditId: "someguid",
+          type: InteractionType.ENCOUNTER,
+          caseId: "6"
+        })
+      );
+    }));
+    
+    it('should disable button if both tables don\'t have selection', fakeAsync(() => {
+      initEmpty();
 
-    tick(10000); // we don't know why this is necessary; $event.stopPropagation is a possible suspect
-    fixture.detectChanges(); // clicked
+      let selectedSupplier = new EmsSupplier();
+      selectedSupplier.id = 5;
 
-    expect(comp.endpointSelection.selected).toContain(cdss);
-    expect(comp.endpointSelection.selected).not.toContain(ems);
-  }));
-  it('should deselect when clicking on endpoint row', fakeAsync(() => {
-    let {cdss} = setupSupplierSpies();
-    auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
-    auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+      comp.endpointSelection.select(selectedSupplier);
 
-    comp.endpointSelection.select(cdss);
+      fixture.detectChanges(); //init
+      tick();
+      fixture.detectChanges();
 
-    fixture.detectChanges(); // init
-    tick();
-    fixture.detectChanges();
+      expect(page.validateButton.disabled).toBeTruthy();
+    }));
 
-    page.getEndpointRow(1).click();
+    it('should enable button if both tables have selection', fakeAsync(() => {
+      initEmpty();
 
-    tick(10000); // we don't know why this is necessary; $event.stopPropagation is a possible suspect
-    fixture.detectChanges(); // clicked
+      let selectedSupplier = new EmsSupplier();
+      selectedSupplier.id = 5;
+      let selectedInteraction = new Interaction();
+      selectedInteraction.id = "someguid";
+      selectedInteraction.additionalProperties["caseId"] = "6";
+  
+      comp.endpointSelection.select(selectedSupplier);
+      comp.interactionSelection.select(selectedInteraction);
+  
+      fixture.detectChanges(); //init
+      tick();
+      fixture.detectChanges();
 
-    expect(comp.endpointSelection.selected).toEqual([]);
-  }));
-  it('should deselect when clicking on endpoint checkbox', fakeAsync(() => {
-    let {cdss} = setupSupplierSpies();
-    auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
-    auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
-
-    comp.endpointSelection.select(cdss);
-
-    fixture.detectChanges(); // init
-    tick();
-    fixture.detectChanges();
-
-    page.getEndpointRowCheckbox(1).click();
-
-    tick(10000); // we don't know why this is necessary; $event.stopPropagation is a possible suspect
-    fixture.detectChanges(); // clicked
-
-    expect(comp.endpointSelection.selected).toEqual([]);
-  }));
-  it('should deselect existing when selecting a different endpoint', fakeAsync(() => {
-    let {cdss,ems} = setupSupplierSpies();
-    auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
-    auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
-
-    comp.endpointSelection.select(cdss);
-
-    fixture.detectChanges(); // init
-    tick();
-    fixture.detectChanges();
-
-    page.getEndpointRow(0).click();
-
-    tick(10000); // we don't know why this is necessary; $event.stopPropagation is a possible suspect
-    fixture.detectChanges(); // clicked
-
-    expect(comp.endpointSelection.selected).not.toContain(cdss);
-    expect(comp.endpointSelection.selected).toContain(ems);
-  }));
-
-  it('should select one when clicking on interaction row', fakeAsync(() => {
-    cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
-    emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
-    let {encounter, sdSearch} = setupInteractionSpies();
-
-    fixture.detectChanges(); // init
-    tick();
-    fixture.detectChanges();
-
-    page.getInteractionRow(0).click();
-
-    fixture.detectChanges(); // clicked
-
-    expect(comp.interactionSelection.selected).toContain(encounter);
-    expect(comp.interactionSelection.selected).not.toContain(sdSearch);
-  }));
-  it('should select one when clicking on interaction checkbox', fakeAsync(() => {
-    cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
-    emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
-    let {encounter, sdSearch} = setupInteractionSpies();
-
-    fixture.detectChanges(); // init
-    tick();
-    fixture.detectChanges();
-
-    page.getInteractionRowCheckbox(0).click();
-
-    tick(10000); // we don't know why this is necessary; $event.stopPropagation is a possible suspect
-    fixture.detectChanges(); // clicked
-
-    expect(comp.interactionSelection.selected).toContain(encounter);
-    expect(comp.interactionSelection.selected).not.toContain(sdSearch);
-  }));
-  it('should deselect when clicking on interaction row', fakeAsync(() => {
-    cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
-    emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
-    let {encounter} = setupInteractionSpies();
-
-    comp.interactionSelection.select(encounter);
-
-    fixture.detectChanges(); // init
-    tick();
-    fixture.detectChanges();
-
-    page.getInteractionRow(0).click();
-
-    tick(10000); // we don't know why this is necessary; $event.stopPropagation is a possible suspect
-    fixture.detectChanges(); // clicked
-
-    expect(comp.interactionSelection.selected).toEqual([]);
-  }));
-  it('should deselect when clicking on interaction checkbox', fakeAsync(() => {
-    cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
-    emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
-    let {encounter} = setupInteractionSpies();
-
-    comp.interactionSelection.select(encounter);
-
-    fixture.detectChanges(); // init
-    tick();
-    fixture.detectChanges();
-
-    page.getInteractionRowCheckbox(0).click();
-
-    tick(10000); // we don't know why this is necessary; $event.stopPropagation is a possible suspect
-    fixture.detectChanges(); // clicked
-
-    expect(comp.interactionSelection.selected).toEqual([]);
-  }));
-  it('should deselect existing when selecting a different interaction', fakeAsync(() => {
-    cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
-    emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
-    let {encounter, sdSearch} = setupInteractionSpies();
-
-    comp.interactionSelection.select(encounter);
-
-    fixture.detectChanges(); // init
-    tick();
-    fixture.detectChanges();
-
-    page.getInteractionRow(1).click();
-
-    tick(10000); // we don't know why this is necessary; $event.stopPropagation is a possible suspect
-    fixture.detectChanges(); // clicked
-
-    expect(comp.interactionSelection.selected).not.toContain(encounter);
-    expect(comp.interactionSelection.selected).toContain(sdSearch);
-  }));
+      expect(page.validateButton.disabled).toBeFalsy();
+    }));
+  });
 });
