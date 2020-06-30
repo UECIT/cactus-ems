@@ -28,7 +28,7 @@ xdescribe('Audit Service', () => {
 
     it('should get encounter audits', () => {
         const expectedInteraction: Interaction = {
-            id: "someid",
+            requestId: "someid",
             interactionType: InteractionType.ENCOUNTER,
             createdDate: 835222942,
             additionalProperties: new Map([['caseId', '4']])
@@ -48,7 +48,7 @@ xdescribe('Audit Service', () => {
 
     it('should get service definition search audits', () => {
         const expectedInteraction: Interaction = {
-            id: "someguid",
+            requestId: "someguid",
             interactionType: InteractionType.SERVICE_SEARCH,
             createdDate: 835222942,
             additionalProperties: new Map([])

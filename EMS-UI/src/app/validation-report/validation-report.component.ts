@@ -92,7 +92,7 @@ export class ValidationReportComponent implements OnInit {
     let request: ValidationRequest = {
       type: interactionSelection.interactionType,
       instanceBaseUrl: endpointSelection.baseUrl,
-      searchAuditId: interactionSelection.id,
+      searchAuditId: interactionSelection.requestId,
       caseId: interactionSelection.additionalProperties["caseId"],
     };
     

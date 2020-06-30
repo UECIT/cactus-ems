@@ -1,5 +1,5 @@
 export class Interaction {
-    id: string;
+    requestId: string;
     interactionType: InteractionType;
     createdDate: number; //instant
     additionalProperties: Map<string, string> = new Map<string, string>();
