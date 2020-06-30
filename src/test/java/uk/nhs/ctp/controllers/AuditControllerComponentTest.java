@@ -9,6 +9,7 @@ import static uk.nhs.ctp.testhelper.matchers.ClientExceptionMatchers.hasStatusCo
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.junit.Before;
 import org.junit.Rule;
@@ -18,13 +19,16 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.auditFinder.ElasticSearchClient;
 import uk.nhs.ctp.auditFinder.model.AuditValidationRequest;
+import uk.nhs.ctp.testhelper.fixtures.ElasticSearchFixtures;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
+@ActiveProfiles("default")
 public class AuditControllerComponentTest {
 
   private static final String TEST_SUPPLIER_ID = "testSupplierId";
@@ -71,10 +75,30 @@ public class AuditControllerComponentTest {
   }
 
   @Test
-  public void validate_withCaseId_shouldReturnEncounterAudits() {
+  public void validate_withCaseId_shouldSendEncounterAudits() throws IOException {
+    var request = new AuditValidationRequest();
+    request.setCaseId("validCaseId");
+    request.setSearchAuditId(null);
+
+    when(esClient.search(anyString(), any(SearchSourceBuilder.class)))
+        .thenReturn(List.of(ElasticSearchFixtures.minimumSearchHit()));
+
+    auditController.validate(request);
+
+    // TODO CDSCT-94: expect that a spyTkwService will be called with zipped audits
   }
 
   @Test
-  public void validate_withSearchAuditId_shouldReturnSearchAudits() {
+  public void validate_withSearchAuditId_shouldSendSearchAudits() throws IOException {
+    var request = new AuditValidationRequest();
+    request.setCaseId(null);
+    request.setSearchAuditId("validSearchAuditId");
+
+    when(esClient.search(anyString(), any(SearchSourceBuilder.class)))
+        .thenReturn(List.of(ElasticSearchFixtures.minimumSearchHit()));
+
+    auditController.validate(request);
+
+    // TODO CDSCT-94: expect that a spyTkwService will be called with zipped audits
   }
 }
