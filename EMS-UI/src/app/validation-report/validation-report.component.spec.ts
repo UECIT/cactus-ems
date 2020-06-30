@@ -451,7 +451,7 @@ describe('ValidationReportComponent', () => {
       let selectedSupplier = new EmsSupplier();
       selectedSupplier.baseUrl = "this.is.a.fake";
       let selectedInteraction = new Interaction();
-      selectedInteraction.id = "someguid";
+      selectedInteraction.requestId = "someguid";
       selectedInteraction.interactionType = InteractionType.ENCOUNTER;
       selectedInteraction.additionalProperties["caseId"] = "6";
   
@@ -496,7 +496,7 @@ describe('ValidationReportComponent', () => {
       let selectedSupplier = new EmsSupplier();
       selectedSupplier.id = 5;
       let selectedInteraction = new Interaction();
-      selectedInteraction.id = "someguid";
+      selectedInteraction.requestId = "someguid";
       selectedInteraction.additionalProperties["caseId"] = "6";
   
       comp.endpointSelection.select(selectedSupplier);
