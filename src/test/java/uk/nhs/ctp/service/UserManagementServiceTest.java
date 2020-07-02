@@ -75,6 +75,8 @@ public class UserManagementServiceTest {
     ReflectionTestUtils.setField(userManagementService, "cdss2", "http://cdss2.com");
     ReflectionTestUtils.setField(userManagementService, "dos", "http://dos.com");
     ReflectionTestUtils.setField(userManagementService, "logs", "http://elastic.com");
+    ReflectionTestUtils.setField(userManagementService, "fhirServer", "http://fhir-place.com");
+    ReflectionTestUtils.setField(userManagementService, "blobServer", "http://blob-palace.com");
 
     RegisterSupplierRequest request = new RegisterSupplierRequest();
     request.setSupplierId("supplier_id");
@@ -88,6 +90,8 @@ public class UserManagementServiceTest {
             .ems("http://ems.com")
             .emsUi("http://ems-ui.com")
             .cdss("http://cdss.com")
+            .fhirServer("http://fhir-place.com")
+            .blobServer("http://blob-palace.com")
             .cdss2("http://cdss2.com")
             .dos("http://dos.com")
             .logs("http://elastic.com")

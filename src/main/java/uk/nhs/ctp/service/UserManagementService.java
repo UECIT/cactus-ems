@@ -46,6 +46,12 @@ public class UserManagementService {
   @Value("${cactus.cdss.v2}")
   private String cdss2;
 
+  @Value("${fhir.server}")
+  private String fhirServer;
+
+  @Value("${blob.server}")
+  private String blobServer;
+
   @Value("${dos.server}")
   private String dos;
 
@@ -82,6 +88,8 @@ public class UserManagementService {
               .emsUi(emsUi)
               .cdss(cdss)
               .cdss2(cdss2)
+              .fhirServer(fhirServer)
+              .blobServer(blobServer)
               .dos(dos)
               .logs(logs)
               .build())
