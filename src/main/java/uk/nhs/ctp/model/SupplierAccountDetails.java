@@ -20,6 +20,8 @@ public class SupplierAccountDetails {
     String cdss2;
     String ems;
     String emsUi;
+    String fhirServer;
+    String blobServer;
     String dos;
     String logs;
   }

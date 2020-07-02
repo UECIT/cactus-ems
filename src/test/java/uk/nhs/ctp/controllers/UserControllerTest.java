@@ -54,7 +54,7 @@ public class UserControllerTest {
 
   @Test
   @WithMockUser(roles = "ADMIN")
-  public void shouldResponseWithAccountDetails() {
+  public void shouldRespondWithAccountDetails() {
     RegisterSupplierRequest request = new RegisterSupplierRequest();
     request.setSupplierId("testid");
     request.setEmail("testemail");
@@ -69,6 +69,8 @@ public class UserControllerTest {
             .cdss2("http://localhost:8080/fhir")
             .ems("http://localhost:8083/fhir")
             .emsUi("http://localhost:4200")
+            .fhirServer("http://localhost:8084/fhir")
+            .blobServer("http://localhost:8084/blob")
             .dos("http://localhost:8085/fhir")
             .logs("http://elastic.search")
             .build())
