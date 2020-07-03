@@ -8,7 +8,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
-import org.hl7.fhir.dstu3.model.CareConnectObservation;
 import org.hl7.fhir.dstu3.model.CareConnectPatient;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DataRequirement;
@@ -27,6 +26,8 @@ import uk.nhs.ctp.service.fhir.GenericResourceLocator;
 public class SearchParametersTransformer {
 
   private GenericResourceLocator resourceLocator;
+
+  private static final String OBSERVATION_TYPE = "Observation";
 
   public SearchParameters transform(List<DataRequirement> dataRequirements,
       SettingsDTO settingsDTO,
@@ -67,7 +68,7 @@ public class SearchParametersTransformer {
   private List<ObservationTrigger> transformObservationTriggers(List<DataRequirement> dataRequirements) {
 
     return dataRequirements.stream()
-      .filter(data -> data.getType().equals(CareConnectObservation.class.getSimpleName()))
+      .filter(data -> data.getType().equals(OBSERVATION_TYPE))
       .map(dataRequirement -> {
         List<DataRequirementCodeFilterComponent> codeFilter = dataRequirement.getCodeFilter();
         List<DataRequirementDateFilterComponent> dateFilter = dataRequirement.getDateFilter();

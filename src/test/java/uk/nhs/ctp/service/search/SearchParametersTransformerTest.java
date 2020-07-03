@@ -20,9 +20,9 @@ import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementDateFilterCompone
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.nhs.ctp.service.dto.CodeDTO;
@@ -32,15 +32,11 @@ import uk.nhs.ctp.service.fhir.GenericResourceLocator;
 @RunWith(MockitoJUnitRunner.class)
 public class SearchParametersTransformerTest {
 
+  @InjectMocks
   private SearchParametersTransformer searchParametersTransformer;
 
   @Mock
   private GenericResourceLocator resourceLocator;
-
-  @Before
-  public void setup() {
-    searchParametersTransformer = new SearchParametersTransformer(resourceLocator);
-  }
 
   @Test
   public void createSearchParametersFromTriggers() {
@@ -130,7 +126,7 @@ public class SearchParametersTransformerTest {
 
   private DataRequirement createObservationRequirement(String code, String value, LocalDateTime date) {
     DataRequirement dataRequirement = new DataRequirement();
-    dataRequirement.setType("CareConnectObservation");
+    dataRequirement.setType("Observation");
 
     DataRequirementCodeFilterComponent codeFilter = new DataRequirementCodeFilterComponent();
     codeFilter.setPath("code");
