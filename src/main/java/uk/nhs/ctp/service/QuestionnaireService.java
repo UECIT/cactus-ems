@@ -13,43 +13,35 @@ import javax.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import org.apache.commons.lang3.ObjectUtils;
-import org.hl7.fhir.dstu3.model.BooleanType;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.CoordinateResource;
-import org.hl7.fhir.dstu3.model.DateTimeType;
-import org.hl7.fhir.dstu3.model.DecimalType;
 import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.IntegerType;
 import org.hl7.fhir.dstu3.model.Narrative;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
+import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ResourceType;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.Type;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.entities.QuestionResponse;
 import uk.nhs.ctp.repos.CaseRepository;
-import uk.nhs.ctp.service.attachment.AttachmentService;
 import uk.nhs.ctp.service.dto.TriageQuestion;
 import uk.nhs.ctp.service.fhir.GenericResourceLocator;
 import uk.nhs.ctp.service.fhir.ReferenceService;
 import uk.nhs.ctp.service.fhir.StorageService;
+import uk.nhs.ctp.transform.QuestionnaireAnswerValueTransformer;
 
 @Service
 @RequiredArgsConstructor
 public class QuestionnaireService {
 
   private final CaseRepository caseRepository;
-  private final AttachmentService attachmentService;
   private final StorageService storageService;
   private final GenericResourceLocator resourceLocator;
   private final ReferenceService referenceService;
   private final NarrativeService narrativeService;
+  private final QuestionnaireAnswerValueTransformer answerValueTransformer;
 
   /**
    * Saves or updates the current questionnaire response
@@ -90,7 +82,8 @@ public class QuestionnaireService {
           .setSubject(patientRef)
           .setLinkId(triageQuestion.getQuestionId())
           .setText(getQuestionText(questionnaire, triageQuestion.getQuestionId()))
-          .addAnswer().setValue(getAnswerValue(triageQuestion));
+          .addAnswer()
+            .setValue(answerValueTransformer.transform(triageQuestion));
     }
 
     questionnaireResponse.setSource(source);
@@ -131,62 +124,26 @@ public class QuestionnaireService {
   }
 
   private String getAnswerString(TriageQuestion triageQuestion) {
-    switch (triageQuestion.getQuestionType().toUpperCase()) {
-      case "STRING":
-      case "TEXT":
+    switch (QuestionnaireItemType.valueOf(triageQuestion.getQuestionType())) {
+      case STRING:
+      case TEXT:
         return triageQuestion.getResponseString();
-      case "INTEGER":
+      case INTEGER:
         return triageQuestion.getResponseInteger();
-      case "BOOLEAN":
+      case BOOLEAN:
         return triageQuestion.getResponseBoolean();
-      case "DECIMAL":
+      case DECIMAL:
         return triageQuestion.getResponseDecimal();
-      case "DATE":
+      case DATE:
+      case DATETIME:
         return triageQuestion.getResponseDate();
-      case "ATTACHMENT":
+      case ATTACHMENT:
         return triageQuestion.getResponseAttachmentType();
-      case "REFERENCE":
+      case REFERENCE:
         return triageQuestion.getResponseCoordinates().toString();
       default:
         return triageQuestion.getResponse().getDisplay();
     }
-  }
-  private Type getAnswerValue(TriageQuestion triageQuestion) {
-    switch (triageQuestion.getQuestionType().toUpperCase()) {
-      case "STRING":
-      case "TEXT":
-        return new StringType(triageQuestion.getResponseString());
-      case "INTEGER":
-        return new IntegerType(triageQuestion.getResponseInteger());
-      case "BOOLEAN":
-        return new BooleanType(triageQuestion.getResponseBoolean());
-      case "DECIMAL":
-        return new DecimalType(triageQuestion.getResponseDecimal());
-      case "DATE":
-        return new DateTimeType(triageQuestion.getResponseDate());
-      case "ATTACHMENT":
-        var attachmentData = triageQuestion.getResponseAttachment().getBytes();
-        String attachmentType = triageQuestion.getResponseAttachmentType();
-        return attachmentService.storeAttachment(
-            MediaType.valueOf(attachmentType), attachmentData);
-      case "REFERENCE":
-        if (isImageMapAnswer(triageQuestion)) {
-          CoordinateResource coordinateResource = new CoordinateResource();
-          coordinateResource
-              .setXCoordinate(new IntegerType(triageQuestion.getResponseCoordinates().getX()));
-          coordinateResource
-              .setYCoordinate(new IntegerType(triageQuestion.getResponseCoordinates().getY()));
-          return new Reference(coordinateResource);
-        }
-      default:
-        return new Coding()
-            .setCode(triageQuestion.getResponse().getCode())
-            .setDisplay(triageQuestion.getResponse().getDisplay());
-    }
-  }
-
-  private boolean isImageMapAnswer(TriageQuestion triageQuestion) {
-    return triageQuestion.getExtension().getCode().equals("imagemap");
   }
 
   @Nonnull
