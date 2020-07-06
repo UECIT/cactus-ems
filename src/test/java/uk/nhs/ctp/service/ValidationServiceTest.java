@@ -1,10 +1,7 @@
 package uk.nhs.ctp.service;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.time.ZoneOffset.UTC;
-import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Collections.singletonList;
-import static org.exparity.hamcrest.date.OffsetDateTimeMatchers.within;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -31,6 +28,11 @@ import uk.nhs.ctp.auditFinder.model.OperationType;
 import uk.nhs.ctp.testhelper.matchers.FunctionMatcher;
 
 public class ValidationServiceTest {
+  // Intentionally set without milliseconds as the zipping process truncates
+  // creation date-times to second precision
+  private static final Instant VALID_CREATION_INSTANT_1 = Instant.parse("2020-07-06T10:23:31Z");
+  private static final Instant VALID_CREATION_INSTANT_2 = Instant.parse("2019-06-05T09:12:20Z");
+
   private final ValidationService validationService = new ValidationService();
 
   @Rule
@@ -42,7 +44,7 @@ public class ValidationServiceTest {
         .entry(AuditEntry.builder()
             .requestMethod("GET")
             .requestUrl("http://fhir.server/fhir/Encounter/5")
-            .dateOfEntry(Instant.now())
+            .dateOfEntry(VALID_CREATION_INSTANT_1)
             .responseBody("Encounter resource")
             .build())
         .additionalProperty("caseId", "6")
@@ -100,7 +102,7 @@ public class ValidationServiceTest {
   public void zipAudits_shouldOnlyZipGetEntries() throws IOException {
     var getEntry = AuditEntry.builder()
         .requestMethod("GET")
-        .dateOfEntry(Instant.now())
+        .dateOfEntry(VALID_CREATION_INSTANT_1)
         .requestUrl("http://valid.com/request/url")
         .responseBody("{}")
         .build();
@@ -119,25 +121,23 @@ public class ValidationServiceTest {
 
   @Test
   public void zipAudits_withEncounterAudits_shouldZipEntryData() throws IOException {
-    var now = Instant.now();
-    var then = now.plus(1, SECONDS);
     var entry1 = AuditEntry.builder()
         .requestMethod("GET")
         .responseBody("{ \"body\": \"validRequestBody1\" }")
         .requestUrl("http://valid.com/request/url1")
-        .dateOfEntry(now)
+        .dateOfEntry(VALID_CREATION_INSTANT_1)
         .build();
     var entry2 = AuditEntry.builder()
         .requestMethod("GET")
         .responseBody("<body>validRequestBody2</body>")
         .requestUrl("http://valid.com/request/url2")
-        .dateOfEntry(then)
+        .dateOfEntry(VALID_CREATION_INSTANT_2)
         .build();
     var entry3 = AuditEntry.builder()
         .requestMethod("GET")
         .responseBody("{ \"body\": \"validRequestBody3\" }")
         .requestUrl("http://valid.com/request/url3")
-        .dateOfEntry(then)
+        .dateOfEntry(VALID_CREATION_INSTANT_1)
         .build();
 
     var audit1 = AuditSession.builder()
@@ -167,7 +167,7 @@ public class ValidationServiceTest {
         .requestMethod("GET")
         .responseBody("{ \"body\": \"validRequestBody1\" }")
         .requestUrl("http://valid.com/request/url1")
-        .dateOfEntry(Instant.now())
+        .dateOfEntry(VALID_CREATION_INSTANT_2)
         .build();
 
     var audits = singletonList(AuditSession.builder().entry(entry).build());
@@ -210,12 +210,8 @@ public class ValidationServiceTest {
   private Matcher<ZippedAuditEntry> matchesAuditEntry(String path, AuditEntry auditEntry) {
     return new FunctionMatcher<>(
         zipEntry -> path.equals(zipEntry.getPath())
-            && sameSecond(auditEntry.getDateOfEntry(), zipEntry.getInstant())
+            && auditEntry.getDateOfEntry().equals(zipEntry.getInstant())
             && auditEntry.getResponseBody().equals(zipEntry.getBody()),
         "matches auditEntry on path " + path);
-  }
-
-  private boolean sameSecond(Instant a, Instant b) {
-    return within(1, SECONDS, a.atOffset(UTC)).matches(b.atOffset(UTC));
   }
 }

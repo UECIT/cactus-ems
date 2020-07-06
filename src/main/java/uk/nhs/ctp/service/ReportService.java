@@ -169,8 +169,7 @@ public class ReportService {
     try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
       var caseId = new Reference(encounterRef)
           .getReferenceElement()
-          .getIdPartAsLong()
-          .toString();
+          .getIdPart();
       var audits = auditFinder.findAllEmsEncountersByCaseId(caseId);
       byte[] zipData = validationService.zipAudits(audits, OperationType.ENCOUNTER);
 
