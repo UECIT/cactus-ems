@@ -21,8 +21,8 @@ import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.Reference;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import org.springframework.beans.factory.annotation.Value;
@@ -167,9 +167,7 @@ public class ReportService {
         .build();
 
     try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
-      var caseId = new Reference(encounterRef)
-          .getReferenceElement()
-          .getIdPart();
+      var caseId = new IdType(encounterRef).getIdPart();
       var audits = auditFinder.findAllEmsEncountersByCaseId(caseId);
       byte[] zipData = validationService.zipAudits(audits, OperationType.ENCOUNTER);
 
