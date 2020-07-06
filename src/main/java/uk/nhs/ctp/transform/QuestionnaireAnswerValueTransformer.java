@@ -2,6 +2,9 @@ package uk.nhs.ctp.transform;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import java.sql.Date;
+import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.Transformer;
 import org.hl7.fhir.dstu3.model.BooleanType;
@@ -41,7 +44,8 @@ public class QuestionnaireAnswerValueTransformer implements Transformer<TriageQu
       case DECIMAL:
         return new DecimalType(triageQuestion.getResponseDecimal());
       case DATE:
-        return new DateType(triageQuestion.getResponseDate());
+        var date = Date.from(Instant.parse(triageQuestion.getResponseDate()));
+        return new DateType(date, TemporalPrecisionEnum.DAY);
       case DATETIME:
         return new DateTimeType(triageQuestion.getResponseDate()); //Defaults to TemporalPrecisionEnum.SECOND
       case ATTACHMENT:

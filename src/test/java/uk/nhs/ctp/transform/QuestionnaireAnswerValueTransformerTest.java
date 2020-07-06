@@ -125,6 +125,19 @@ public class QuestionnaireAnswerValueTransformerTest {
   }
 
   @Test
+  public void transformsDateTypeFromTime() {
+    TriageQuestion triageQuestion = new TriageQuestion();
+    triageQuestion.setQuestionType(QuestionnaireItemType.DATE.toString());
+    triageQuestion.setResponseDate("2020-07-06T14:00:00.000Z");
+
+    Type answer = answerValueTransformer.transform(triageQuestion);
+
+    assertThat(answer, instanceOf(DateType.class));
+    assertThat((DateType)answer, typeWithValue("2020-07-06"));
+    verifyZeroInteractions(attachmentService);
+  }
+
+  @Test
   public void transformsDateTimeType() {
     TriageQuestion triageQuestion = new TriageQuestion();
     triageQuestion.setQuestionType(QuestionnaireItemType.DATETIME.toString());
