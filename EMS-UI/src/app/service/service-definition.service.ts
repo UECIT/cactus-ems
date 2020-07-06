@@ -38,14 +38,15 @@ export class ServiceDefinitionService {
     }
   }
 
-  getServiceDefinition(cdssUrl: string) {
+  getServiceDefinition(cdssSupplierId: number, serviceDefId: string) {
     if (this.sessionStorage['auth_token'] != null) {
       httpOptions.headers = httpOptions.headers.set(
           'Authorization',
           this.sessionStorage['auth_token']
       );
     }
-    return this.http.get<any>(cdssUrl, httpOptions);
+    const url = `${environment.EMS_API}/cdss/${cdssSupplierId}/${serviceDefId}`;
+    return this.http.get<any>(url, httpOptions);
   }
 
   getServiceDefinitionByQuery(

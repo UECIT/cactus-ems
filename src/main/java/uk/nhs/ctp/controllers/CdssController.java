@@ -1,8 +1,10 @@
 package uk.nhs.ctp.controllers;
 
+import ca.uhn.fhir.context.FhirContext;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,6 +33,8 @@ public class CdssController {
   private final CdssSupplierService cdssSupplierService;
   private final CdssService cdssService;
 
+  private final FhirContext fhirContext;
+
   @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SUPPLIER_ADMIN','ROLE_NHS','ROLE_CDSS')")
   @GetMapping
   public @ResponseBody
@@ -54,6 +58,22 @@ public class CdssController {
     CdssSupplierDTO cdssSupplierDTO = cdssService
         .queryServiceDefinitions(cdssSupplier, SearchParameters.builder().build());
     return cdssSupplierDTO.getServiceDefinitions();
+  }
+
+  /**
+   * Proxy a request for a service definition through a cactus-authenticated client.
+   * @param cdssId ID of the CDSS Supplier where the service definition is
+   * @param serviceDefId ID of the service definition on the CDSS
+   * @return the full FHIR ServiceDefinition resource.
+   */
+  @GetMapping(value = "/{cdssId}/{serviceDefId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public @ResponseBody
+  String proxyServiceDefinition(
+      @PathVariable Long cdssId,
+      @PathVariable String serviceDefId) {
+    // Jackson can't serialize the resource so we have to get HAPI to do it manually.
+    return fhirContext.newJsonParser()
+        .encodeResourceToString(cdssService.getServiceDefinition(cdssId, serviceDefId));
   }
 
   @PostMapping

@@ -1,4 +1,11 @@
-<mat-card class="serviceDefinition">
-    <mat-card-title>Service Definition:</mat-card-title>
-    <ngx-json-viewer [json]="serviceDefinition"></ngx-json-viewer>
-</mat-card>
+<mat-expansion-panel class="serviceDefinition">
+    <mat-expansion-panel-header>
+        <mat-panel-title>
+            Service Definition:
+        </mat-panel-title>
+        <mat-panel-description>
+          ID: {{tempSelectedServiceDefinitionId}}
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+      <ngx-json-viewer [json]="serviceDefinition"></ngx-json-viewer>   
+</mat-expansion-panel>
