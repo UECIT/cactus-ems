@@ -4,7 +4,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -13,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Map;
-import javax.xml.bind.JAXBException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -23,8 +21,8 @@ import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.Reference;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,6 +36,8 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import uk.nhs.ctp.auditFinder.finder.AuditFinder;
+import uk.nhs.ctp.auditFinder.model.OperationType;
 import uk.nhs.ctp.enums.ContentType;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.dto.ReportType;
@@ -53,6 +53,7 @@ public class ReportService {
   private final ValidationService validationService;
   private final ObjectMapper mapper;
   private final FhirContext fhirContext;
+  private final AuditFinder auditFinder;
 
   @Value("${reports.server}")
   private String reportsServer;
@@ -63,8 +64,7 @@ public class ReportService {
   @Value("${reports.validation.server}")
   private String reportValidationServer;
 
-  public Collection<ReportsDTO> generateReports(
-      ReportRequestDTO request) throws JAXBException, JsonProcessingException {
+  public Collection<ReportsDTO> generateReports(ReportRequestDTO request) {
 
     Collection<ReportsDTO> reports = new ArrayList<>();
 
@@ -75,7 +75,6 @@ public class ReportService {
         log.error(MessageFormat.format("Error creating report {0} ",
             service.getClass().getSimpleName().replace("Service", "")), e);
       }
-
     }
 
     return reports;
@@ -168,8 +167,9 @@ public class ReportService {
         .build();
 
     try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
-      byte[] zipData = validationService
-          .zipResources(new Reference(encounterRef).getReferenceElement().getIdPartAsLong());
+      var caseId = new IdType(encounterRef).getIdPart();
+      var audits = auditFinder.findAllEmsEncountersByCaseId(caseId);
+      byte[] zipData = validationService.zipAudits(audits, OperationType.ENCOUNTER);
 
       var base64Zip = Base64.getEncoder().encode(zipData);
 
