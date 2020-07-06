@@ -145,7 +145,7 @@ export class TriageComponent implements OnInit {
           questionnaireResponse.responseBoolean = element.responseBoolean;
         } else if (questionnaireResponse.questionType === 'DECIMAL') {
           questionnaireResponse.responseDecimal = element.responseDecimal;
-        } else if (questionnaireResponse.questionType === 'DATE') {
+        } else if (questionnaireResponse.questionType === 'DATE' || questionnaireResponse.questionType === 'DATETIME') {
           questionnaireResponse.responseDate = element.responseDate;
         } else if (questionnaireResponse.questionType === 'ATTACHMENT') {
           questionnaireResponse.responseAttachment = element.responseAttachment;

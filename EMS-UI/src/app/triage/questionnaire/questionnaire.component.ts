@@ -309,6 +309,10 @@ export class QuestionnaireComponent implements OnInit {
     return question.questionType == 'REFERENCE' && question.extension.code == 'imagemap';
   }
 
+  isDate(question: TriageQuestion) {
+    return question.questionType == 'DATE'|| question.questionType == 'DATETIME';
+  }
+
   getImageUrl(question: String) {
     if (this.supplierId) {
       return this.supplierId.replace('/fhir', '/image') + question.match(/!\[.*?\]\((.*?)\)/)[1];

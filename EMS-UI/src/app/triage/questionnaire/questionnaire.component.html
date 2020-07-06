@@ -156,7 +156,7 @@
             </mat-form-field>
           </div>
         </form>
-        <form #form="ngForm" class="col-12" *ngIf="triageQuestion.questionType == 'DATE'">
+        <form #form="ngForm" class="col-12" *ngIf="isDate(triageQuestion)">
           <div class="answers">
             <img *ngIf="hasInitialValue(triageQuestion)"
                  [src]="triageQuestion.responseAttachmentInitial" height="200" style="float:right;">
