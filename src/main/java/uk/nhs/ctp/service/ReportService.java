@@ -43,6 +43,7 @@ import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.dto.ReportType;
 import uk.nhs.ctp.service.dto.ReportsDTO;
 import uk.nhs.ctp.service.report.Reportable;
+import uk.nhs.ctp.tkwvalidation.ValidationService;
 
 @Service
 @Slf4j

@@ -1,4 +1,4 @@
-package uk.nhs.ctp.utils;
+package uk.nhs.ctp.tkwvalidation;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
