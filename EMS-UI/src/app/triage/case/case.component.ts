@@ -1,3 +1,4 @@
+import { AnswerService } from './../../service/answer.service';
 import { ProcessTriage } from 'src/app/model/processTriage';
 import {
   Component,
@@ -15,6 +16,7 @@ import { CdssSupplier } from 'src/app/model/cdssSupplier';
 import { Router } from '@angular/router';
 import { SessionStorage } from 'h5webstorage';
 import { Settings } from 'src/app/model/settings';
+import { Subscription } from 'rxjs';
 
 export interface DialogData {
   cdssSupplier: CdssSupplier;
@@ -27,6 +29,8 @@ export interface DialogData {
   styleUrls: ['./case.component.css']
 })
 export class CaseComponent implements OnInit {
+
+  //TODO: CDSCT-35 Remove this property once all question types using answer service
   @Input() answerSelected: QuestionResponse[];
   @Input() case: Case;
   @Input() cdssSupplierName: string;
@@ -43,10 +47,18 @@ export class CaseComponent implements OnInit {
 
   cdssSupplier: CdssSupplier;
   serviceDefinition: string;
+  answerSubscription: Subscription;
 
-  constructor(public dialog: MatDialog,
-              public router: Router,
-              private sessionStorage: SessionStorage) {}
+  constructor(
+    public dialog: MatDialog,
+    public router: Router,
+    private sessionStorage: SessionStorage,
+    private answerService: AnswerService
+  ) 
+  {
+    this.answerSubscription = this.answerService.answerSelected$
+      .subscribe(answer => this.answerSelected = answer);
+  }
 
   openDialog(): void {
     const dialogRef = this.dialog.open(SwitchSupplierDialogComponent, {
@@ -98,19 +110,23 @@ export class CaseComponent implements OnInit {
     this.router.navigate(['/main']);
   }
 
-  checkAllRequieredQuestionsAreAnswered(): boolean {
-    let requieredComplete = false;
-    let requieredQuestions: Boolean = false;
+  checkAllRequiredQuestionsAreAnswered(): boolean {
+    let requiredComplete = false;
+    let requiredQuestions: Boolean = false;
 
+    console.log("Checking if valid to process");
+    console.log(this.questionnaire);
+    console.log("Answer selected");
+    console.log(this.answerSelected);
     if (!this.questionnaire || !this.questionnaire.triageQuestions) {
       return false;
     }
 
     this.questionnaire.triageQuestions.forEach(question => {
-      requieredQuestions = question.required;
+      requiredQuestions = question.required;
     });
 
-    if (!requieredQuestions) {
+    if (!requiredQuestions) {
       return true;
     }
 
@@ -119,14 +135,18 @@ export class CaseComponent implements OnInit {
         for (let index = 0; index < this.answerSelected.length; index++) {
           const answer = this.answerSelected[index];
           if (answer.triageQuestion.questionId === question.questionId) {
-            requieredComplete = true;
+            requiredComplete = true;
             break;
           } else {
-            requieredComplete = false;
+            requiredComplete = false;
           }
         }
       }
     });
-    return requieredComplete;
+    return requiredComplete;
+  }
+
+  ngOnDestroy() {
+    this.answerSubscription.unsubscribe();
   }
 }

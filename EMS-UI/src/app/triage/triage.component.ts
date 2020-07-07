@@ -1,3 +1,4 @@
+import { AnswerService } from './../service/answer.service';
 import { ErrorMessage } from './../model/questionnaire';
 import { Component, OnInit } from '@angular/core';
 import { TriageService } from '../service/triage.service';
@@ -9,7 +10,7 @@ import {
 import { Store } from '@ngrx/store';
 import { Router } from '@angular/router';
 import { AppState } from '../app.state';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { Patient } from '../model/patient';
 import { ProcessTriage, QuestionnaireResponse } from '../model/processTriage';
 import { CaseService } from '../service/case.service';
@@ -46,6 +47,7 @@ export class TriageComponent implements OnInit {
   oldServiceDefinition: string;
   newServiceDefinition: string;
   amendingPrevious = false;
+  answerSubscription: Subscription;
 
   constructor(
     public router: Router,
@@ -55,8 +57,12 @@ export class TriageComponent implements OnInit {
     private sessionStorage: SessionStorage,
     private toastr: ToastrService,
     store: Store<AppState>,
+    private answerSevice: AnswerService
   ) {
     store.select('patient').subscribe(({ id }) => this.patientId = id);
+    this.answerSubscription = answerSevice.answerSelected$.subscribe(qr => {
+      this.answerSelected = qr;
+    })
   }
 
   async ngOnInit() {
@@ -265,5 +271,9 @@ export class TriageComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {});
+  }
+
+  ngOnDestroy() {
+    this.answerSubscription.unsubscribe();
   }
 }

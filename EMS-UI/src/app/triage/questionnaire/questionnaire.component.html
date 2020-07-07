@@ -183,15 +183,13 @@
           </div>
         </form>
 
-        <form #form="ngForm" class="col-12" *ngIf="isImageMap(triageQuestion)">
-          <div class="answers">
-            <img [src]="getImageUrl(triageQuestion.question)" height="400"
-                 (click)="mouseClickOnImage($event, triageQuestion)">
-            <p> {{ freeText.get(triageQuestion.questionId) }} </p>
-          </div>
+        <form #form="ngForm" class="col-12" [ngSwitch]="getType(triageQuestion)">
+          <imagemap-question *ngSwitchCase="questionnaireType.IMAGE_MAP"
+            [answerSelected]="answerSelected"
+            [triageQuestion]="triageQuestion"
+            [disabled]="checkEnableWhen(triageQuestion)">
+          </imagemap-question>
         </form>
-
-
       </div>
     </div>
   </div>
