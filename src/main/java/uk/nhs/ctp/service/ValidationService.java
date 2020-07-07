@@ -97,7 +97,7 @@ public class ValidationService {
         zipBuilder.addEntry(fullPath, messageAudit.getBody(), messageAudit.getMoment());
     }
 
-    return zipBuilder.buildZip();
+    return zipBuilder.buildAndCloseZip();
   }
 
   @Value

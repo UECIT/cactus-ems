@@ -25,7 +25,7 @@ public class ZipBuilder {
     zip.write(body.getBytes(StandardCharsets.UTF_8));
   }
 
-  public byte[] buildZip() throws IOException {
+  public byte[] buildAndCloseZip() throws IOException {
     zip.closeEntry();
     zip.close();
 
