@@ -25,7 +25,6 @@ export class ServiceDefinitionComponent implements OnChanges {
   constructor(private serviceDefinitionService: ServiceDefinitionService) {}
 
   async ngOnChanges(changes: SimpleChanges) {
-    console.log("Changes Triggered");
     if (changes.selectedSupplier !== undefined) {
       this.cdssSupplierId = changes.selectedSupplier.currentValue;
     }
