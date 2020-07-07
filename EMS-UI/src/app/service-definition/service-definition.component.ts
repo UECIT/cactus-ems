@@ -25,6 +25,7 @@ export class ServiceDefinitionComponent implements OnChanges {
   constructor(private serviceDefinitionService: ServiceDefinitionService) {}
 
   async ngOnChanges(changes: SimpleChanges) {
+    console.log("Changes Triggered");
     if (changes.selectedSupplier !== undefined) {
       this.cdssSupplierId = changes.selectedSupplier.currentValue;
     }
@@ -36,10 +37,8 @@ export class ServiceDefinitionComponent implements OnChanges {
     // If there's been a change to the supplier use the old service def selected.
     if (this.tempSelectedServiceDefinitionId !== undefined) {
       this.serviceDefinitionService
-      .getServiceDefinition(this.cdssSupplierId, this.tempSelectedServiceDefinitionId)
-          .subscribe(
-            serviceDefinition => (this.serviceDefinition = serviceDefinition)
-          );
+        .getServiceDefinition(this.cdssSupplierId, this.tempSelectedServiceDefinitionId)
+          .subscribe(serviceDefinition => this.serviceDefinition = serviceDefinition);
     }
   }
 }

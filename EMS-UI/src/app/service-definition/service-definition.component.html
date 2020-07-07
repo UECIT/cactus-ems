@@ -4,8 +4,8 @@
             Service Definition:
         </mat-panel-title>
         <mat-panel-description>
-          ID: {{tempSelectedServiceDefinitionId}}
+          ID: <p id="serviceDefId">{{tempSelectedServiceDefinitionId}}</p>
         </mat-panel-description>
       </mat-expansion-panel-header>
-      <ngx-json-viewer [json]="serviceDefinition"></ngx-json-viewer>   
+      <ngx-json-viewer id="serviceDefJson" [json]="serviceDefinition"></ngx-json-viewer>   
 </mat-expansion-panel>
