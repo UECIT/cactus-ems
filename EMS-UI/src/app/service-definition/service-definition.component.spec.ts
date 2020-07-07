@@ -8,7 +8,6 @@ import { By } from '@angular/platform-browser';
 import { MaterialModule } from 'src/app/material.module';
 import { ServiceDefinitionService } from '../service';
 import { NgxJsonViewerModule } from 'ngx-json-viewer';
-import { FindValueSubscriber } from 'rxjs/internal/operators/find';
 
 let comp: ServiceDefinitionComponent;
 let fixture: ComponentFixture<ServiceDefinitionComponent>;
@@ -53,9 +52,7 @@ describe('Service Definition Component', () => {
             selectedServiceDefinition: new SimpleChange(null, "serviceId", true)
         };
 
-        comp.ngOnChanges(changes);
-        tick();
-        fixture.detectChanges();
+        triggerChange(changes);
 
         expect(page.serviceDefId.textContent).toBe('serviceId');
         expect(page.serviceDefJson.textContent).toContain(jsonString);
@@ -70,12 +67,9 @@ describe('Service Definition Component', () => {
         const changes: SimpleChanges = {
             selectedSupplier: new SimpleChange(3, 5, false),
         };
-
         comp.tempSelectedServiceDefinitionId = "unchanged";
 
-        comp.ngOnChanges(changes);
-        tick();
-        fixture.detectChanges();
+        triggerChange(changes);
 
         expect(page.serviceDefId.textContent).toBe('unchanged');
         expect(page.serviceDefJson.textContent).toContain(jsonString);
@@ -88,18 +82,21 @@ describe('Service Definition Component', () => {
         serviceDefinitionServiceSpy.getServiceDefinition.and.returnValue(of(jsonString));
 
         const changes: SimpleChanges = {
-            selectedServiceDefinition: new SimpleChange("old", "new", FindValueSubscriber)
+            selectedServiceDefinition: new SimpleChange("old", "new", false)
         };
-
         comp.cdssSupplierId = 9;
 
-        comp.ngOnChanges(changes);
-        tick();
-        fixture.detectChanges();
+        triggerChange(changes);
 
         expect(page.serviceDefId.textContent).toBe('new');
         expect(page.serviceDefJson.textContent).toContain(jsonString);
         expect(serviceDefinitionServiceSpy.getServiceDefinition)
             .toHaveBeenCalledWith(9, "new");
     }));
+
+    function triggerChange(changes) {
+        comp.ngOnChanges(changes);
+        tick();
+        fixture.detectChanges();
+    }
 });
