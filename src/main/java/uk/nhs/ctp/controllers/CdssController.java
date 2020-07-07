@@ -4,7 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -74,6 +77,20 @@ public class CdssController {
     // Jackson can't serialize the resource so we have to get HAPI to do it manually.
     return fhirContext.newJsonParser()
         .encodeResourceToString(cdssService.getServiceDefinition(cdssId, serviceDefId));
+  }
+
+  @GetMapping(value = "/image/{cdssId}/{imageId:.+}")
+  public ResponseEntity<byte[]> proxyImage(
+      @PathVariable Long cdssId,
+      @PathVariable String imageId) {
+    byte[] data = cdssService.getImage(cdssId, imageId);
+    String digest = String.format("SHA=%s",
+        Base64.encodeBase64URLSafeString(DigestUtils.sha1(data)));
+    return ResponseEntity.ok()
+        .contentType(MediaType.IMAGE_PNG)
+        .header("Digest", digest)
+        .contentLength(data.length)
+        .body(data);
   }
 
   @PostMapping

@@ -114,10 +114,6 @@ export class CaseComponent implements OnInit {
     let requiredComplete = false;
     let requiredQuestions: Boolean = false;
 
-    console.log("Checking if valid to process");
-    console.log(this.questionnaire);
-    console.log("Answer selected");
-    console.log(this.answerSelected);
     if (!this.questionnaire || !this.questionnaire.triageQuestions) {
       return false;
     }

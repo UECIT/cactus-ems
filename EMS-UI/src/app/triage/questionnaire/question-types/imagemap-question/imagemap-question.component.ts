@@ -46,9 +46,7 @@ export class ImagemapQuestionComponent {
   }
 
   getImageUrl(question: String) {
-    // if (this.supplierId) {
-    //   return this.supplierId.replace('/fhir', '/image') + question.match(/!\[.*?\]\((.*?)\)/)[1];
-    // }
-    // return 'Image not found';
+    const image = question.match(/!\[.*?\]\((.*?)\)/)[1];
+    console.log(image);
   }
 }
