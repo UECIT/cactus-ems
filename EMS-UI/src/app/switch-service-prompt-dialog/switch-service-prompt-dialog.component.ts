@@ -23,15 +23,12 @@ export class SwitchServicePromptDialogComponent implements OnInit {
 
   async ngOnInit() {
     try {
-      const CdssUrl = await this.serviceDefintionService.getCdssSupplierUrl(
-          this.data.cdssSupplierId
-      );
-      this.oldServiceDefinition = await this.serviceDefintionService.getServiceDefinition(
-          CdssUrl + 'ServiceDefinition/' + this.data.oldServiceDefinition
-      ).toPromise();
-      this.newServiceDefinition = await this.serviceDefintionService.getServiceDefinition(
-          CdssUrl + 'ServiceDefinition/' + this.data.newServiceDefinition
-      ).toPromise();
+      this.oldServiceDefinition = 
+        await this.serviceDefintionService.
+          getServiceDefinition(this.data.cdssSupplierId, this.data.oldServiceDefinition).toPromise();
+      this.newServiceDefinition = 
+        await this.serviceDefintionService
+          .getServiceDefinition(this.data.cdssSupplierId, this.data.newServiceDefinition).toPromise();
     } catch (err) {
       this.toastr.error(err.error.target.__zone_symbol__xhrURL + ' - ' + err.message);
     }

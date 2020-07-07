@@ -37,7 +37,6 @@ export class MainComponent implements OnInit {
   selectedSupplier: number;
   selectedServiceDefinition: string;
   displayedTestWarningMessage = false;
-  selectedQueryType = 'id';
   serviceDefinitionMode = 'automated';
   availableServiceDefinitions: CdssSupplier[];
   roles: Code[];

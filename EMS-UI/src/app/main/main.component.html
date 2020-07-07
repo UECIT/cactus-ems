@@ -93,17 +93,15 @@
   </div>
 </div>
 
+<div class="row" *ngIf="selectedServiceDefinition != null">
+  <app-service-definition class="col-md-12"
+      [(selectedServiceDefinition)]="selectedServiceDefinition"
+      [(selectedSupplier)]="selectedSupplier">
+  </app-service-definition>
+</div>
+
 <div class="launchSection">
   <button mat-button class="btn btn-primary btn-block launch" (click)="triage()" [disabled]="disableLaunch()">
     {{ encounterReportInput ? 'Continue Triage' : 'Start Triage' }}
   </button>
-</div>
-
-
-<div class="row" *ngIf="selectedServiceDefinition != null">
-  <app-service-definition
-      class="col-md-12"
-      [(selectedServiceDefinition)]="selectedServiceDefinition"
-      [(selectedQueryType)]="selectedQueryType"
-      [(selectedSupplier)]="selectedSupplier"></app-service-definition>
 </div>

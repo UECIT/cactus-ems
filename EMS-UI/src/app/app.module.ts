@@ -1,3 +1,4 @@
+import { AuthService } from './service/auth.service';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { HashLocationStrategy, LocationStrategy } from '@angular/common';
@@ -13,7 +14,6 @@ import { BannerComponent } from './banner/banner.component';
 import { ManageUsersComponent } from './user-management/manage-users/manage-users.component';
 import { LoginService } from './service/login.service';
 import { ManageUsersService } from './service/manage-users.service';
-import {platformBrowserDynamic} from '@angular/platform-browser-dynamic';
 import { PatientService } from './service/patient.service';
 import { TriageComponent } from './triage/triage.component';
 import { StoreModule } from '@ngrx/store';
@@ -161,6 +161,7 @@ export function hljsLanguages() {
     AuditService,
     ReportService,
     EnvironmentService,
+    AuthService,
     {provide: MAT_DATE_LOCALE, useValue: 'en-GB'}],
   bootstrap: [AppComponent]
 })
