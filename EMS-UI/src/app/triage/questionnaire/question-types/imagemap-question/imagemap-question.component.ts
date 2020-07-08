@@ -65,7 +65,11 @@ export class ImagemapQuestionComponent implements OnInit {
 
   private createImageFromBlob(image: Blob) {
     let reader = new FileReader();
-    reader.addEventListener("load", () => this.imgSrc = reader.result, false);
+    reader.addEventListener("load", e => {
+      let target = e.target as FileReader;
+      this.imgSrc = target.result;
+      this.error = null;
+    }, false);
     reader.readAsDataURL(image);
   }
 }
