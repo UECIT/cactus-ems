@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.audit.model.AuditSession;
 import uk.nhs.ctp.auditFinder.model.OperationType;
+import uk.nhs.ctp.tkwvalidation.models.HttpMessageAudit;
+import uk.nhs.ctp.tkwvalidation.models.HttpMessageType;
 import uk.nhs.ctp.tkwvalidation.rules.AuditValidationRule;
 
 @Service
@@ -27,25 +29,48 @@ public class ValidationService {
     var sequenceCounter = new HashMap<String, Integer>();
 
     for (var messageAudit : auditSelector.selectAudits(audits, operationType)) {
-
-        var count = sequenceCounter.compute(
+        int count = sequenceCounter.compute(
             messageAudit.getFilePath(),
             (path, existingCount) -> existingCount == null ? 1 : existingCount + 1);
 
-        // TODO get content type and add extension to path
-        var extension = naiveIsJson(messageAudit.getBody()) ? "json" : "xml";
-
-        var fullPath = String.format(
-            "%s.%d.%s.%s",
-            messageAudit.getFilePath(),
-            count,
-            messageAudit.getType().name(),
-            extension);
-
-        zipBuilder.addEntry(fullPath, messageAudit.getBody(), messageAudit.getMoment());
+        addZipEntry(zipBuilder, messageAudit, count, HttpMessageType.REQUEST);
+        addZipEntry(zipBuilder, messageAudit, count, HttpMessageType.RESPONSE);
     }
 
     return zipBuilder.buildAndCloseZip();
+  }
+
+  private static void addZipEntry(
+      ZipBuilder zipBuilder,
+      HttpMessageAudit audit,
+      int count,
+      HttpMessageType type)
+      throws IOException {
+    String body = null;
+    switch (type) {
+      case REQUEST:
+        body = audit.getRequestBody();
+        break;
+      case RESPONSE:
+        body = audit.getResponseBody();
+        break;
+    }
+
+    if (body == null) {
+      return;
+    }
+
+    // TODO get content type and add extension to path
+    var extension = naiveIsJson(body) ? "json" : "xml";
+
+    var fullPath = String.format(
+        "%s.%d.%s.%s",
+        audit.getFilePath(),
+        count,
+        type.name(),
+        extension);
+
+    zipBuilder.addEntry(fullPath, body, audit.getMoment());
   }
 
   private static boolean naiveIsJson(String text) {

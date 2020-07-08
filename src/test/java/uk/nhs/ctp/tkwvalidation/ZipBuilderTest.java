@@ -1,4 +1,4 @@
-package uk.nhs.ctp.utils;
+package uk.nhs.ctp.tkwvalidation;
 
 import static com.shazam.shazamcrest.matcher.Matchers.sameBeanAs;
 import static java.nio.charset.StandardCharsets.UTF_8;

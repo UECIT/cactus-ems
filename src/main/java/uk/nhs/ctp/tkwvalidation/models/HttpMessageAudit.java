@@ -11,43 +11,25 @@ import uk.nhs.ctp.audit.model.AuditSession;
 @Builder
 public class HttpMessageAudit {
   String filePath;
-  String body;
+  String requestBody;
+  String responseBody;
   Instant moment;
-  HttpMessageType type;
 
-  public static HttpMessageAudit fromRequest(AuditSession session, String basePath) {
+  public static HttpMessageAudit from(AuditSession session, String basePath, boolean includeRequestBody) {
     return HttpMessageAudit.builder()
         .filePath(mergePaths(basePath, session.getRequestUrl()))
-        .body(session.getRequestBody())
+        .requestBody(includeRequestBody ? session.getRequestBody() : null)
+        .responseBody(session.getResponseBody())
         .moment(session.getCreatedDate())
-        .type(HttpMessageType.REQUEST)
         .build();
   }
 
-  public static HttpMessageAudit fromResponse(AuditSession session, String basePath) {
-    return HttpMessageAudit.builder()
-        .filePath(mergePaths(basePath, session.getRequestUrl()))
-        .body(session.getResponseBody())
-        .moment(session.getCreatedDate())
-        .type(HttpMessageType.RESPONSE)
-        .build();
-  }
-
-  public static HttpMessageAudit fromRequest(AuditEntry entry, String basePath) {
+  public static HttpMessageAudit from(AuditEntry entry, String basePath, boolean includeRequestBody) {
     return HttpMessageAudit.builder()
         .filePath(mergePaths(basePath, entry.getRequestUrl()))
-        .body(entry.getRequestBody())
+        .requestBody(includeRequestBody ? entry.getRequestBody() : null)
+        .responseBody(entry.getResponseBody())
         .moment(entry.getDateOfEntry())
-        .type(HttpMessageType.REQUEST)
-        .build();
-  }
-
-  public static HttpMessageAudit fromResponse(AuditEntry entry, String basePath) {
-    return HttpMessageAudit.builder()
-        .filePath(mergePaths(basePath, entry.getRequestUrl()))
-        .body(entry.getResponseBody())
-        .moment(entry.getDateOfEntry())
-        .type(HttpMessageType.RESPONSE)
         .build();
   }
 

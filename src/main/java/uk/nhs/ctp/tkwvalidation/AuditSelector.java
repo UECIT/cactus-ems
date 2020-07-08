@@ -30,18 +30,18 @@ public class AuditSelector {
           : "encounter" + audit.getAdditionalProperties().get(CASE_ID);
 
       if (isMethod(audit.getRequestMethod(), POST)) {
-        zippableAudits.add(HttpMessageAudit.fromRequest(audit, baseName));
+        zippableAudits.add(HttpMessageAudit.from(audit, baseName, true));
       }
-      if (isMethod(audit.getRequestMethod(), GET, POST)) {
-        zippableAudits.add(HttpMessageAudit.fromResponse(audit, baseName));
+      if (isMethod(audit.getRequestMethod(), GET)) {
+        zippableAudits.add(HttpMessageAudit.from(audit, baseName, false));
       }
 
       for (var entry : audit.getEntries()) {
         if (isMethod(entry.getRequestMethod(), POST)) {
-          zippableAudits.add(HttpMessageAudit.fromRequest(entry, baseName));
+          zippableAudits.add(HttpMessageAudit.from(audit, baseName, true));
         }
         if (isMethod(entry.getRequestMethod(), GET, POST)) {
-          zippableAudits.add(HttpMessageAudit.fromResponse(entry, baseName));
+          zippableAudits.add(HttpMessageAudit.from(audit, baseName, false));
         }
       }
     }
