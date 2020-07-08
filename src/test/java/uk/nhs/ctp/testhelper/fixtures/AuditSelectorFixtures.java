@@ -37,7 +37,7 @@ public class AuditSelectorFixtures {
         .additionalProperty("caseId", "_" + method)
         .requestUrl("http://" + method)
         .requestBody(format("{ request %s }", method))
-        .responseBody(format("{ request %s }", method))
+        .responseBody(format("{ response %s }", method))
         .build();
   }
 

@@ -38,10 +38,10 @@ public class AuditSelector {
 
       for (var entry : audit.getEntries()) {
         if (isMethod(entry.getRequestMethod(), POST)) {
-          zippableAudits.add(HttpMessageAudit.from(audit, baseName, true));
+          zippableAudits.add(HttpMessageAudit.from(entry, baseName, true));
         }
-        if (isMethod(entry.getRequestMethod(), GET, POST)) {
-          zippableAudits.add(HttpMessageAudit.from(audit, baseName, false));
+        if (isMethod(entry.getRequestMethod(), GET)) {
+          zippableAudits.add(HttpMessageAudit.from(entry, baseName, false));
         }
       }
     }

@@ -19,8 +19,8 @@ import uk.nhs.ctp.testhelper.matchers.FunctionMatcher;
 import uk.nhs.ctp.tkwvalidation.models.HttpMessageAudit;
 
 public class AuditSelectorTest {
-  private static final Instant CREATED_AT_1 = Instant.parse("2020-07-06T10:23:31Z");
-  private static final Instant CREATED_AT_2 = Instant.parse("2019-06-05T09:12:20Z");
+  private static final Instant CREATED_AT_1 = Instant.parse("2019-06-05T09:12:20Z");
+  private static final Instant CREATED_AT_2 = Instant.parse("2020-07-06T10:23:31Z");
 
   private final AuditSelector auditSelector = new AuditSelector();
 
@@ -33,16 +33,27 @@ public class AuditSelectorTest {
         .dateOfEntry(CREATED_AT_2)
         .build();
 
-    var audits = singletonList(AuditSession.builder().entry(entry).build());
+    var audits = singletonList(AuditSession.builder()
+        .entry(entry)
+        .requestMethod("GET")
+        .requestUrl("http://valid.com/request/base")
+        .responseBody("validResponseBody2")
+        .createdDate(CREATED_AT_1)
+        .build());
 
     var messageAudits = auditSelector.selectAudits(audits, OperationType.SERVICE_SEARCH);
 
-    assertThat(messageAudits, contains(isEntry(
-        "service_search/valid.com/request/url1",
-        null,
-        "validResponseBody",
-        CREATED_AT_2
-    )));
+    assertThat(messageAudits, contains(
+        isEntry(
+            "service_search/valid.com/request/base",
+            null,
+            "validResponseBody2",
+            CREATED_AT_1),
+        isEntry(
+          "service_search/valid.com/request/url",
+          null,
+          "validResponseBody",
+          CREATED_AT_2)));
   }
 
   @Test
@@ -117,19 +128,19 @@ public class AuditSelectorTest {
 
     var earlierEntry = AuditEntry.builder()
         .requestMethod("GET")
-        .requestUrl("earlier/entry")
+        .requestUrl("http://earlier/entry")
         .responseBody("earlierEntryBody")
         .dateOfEntry(date2)
         .build();
     var laterEntry = AuditEntry.builder()
         .requestMethod("GET")
-        .requestUrl("later/entry")
+        .requestUrl("http://later/entry")
         .responseBody("laterEntryBody")
         .dateOfEntry(date3)
         .build();
     var earlierAudit = AuditSession.builder()
         .requestMethod("GET")
-        .requestUrl("earlier/session")
+        .requestUrl("http://earlier/session")
         .responseBody("earlierSessionBody")
         .createdDate(date1)
         .entry(laterEntry)
@@ -138,7 +149,7 @@ public class AuditSelectorTest {
         .build();
     var laterAudit = AuditSession.builder()
         .requestMethod("GET")
-        .requestUrl("later/session")
+        .requestUrl("http://later/session")
         .responseBody("laterSessionBody")
         .createdDate(date4)
         .additionalProperty("caseId", "_later")
@@ -152,7 +163,7 @@ public class AuditSelectorTest {
         isEntry("encounter_earlier/earlier/session", null, "earlierSessionBody", date1),
         isEntry("encounter_earlier/earlier/entry", null, "earlierEntryBody", date2),
         isEntry("encounter_earlier/later/entry", null, "laterEntryBody", date3),
-        isEntry("encounter_earlier/later/session", null, "laterSessionBody", date4)
+        isEntry("encounter_later/later/session", null, "laterSessionBody", date4)
     ));
   }
 

@@ -3,8 +3,6 @@ package uk.nhs.ctp.tkwvalidation;
 import static java.util.Collections.emptyList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -18,9 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -50,9 +46,6 @@ public class ValidationServiceTest {
   @InjectMocks
   private ValidationService validationService;
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
-
   @Before
   public void setup() {
     zipBuilder = mock(ZipBuilder.class);
@@ -60,33 +53,10 @@ public class ValidationServiceTest {
   }
 
   @Test
-  public void zip_creation() throws IOException {
-    var audit = AuditSession.builder()
-        .entry(AuditEntry.builder()
-            .requestMethod("GET")
-            .requestUrl("http://fhir.server/fhir/Encounter/5")
-            .dateOfEntry(CREATED_AT_1)
-            .responseBody("Encounter resource")
-            .build())
-        .additionalProperty("caseId", "6")
-        .build();
-
-    byte[] output = validationService.zipAudits(List.of(audit), OperationType.ENCOUNTER);
-    assertNotNull(output);
-    assertTrue(output.length > 0);
-
-//    File zipFile = File.createTempFile("validation", ".zip");
-//    try (FileOutputStream outputStream = new FileOutputStream(zipFile)) {
-//      outputStream.write(output);
-//    }
-//    System.out.println("Output written to " + zipFile);
-  }
-
-  @Test
   public void zipAudits_shouldEnsureValidationRules() throws IOException {
     var audits = new ArrayList<AuditSession>();
     var rule = mock(AuditValidationRule.class);
-    when(validationRules.get("encounter")).thenReturn(mock(AuditValidationRule.class));
+    when(validationRules.get("encounter")).thenReturn(rule);
 
     validationService.zipAudits(audits, OperationType.ENCOUNTER);
 
@@ -95,6 +65,7 @@ public class ValidationServiceTest {
 
   @Test
   public void zipAudits_withNoAudits_shouldReturnEmpty() throws IOException {
+    when(validationRules.get("encounter")).thenReturn(mock(AuditValidationRule.class));
     var expectedZipData = new byte[]{};
     when(zipBuilder.buildAndCloseZip()).thenReturn(expectedZipData);
 
@@ -106,6 +77,7 @@ public class ValidationServiceTest {
 
   @Test
   public void zipAudits_shouldReturnUnmodifiedZip() throws IOException {
+    when(validationRules.get("service_search")).thenReturn(mock(AuditValidationRule.class));
     var expectedZipData = new byte[]{0, 1, 2, 3, 4, 5, 6, 7};
     when(zipBuilder.buildAndCloseZip()).thenReturn(expectedZipData);
 

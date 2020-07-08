@@ -67,7 +67,7 @@ public class ValidationService {
         "%s.%d.%s.%s",
         audit.getFilePath(),
         count,
-        type.name(),
+        type.name().toLowerCase(),
         extension);
 
     zipBuilder.addEntry(fullPath, body, audit.getMoment());
