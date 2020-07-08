@@ -79,7 +79,7 @@ public class CdssController {
         .encodeResourceToString(cdssService.getServiceDefinition(cdssId, serviceDefId));
   }
 
-  @GetMapping(value = "/image/{cdssId}/{imageId:.+}")
+  @GetMapping(value = "/{cdssId}/image/{imageId:.+}")
   public ResponseEntity<byte[]> proxyImage(
       @PathVariable Long cdssId,
       @PathVariable String imageId) {

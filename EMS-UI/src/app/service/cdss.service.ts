@@ -1,3 +1,4 @@
+import { AuthService } from './auth.service';
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {environment} from '../../environments/environment';
@@ -10,31 +11,29 @@ const httpOptions = {
   headers: new HttpHeaders()
 };
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({providedIn: 'root'})
 export class CdssService {
-  constructor(private http: HttpClient, private sessionStorage: SessionStorage, private toastr: ToastrService) {
-  }
+
+  constructor(
+    private http: HttpClient, 
+    private authService: AuthService, 
+    private toastr: ToastrService
+  ) {}
 
   getCdssSuppliers(): Observable<CdssSupplier[]> {
-    if (this.sessionStorage['auth_token'] != null) {
-      httpOptions.headers = httpOptions.headers.set(
-          'Authorization',
-          this.sessionStorage['auth_token']
-      );
+    const token = this.authService.getAuthToken();
+    if (token != null) {
+      httpOptions.headers = httpOptions.headers.set('Authorization', token);
       const url = `${environment.EMS_API}/cdss`;
       return this.http.get<CdssSupplier[]>(url, httpOptions);
     }
   }
 
   async listServiceDefinitions(cdssId: number): Promise<ServiceDefinition[]> {
-    if (this.sessionStorage['auth_token'] != null) {
+    const token = this.authService.getAuthToken();
+    if (token != null) {
       try {
-        httpOptions.headers = httpOptions.headers.set(
-            'Authorization',
-            this.sessionStorage['auth_token']
-        );
+        httpOptions.headers = httpOptions.headers.set('Authorization', token);
         const url = `${environment.EMS_API}/cdss/${cdssId}/ServiceDefinition?_summary=true`;
         return await this.http.get<ServiceDefinition[]>(url, httpOptions).toPromise();
       } catch (err) {
@@ -46,22 +45,28 @@ export class CdssService {
   }
 
   getCdssSupplier(id: any) {
-    if (this.sessionStorage['auth_token'] != null) {
-      httpOptions.headers = httpOptions.headers.set(
-          'Authorization',
-          this.sessionStorage['auth_token']
-      );
+    const token = this.authService.getAuthToken();
+    if (token != null) {
+      httpOptions.headers = httpOptions.headers.set('Authorization', token);
       const url = `${environment.EMS_API}/cdss/${id}`;
       return this.http.get<CdssSupplier>(url, httpOptions).toPromise();
     }
   }
 
+  getImage(cdssId: number, imageUrl: string) {
+    const token = this.authService.getAuthToken();
+    if (token != null) {
+      httpOptions.headers = httpOptions.headers.set('Authorization', token); 
+      const url = `${environment.EMS_API}/cdss/${cdssId}/image/${imageUrl}`;
+      return this.http.get(url, {headers: httpOptions.headers, responseType: 'blob'})
+        .toPromise();
+    }
+  }
+
   createCdssSupplier(cdssSupplier: CdssSupplier) {
-    if (this.sessionStorage['auth_token'] != null) {
-      httpOptions.headers = httpOptions.headers.set(
-          'Authorization',
-          this.sessionStorage['auth_token']
-      );
+    const token = this.authService.getAuthToken();
+    if (token != null) {
+      httpOptions.headers = httpOptions.headers.set('Authorization', token);
       httpOptions.headers = httpOptions.headers.set(
           'Content-Type',
           'application/json'
@@ -76,11 +81,9 @@ export class CdssService {
   }
 
   updateCdssSupplier(cdssSupplier: CdssSupplier) {
-    if (this.sessionStorage['auth_token'] != null) {
-      httpOptions.headers = httpOptions.headers.set(
-          'Authorization',
-          this.sessionStorage['auth_token']
-      );
+    const token = this.authService.getAuthToken();
+    if (token != null) {
+      httpOptions.headers = httpOptions.headers.set('Authorization', token);
       httpOptions.headers = httpOptions.headers.set(
           'Content-Type',
           'application/json'
@@ -91,11 +94,9 @@ export class CdssService {
   }
 
   deleteCdssSupplier(cdssSupplierId: String) {
-    if (this.sessionStorage['auth_token'] != null) {
-      httpOptions.headers = httpOptions.headers.set(
-          'Authorization',
-          this.sessionStorage['auth_token']
-      );
+    const token = this.authService.getAuthToken();
+    if (token != null) {
+      httpOptions.headers = httpOptions.headers.set('Authorization', token);
       httpOptions.headers = httpOptions.headers.set(
           'Content-Type',
           'application/json'

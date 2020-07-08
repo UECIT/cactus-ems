@@ -187,6 +187,7 @@
           <imagemap-question *ngSwitchCase="questionnaireType.IMAGE_MAP"
             [answerSelected]="answerSelected"
             [triageQuestion]="triageQuestion"
+            [cdssSupplierId]="questionnaire.cdssSupplierId"
             [disabled]="checkEnableWhen(triageQuestion)">
           </imagemap-question>
         </form>

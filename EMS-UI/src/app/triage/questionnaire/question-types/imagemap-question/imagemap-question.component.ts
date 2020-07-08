@@ -1,21 +1,32 @@
-import { AnswerService } from './../../../../service/answer.service';
+import { CdssService } from './../../../../service/cdss.service';
 import { QuestionResponse, TriageQuestion, Coordinates } from './../../../../model/questionnaire';
 import { Component, OnInit, Input } from '@angular/core';
+import { AnswerService } from 'src/app/service/answer.service';
 
 @Component({
   selector: 'imagemap-question',
   templateUrl: './imagemap-question.component.html',
   styleUrls: ['./imagemap-question.component.css']
 })
-export class ImagemapQuestionComponent {
+export class ImagemapQuestionComponent implements OnInit {
 
   @Input() answerSelected: QuestionResponse[];
   @Input() triageQuestion: TriageQuestion;
+  @Input() cdssSupplierId: string;
   @Input() disabled: boolean;
 
   selectedCoordinates: Coordinates;
+  imgSrc: any;
+  error: any;
 
-  constructor(private answerService: AnswerService) { }
+  constructor(
+    private answerService: AnswerService,
+    private cdssService: CdssService
+  ) { }
+
+  ngOnInit() {
+    this.getImageUrl(this.triageQuestion.question);
+  }
 
   mouseClickOnImage(event: any, triageQuestion: TriageQuestion) {
     if (this.disabled) {
@@ -45,8 +56,16 @@ export class ImagemapQuestionComponent {
       this.selectedCoordinates.y + ")";
   }
 
-  getImageUrl(question: String) {
+  private async getImageUrl(question: String) {
     const image = question.match(/!\[.*?\]\((.*?)\)/)[1];
-    console.log(image);
+    this.cdssService.getImage(this.cdssSupplierId, image)
+      .then(res => this.createImageFromBlob(res))
+      .catch(err => this.error = err);
+  }
+
+  private createImageFromBlob(image: Blob) {
+    let reader = new FileReader();
+    reader.addEventListener("load", () => this.imgSrc = reader.result, false);
+    reader.readAsDataURL(image);
   }
 }

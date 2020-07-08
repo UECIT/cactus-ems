@@ -88,9 +88,9 @@ public class CdssService {
   }
 
   public byte[] getImage(Long cdssSupplierId, String imageId) {
-    String url = getBaseUrl(cdssSupplierId).replace("/fhir/", "/image/") + imageId;
+    //TODO: CDSCT-??? Flimsy: imageId will be a url for 2.0 to an unauthed server or a 'binary' fhir resource
+    String url = getBaseUrl(cdssSupplierId).replace("/fhir", "/image/") + imageId;
     return RetryUtils.retry(
-        //TODO: failing as the /image endpoint isn't cactus or a supplier endpoint so no token.
         () -> restTemplate.getForObject(url, byte[].class), url);
   }
 
