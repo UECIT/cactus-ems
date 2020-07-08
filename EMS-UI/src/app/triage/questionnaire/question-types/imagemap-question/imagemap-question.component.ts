@@ -6,13 +6,13 @@ import { AnswerService } from 'src/app/service/answer.service';
 @Component({
   selector: 'imagemap-question',
   templateUrl: './imagemap-question.component.html',
-  styleUrls: ['./imagemap-question.component.css']
+  styleUrls: ['../../questionnaire.component.css']
 })
 export class ImagemapQuestionComponent implements OnInit {
 
   @Input() answerSelected: QuestionResponse[];
   @Input() triageQuestion: TriageQuestion;
-  @Input() cdssSupplierId: string;
+  @Input() cdssSupplierId: number;
   @Input() disabled: boolean;
 
   selectedCoordinates: Coordinates;
