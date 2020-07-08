@@ -3,7 +3,6 @@ import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {environment} from '../../environments/environment';
 import {CdssSupplier, ServiceDefinition} from '../model/cdssSupplier';
-import {SessionStorage} from 'h5webstorage';
 import {ToastrService} from 'ngx-toastr';
 import {Observable} from 'rxjs';
 
