@@ -17,11 +17,16 @@ import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.RestTemplate;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.enums.CdsApiVersion;
@@ -39,6 +44,10 @@ public class CdssControllerComponentTest {
 
   @Autowired
   private CdssSupplierRepository cdssRepository;
+
+  @MockBean
+  @Qualifier("restTemplate")
+  private RestTemplate restTemplate;
 
   @MockBean
   private TokenAuthenticationService authenticationService;
@@ -106,6 +115,26 @@ public class CdssControllerComponentTest {
             + "\"title\":\"A Service Definition\","
             + "\"experimental\":true,"
             + "\"description\":\"It does a thing\"}"));
+  }
+
+  @Test
+  @Transactional
+  public void queriesCdssForImages() {
+    CdssSupplier testSupplier = new CdssSupplier();
+    testSupplier.setSupplierId(MOCK_SUPPLIER_ID);
+    testSupplier.setBaseUrl("mock.base.url/fhir");
+
+    final Long supplierId = cdssRepository.save(testSupplier).getId();
+    final String imageid = "img.png";
+    final byte[] image = "some encoded image".getBytes();
+
+    when(restTemplate.getForObject("mock.base.url/image/img.png", byte[].class))
+        .thenReturn(image);
+
+    ResponseEntity<byte[]> response = cdssController.proxyImage(supplierId, imageid);
+    assertThat(response.getBody(), is(image));
+    assertThat(response.getStatusCode(), is(HttpStatus.OK));
+    assertThat(response.getHeaders().getContentType(), is(MediaType.IMAGE_PNG));
   }
 
   private NewCdssSupplierDTO newSupplierRequest() {
