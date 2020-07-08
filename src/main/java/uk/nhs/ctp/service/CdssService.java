@@ -88,7 +88,7 @@ public class CdssService {
   }
 
   public byte[] getImage(Long cdssSupplierId, String imageId) {
-    //TODO: CDSCT-??? Flimsy: imageId will be a url for 2.0 to an unauthed server or a 'binary' fhir resource
+    //TODO: CDSCT-233 Flimsy: imageId will be a url for 2.0 to an unauthed server or a 'binary' fhir resource
     String url = getBaseUrl(cdssSupplierId).replace("/fhir", "/image/") + imageId;
     return RetryUtils.retry(
         () -> restTemplate.getForObject(url, byte[].class), url);
