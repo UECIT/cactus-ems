@@ -34,8 +34,10 @@ import uk.nhs.ctp.service.dto.CdssResponseDTO;
 import uk.nhs.ctp.service.dto.CdssResult;
 import uk.nhs.ctp.service.dto.ErrorMessageDTO;
 import uk.nhs.ctp.service.dto.ReferralRequestDTO;
+import uk.nhs.ctp.service.dto.TriageOption;
 import uk.nhs.ctp.service.dto.TriageQuestion;
 import uk.nhs.ctp.transform.ErrorMessageTransformer;
+import uk.nhs.ctp.transform.QuestionnaireOptionValueTransformer;
 import uk.nhs.ctp.transform.ReferralRequestDTOTransformer;
 import uk.nhs.ctp.transform.one_one.ReferralRequestDTOOneOneTransformer;
 import uk.nhs.ctp.transform.two.ReferralRequestDTOTwoTransformer;
@@ -51,6 +53,8 @@ public class ResponseServiceTest {
 	private ErrorMessageTransformer errorMessageTransformer;
 	@Mock
 	private ImplementationResolver<ReferralRequestDTOTransformer> implementationResolver;
+	@Mock
+	private QuestionnaireOptionValueTransformer optionValueTransformer;
 	@Mock
 	private ReferralRequestDTOOneOneTransformer referralRequestVOneOneTransformer;
 	@Mock
@@ -109,17 +113,24 @@ public class ResponseServiceTest {
 	//TODO: tested method should split for more efficient testing
 	public void shouldReturnResultWithQuestionnaire() {
 		CdssResult emptyResult = new CdssResult();
+		QuestionnaireItemOptionComponent option1 = new QuestionnaireItemOptionComponent()
+				.setValue(new Coding("optionSys", "optionCode", "optionDisplay"));
+		QuestionnaireItemOptionComponent option2 = new QuestionnaireItemOptionComponent()
+				.setValue(new Coding("optionSys2", "optionCode2", "optionDisplay2"));
 		Questionnaire questionnaire = new Questionnaire()
 				.setStatus(PublicationStatus.ACTIVE)
 				.addItem(new QuestionnaireItemComponent()
 						.setLinkId("1")
 						.setType(QuestionnaireItemType.CHOICE)
 						.setText("Test question")
-						.addOption(new QuestionnaireItemOptionComponent()
-							.setValue(new Coding("optionSys", "optionCode", "optionDisplay")))
-						.addOption(new QuestionnaireItemOptionComponent()
-							.setValue(new Coding("optionSys2", "optionCode2", "optionDisplay2"))));
+						.addOption(option1)
+						.addOption(option2));
 		questionnaire.setId("1");
+
+		when(optionValueTransformer.transform(option1))
+				.thenReturn(new TriageOption("optionCode", "optionDisplay"));
+		when(optionValueTransformer.transform(option2))
+				.thenReturn(new TriageOption("optionCode2", "optionDisplay2"));
 
 		CdssResponseDTO response = responseService
 				.buildResponse(emptyResult, questionnaire, 5L, 1L);
@@ -333,22 +344,28 @@ public class ResponseServiceTest {
 		ReferralRequestDTO expectedReferral = ReferralRequestDTO.builder()
 				.description("Something")
 				.build();
+		QuestionnaireItemOptionComponent option1 = new QuestionnaireItemOptionComponent()
+				.setValue(new Coding("optionSys", "optionCode", "optionDisplay"));
+		QuestionnaireItemOptionComponent option2 = new QuestionnaireItemOptionComponent()
+				.setValue(new Coding("optionSys2", "optionCode2", "optionDisplay2"));
 		Questionnaire questionnaire = new Questionnaire()
 				.setStatus(PublicationStatus.ACTIVE)
 				.addItem(new QuestionnaireItemComponent()
 						.setLinkId("1")
 						.setType(QuestionnaireItemType.CHOICE)
 						.setText("Test question")
-						.addOption(new QuestionnaireItemOptionComponent()
-								.setValue(new Coding("optionSys", "optionCode", "optionDisplay")))
-						.addOption(new QuestionnaireItemOptionComponent()
-								.setValue(new Coding("optionSys2", "optionCode2", "optionDisplay2"))));
+						.addOption(option1)
+						.addOption(option2));
 		questionnaire.setId("1");
 
 		when(implementationResolver.resolve(CdsApiVersion.ONE_ONE))
 				.thenReturn(referralRequestVOneOneTransformer);
 		when(referralRequestVOneOneTransformer.transform(referralRequest))
 				.thenReturn(expectedReferral);
+		when(optionValueTransformer.transform(option1))
+				.thenReturn(new TriageOption("optionCode", "optionDisplay"));
+		when(optionValueTransformer.transform(option2))
+				.thenReturn(new TriageOption("optionCode2", "optionDisplay2"));
 
 		CdssResponseDTO response = responseService
 				.buildAmendResponse(resultWithQuestionnaire,
@@ -382,22 +399,28 @@ public class ResponseServiceTest {
 		ReferralRequestDTO expectedReferral = ReferralRequestDTO.builder()
 				.description("Something")
 				.build();
+		QuestionnaireItemOptionComponent option1 = new QuestionnaireItemOptionComponent()
+				.setValue(new Coding("optionSys", "optionCode", "optionDisplay"));
+		QuestionnaireItemOptionComponent option2 = new QuestionnaireItemOptionComponent()
+				.setValue(new Coding("optionSys2", "optionCode2", "optionDisplay2"));
 		Questionnaire questionnaire = new Questionnaire()
 				.setStatus(PublicationStatus.ACTIVE)
 				.addItem(new QuestionnaireItemComponent()
 						.setLinkId("1")
 						.setType(QuestionnaireItemType.CHOICE)
 						.setText("Test question")
-						.addOption(new QuestionnaireItemOptionComponent()
-								.setValue(new Coding("optionSys", "optionCode", "optionDisplay")))
-						.addOption(new QuestionnaireItemOptionComponent()
-								.setValue(new Coding("optionSys2", "optionCode2", "optionDisplay2"))));
+						.addOption(option1)
+						.addOption(option2));
 		questionnaire.setId("1");
 
 		when(implementationResolver.resolve(CdsApiVersion.TWO))
 				.thenReturn(referralRequestVTwoTransformer);
 		when(referralRequestVTwoTransformer.transform(referralRequest))
 				.thenReturn(expectedReferral);
+		when(optionValueTransformer.transform(option1))
+				.thenReturn(new TriageOption("optionCode", "optionDisplay"));
+		when(optionValueTransformer.transform(option2))
+				.thenReturn(new TriageOption("optionCode2", "optionDisplay2"));
 
 		CdssResponseDTO response = responseService
 				.buildAmendResponse(resultWithQuestionnaire,

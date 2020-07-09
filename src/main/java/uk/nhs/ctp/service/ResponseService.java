@@ -17,8 +17,6 @@ import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.OperationOutcomeFactory;
 import uk.nhs.ctp.SystemCode;
@@ -29,6 +27,7 @@ import uk.nhs.ctp.service.dto.ExtensionDTO;
 import uk.nhs.ctp.service.dto.TriageOption;
 import uk.nhs.ctp.service.dto.TriageQuestion;
 import uk.nhs.ctp.transform.ErrorMessageTransformer;
+import uk.nhs.ctp.transform.QuestionnaireOptionValueTransformer;
 import uk.nhs.ctp.transform.ReferralRequestDTOTransformer;
 import uk.nhs.ctp.utils.ImplementationResolver;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
@@ -37,10 +36,9 @@ import uk.nhs.ctp.utils.ResourceProviderUtils;
 @RequiredArgsConstructor
 public class ResponseService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ResponseService.class);
-
 	private final ErrorMessageTransformer errorMessageTransformer;
 	private final ImplementationResolver<ReferralRequestDTOTransformer> referralRequestTransformerResolver;
+	private final QuestionnaireOptionValueTransformer optionValueTransformer;
 
 	/**
 	 * Build response DTO with a summary of the CDSS response
@@ -194,21 +192,9 @@ public class ResponseService {
 					}
 				}
 
-				question.getOption().forEach(option -> {
-					try {
-						Coding optionCode = option.getValueCoding();
-						if (optionCode != null) {
-							if (option.getExtensionFirstRep().isEmpty()) {
-								triageQuestion.addOption(optionCode.getCode(), optionCode.getDisplay());
-							} else {
-								triageQuestion.addOption(optionCode.getCode(), optionCode.getDisplay(),
-										option.getExtensionFirstRep());
-							}
-						}
-					} catch (FHIRException e) {
-						LOG.error("Could not get value coding", e);
-					}
-				});
+				question.getOption().stream()
+						.map(optionValueTransformer::transform)
+						.forEach(triageQuestion::addOption);
 				triageQuestions.add(triageQuestion);
 			}
 		}
@@ -246,21 +232,9 @@ public class ResponseService {
 				triageQuestion.setResponseAttachmentInitial(intial.getUrl());
 			}
 
-			question.getOption().forEach(option -> {
-				try {
-					Coding optionCode = option.getValueCoding();
-					if (optionCode != null) {
-						if (option.getExtensionFirstRep().isEmpty()) {
-							triageQuestion.addOption(optionCode.getCode(), optionCode.getDisplay());
-						} else {
-							triageQuestion.addOption(optionCode.getCode(), optionCode.getDisplay(),
-									option.getExtensionFirstRep());
-						}
-					}
-				} catch (FHIRException e) {
-					LOG.error("Could not get value coding", e);
-				}
-			});
+			question.getOption().stream()
+					.map(optionValueTransformer::transform)
+					.forEach(triageQuestion::addOption);
 			subQuestions.add(triageQuestion);
 		}
 		return subQuestions;
