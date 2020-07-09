@@ -192,15 +192,15 @@ public class QuestionnaireAnswerValueTransformerTest {
   }
 
   @Test
-  public void transformDefaultCoding() {
+  public void transformDefaultCoding_actuallyCoding() {
     TriageQuestion triageQuestion = new TriageQuestion();
     triageQuestion.setQuestionType(QuestionnaireItemType.URL.toString());
-    TriageOption response = new TriageOption("url", "Answer");
+    TriageOption response = new TriageOption("a-system", "url", "Answer");
     triageQuestion.setResponse(response);
 
     Type answer = answerValueTransformer.transform(triageQuestion);
 
-    Coding expected = new Coding(null, "url", "Answer");
+    Coding expected = new Coding("a-system", "url", "Answer");
 
     assertThat(answer, instanceOf(Coding.class));
     assertThat(answer, isFhir(expected));

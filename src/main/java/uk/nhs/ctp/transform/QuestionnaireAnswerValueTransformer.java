@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import java.sql.Date;
 import java.time.Instant;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.Transformer;
 import org.hl7.fhir.dstu3.model.BooleanType;
@@ -13,14 +14,18 @@ import org.hl7.fhir.dstu3.model.CoordinateResource;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.DecimalType;
+import org.hl7.fhir.dstu3.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.dstu3.model.IntegerType;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.TimeType;
 import org.hl7.fhir.dstu3.model.Type;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.service.attachment.AttachmentService;
+import uk.nhs.ctp.service.dto.TriageOption;
 import uk.nhs.ctp.service.dto.TriageQuestion;
 
 @Component
@@ -64,9 +69,29 @@ public class QuestionnaireAnswerValueTransformer implements Transformer<TriageQu
         }
       default: //Some coding types can have primitive type values (See CDSCT-64)
         checkNotNull(triageQuestion.getResponse(), "No response for question");
-        return new Coding()
-            .setCode(triageQuestion.getResponse().getCode())
-            .setDisplay(triageQuestion.getResponse().getDisplay());
+        return answerFromCoding(triageQuestion.getResponse());
+    }
+  }
+
+  private Type answerFromCoding(TriageOption response) {
+    return typeFromSystem(response.getSystem())
+        .map(type -> {
+          switch (type) {
+            case STRING: return new StringType(response.getCode());
+            case INTEGER: return new IntegerType(response.getCode());
+            case DATE: return new DateType(response.getCode());
+            case TIME: return new TimeType(response.getCode());
+            default:
+              return new Coding(response.getSystem(), response.getCode(), response.getDisplay());
+          }
+        }).orElse(new Coding(response.getSystem(), response.getCode(), response.getDisplay()));
+  }
+
+  private Optional<FHIRAllTypes> typeFromSystem(String system) {
+    try {
+      return Optional.of(FHIRAllTypes.fromCode(system));
+    } catch (FHIRException | NullPointerException ignored) {
+      return Optional.empty();
     }
   }
 
