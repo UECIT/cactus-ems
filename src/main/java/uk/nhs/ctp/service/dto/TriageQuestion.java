@@ -36,11 +36,8 @@ public class TriageQuestion {
 	private String enableWhenQuestionnaireId;
 	private boolean enableWhenAnswer;
 
-	public void addOption(String code, String display) {
-		if (this.options == null) {
-			this.options = new ArrayList<>();
-		}
-		this.options.add(new TriageOption(code, display));
+	public void addOption(String sys, String code, String display) {
+		addOption(new TriageOption(sys, code, display));
 	}
 
 	public void addOption(TriageOption option) {

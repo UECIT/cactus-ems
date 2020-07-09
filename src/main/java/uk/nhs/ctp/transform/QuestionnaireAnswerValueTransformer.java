@@ -62,7 +62,7 @@ public class QuestionnaireAnswerValueTransformer implements Transformer<TriageQu
               .setYCoordinate(new IntegerType(triageQuestion.getResponseCoordinates().getY()));
           return new Reference(coordinateResource);
         }
-      default:
+      default: //Some coding types can have primitive type values (See CDSCT-64)
         checkNotNull(triageQuestion.getResponse(), "No response for question");
         return new Coding()
             .setCode(triageQuestion.getResponse().getCode())

@@ -30,6 +30,7 @@ public class QuestionnaireOptionValueTransformer
       Coding optionCode = optionComponent.getValueCoding();
       option.setCode(optionCode.getCode());
       option.setDisplay(optionCode.getDisplay());
+      option.setSystem(optionCode.getSystem());
       return option;
     }
 
@@ -56,6 +57,7 @@ public class QuestionnaireOptionValueTransformer
   private void setValue(QuestionnaireItemOptionComponent comp, TriageOption option,
       Function<QuestionnaireItemOptionComponent, ? extends PrimitiveType<?>> typeExtract) {
     String valueAsString = typeExtract.apply(comp).getValueAsString();
+    option.setSystem(comp.getValue().fhirType()); // use fhir type as system (see CDSCT-64)
     option.setCode(valueAsString);
     option.setDisplay(valueAsString);
   }

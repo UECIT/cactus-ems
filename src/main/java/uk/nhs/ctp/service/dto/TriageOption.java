@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TriageOption {
 
+	private String system;
 	private String code;
 	private String display;
 	private TriageExtension extension;
@@ -17,6 +18,11 @@ public class TriageOption {
 		this.code = code;
 		this.display = display;
 		this.extension = null;
+	}
+
+	public TriageOption(String system, String code, String display) {
+		this(code, display);
+		this.system = system;
 	}
 
 }

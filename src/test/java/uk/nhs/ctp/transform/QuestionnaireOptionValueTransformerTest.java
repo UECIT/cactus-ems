@@ -36,7 +36,7 @@ public class QuestionnaireOptionValueTransformerTest {
 
     TriageOption option = optionValueTransformer.transform(optionComponent);
 
-    TriageOption expected = new TriageOption("code", "disp");
+    TriageOption expected = new TriageOption("sys", "code", "disp");
     assertThat(option, sameBeanAs(expected));
   }
 
@@ -48,7 +48,7 @@ public class QuestionnaireOptionValueTransformerTest {
 
     TriageOption option = optionValueTransformer.transform(optionComponent);
 
-    TriageOption expected = new TriageOption("code", "disp",
+    TriageOption expected = new TriageOption("sys", "code", "disp",
         new TriageExtension("some.extension.url", "extensionval"));
     assertThat(option, sameBeanAs(expected));
   }
@@ -68,7 +68,7 @@ public class QuestionnaireOptionValueTransformerTest {
 
     TriageOption option = optionValueTransformer.transform(optionComponent);
 
-    TriageOption expected = new TriageOption("some value", "some value");
+    TriageOption expected = new TriageOption("string", "some value", "some value");
     assertThat(option, sameBeanAs(expected));
   }
 
@@ -79,7 +79,7 @@ public class QuestionnaireOptionValueTransformerTest {
 
     TriageOption option = optionValueTransformer.transform(optionComponent);
 
-    TriageOption expected = new TriageOption("55", "55");
+    TriageOption expected = new TriageOption("integer", "55", "55");
     assertThat(option, sameBeanAs(expected));
   }
 
@@ -90,7 +90,7 @@ public class QuestionnaireOptionValueTransformerTest {
 
     TriageOption option = optionValueTransformer.transform(optionComponent);
 
-    TriageOption expected = new TriageOption("2011-06-02", "2011-06-02");
+    TriageOption expected = new TriageOption("date", "2011-06-02", "2011-06-02");
     assertThat(option, sameBeanAs(expected));
   }
 
@@ -101,7 +101,7 @@ public class QuestionnaireOptionValueTransformerTest {
 
     TriageOption option = optionValueTransformer.transform(optionComponent);
 
-    TriageOption expected = new TriageOption("19:55:13", "19:55:13");
+    TriageOption expected = new TriageOption("time", "19:55:13", "19:55:13");
     assertThat(option, sameBeanAs(expected));
   }
 }

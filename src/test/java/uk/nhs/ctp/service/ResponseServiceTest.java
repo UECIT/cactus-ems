@@ -128,9 +128,9 @@ public class ResponseServiceTest {
 		questionnaire.setId("1");
 
 		when(optionValueTransformer.transform(option1))
-				.thenReturn(new TriageOption("optionCode", "optionDisplay"));
+				.thenReturn(new TriageOption("sys", "optionCode", "optionDisplay"));
 		when(optionValueTransformer.transform(option2))
-				.thenReturn(new TriageOption("optionCode2", "optionDisplay2"));
+				.thenReturn(new TriageOption("sys2", "optionCode2", "optionDisplay2"));
 
 		CdssResponseDTO response = responseService
 				.buildResponse(emptyResult, questionnaire, 5L, 1L);
@@ -146,8 +146,8 @@ public class ResponseServiceTest {
 		expectedQuestion.setQuestionnaireId("1");
 		expectedQuestion.setQuestionId("1");
 		expectedQuestion.setQuestionType("CHOICE");
-		expectedQuestion.addOption("optionCode", "optionDisplay");
-		expectedQuestion.addOption("optionCode2", "optionDisplay2");
+		expectedQuestion.addOption("sys", "optionCode", "optionDisplay");
+		expectedQuestion.addOption("sys2", "optionCode2", "optionDisplay2");
 		expected.setTriageQuestions(Collections.singletonList(expectedQuestion));
 		expected.setCaseId(5L);
 		expected.setCdssSupplierId(1L);
@@ -363,9 +363,9 @@ public class ResponseServiceTest {
 		when(referralRequestVOneOneTransformer.transform(referralRequest))
 				.thenReturn(expectedReferral);
 		when(optionValueTransformer.transform(option1))
-				.thenReturn(new TriageOption("optionCode", "optionDisplay"));
+				.thenReturn(new TriageOption("sys", "optionCode", "optionDisplay"));
 		when(optionValueTransformer.transform(option2))
-				.thenReturn(new TriageOption("optionCode2", "optionDisplay2"));
+				.thenReturn(new TriageOption("sys2", "optionCode2", "optionDisplay2"));
 
 		CdssResponseDTO response = responseService
 				.buildAmendResponse(resultWithQuestionnaire,
@@ -381,8 +381,8 @@ public class ResponseServiceTest {
 		expectedQuestion.setQuestionnaireId("1");
 		expectedQuestion.setQuestionId("1");
 		expectedQuestion.setQuestionType("CHOICE");
-		expectedQuestion.addOption("optionCode", "optionDisplay");
-		expectedQuestion.addOption("optionCode2", "optionDisplay2");
+		expectedQuestion.addOption("sys", "optionCode", "optionDisplay");
+		expectedQuestion.addOption("sys2", "optionCode2", "optionDisplay2");
 		expected.setTriageQuestions(Collections.singletonList(expectedQuestion));
 		expected.setReferralRequest(expectedReferral);
 		expected.setCaseId(5L);
@@ -418,9 +418,9 @@ public class ResponseServiceTest {
 		when(referralRequestVTwoTransformer.transform(referralRequest))
 				.thenReturn(expectedReferral);
 		when(optionValueTransformer.transform(option1))
-				.thenReturn(new TriageOption("optionCode", "optionDisplay"));
+				.thenReturn(new TriageOption("sys", "optionCode", "optionDisplay"));
 		when(optionValueTransformer.transform(option2))
-				.thenReturn(new TriageOption("optionCode2", "optionDisplay2"));
+				.thenReturn(new TriageOption("sys2", "optionCode2", "optionDisplay2"));
 
 		CdssResponseDTO response = responseService
 				.buildAmendResponse(resultWithQuestionnaire,
@@ -436,8 +436,8 @@ public class ResponseServiceTest {
 		expectedQuestion.setQuestionnaireId("1");
 		expectedQuestion.setQuestionId("1");
 		expectedQuestion.setQuestionType("CHOICE");
-		expectedQuestion.addOption("optionCode", "optionDisplay");
-		expectedQuestion.addOption("optionCode2", "optionDisplay2");
+		expectedQuestion.addOption("sys", "optionCode", "optionDisplay");
+		expectedQuestion.addOption("sys2", "optionCode2", "optionDisplay2");
 		expected.setTriageQuestions(Collections.singletonList(expectedQuestion));
 		expected.setReferralRequest(expectedReferral);
 		expected.setCaseId(5L);
