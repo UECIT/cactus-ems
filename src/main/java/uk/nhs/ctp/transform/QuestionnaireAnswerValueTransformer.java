@@ -81,8 +81,9 @@ public class QuestionnaireAnswerValueTransformer implements Transformer<TriageQu
             case INTEGER: return new IntegerType(response.getCode());
             case DATE: return new DateType(response.getCode());
             case TIME: return new TimeType(response.getCode());
-            default:
+            case CODING:
               return new Coding(response.getSystem(), response.getCode(), response.getDisplay());
+            default: throw new FHIRException("Type: " + type + " not a valid answer type");
           }
         }).orElse(new Coding(response.getSystem(), response.getCode(), response.getDisplay()));
   }
