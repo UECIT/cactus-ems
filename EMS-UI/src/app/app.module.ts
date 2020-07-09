@@ -1,3 +1,4 @@
+import { AnswerService } from './service/answer.service';
 import { AuthService } from './service/auth.service';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
@@ -66,6 +67,7 @@ import { EmsSupplierComponent, EditEmsDialog } from './supplier-managment/ems-su
 import { EmsService } from './service/ems.service';
 import { ReportSearchDialogComponent } from './main/report-search-dialog/report-search-dialog.component';
 import { ValidationReportComponent } from './validation-report/validation-report.component';
+import { ImagemapQuestionComponent } from './triage/questionnaire/question-types/imagemap-question/imagemap-question.component';
 
 export function hljsLanguages() {
   return [
@@ -115,7 +117,8 @@ export function hljsLanguages() {
     EmsSupplierComponent,
     EditEmsDialog,
     ReportSearchDialogComponent,
-    ValidationReportComponent
+    ValidationReportComponent,
+    ImagemapQuestionComponent,
   ],
   entryComponents: [
     SwitchSupplierDialogComponent, 
@@ -162,6 +165,7 @@ export function hljsLanguages() {
     ReportService,
     EnvironmentService,
     AuthService,
+    AnswerService,
     {provide: MAT_DATE_LOCALE, useValue: 'en-GB'}],
   bootstrap: [AppComponent]
 })

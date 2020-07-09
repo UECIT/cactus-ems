@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.SystemConstants;
@@ -43,6 +44,7 @@ public class CdssService {
   private final FhirContext fhirContext;
   private final TokenAuthenticationService tokenAuthenticationService;
   private final CdssSupplierDTOTransformer cdssTransformer;
+  private final RestTemplate restTemplate;
 
   /**
    * Sends request to CDSS Supplier (ServiceDefintion $evaluate).
@@ -83,6 +85,13 @@ public class CdssService {
                 .execute(),
         baseUrl
     );
+  }
+
+  public byte[] getImage(Long cdssSupplierId, String imageId) {
+    //TODO: CDSCT-233 Flimsy: imageId will be a url for 2.0 to an unauthed server or a 'binary' fhir resource
+    String url = getBaseUrl(cdssSupplierId).replace("/fhir", "/image/") + imageId;
+    return RetryUtils.retry(
+        () -> restTemplate.getForObject(url, byte[].class), url);
   }
 
   /**

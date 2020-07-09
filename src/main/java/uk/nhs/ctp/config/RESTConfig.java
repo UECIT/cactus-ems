@@ -1,5 +1,6 @@
 package uk.nhs.ctp.config;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.boot.web.client.RestTemplateCustomizer;
@@ -9,8 +10,6 @@ import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
