@@ -35,19 +35,19 @@ public class QuestionnaireOptionValueTransformer
     }
 
     //non-code types are mangled into coding-like objects for display on the UI
-    else if (optionComponent.hasValueStringType()) {
+    if (optionComponent.hasValueStringType()) {
       setValue(optionComponent, option, QuestionnaireItemOptionComponent::getValueStringType);
       return option;
     }
-    else if (optionComponent.hasValueIntegerType()) {
+    if (optionComponent.hasValueIntegerType()) {
       setValue(optionComponent, option, QuestionnaireItemOptionComponent::getValueIntegerType);
       return option;
     }
-    else if (optionComponent.hasValueDateType()) {
+    if (optionComponent.hasValueDateType()) {
       setValue(optionComponent, option, QuestionnaireItemOptionComponent::getValueDateType);
       return option;
     }
-    else if (optionComponent.hasValueTimeType()) {
+    if (optionComponent.hasValueTimeType()) {
       setValue(optionComponent, option, QuestionnaireItemOptionComponent::getValueTimeType);
       return option;
     }
