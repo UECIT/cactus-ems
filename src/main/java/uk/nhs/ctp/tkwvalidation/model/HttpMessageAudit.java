@@ -1,4 +1,4 @@
-package uk.nhs.ctp.tkwvalidation.models;
+package uk.nhs.ctp.tkwvalidation.model;
 
 import java.net.URI;
 import java.time.Instant;

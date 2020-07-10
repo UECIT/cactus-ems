@@ -146,22 +146,15 @@ public class ReportService {
     ReportsDTO reportsDTO = ReportsDTO.builder()
         .contentType(ContentType.HTML)
         .reportType(ReportType.VALIDATION)
-        .request(auditDispatcher.getValidationUrl())
+        .request(validationService.getValidationUrl())
         .build();
 
     var caseId = new IdType(encounterRef).getIdPart();
     var audits = auditFinder.findAllEmsEncountersByCaseId(caseId);
 
-    byte[] zipData;
     try {
-      zipData = validationService.zipAudits(audits, OperationType.ENCOUNTER);
-    } catch (IOException e) {
-      reportsDTO.setResponse("Creating Reports: Unable to create zip file: " + e.getMessage());
+      reportsDTO.setResponse(validationService.validateAudits(audits, OperationType.ENCOUNTER, ""));
       return reportsDTO;
-    }
-
-    try {
-      auditDispatcher.dispatchToTkw(zipData);
     } catch (DataFormatException e) {
       reportsDTO.setResponse("Error parsing response");
       return reportsDTO;
@@ -171,9 +164,10 @@ public class ReportService {
     } catch (ResourceAccessException e) {
       reportsDTO.setResponse("Creating Reports: Unable to contact validation service: " + e.getMessage());
       return reportsDTO;
+    } catch (IOException e) {
+      reportsDTO.setResponse("Creating Reports: Unable to create zip file: " + e.getMessage());
+      return reportsDTO;
     }
-
-    return reportsDTO;
   }
 
 }

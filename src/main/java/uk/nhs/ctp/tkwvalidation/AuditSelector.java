@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMethod;
 import uk.nhs.ctp.audit.model.AuditSession;
 import uk.nhs.ctp.auditFinder.model.OperationType;
-import uk.nhs.ctp.tkwvalidation.models.HttpMessageAudit;
+import uk.nhs.ctp.tkwvalidation.model.HttpMessageAudit;
 
 @Component
 public class AuditSelector {

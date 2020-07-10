@@ -24,7 +24,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import uk.nhs.ctp.audit.model.AuditEntry;
 import uk.nhs.ctp.audit.model.AuditSession;
 import uk.nhs.ctp.auditFinder.model.OperationType;
-import uk.nhs.ctp.tkwvalidation.models.HttpMessageAudit;
+import uk.nhs.ctp.tkwvalidation.model.HttpMessageAudit;
 import uk.nhs.ctp.tkwvalidation.rules.AuditValidationRule;
 
 @RunWith(MockitoJUnitRunner.class)
