@@ -20,7 +20,9 @@ import org.hl7.fhir.dstu3.model.IntegerType;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.TimeType;
 import org.hl7.fhir.dstu3.model.Type;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -192,10 +194,10 @@ public class QuestionnaireAnswerValueTransformerTest {
   }
 
   @Test
-  public void transformDefaultCoding() {
+  public void transformDefaultCoding_noSystem() {
     TriageQuestion triageQuestion = new TriageQuestion();
     triageQuestion.setQuestionType(QuestionnaireItemType.URL.toString());
-    TriageOption response = new TriageOption("url", "Answer");
+    TriageOption response = new TriageOption(null, "url", "Answer");
     triageQuestion.setResponse(response);
 
     Type answer = answerValueTransformer.transform(triageQuestion);
@@ -205,6 +207,97 @@ public class QuestionnaireAnswerValueTransformerTest {
     assertThat(answer, instanceOf(Coding.class));
     assertThat(answer, isFhir(expected));
     verifyZeroInteractions(attachmentService);
+  }
+
+  @Test
+  public void transformDefaultCoding_actuallyCoding() {
+    TriageQuestion triageQuestion = new TriageQuestion();
+    triageQuestion.setQuestionType(QuestionnaireItemType.URL.toString());
+    TriageOption response = new TriageOption("a-system", "url", "Answer");
+    triageQuestion.setResponse(response);
+
+    Type answer = answerValueTransformer.transform(triageQuestion);
+
+    Coding expected = new Coding("a-system", "url", "Answer");
+
+    assertThat(answer, instanceOf(Coding.class));
+    assertThat(answer, isFhir(expected));
+    verifyZeroInteractions(attachmentService);
+  }
+
+  @Test
+  public void transformDefaultCoding_actuallyString() {
+    TriageQuestion triageQuestion = new TriageQuestion();
+    triageQuestion.setQuestionType(QuestionnaireItemType.URL.toString());
+    TriageOption response = new TriageOption("string", "string-value", "string-value");
+    triageQuestion.setResponse(response);
+
+    Type answer = answerValueTransformer.transform(triageQuestion);
+
+    StringType expected = new StringType("string-value");
+
+    assertThat(answer, instanceOf(StringType.class));
+    assertThat(answer, isFhir(expected));
+    verifyZeroInteractions(attachmentService);
+  }
+
+  @Test
+  public void transformDefaultCoding_actuallyInt() {
+    TriageQuestion triageQuestion = new TriageQuestion();
+    triageQuestion.setQuestionType(QuestionnaireItemType.URL.toString());
+    TriageOption response = new TriageOption("integer", "66", "66");
+    triageQuestion.setResponse(response);
+
+    Type answer = answerValueTransformer.transform(triageQuestion);
+
+    IntegerType expected = new IntegerType(66);
+
+    assertThat(answer, instanceOf(IntegerType.class));
+    assertThat(answer, isFhir(expected));
+    verifyZeroInteractions(attachmentService);
+  }
+
+  @Test
+  public void transformDefaultCoding_actuallyDate() {
+    TriageQuestion triageQuestion = new TriageQuestion();
+    triageQuestion.setQuestionType(QuestionnaireItemType.URL.toString());
+    TriageOption response = new TriageOption("date", "2011-04-06", "2011-04-06");
+    triageQuestion.setResponse(response);
+
+    Type answer = answerValueTransformer.transform(triageQuestion);
+
+    DateType expected = new DateType("2011-04-06");
+
+    assertThat(answer, instanceOf(DateType.class));
+    assertThat(answer, isFhir(expected));
+    verifyZeroInteractions(attachmentService);
+  }
+
+  @Test
+  public void transformDefaultCoding_actuallyTime() {
+    TriageQuestion triageQuestion = new TriageQuestion();
+    triageQuestion.setQuestionType(QuestionnaireItemType.URL.toString());
+    TriageOption response = new TriageOption("time", "07:16:59", "07:16:59");
+    triageQuestion.setResponse(response);
+
+    Type answer = answerValueTransformer.transform(triageQuestion);
+
+    TimeType expected = new TimeType("07:16:59");
+
+    assertThat(answer, instanceOf(TimeType.class));
+    assertThat(answer, isFhir(expected));
+    verifyZeroInteractions(attachmentService);
+  }
+
+  @Test
+  public void transformDefaultCoding_invalidFhirSystemThrows() {
+    TriageQuestion triageQuestion = new TriageQuestion();
+    triageQuestion.setQuestionType(QuestionnaireItemType.URL.toString());
+    TriageOption response = new TriageOption("Patient", "code", "John Smith");
+    triageQuestion.setResponse(response);
+
+    expectedException.expect(FHIRException.class);
+    answerValueTransformer.transform(triageQuestion);
   }
 
   @Test

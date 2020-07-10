@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
-import org.hl7.fhir.dstu3.model.Extension;
 
 @Data
 public class TriageQuestion {
@@ -13,7 +12,7 @@ public class TriageQuestion {
 	private String questionnaireId;
 	private String question;
 	private String questionId;
-	private List<TriageOption> options;
+	private List<TriageOption> options = new ArrayList<>();
 	private boolean repeats;
 	private boolean required;
 	private String questionType;
@@ -37,25 +36,14 @@ public class TriageQuestion {
 	private String enableWhenQuestionnaireId;
 	private boolean enableWhenAnswer;
 
-	public List<TriageOption> getOptions() {
-		if (this.options == null) {
-			this.options = new ArrayList<>();
-		}
-		return options;
+	public void addOption(String sys, String code, String display) {
+		addOption(new TriageOption(sys, code, display));
 	}
 
-	public void addOption(String code, String display) {
+	public void addOption(TriageOption option) {
 		if (this.options == null) {
 			this.options = new ArrayList<>();
 		}
-		this.options.add(new TriageOption(code, display));
-	}
-
-	public void addOption(String code, String display, Extension extension) {
-		if (this.options == null) {
-			this.options = new ArrayList<>();
-		}
-		this.options.add(new TriageOption(code, display,
-				new TriageExtension(extension.getUrl(), extension.getValue().primitiveValue())));
+		this.options.add(option);
 	}
 }
