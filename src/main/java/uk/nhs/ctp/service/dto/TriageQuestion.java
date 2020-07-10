@@ -12,7 +12,7 @@ public class TriageQuestion {
 	private String questionnaireId;
 	private String question;
 	private String questionId;
-	private List<TriageOption> options;
+	private List<TriageOption> options = new ArrayList<>();
 	private boolean repeats;
 	private boolean required;
 	private String questionType;
