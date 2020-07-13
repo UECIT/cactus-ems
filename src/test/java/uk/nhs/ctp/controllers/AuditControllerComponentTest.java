@@ -39,6 +39,9 @@ import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.auditFinder.ElasticSearchClient;
 import uk.nhs.ctp.auditFinder.model.AuditValidationRequest;
 import uk.nhs.ctp.auditFinder.model.OperationType;
+import uk.nhs.ctp.entities.CdssSupplier;
+import uk.nhs.ctp.enums.CdsApiVersion;
+import uk.nhs.ctp.repos.CdssSupplierRepository;
 import uk.nhs.ctp.testhelper.AuditUnzipper.ZippedEntry;
 import uk.nhs.ctp.tkwvalidation.AlternativeRestTemplate;
 
@@ -60,6 +63,9 @@ public class AuditControllerComponentTest {
 
   @Autowired
   private AuditController auditController;
+
+  @Autowired
+  private CdssSupplierRepository cdssSupplierRepository;
 
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
@@ -97,6 +103,7 @@ public class AuditControllerComponentTest {
   public void validate_withCaseId_shouldSendEncounterAudits() throws IOException {
     var request = new AuditValidationRequest();
     request.setCaseId("validCaseId");
+    request.setInstanceBaseUrl("http://existing.cdss/supplier");
     request.setSearchAuditId(null);
     request.setType(OperationType.ENCOUNTER);
 
@@ -104,6 +111,12 @@ public class AuditControllerComponentTest {
         .thenReturn(encounterSearchHits(getClass().getClassLoader()));
     when(restTemplate.exchange(isA(RequestEntity.class)))
         .thenReturn(ResponseEntity.ok(VALIDATION_RESPONSE));
+
+    var selectedCdss = new CdssSupplier();
+    selectedCdss.setName("selectedCdss");
+    selectedCdss.setBaseUrl("http://existing.cdss/supplier");
+    selectedCdss.setSupportedVersion(CdsApiVersion.ONE_ONE);
+    cdssSupplierRepository.saveAndFlush(selectedCdss);
 
     var result = auditController.validate(request);
 
@@ -143,6 +156,7 @@ public class AuditControllerComponentTest {
   public void validate_withSearchAuditId_shouldSendSearchAudits() throws IOException {
     var request = new AuditValidationRequest();
     request.setCaseId(null);
+    request.setInstanceBaseUrl("http://non-existing.cdss/supplier");
     request.setSearchAuditId("validSearchAuditId");
     request.setType(OperationType.SERVICE_SEARCH);
 

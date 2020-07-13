@@ -5,17 +5,24 @@ import static java.util.Comparator.comparing;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.audit.model.AuditSession;
 import uk.nhs.ctp.auditFinder.model.OperationType;
+import uk.nhs.ctp.entities.CdssSupplier;
+import uk.nhs.ctp.enums.CdsApiVersion;
+import uk.nhs.ctp.service.CdssSupplierService;
 import uk.nhs.ctp.tkwvalidation.model.AuditMetadata;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class AuditMetadataCollector {
   private static final String SUPPLIER_ID = "supplierId";
   private static final String CASE_ID = "caseId";
+
+  private final CdssSupplierService cdssSupplierService;
 
   public AuditMetadata collect(
       List<AuditSession> audits,
@@ -30,7 +37,11 @@ public class AuditMetadataCollector {
     }
 
     metadataBuilder.supplierId(getSingleProperty(audits, SUPPLIER_ID));
-    // TODO: get api version
+
+    var apiVersion = cdssSupplierService.findCdssSupplierByBaseUrl(selectedServiceEndpoint)
+        .map(CdssSupplier::getSupportedVersion)
+        .orElse(CdsApiVersion.TWO);
+    metadataBuilder.apiVersion(apiVersion);
 
     switch (operationType) {
       case ENCOUNTER:
