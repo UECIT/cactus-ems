@@ -3,10 +3,15 @@ package uk.nhs.ctp.testhelper.matchers;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.model.CoordinateResource;
 import org.hl7.fhir.dstu3.model.Element;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.PrimitiveType;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -35,6 +40,32 @@ public class FhirMatchers {
     return new FunctionMatcher<>(
         actual -> actual.equalsDeep(expected),
         expected.toString());
+  }
+
+  @SafeVarargs
+  public static Matcher<Parameters> isParametersContaining(
+      Matcher<ParametersParameterComponent>... matchers) {
+    return new FunctionMatcher<>(
+        parameters -> Matchers.contains(matchers).matches(parameters.getParameter()),
+        "is a Parameters resource");
+  }
+
+  public static Matcher<ParametersParameterComponent> isParameter(String name, Resource value) {
+    return new FunctionMatcher<>(
+        parameter -> name.equals(parameter.getName()) && value.equalsDeep(parameter.getResource()),
+        "is Parameter with name " + name);
+  }
+
+  public static Matcher<ParametersParameterComponent> isParameter(String name, Type value) {
+    return new FunctionMatcher<>(
+        parameter -> name.equals(parameter.getName()) && value.equalsDeep(parameter.getValue()),
+        "is parameter with type = " + value);
+  }
+
+  public static Matcher<ParametersParameterComponent> isParameter(String name, Matcher<?> valueMatcher) {
+    return new FunctionMatcher<>(
+        parameter -> name.equals(parameter.getName()) && valueMatcher.matches(parameter.getValue()),
+        "value matching given matcher");
   }
 
 }

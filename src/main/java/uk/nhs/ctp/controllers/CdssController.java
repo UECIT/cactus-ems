@@ -2,6 +2,7 @@ package uk.nhs.ctp.controllers;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.binary.Base64;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.service.CdssService;
 import uk.nhs.ctp.service.CdssSupplierService;
-import uk.nhs.ctp.service.CdssValidityService;
+import uk.nhs.ctp.service.isvalid.CdssValidityService;
 import uk.nhs.ctp.service.dto.CdssSupplierDTO;
 import uk.nhs.ctp.service.dto.NewCdssSupplierDTO;
 import uk.nhs.ctp.service.dto.ServiceDefinitionDTO;
@@ -68,10 +69,11 @@ public class CdssController {
 
   /**
    * Invoke $isValid on all registered cdss instances for the supplier for the given patient
+   * @return
    */
   @PostMapping(path = "/isValid")
-  public void invokeIsValid(@RequestBody String patientId) {
-    cdssValidityService.checkValidity(patientId);
+  public Map<String, Boolean> invokeIsValid(@RequestBody String patientId) {
+    return cdssValidityService.checkValidity(patientId);
   }
 
   /**
