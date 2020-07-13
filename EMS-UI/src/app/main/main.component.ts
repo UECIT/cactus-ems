@@ -295,6 +295,7 @@ export class MainComponent implements OnInit {
       const request = new SelectService();
       if (this.selectedPatient) {
         request.patientId = this.selectedPatient.id;
+      // this.triageService.invokeIsValid(request.patientId);
       }
       const settings: Settings = this.sessionStorage['settings'];
       request.settings = settings;

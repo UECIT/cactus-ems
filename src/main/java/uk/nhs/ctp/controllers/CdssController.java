@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.service.CdssService;
 import uk.nhs.ctp.service.CdssSupplierService;
+import uk.nhs.ctp.service.CdssValidityService;
 import uk.nhs.ctp.service.dto.CdssSupplierDTO;
 import uk.nhs.ctp.service.dto.NewCdssSupplierDTO;
 import uk.nhs.ctp.service.dto.ServiceDefinitionDTO;
@@ -35,6 +36,7 @@ public class CdssController {
 
   private final CdssSupplierService cdssSupplierService;
   private final CdssService cdssService;
+  private final CdssValidityService cdssValidityService;
 
   private final FhirContext fhirContext;
 
@@ -61,6 +63,15 @@ public class CdssController {
     CdssSupplierDTO cdssSupplierDTO = cdssService
         .queryServiceDefinitions(cdssSupplier, SearchParameters.builder().build());
     return cdssSupplierDTO.getServiceDefinitions();
+  }
+
+
+  /**
+   * Invoke $isValid on all registered cdss instances for the supplier for the given patient
+   */
+  @PostMapping(path = "/isValid")
+  public void invokeIsValid(@RequestBody String patientId) {
+    cdssValidityService.checkValidity(patientId);
   }
 
   /**
