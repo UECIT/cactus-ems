@@ -24,13 +24,19 @@ public class ServiceSearchAuditValidationRuleTest {
   }
 
   @Test
-  public void ensure_withMoreThan1ServiceSearchAuditEntry_shouldFail() {
+  public void ensure_withMoreThan1ServiceSearchAuditEntry_shouldPass() {
     var audits = List.of(AuditSession.builder()
         .entry(AuditEntry.builder().build())
         .entry(AuditEntry.builder().build())
         .build());
 
-    expectedException.expect(UnsupportedOperationException.class);
+    rule.ensure(audits);
+  }
+
+  @Test
+  public void ensure_with0ServiceSearchAuditEntry_shouldPass() {
+    var audits = List.of(AuditSession.builder().build());
+
     rule.ensure(audits);
   }
 

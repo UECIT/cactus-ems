@@ -1,15 +1,19 @@
 package uk.nhs.ctp.tkwvalidation.rules;
 
 import java.util.List;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.audit.model.AuditSession;
+import uk.nhs.ctp.auditFinder.model.OperationType;
 
 @Component
-@Qualifier("encounter") // OperationType.ENCOUNTER.getName()
 public class EncounterAuditValidationRule implements AuditValidationRule {
 
   private static final String CASE_ID = "caseId";
+
+  @Override
+  public OperationType getSupportedType() {
+    return OperationType.ENCOUNTER;
+  }
 
   @Override
   public void ensure(List<AuditSession> audits) {

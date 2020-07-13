@@ -1,0 +1,64 @@
+package uk.nhs.ctp.tkwvalidation;
+
+import static com.shazam.shazamcrest.matcher.Matchers.sameBeanAs;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.time.Instant;
+import java.util.Collections;
+import java.util.List;
+import org.junit.Test;
+import uk.nhs.ctp.audit.model.AuditSession;
+import uk.nhs.ctp.auditFinder.model.OperationType;
+import uk.nhs.ctp.tkwvalidation.model.AuditMetadata;
+
+public class AuditMetadataCollectorTest {
+  private static final Instant CREATED_AT_1 = Instant.parse("2019-06-05T09:12:20Z");
+  private static final Instant CREATED_AT_2 = Instant.parse("2020-07-06T10:23:31Z");
+
+  private final AuditMetadataCollector metadataCollector = new AuditMetadataCollector();
+
+  @Test
+  public void collect_withNoAudits_shouldReturnBasicMetadata() {
+    var actualMetadata = metadataCollector.collect(
+        Collections.emptyList(),
+        OperationType.ENCOUNTER,
+        "validEndpoint");
+
+    var expectedMetadata = AuditMetadata.builder()
+        .interactionType(OperationType.ENCOUNTER)
+        .serviceEndpoint("validEndpoint")
+        .build();
+
+    assertThat(actualMetadata, sameBeanAs(expectedMetadata));
+  }
+
+  @Test
+  public void collect_withAudits_shouldReturnFullMetadata() {
+    var audits = List.of(
+        AuditSession.builder()
+            .createdDate(CREATED_AT_2)
+            .additionalProperty("supplierId", "validSupplierId")
+            .additionalProperty("caseId", "validCaseId")
+            .build(),
+        AuditSession.builder()
+            .createdDate(CREATED_AT_1)
+            .additionalProperty("supplierId", "validSupplierId")
+            .additionalProperty("caseId", "validCaseId")
+            .build());
+
+    var actualMetadata = metadataCollector.collect(
+        audits,
+        OperationType.ENCOUNTER,
+        "validEndpoint");
+
+    var expectedMetadata = AuditMetadata.builder()
+        .interactionType(OperationType.ENCOUNTER)
+        .serviceEndpoint("validEndpoint")
+        .supplierId("validSupplierId")
+        .interactionId("validCaseId")
+        .interactionDate(CREATED_AT_1)
+        .build();
+
+    assertThat(actualMetadata, sameBeanAs(expectedMetadata));
+  }
+}

@@ -21,14 +21,15 @@ public class AuditMetadataCollector {
       List<AuditSession> audits,
       OperationType operationType,
       String selectedServiceEndpoint) {
-    var metadataBuilder = AuditMetadata.builder().interactionType(operationType);
+    var metadataBuilder = AuditMetadata.builder()
+        .interactionType(operationType)
+        .serviceEndpoint(selectedServiceEndpoint);
     if (audits.isEmpty()) {
       log.warn("Cannot infer audit metadata from 0 audits");
       return metadataBuilder.build();
     }
 
     metadataBuilder.supplierId(getSingleProperty(audits, SUPPLIER_ID));
-    metadataBuilder.serviceEndpoint(selectedServiceEndpoint);
     // TODO: get api version
 
     switch (operationType) {
