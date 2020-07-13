@@ -6,8 +6,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -15,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.Base64;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -29,7 +28,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.client.RestTemplate;
 import uk.nhs.ctp.auditFinder.model.OperationType;
 import uk.nhs.ctp.enums.CdsApiVersion;
 import uk.nhs.ctp.tkwvalidation.model.AuditMetadata;
@@ -43,7 +41,7 @@ public class AuditDispatcherTest {
   FhirContext fhirContext;
 
   @Mock
-  RestTemplate restTemplate;
+  AlternativeRestTemplate restTemplate;
 
   @InjectMocks
   AuditDispatcher auditDispatcher;
@@ -62,7 +60,7 @@ public class AuditDispatcherTest {
   }
 
   @Test
-  public void dispatchToTkw() {
+  public void dispatchToTkw() throws IOException {
     ReflectionTestUtils.setField(auditDispatcher, "reportValidationServer", "http://validServerUrl.com");
     var fixedDate = Instant.parse("2020-07-06T10:23:31Z");
 
@@ -82,7 +80,7 @@ public class AuditDispatcherTest {
     var outcome = new OperationOutcome();
     outcome.addIssue(issue);
 
-    when(restTemplate.exchange(isA(RequestEntity.class), argThat(sameInstance(String.class))))
+    when(restTemplate.exchange(isA(RequestEntity.class)))
         .thenReturn(ResponseEntity.ok("validResponse"));
     when(jsonParser.parseResource(OperationOutcome.class, "validResponse"))
         .thenReturn(outcome);
@@ -92,7 +90,7 @@ public class AuditDispatcherTest {
     assertThat(response, is("validDiagnosticsHtml"));
 
     var requestCaptor = ArgumentCaptor.forClass(RequestEntity.class);
-    verify(restTemplate).exchange(requestCaptor.capture(), argThat(sameInstance(String.class)));
+    verify(restTemplate).exchange(requestCaptor.capture());
     var request = requestCaptor.getValue();
 
     assertThat(request.getUrl().toString(), is("http://validServerUrl.com/$evaluate"));

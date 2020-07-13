@@ -3,10 +3,8 @@ package uk.nhs.ctp.controllers;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.sameInstance;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,19 +29,18 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.client.RestTemplate;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.auditFinder.ElasticSearchClient;
 import uk.nhs.ctp.auditFinder.model.AuditValidationRequest;
 import uk.nhs.ctp.auditFinder.model.OperationType;
 import uk.nhs.ctp.testhelper.AuditUnzipper.ZippedEntry;
+import uk.nhs.ctp.tkwvalidation.AlternativeRestTemplate;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -59,8 +56,7 @@ public class AuditControllerComponentTest {
   private TokenAuthenticationService authenticationService;
 
   @MockBean
-  @Qualifier("restTemplate")
-  private RestTemplate restTemplate;
+  private AlternativeRestTemplate restTemplate;
 
   @Autowired
   private AuditController auditController;
@@ -106,7 +102,7 @@ public class AuditControllerComponentTest {
 
     when(esClient.search(anyString(), any(SearchSourceBuilder.class)))
         .thenReturn(encounterSearchHits(getClass().getClassLoader()));
-    when(restTemplate.exchange(isA(RequestEntity.class), argThat(sameInstance(String.class))))
+    when(restTemplate.exchange(isA(RequestEntity.class)))
         .thenReturn(ResponseEntity.ok(VALIDATION_RESPONSE));
 
     var result = auditController.validate(request);
@@ -114,7 +110,7 @@ public class AuditControllerComponentTest {
     assertThat(result, is("validDiagnosticsHtml"));
 
     var requestCaptor = ArgumentCaptor.forClass(RequestEntity.class);
-    verify(restTemplate).exchange(requestCaptor.capture(), argThat(sameInstance(String.class)));
+    verify(restTemplate).exchange(requestCaptor.capture());
     var tkwRequest = requestCaptor.getValue();
 
     var decodedBytes = Base64.getDecoder().decode((byte[])tkwRequest.getBody());
@@ -152,7 +148,7 @@ public class AuditControllerComponentTest {
 
     when(esClient.search(anyString(), any(SearchSourceBuilder.class)))
         .thenReturn(serviceDefinitionSearchHits(getClass().getClassLoader()));
-    when(restTemplate.exchange(isA(RequestEntity.class), argThat(sameInstance(String.class))))
+    when(restTemplate.exchange(isA(RequestEntity.class)))
         .thenReturn(ResponseEntity.ok(VALIDATION_RESPONSE));
 
     var result = auditController.validate(request);
@@ -160,7 +156,7 @@ public class AuditControllerComponentTest {
     assertThat(result, is("validDiagnosticsHtml"));
 
     var requestCaptor = ArgumentCaptor.forClass(RequestEntity.class);
-    verify(restTemplate).exchange(requestCaptor.capture(), argThat(sameInstance(String.class)));
+    verify(restTemplate).exchange(requestCaptor.capture());
     var tkwRequest = requestCaptor.getValue();
 
     var decodedBytes = Base64.getDecoder().decode((byte[])tkwRequest.getBody());

@@ -1,6 +1,7 @@
 package uk.nhs.ctp.tkwvalidation;
 
 import ca.uhn.fhir.context.FhirContext;
+import java.io.IOException;
 import java.net.URI;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -15,7 +16,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 import uk.nhs.ctp.tkwvalidation.model.AuditMetadata;
 import uk.nhs.ctp.tkwvalidation.model.AuditMetadata.Headers;
 
@@ -24,7 +24,7 @@ import uk.nhs.ctp.tkwvalidation.model.AuditMetadata.Headers;
 @Slf4j
 public class AuditDispatcher {
   private final FhirContext fhirContext;
-  private final RestTemplate restTemplate;
+  private final AlternativeRestTemplate restTemplate;
 
   @Value("${reports.validation.server}")
   private String reportValidationServer;
@@ -33,7 +33,7 @@ public class AuditDispatcher {
     return reportValidationServer + "/$evaluate";
   }
 
-  public String dispatchToTkw(byte[] zipData, AuditMetadata zipMetadata) {
+  public String dispatchToTkw(byte[] zipData, AuditMetadata zipMetadata) throws IOException {
 
     var base64Zip = Base64.getEncoder().encode(zipData);
     var validatorUrl = URI.create(getValidationUrl());
@@ -54,7 +54,9 @@ public class AuditDispatcher {
         .header(Headers.SERVICE_ENDPOINT, zipMetadata.getServiceEndpoint())
         .body(base64Zip);
 
-    var response = restTemplate.exchange(request, String.class);
+    log.info("Sending validation request to TKW: {}", request);
+
+    var response = restTemplate.exchange(request);
     if (response.getStatusCode() != HttpStatus.ACCEPTED) {
       log.warn("Call to validation service on {} returned status {}, with message:\n{}",
           validatorUrl,
