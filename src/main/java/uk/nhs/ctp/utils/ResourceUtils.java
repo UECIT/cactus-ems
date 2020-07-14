@@ -14,8 +14,8 @@ public class ResourceUtils {
       if (reference.hasReferenceElement()) {
         return reference.getReferenceElement().getResourceType().equals(resourceType.toString());
       }
-      else if (reference.isResource()) {
-        return reference.getResource().getIdElement().getResourceType().equals(resourceType.toString());
+      else if (reference.getResource() != null) {
+        return reference.getResource().fhirType().equals(resourceType.toString());
       }
       else {
         return false;
