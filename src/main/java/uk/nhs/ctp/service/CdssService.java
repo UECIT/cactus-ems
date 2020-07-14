@@ -102,7 +102,7 @@ public class CdssService {
   public List<CdssSupplierDTO> queryServiceDefinitions(@NotNull SearchParameters parameters) {
     return cdssSupplierRepository
         .findAllBySupplierId(tokenAuthenticationService.requireSupplierId())
-        .stream() //TODO: More efficient in parallel NCTH-536
+        .stream() //TODO: More efficient in parallel CDSCT-41
         .map(supplier -> queryServiceDefinitions(supplier, parameters))
         .filter(Objects::nonNull)
         .filter(supplier -> !CollectionUtils.isEmpty(supplier.getServiceDefinitions()))

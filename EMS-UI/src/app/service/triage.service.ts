@@ -1,3 +1,4 @@
+import { AuthService } from './auth.service';
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable} from 'rxjs';
@@ -7,7 +8,6 @@ import {
   ProcessTriage,
   SelectService,
   CdssSupplier,
-  ServiceDefinition,
   HealthcareService,
   Case } from '../model';
 import {environment} from '../../environments/environment';
@@ -26,7 +26,10 @@ const httpOptions = {
 export class TriageService {
   launchTriage: LaunchTriage = new LaunchTriage();
 
-  constructor(private http: HttpClient, private sessionStorage: SessionStorage) {
+  constructor(
+    private http: HttpClient, 
+    private sessionStorage: SessionStorage,
+    private authService: AuthService) {
   }
 
   getQuestionnaire(patientId: string): Observable<Questionnaire> {
@@ -38,11 +41,10 @@ export class TriageService {
     this.launchTriage.settings = JSON.parse(sessionStorage['settings']);
     let encounterHandover = this.sessionStorage['encounterHandover'];
     this.launchTriage.encounterId = encounterHandover ? encounterHandover.encounterId : null;
-    if (this.sessionStorage['auth_token'] != null) {
-      httpOptions.headers = httpOptions.headers.set(
-          'Authorization',
-          this.sessionStorage['auth_token']
-      );
+
+    let authToken = this.authService.getAuthToken();
+    if (authToken) {
+      httpOptions.headers = httpOptions.headers.set('Authorization', authToken);
       const url = `${environment.EMS_API}/case/`;
       return this.http.post<Questionnaire>(
           url,
@@ -53,12 +55,10 @@ export class TriageService {
   }
 
   processTriage(triage: ProcessTriage, back: boolean) {
-    if (this.sessionStorage['auth_token'] != null) {
+    let authToken = this.authService.getAuthToken();
+    if (authToken) {
       triage.settings = JSON.parse(sessionStorage['settings']);
-      httpOptions.headers = httpOptions.headers.set(
-          'Authorization',
-          this.sessionStorage['auth_token']
-      );
+      httpOptions.headers = httpOptions.headers.set('Authorization', authToken);
       let url = ``;
       let triageItems = this.sessionStorage['triageItems'];
       if (back) {
@@ -80,11 +80,9 @@ export class TriageService {
   }
 
   async updateSelectedService(caseId: number, selectedService: HealthcareService) {
-    if (this.sessionStorage['auth_token'] != null) {
-      httpOptions.headers = httpOptions.headers.set(
-          'Authorization',
-          this.sessionStorage['auth_token']
-      );
+    let authToken = this.authService.getAuthToken();
+    if (authToken) {
+      httpOptions.headers = httpOptions.headers.set('Authorization', authToken);
       let url = `${environment.EMS_API}/case/selectedService`;
       let request = {
         caseId,
@@ -98,17 +96,24 @@ export class TriageService {
   }
 
   async selectServiceDefinitions(request: SelectService): Promise<CdssSupplier[]> {
-    if (this.sessionStorage['auth_token'] != null) {
-      httpOptions.headers = httpOptions.headers.set(
-          'Authorization',
-          this.sessionStorage['auth_token']
-      );
+    let authToken = this.authService.getAuthToken();
+    if (authToken) {
+      httpOptions.headers = httpOptions.headers.set('Authorization', authToken);
       const url = `${environment.EMS_API}/case/serviceDefinitions`;
       return this.http.post<CdssSupplier[]>(
           url,
           JSON.stringify(request),
           httpOptions
       ).toPromise();
+    }
+  }
+
+  invokeIsValid(patientId: string) {
+    let authToken = this.authService.getAuthToken();
+    if (authToken) {
+      httpOptions.headers = httpOptions.headers.set('Authorization', authToken);
+      const url = `${environment.EMS_API}/cdss/isValid`;
+      return this.http.post(url, patientId, httpOptions).toPromise();
     }
   }
 }
