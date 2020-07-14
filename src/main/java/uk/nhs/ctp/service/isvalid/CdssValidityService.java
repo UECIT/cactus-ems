@@ -1,9 +1,9 @@
 package uk.nhs.ctp.service.isvalid;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.dstu3.model.Identifier;
@@ -41,7 +41,7 @@ public class CdssValidityService {
       log.warn("GP {} for patient {} has no ODS code", gp.getId(), patient.getId());
       return Collections.emptyMap();
     }
-    var results = new HashMap<String, Boolean>();
+    var results = new ConcurrentHashMap<String, Boolean>();
     cdssSupplierRepository.findAllBySupplierId(authService.requireSupplierId()).stream()
         .parallel()
         .forEach(supplier -> {

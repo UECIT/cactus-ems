@@ -42,14 +42,14 @@ public class IsValidOperationService {
             .operation()
             .onType(ServiceDefinition.class)
             .named(IS_VALID)
-            .withParameters(isValidParameters(odsCode, patient.getBirthDate()))
+            .withParameters(buildIsValidParameters(odsCode, patient.getBirthDate()))
             .execute()
             .getParameterFirstRep()
             .getValue();
     return isValidResponse.booleanValue();
   }
 
-  private Parameters isValidParameters(Identifier odsCode, Date dateOfBirth) {
+  private Parameters buildIsValidParameters(Identifier odsCode, Date dateOfBirth) {
     return new Parameters()
         .addParameter(new ParametersParameterComponent()
             .setName(REQUEST_ID)
