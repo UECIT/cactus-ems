@@ -2,6 +2,7 @@ package uk.nhs.ctp.auditFinder.finder;
 
 import static com.google.common.collect.MoreCollectors.toOptional;
 import static java.util.stream.Collectors.toUnmodifiableList;
+import static uk.nhs.ctp.auditFinder.Constants.AUDIT_SUFFIX;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
@@ -37,8 +38,6 @@ public class AWSAuditFinder implements AuditFinder {
   private static final String CASE_ID_FIELD = "additionalProperties.caseId";
   private static final String OPERATION_FIELD = "additionalProperties.operation";
   private static final String REQUEST_ID_FIELD = "requestId.keyword";
-
-  private static final String AUDIT_SUFFIX = "-audit";
 
   private final ElasticSearchClient esClient;
   private final TokenAuthenticationService authenticationService;

@@ -3,6 +3,11 @@ package uk.nhs.ctp.auditFinder;
 import com.amazonaws.auth.AWS4Signer;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.google.common.base.Preconditions;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
@@ -10,16 +15,20 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.security.PutRoleMappingRequest;
+import org.elasticsearch.client.security.PutRoleMappingResponse;
+import org.elasticsearch.client.security.PutRoleRequest;
+import org.elasticsearch.client.security.PutRoleResponse;
+import org.elasticsearch.client.security.RefreshPolicy;
+import org.elasticsearch.client.security.support.expressiondsl.fields.FieldRoleMapperExpression;
+import org.elasticsearch.client.security.user.privileges.IndicesPrivileges;
+import org.elasticsearch.client.security.user.privileges.Role;
+import org.elasticsearch.client.security.user.privileges.Role.IndexPrivilegeName;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.regex.Pattern;
 
 @Component
 @Slf4j
@@ -70,5 +79,41 @@ public class ElasticSearchClient {
 
     var response = baseClient.search(request, RequestOptions.DEFAULT);
     return Arrays.asList(response.getHits().getHits());
+  }
+
+  public void mapRole(String supplierId, String username) throws IOException {
+    String roleName = supplierId + "_role";
+    Role supplierRole = Role.builder()
+        .name(roleName)
+        .indicesPrivileges(IndicesPrivileges.builder()
+            .privileges(IndexPrivilegeName.READ)
+            .indices(supplierId + "-*")
+            .build())
+        .build();
+    PutRoleRequest putRoleRequest = new PutRoleRequest(supplierRole, RefreshPolicy.NONE);
+    PutRoleResponse putRoleResponse = baseClient.security()
+        .putRole(putRoleRequest, RequestOptions.DEFAULT);
+
+    if (!putRoleResponse.isCreated()) {
+      log.error("Could not create role for supplier");
+      return;
+    }
+
+    PutRoleMappingRequest mappingRequest = new PutRoleMappingRequest(
+        roleName + "_mapping",
+        true,
+        Collections.singletonList(roleName),
+        Collections.emptyList(),
+        FieldRoleMapperExpression.ofUsername(username),
+        null,
+        RefreshPolicy.NONE
+    );
+
+    PutRoleMappingResponse putRoleMappingResponse = baseClient.security()
+        .putRoleMapping(mappingRequest, RequestOptions.DEFAULT);
+
+    if (!putRoleMappingResponse.isCreated()) {
+      log.error("Could not create role mapping for supplier");
+    }
   }
 }
