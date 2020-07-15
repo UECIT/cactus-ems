@@ -20,7 +20,7 @@ public class ElasticRestClientFactory {
 
   private static final String ES_SERVICE_NAME = "es";
   private static final Pattern AWS_ES_PATTERN =
-      Pattern.compile("https://[a-z0-9-]+\\.([a-z0-9-]+)\\.es\\.amazonaws\\.com(:\\d+?)");
+      Pattern.compile("https://[a-z0-9-]+\\.([a-z0-9-]+)\\.es\\.amazonaws\\.com(:\\d+)?");
 
   public RestHighLevelClient highLevelClient(String endpoint) {
     Preconditions.checkState(
