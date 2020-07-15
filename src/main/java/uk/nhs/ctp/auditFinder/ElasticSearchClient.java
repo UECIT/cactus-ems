@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.client.RequestOptions;
@@ -61,7 +62,7 @@ public class ElasticSearchClient {
     HttpHost host = new HttpHost(endpoint);
     HttpPut putRoleRequest = new HttpPut("_opendistro/_security/api/roles/" + roleName);
     putRoleRequest.setEntity(new ByteArrayEntity(objectMapper.writeValueAsBytes(roleRequest)));
-    client.execute(host, putRoleRequest);
+    client.execute(host, putRoleRequest, new BasicResponseHandler());
 
     PutRoleMappingRequest roleMappingRequest = PutRoleMappingRequest.builder()
         .user(username)
@@ -69,6 +70,6 @@ public class ElasticSearchClient {
 
     HttpPut putRoleMappingRequest = new HttpPut(" _opendistro/_security/api/rolesmapping/" + roleName);
     putRoleMappingRequest.setEntity(new ByteArrayEntity(objectMapper.writeValueAsBytes(roleMappingRequest)));
-    client.execute(host, putRoleMappingRequest);
+    client.execute(host, putRoleMappingRequest, new BasicResponseHandler());
   }
 }
