@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.auditFinder.ElasticSearchClient;
 import uk.nhs.ctp.auditFinder.role.PutRoleRequest.IndexPermissions;
-import uk.nhs.ctp.model.SupplierAccountDetails;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +25,7 @@ public class AWSElasticSearchRoleMapper implements RoleMapper {
   private static final String ROLE_SUFFIX = "_role";
 
   @Override
-  public void setupSupplierRoles(String supplierId, SupplierAccountDetails accountDetails) {
+  public void setupSupplierRoles(String supplierId, String username) {
 
     PutRoleRequest roleRequest = PutRoleRequest.builder()
         .indexPermission(IndexPermissions.builder()
@@ -35,17 +34,17 @@ public class AWSElasticSearchRoleMapper implements RoleMapper {
             .build())
         .build();
 
-    String username = COGNITO_PREXIX + userPool + accountDetails.getUsername();
+    String cognitoUser = COGNITO_PREXIX + userPool + "/" + username;
     String roleName = supplierId + ROLE_SUFFIX;
 
     PutRoleMappingRequest roleMappingRequest = PutRoleMappingRequest.builder()
-        .user(username)
+        .user(cognitoUser)
         .build();
 
     try{
       esClient.mapRole(roleName, roleRequest, roleMappingRequest);
     } catch (IOException e) {
-      log.error("Error occurred creating elasticsearch roles for user {}", accountDetails.getUsername(), e);
+      log.error("Error occurred creating elasticsearch roles for user {}", username, e);
       throw new RuntimeException(e.getMessage());
     }
   }

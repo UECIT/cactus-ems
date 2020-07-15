@@ -54,7 +54,7 @@ public class UserManagementServiceTest {
   private JWTHandler jwtHandler;
 
   @Mock
-  private RoleMapper roleMapper; //TODO: verify mock
+  private RoleMapper roleMapper;
 
   @InjectMocks
   private UserManagementService userManagementService;
@@ -105,6 +105,7 @@ public class UserManagementServiceTest {
     assertThat(returned, sameBeanAs(expected)
       .with("password", any(String.class)));
     verify(cognitoService).signUp("supplier_id", returned);
+    verify(roleMapper).setupSupplierRoles("supplier_id", returned.getUsername());
   }
 
   @Test
@@ -118,7 +119,7 @@ public class UserManagementServiceTest {
     expectedException.expect(EntityExistsException.class);
     userManagementService.createNewSupplierUser(request);
 
-    verifyZeroInteractions(cognitoService);
+    verifyZeroInteractions(cognitoService, roleMapper);
   }
 
   private NewUserDTO getTestUser() {

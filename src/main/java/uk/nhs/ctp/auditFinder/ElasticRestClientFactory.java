@@ -1,12 +1,13 @@
 package uk.nhs.ctp.auditFinder;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import com.amazonaws.auth.AWS4Signer;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.google.common.base.Preconditions;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -22,10 +23,11 @@ public class ElasticRestClientFactory {
   private static final Pattern AWS_ES_PATTERN =
       Pattern.compile("https://[a-z0-9-]+\\.([a-z0-9-]+)\\.es\\.amazonaws\\.com(:\\d+)?");
 
+  private static final String EMPTY_ENDPOINT_MESSAGE =
+      "Expected non-empty endpoint for ElasticSearch client";
+
   public RestHighLevelClient highLevelClient(String endpoint) {
-    Preconditions.checkState(
-        StringUtils.isNotEmpty(endpoint),
-        "Expected non-empty endpoint for ElasticSearch client");
+    Preconditions.checkState(isNotBlank(endpoint), EMPTY_ENDPOINT_MESSAGE);
 
     var baseClientBuilder = RestClient.builder(HttpHost.create(endpoint));
 
@@ -38,6 +40,8 @@ public class ElasticRestClientFactory {
   }
 
   public CloseableHttpClient httpClient(String endpoint) {
+    Preconditions.checkState(isNotBlank(endpoint), EMPTY_ENDPOINT_MESSAGE);
+
     HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
 
     interceptor(endpoint)

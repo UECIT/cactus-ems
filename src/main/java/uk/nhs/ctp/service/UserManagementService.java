@@ -98,7 +98,7 @@ public class UserManagementService {
           .build();
       // Create the user in cognito for ElasticSearch searching.
       cognitoService.signUp(supplierId, supplierAccountDetails);
-      roleMapper.setupSupplierRoles(supplierId, supplierAccountDetails);
+      roleMapper.setupSupplierRoles(supplierId, supplierAccountDetails.getUsername());
       return supplierAccountDetails;
     } catch (Exception e) {
       log.error("Error creating user: {}", supplierId);
