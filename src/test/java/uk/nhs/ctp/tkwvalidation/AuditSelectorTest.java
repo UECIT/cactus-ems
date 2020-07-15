@@ -16,7 +16,7 @@ import uk.nhs.ctp.audit.model.AuditEntry;
 import uk.nhs.ctp.audit.model.AuditSession;
 import uk.nhs.ctp.auditFinder.model.OperationType;
 import uk.nhs.ctp.testhelper.matchers.FunctionMatcher;
-import uk.nhs.ctp.tkwvalidation.model.HttpMessageAudit;
+import uk.nhs.ctp.tkwvalidation.model.FhirMessageAudit;
 
 public class AuditSelectorTest {
   private static final Instant CREATED_AT_1 = Instant.parse("2019-06-05T09:12:20Z");
@@ -167,7 +167,7 @@ public class AuditSelectorTest {
     ));
   }
 
-  private Matcher<HttpMessageAudit> isEntry(
+  private Matcher<FhirMessageAudit> isEntry(
       String path,
       String requestBody,
       String responseBody,

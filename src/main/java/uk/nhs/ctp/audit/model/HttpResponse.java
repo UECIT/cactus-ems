@@ -39,7 +39,7 @@ public class HttpResponse implements HttpExchange {
     }
   }
 
-  public static HttpResponse from(ContentCachingResponseWrapper responseWrapper) {
+  public static HttpResponse from(ContentCachingResponseWrapper responseWrapper, byte[] content) {
     Map<String, List<String>> headers = responseWrapper.getHeaderNames().stream()
         .collect(toMap(
             identity(),
@@ -49,7 +49,7 @@ public class HttpResponse implements HttpExchange {
     return HttpResponse.builder()
         .headers(headers)
         .status(responseWrapper.getStatus())
-        .body(responseWrapper.getContentAsByteArray())
+        .body(content)
         .build();
   }
 

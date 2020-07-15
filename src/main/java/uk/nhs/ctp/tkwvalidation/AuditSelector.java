@@ -12,17 +12,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMethod;
 import uk.nhs.ctp.audit.model.AuditSession;
 import uk.nhs.ctp.auditFinder.model.OperationType;
-import uk.nhs.ctp.tkwvalidation.model.HttpMessageAudit;
+import uk.nhs.ctp.tkwvalidation.model.FhirMessageAudit;
 
 @Component
 public class AuditSelector {
 
   private static final String CASE_ID = "caseId";
 
-  public List<HttpMessageAudit> selectAudits(
+  public List<FhirMessageAudit> selectAudits(
       Collection<AuditSession> audits,
       OperationType operationType) {
-    var zippableAudits = new ArrayList<HttpMessageAudit>();
+    var zippableAudits = new ArrayList<FhirMessageAudit>();
 
     for (var audit : audits) {
       var baseName = operationType == OperationType.SERVICE_SEARCH
@@ -30,23 +30,23 @@ public class AuditSelector {
           : "encounter" + audit.getAdditionalProperties().get(CASE_ID);
 
       if (isMethod(audit.getRequestMethod(), POST)) {
-        zippableAudits.add(HttpMessageAudit.from(audit, baseName, true));
+        zippableAudits.add(FhirMessageAudit.from(audit, baseName, true));
       }
       if (isMethod(audit.getRequestMethod(), GET)) {
-        zippableAudits.add(HttpMessageAudit.from(audit, baseName, false));
+        zippableAudits.add(FhirMessageAudit.from(audit, baseName, false));
       }
 
       for (var entry : audit.getEntries()) {
         if (isMethod(entry.getRequestMethod(), POST)) {
-          zippableAudits.add(HttpMessageAudit.from(entry, baseName, true));
+          zippableAudits.add(FhirMessageAudit.from(entry, baseName, true));
         }
         if (isMethod(entry.getRequestMethod(), GET)) {
-          zippableAudits.add(HttpMessageAudit.from(entry, baseName, false));
+          zippableAudits.add(FhirMessageAudit.from(entry, baseName, false));
         }
       }
     }
 
-    zippableAudits.sort(Comparator.comparing(HttpMessageAudit::getMoment));
+    zippableAudits.sort(Comparator.comparing(FhirMessageAudit::getMoment));
     return zippableAudits;
   }
 

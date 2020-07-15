@@ -20,7 +20,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.nhs.ctp.tkwvalidation.model.HttpMessageAudit;
+import uk.nhs.ctp.tkwvalidation.model.FhirMessageAudit;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AuditZipBuilderTest {
@@ -58,7 +58,7 @@ public class AuditZipBuilderTest {
     when(zipBuilder.buildAndCloseZip()).thenReturn(expectedZipData);
 
     var selectedAudits = Collections.singletonList(
-        HttpMessageAudit.builder()
+        FhirMessageAudit.builder()
             .filePath("path")
             .responseBody("responseBody1")
             .moment(CREATED_AT_1).build());
@@ -70,11 +70,11 @@ public class AuditZipBuilderTest {
   @Test
   public void zipAudits_shouldIncrementSequenceCounts() throws IOException {
     var selectedAudits = List.of(
-        HttpMessageAudit.builder()
+        FhirMessageAudit.builder()
             .filePath("path")
             .responseBody("responseBody1")
             .moment(CREATED_AT_1).build(),
-        HttpMessageAudit.builder()
+        FhirMessageAudit.builder()
             .filePath("path")
             .requestBody("requestBody2")
             .responseBody("responseBody2")
@@ -99,19 +99,19 @@ public class AuditZipBuilderTest {
   @Test
   public void zipAudits_shouldNaivelyIdentifyContentType() throws IOException {
     var selectedAudits = List.of(
-        HttpMessageAudit.builder()
+        FhirMessageAudit.builder()
             .filePath("jsonPath")
             .responseBody("{ \"a\": \"b\" }")
             .moment(CREATED_AT_1).build(),
-        HttpMessageAudit.builder()
+        FhirMessageAudit.builder()
             .filePath("xmlPath")
             .responseBody("<a>b</a>")
             .moment(CREATED_AT_1).build(),
-        HttpMessageAudit.builder()
+        FhirMessageAudit.builder()
             .filePath("emptyPath")
             .responseBody("")
             .moment(CREATED_AT_1).build(),
-        HttpMessageAudit.builder()
+        FhirMessageAudit.builder()
             .filePath("undefinedPath")
             .responseBody("Base64==")
             .moment(CREATED_AT_1).build());

@@ -1,5 +1,10 @@
 package uk.nhs.ctp.audit;
 
+import java.io.IOException;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -11,12 +16,6 @@ import uk.nhs.ctp.audit.model.AuditSession;
 import uk.nhs.ctp.audit.model.HttpRequest;
 import uk.nhs.ctp.audit.model.HttpResponse;
 import uk.nhs.ctp.audit.sqs.AuditSender;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
@@ -54,9 +53,13 @@ public class AuditServerFilter extends OncePerRequestFilter {
     try {
       filterChain.doFilter(requestWrapper, responseWrapper);
     } finally {
+      var content = responseWrapper.getContentAsByteArray();
+      responseWrapper.copyBodyToResponse();
+
+
       AuditSession auditSession = auditService
           .completeAuditSession(HttpRequest.from(requestWrapper),
-              HttpResponse.from(responseWrapper));
+              HttpResponse.from(responseWrapper, content));
 
       auditSender.sendAudit(auditSession);
       responseWrapper.copyBodyToResponse();

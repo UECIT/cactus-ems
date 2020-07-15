@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import uk.nhs.ctp.tkwvalidation.model.HttpMessageAudit;
+import uk.nhs.ctp.tkwvalidation.model.FhirMessageAudit;
 import uk.nhs.ctp.tkwvalidation.model.HttpMessageType;
 
 @Component
@@ -13,7 +13,7 @@ import uk.nhs.ctp.tkwvalidation.model.HttpMessageType;
 public class AuditZipBuilder {
   private final ZipBuilderFactory zipBuilderFactory;
 
-  public byte[] zipMessageAudits(List<HttpMessageAudit> audits) throws IOException {
+  public byte[] zipMessageAudits(List<FhirMessageAudit> audits) throws IOException {
     var zipBuilder = zipBuilderFactory.create();
     var sequenceCounter = new HashMap<String, Integer>();
 
@@ -31,7 +31,7 @@ public class AuditZipBuilder {
 
   private static void addZipEntry(
       ZipBuilder zipBuilder,
-      HttpMessageAudit audit,
+      FhirMessageAudit audit,
       int count,
       HttpMessageType type)
       throws IOException {
