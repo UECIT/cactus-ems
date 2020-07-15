@@ -29,6 +29,7 @@ public class AuditSelectorTest {
     var entry = AuditEntry.builder()
         .requestMethod("GET")
         .responseBody("validResponseBody")
+        .responseHeaders("content-type: [application/fhir+json]")
         .requestUrl("http://valid.com/request/url")
         .dateOfEntry(CREATED_AT_2)
         .build();
@@ -38,6 +39,7 @@ public class AuditSelectorTest {
         .requestMethod("GET")
         .requestUrl("http://valid.com/request/base")
         .responseBody("validResponseBody2")
+        .responseHeaders("content-type: [application/fhir+json]")
         .createdDate(CREATED_AT_1)
         .build());
 
@@ -60,23 +62,42 @@ public class AuditSelectorTest {
   public void selectAudits_withEncounterAudits_shouldSelectEncounterPaths() {
     var getEntry = AuditEntry.builder()
         .requestMethod("GET")
+        .responseHeaders("content-type: [application/fhir+json]")
         .responseBody("validResponseBody1")
         .requestUrl("http://valid.com/request/url1")
         .dateOfEntry(CREATED_AT_1)
         .build();
     var postEntry = AuditEntry.builder()
         .requestMethod("POST")
+        .requestHeaders("content-type: [application/fhir+json]")
+        .responseHeaders("content-type: [application/fhir+xml]")
         .requestBody("validRequestBody2")
         .responseBody("validResponseBody2")
         .requestUrl("http://valid.com/request/url2")
         .dateOfEntry(CREATED_AT_2)
         .build();
+    var textEntry = AuditEntry.builder()
+        .requestMethod("GET")
+        .responseBody("validResponseBody3")
+        .requestUrl("http://valid.com/request/url3")
+        .dateOfEntry(CREATED_AT_2)
+        .build();
+    var jsonEntry = AuditEntry.builder()
+        .requestMethod("GET")
+        .responseHeaders("content-type: [application/json]")
+        .responseBody("validResponseBody4")
+        .requestUrl("http://valid.com/request/url4")
+        .dateOfEntry(CREATED_AT_1)
+        .build();
 
     var audits = singletonList(AuditSession.builder()
         .entry(getEntry)
         .entry(postEntry)
+        .entry(textEntry)
+        .entry(jsonEntry)
         .additionalProperty("caseId", "6")
         .requestMethod("GET")
+        .responseHeaders("content-type: [application/fhir+json]")
         .requestUrl("http://valid.com/request/base")
         .responseBody("validResponseBody3")
         .createdDate(CREATED_AT_1)
@@ -90,12 +111,16 @@ public class AuditSelectorTest {
         isEntry("encounter6/valid.com/request/url2",
             "validRequestBody2", "validResponseBody2", CREATED_AT_2),
         isEntry("encounter6/valid.com/request/base",
-            null, "validResponseBody3", CREATED_AT_1)));
+            null, "validResponseBody3", CREATED_AT_1),
+        isEntry("encounter6/valid.com/request/url3", null, null, CREATED_AT_2),
+        isEntry("encounter6/valid.com/request/url4", null, null, CREATED_AT_1)));
   }
 
   @Test
   public void selectAudits_withEncounterAudits_shouldOnlySelectGetAndPostEntries()  {
-    var messageAudits = auditSelector.selectAudits(mixedMethodAudits(CREATED_AT_1), OperationType.ENCOUNTER);
+    var messageAudits = auditSelector.selectAudits(
+        mixedMethodAudits(CREATED_AT_1),
+        OperationType.ENCOUNTER);
 
     assertThat(messageAudits, containsInAnyOrder(
         isEntry("encounter_get/get",
@@ -130,18 +155,21 @@ public class AuditSelectorTest {
         .requestMethod("GET")
         .requestUrl("http://earlier/entry")
         .responseBody("earlierEntryBody")
+        .responseHeaders("content-type: [application/fhir+json]")
         .dateOfEntry(date2)
         .build();
     var laterEntry = AuditEntry.builder()
         .requestMethod("GET")
         .requestUrl("http://later/entry")
         .responseBody("laterEntryBody")
+        .responseHeaders("content-type: [application/fhir+json]")
         .dateOfEntry(date3)
         .build();
     var earlierAudit = AuditSession.builder()
         .requestMethod("GET")
         .requestUrl("http://earlier/session")
         .responseBody("earlierSessionBody")
+        .responseHeaders("content-type: [application/fhir+json]")
         .createdDate(date1)
         .entry(laterEntry)
         .entry(earlierEntry)
@@ -151,6 +179,7 @@ public class AuditSelectorTest {
         .requestMethod("GET")
         .requestUrl("http://later/session")
         .responseBody("laterSessionBody")
+        .responseHeaders("content-type: [application/fhir+json]")
         .createdDate(date4)
         .additionalProperty("caseId", "_later")
         .build();

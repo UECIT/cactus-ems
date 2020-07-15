@@ -4,8 +4,10 @@
   "requestUrl": "/case/",
   "requestMethod": "POST",
   "requestBody": "auditRequestBody",
+  "requestHeaders": "content-type: [application/fhir+xml]",
   "responseStatus": "200",
   "responseBody": "auditResponseBody",
+  "responseHeaders": "content-type: [application/fhir+json]",
   "createdDate": "2020-06-30T07:56:31.467917Z",
   "entries": [
     {
@@ -13,8 +15,8 @@
       "requestMethod": "GET",
       "requestBody": null,
       "responseStatus": "200",
-      "responseHeaders": "",
       "responseBody": "entry1ResponseBody",
+      "responseHeaders": "content-type: [application/fhir+json]",
       "dateOfEntry": "2020-06-30T07:56:32.482913Z"
     },
     {
@@ -23,6 +25,16 @@
       "requestBody": null,
       "responseStatus": "200",
       "responseBody": "entry1ResponseBody",
+      "responseHeaders": "content-type: [application/fhir+json]",
+      "dateOfEntry": "2020-06-30T07:56:33.529670Z"
+    },
+    {
+      "requestUrl": "http://fhir-server.cactus-staging.iucdspilot.uk/fhir/QuestionnaireResponse/404",
+      "requestMethod": "GET",
+      "requestBody": null,
+      "responseStatus": "200",
+      "responseBody": "entry1ResponseBody",
+      "responseHeaders": "content-type: [application/fhir]",
       "dateOfEntry": "2020-06-30T07:56:33.529670Z"
     }
   ],

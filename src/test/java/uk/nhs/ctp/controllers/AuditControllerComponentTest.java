@@ -196,6 +196,7 @@ public class AuditControllerComponentTest {
       + "    }]"
       + "}";
 
+  @SuppressWarnings("unused")
   private static void saveZipToTempFile(byte[] zipData) throws IOException {
     File zipFile = File.createTempFile("validation", ".zip");
 

@@ -5,6 +5,7 @@
   "requestMethod": "GET",
   "requestBody": null,
   "responseStatus": "200",
+  "responseHeaders": "content-type: [application/fhir+json]",
   "responseBody": "auditResponseBody",
   "createdDate": "2020-06-30T07:56:31.467917Z",
   "entries": [
@@ -14,6 +15,7 @@
       "requestBody": null,
       "responseStatus": "200",
       "responseBody": "entry1ResponseBody",
+      "responseHeaders": "content-type: [application/fhir+json]",
       "dateOfEntry": "2020-06-30T07:56:32.482913Z"
     }
   ],

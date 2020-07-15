@@ -38,6 +38,8 @@ public class AuditSelectorFixtures {
         .requestUrl("http://" + method)
         .requestBody(format("{ request %s }", method))
         .responseBody(format("{ response %s }", method))
+        .requestHeaders("content-type: [application/fhir+json]")
+        .responseHeaders("content-type: [application/fhir+json]")
         .build();
   }
 
@@ -48,6 +50,8 @@ public class AuditSelectorFixtures {
         .requestUrl(format("http://%s/inside/%s", method, outerMethod))
         .requestBody(format("{ request %s inside %s }", method, outerMethod))
         .responseBody(format("{ response %s inside %s }", method, outerMethod))
+        .requestHeaders("content-type: [application/fhir+json]")
+        .responseHeaders("content-type: [application/fhir+json]")
         .build();
   }
 
