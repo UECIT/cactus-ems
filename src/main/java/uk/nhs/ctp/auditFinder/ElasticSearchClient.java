@@ -2,6 +2,7 @@ package uk.nhs.ctp.auditFinder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -59,7 +60,8 @@ public class ElasticSearchClient {
             .build())
         .build();
 
-    HttpHost host = new HttpHost(endpoint);
+    URI uri = URI.create(endpoint);
+    HttpHost host = new HttpHost(uri.getHost(), uri.getPort());
     HttpPut putRoleRequest = new HttpPut("_opendistro/_security/api/roles/" + roleName);
     putRoleRequest.setEntity(new ByteArrayEntity(objectMapper.writeValueAsBytes(roleRequest)));
     client.execute(host, putRoleRequest, new BasicResponseHandler());
