@@ -9,10 +9,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.client.RequestOptions;
@@ -70,7 +70,11 @@ public class ElasticSearchClient {
     putRoleRequest.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
     log.info("Put role request: {}", putRoleRequest);
     log.info("Put role request entity: {}", new String(putRoleRequestBytes));
-    client.execute(host, putRoleRequest, new BasicResponseHandler());
+    CloseableHttpResponse putRoleResponse = client.execute(host, putRoleRequest);
+    log.info("Put role response: Status:{}, Message:{}, Entity:{}",
+        putRoleResponse.getStatusLine().getStatusCode(),
+        putRoleResponse.getStatusLine().getReasonPhrase(),
+        new String(putRoleResponse.getEntity().getContent().readAllBytes()));
 
     PutRoleMappingRequest roleMappingRequest = PutRoleMappingRequest.builder()
         .user(username)
@@ -79,6 +83,10 @@ public class ElasticSearchClient {
     HttpPut putRoleMappingRequest = new HttpPut(" _opendistro/_security/api/rolesmapping/" + roleName);
     putRoleMappingRequest.setEntity(new ByteArrayEntity(objectMapper.writeValueAsBytes(roleMappingRequest)));
     putRoleMappingRequest.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
-    client.execute(host, putRoleMappingRequest, new BasicResponseHandler());
+    CloseableHttpResponse putMappingResponse = client.execute(host, putRoleMappingRequest);
+    log.info("Put role response: Status:{}, Message:{}, Entity:{}",
+        putMappingResponse.getStatusLine().getStatusCode(),
+        putMappingResponse.getStatusLine().getReasonPhrase(),
+        new String(putMappingResponse.getEntity().getContent().readAllBytes()));
   }
 }
