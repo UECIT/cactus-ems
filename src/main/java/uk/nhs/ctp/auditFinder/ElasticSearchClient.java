@@ -7,9 +7,11 @@ import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.elasticsearch.action.search.SearchRequest;
@@ -65,6 +67,7 @@ public class ElasticSearchClient {
     HttpPut putRoleRequest = new HttpPut("_opendistro/_security/api/roles/" + roleName);
     byte[] putRoleRequestBytes = objectMapper.writeValueAsBytes(roleRequest);
     putRoleRequest.setEntity(new ByteArrayEntity(putRoleRequestBytes));
+    putRoleRequest.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
     log.info("Put role request: {}", putRoleRequest);
     log.info("Put role request entity: {}", new String(putRoleRequestBytes));
     client.execute(host, putRoleRequest, new BasicResponseHandler());
@@ -75,6 +78,7 @@ public class ElasticSearchClient {
 
     HttpPut putRoleMappingRequest = new HttpPut(" _opendistro/_security/api/rolesmapping/" + roleName);
     putRoleMappingRequest.setEntity(new ByteArrayEntity(objectMapper.writeValueAsBytes(roleMappingRequest)));
+    putRoleMappingRequest.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
     client.execute(host, putRoleMappingRequest, new BasicResponseHandler());
   }
 }
