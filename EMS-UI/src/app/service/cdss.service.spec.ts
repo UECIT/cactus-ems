@@ -1,17 +1,16 @@
+import { CdssService } from 'src/app/service/cdss.service';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from './auth.service';
-import { ServiceDefinitionService } from './service-definition.service';
-import { ServiceDefinition } from './../model/cdssSupplier';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { asyncData } from '../testing/async-observable-helpers';
 
-describe('Service Definition Service', () => {
+describe('CDSS Service', () => {
 
     const fakeAuthToken = "FAKE_AUTH_TOKEN";
     let httpClientSpy: { get: jasmine.Spy};
     let toastSpy: {error: jasmine.Spy};
-    let serviceDefService: ServiceDefinitionService;
+    let cdssService: CdssService;
 
     beforeEach(() => {
         httpClientSpy = jasmine.createSpyObj('HttpClient', ['get']);
@@ -23,31 +22,25 @@ describe('Service Definition Service', () => {
                 {provide: HttpClient, useValue: httpClientSpy},
                 {provide: AuthService, useValue: authSpy},
                 {provide: ToastrService, useValue: toastSpy},
-                ServiceDefinitionService,
+                CdssService,
             ]
         });
-        serviceDefService = TestBed.get(ServiceDefinitionService);
+        cdssService = TestBed.get(CdssService);
         authSpy.getAuthToken.and.returnValue(fakeAuthToken);
     });
 
-    it('should get service definition', () => {
-        const expectedServiceDef = {
-            id: "sd",
-            name: "Service Def Name",
-            description: "It does a thing"
-        };
+    it('should get image', () => {
+        const expectedBlob = new Blob();
 
-        httpClientSpy.get.and.returnValue(asyncData(expectedServiceDef));
+        httpClientSpy.get.and.returnValue(asyncData(expectedBlob));
 
-        serviceDefService.getServiceDefinition(5, "sd").toPromise()
-            .then(res => {
-                expect(res).toEqual(expectedServiceDef);
-            })
+        cdssService.getImage(5, "image.png")
+            .then(res => expect(res).toEqual(expectedBlob))
             .catch(fail);
 
         expect(httpClientSpy.get).toHaveBeenCalledTimes(1);
         const url = httpClientSpy.get.calls.first().args[0];
-        expect(url).toContain("/cdss/5/sd");
+        expect(url).toContain("/cdss/5/image/image.png");
         const headers: HttpHeaders = httpClientSpy.get.calls.first().args[1].headers;
         expect(headers.get('Authorization')).toBe(fakeAuthToken);
     });

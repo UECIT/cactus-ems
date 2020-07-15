@@ -65,6 +65,7 @@ export class TriageQuestion {
 }
 
 export class Options {
+  system: string; // Code system or fhir type for primitive option types (See CDSCT-64).
   code: string;
   display: string;
   extension: Extension;

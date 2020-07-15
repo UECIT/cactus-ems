@@ -1,3 +1,4 @@
+import { QuestionnaireType } from './question-types/questionnaire-type.enum';
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {Options, Questionnaire, QuestionResponse, TriageQuestion} from '../../model/questionnaire';
 import {QuestionnaireResponse} from '../../model/processTriage';
@@ -20,6 +21,7 @@ export class QuestionnaireComponent implements OnInit {
   enableWhen: Map<string, string[]> = new Map();
   supplierId: string;
   attachmentError: boolean;
+  questionnaireType = QuestionnaireType;
 
   constructor(public dialog: MatDialog,
               private serviceDefinitionService: ServiceDefinitionService) {
@@ -97,26 +99,11 @@ export class QuestionnaireComponent implements OnInit {
     return false;
   }
 
-  mouseClickOnImage(event: any, triageQuestion: TriageQuestion) {
-    if (this.checkEnableWhen(triageQuestion)) {
-      return;
+  getType(question: TriageQuestion) : QuestionnaireType {
+    if (question.questionType == 'REFERENCE' && question.extension.code == 'imagemap') {
+      return QuestionnaireType.IMAGE_MAP;
     }
-
-    this.answerSelected = this.answerSelected.filter(
-        e => e.triageQuestion.questionId !== triageQuestion.questionId
-    );
-    const questionResponse: QuestionResponse = new QuestionResponse();
-    questionResponse.triageQuestion = triageQuestion;
-    questionResponse.triageQuestion.responseCoordinates = {
-      x: event.offsetX,
-      y: event.offsetY
-    };
-    this.answerSelected.push(questionResponse);
-    this.answerSelectedChange.emit(this.answerSelected);
-    this.freeText.set(
-        triageQuestion.questionId,
-        questionResponse.triageQuestion.responseCoordinates.x + ', ' + questionResponse.triageQuestion.responseCoordinates.y
-    );
+    return QuestionnaireType.NOT_SUPPORTED;
   }
 
   hasInitialValue(triageQuestion: TriageQuestion) {
@@ -305,19 +292,8 @@ export class QuestionnaireComponent implements OnInit {
     return this.questionnaire.referralRequest && this.questionnaire.referralRequest.status === 'Draft';
   }
 
-  isImageMap(question: TriageQuestion) {
-    return question.questionType == 'REFERENCE' && question.extension.code == 'imagemap';
-  }
-
   isDate(question: TriageQuestion) {
     return question.questionType == 'DATE'|| question.questionType == 'DATETIME';
-  }
-
-  getImageUrl(question: String) {
-    if (this.supplierId) {
-      return this.supplierId.replace('/fhir', '/image') + question.match(/!\[.*?\]\((.*?)\)/)[1];
-    }
-    return 'Image not found';
   }
 
   formatQuestion(question: TriageQuestion) {
