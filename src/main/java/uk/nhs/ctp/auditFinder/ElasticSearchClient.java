@@ -68,6 +68,7 @@ public class ElasticSearchClient {
     byte[] putRoleRequestBytes = objectMapper.writeValueAsBytes(roleRequest);
     putRoleRequest.setEntity(new ByteArrayEntity(putRoleRequestBytes));
     putRoleRequest.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
+    putRoleRequest.setHeader(HttpHeaders.HOST, uri.getHost());
     log.info("Put role request: {}", putRoleRequest);
     log.info("Put role request entity: {}", new String(putRoleRequestBytes));
     CloseableHttpResponse putRoleResponse = client.execute(host, putRoleRequest);
@@ -83,6 +84,7 @@ public class ElasticSearchClient {
     HttpPut putRoleMappingRequest = new HttpPut(" _opendistro/_security/api/rolesmapping/" + roleName);
     putRoleMappingRequest.setEntity(new ByteArrayEntity(objectMapper.writeValueAsBytes(roleMappingRequest)));
     putRoleMappingRequest.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
+    putRoleMappingRequest.setHeader(HttpHeaders.HOST, uri.getHost());
     CloseableHttpResponse putMappingResponse = client.execute(host, putRoleMappingRequest);
     log.info("Put role response: Status:{}, Message:{}, Entity:{}",
         putMappingResponse.getStatusLine().getStatusCode(),
