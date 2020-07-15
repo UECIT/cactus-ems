@@ -63,7 +63,10 @@ public class ElasticSearchClient {
     URI uri = URI.create(endpoint);
     HttpHost host = new HttpHost(uri.getHost(), uri.getPort());
     HttpPut putRoleRequest = new HttpPut("_opendistro/_security/api/roles/" + roleName);
-    putRoleRequest.setEntity(new ByteArrayEntity(objectMapper.writeValueAsBytes(roleRequest)));
+    byte[] putRoleRequestBytes = objectMapper.writeValueAsBytes(roleRequest);
+    putRoleRequest.setEntity(new ByteArrayEntity(putRoleRequestBytes));
+    log.info("Put role request: {}", putRoleRequest);
+    log.info("Put role request entity: {}", new String(putRoleRequestBytes));
     client.execute(host, putRoleRequest, new BasicResponseHandler());
 
     PutRoleMappingRequest roleMappingRequest = PutRoleMappingRequest.builder()
