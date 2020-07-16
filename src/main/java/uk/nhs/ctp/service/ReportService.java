@@ -153,7 +153,7 @@ public class ReportService {
     var audits = auditFinder.findAllEmsEncountersByCaseId(caseId);
 
     try {
-      reportsDTO.setResponse(validationService.validateAudits(audits, OperationType.ENCOUNTER, ""));
+      validationService.validateAudits(audits, OperationType.ENCOUNTER, "");
       return reportsDTO;
     } catch (DataFormatException e) {
       reportsDTO.setResponse("Error parsing response");

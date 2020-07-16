@@ -18,7 +18,7 @@ public class ValidationService {
   private final AuditMetadataCollector auditMetadataCollector;
   private final AuditDispatcher auditDispatcher;
 
-  public String validateAudits(
+  public void validateAudits(
       List<AuditSession> audits,
       OperationType operationType,
       String selectedServiceEndpoint)
@@ -32,7 +32,7 @@ public class ValidationService {
     var zipData = auditZipBuilder.zipMessageAudits(messageAudits);
     var zipMetadata = auditMetadataCollector.collect(audits, operationType, selectedServiceEndpoint);
 
-    return auditDispatcher.dispatchToTkw(zipData, zipMetadata);
+    auditDispatcher.dispatchToTkw(zipData, zipMetadata);
   }
 
   public String getValidationUrl() {

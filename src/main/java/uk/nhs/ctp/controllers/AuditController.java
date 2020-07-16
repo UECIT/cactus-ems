@@ -60,25 +60,27 @@ public class AuditController {
 	}
 
 	@PostMapping(path = "/validate")
-	public String validate(@RequestBody AuditValidationRequest request) throws IOException {
+	public void validate(@RequestBody AuditValidationRequest request) throws IOException {
 		// TODO CDSCT-400: unify different queries
 
 		if (!isEmpty(request.getCaseId())) {
 			// client must be asking for evaluate requests
 			var audits = auditFinder.findAllEncountersByCaseId(request.getCaseId());
-			return validationService.validateAudits(
+			validationService.validateAudits(
 					audits,
 					request.getType(),
 					request.getInstanceBaseUrl());
+			return;
 		}
 
 		if (!isEmpty(request.getSearchAuditId())) {
 			var audit = auditFinder.findByAuditId(request.getSearchAuditId())
 					.orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
-			return validationService.validateAudits(
+			validationService.validateAudits(
 					Collections.singletonList(audit),
 					request.getType(),
 					request.getInstanceBaseUrl());
+			return;
 		}
 
 		throw new HttpClientErrorException(

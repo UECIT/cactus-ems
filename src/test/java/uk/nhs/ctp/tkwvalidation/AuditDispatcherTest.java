@@ -7,18 +7,14 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Base64;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.OperationOutcome.OperationOutcomeIssueComponent;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -35,22 +31,11 @@ import uk.nhs.ctp.tkwvalidation.model.AuditMetadata;
 @RunWith(MockitoJUnitRunner.class)
 public class AuditDispatcherTest {
 
-  IParser jsonParser;
-
-  @Mock
-  FhirContext fhirContext;
-
   @Mock
   AlternativeRestTemplate restTemplate;
 
   @InjectMocks
   AuditDispatcher auditDispatcher;
-
-  @Before
-  public void setup() {
-    jsonParser = mock(IParser.class);
-    when(fhirContext.newJsonParser()).thenReturn(jsonParser);
-  }
 
   @Test
   public void getValidationUrl() {
@@ -81,13 +66,9 @@ public class AuditDispatcherTest {
     outcome.addIssue(issue);
 
     when(restTemplate.exchange(isA(RequestEntity.class)))
-        .thenReturn(ResponseEntity.ok("validResponse"));
-    when(jsonParser.parseResource(OperationOutcome.class, "validResponse"))
-        .thenReturn(outcome);
+        .thenReturn(ResponseEntity.accepted().build());
 
-    var response = auditDispatcher.dispatchToTkw(zipData, zipMetadata);
-
-    assertThat(response, is("validDiagnosticsHtml"));
+    auditDispatcher.dispatchToTkw(zipData, zipMetadata);
 
     var requestCaptor = ArgumentCaptor.forClass(RequestEntity.class);
     verify(restTemplate).exchange(requestCaptor.capture());

@@ -2,7 +2,6 @@ package uk.nhs.ctp.controllers;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.isA;
@@ -110,7 +109,7 @@ public class AuditControllerComponentTest {
     when(esClient.search(anyString(), any(SearchSourceBuilder.class)))
         .thenReturn(encounterSearchHits(getClass().getClassLoader()));
     when(restTemplate.exchange(isA(RequestEntity.class)))
-        .thenReturn(ResponseEntity.ok(VALIDATION_RESPONSE));
+        .thenReturn(ResponseEntity.accepted().build());
 
     var selectedCdss = new CdssSupplier();
     selectedCdss.setName("selectedCdss");
@@ -118,9 +117,7 @@ public class AuditControllerComponentTest {
     selectedCdss.setSupportedVersion(CdsApiVersion.ONE_ONE);
     cdssSupplierRepository.saveAndFlush(selectedCdss);
 
-    var result = auditController.validate(request);
-
-    assertThat(result, is("validDiagnosticsHtml"));
+    auditController.validate(request);
 
     var requestCaptor = ArgumentCaptor.forClass(RequestEntity.class);
     verify(restTemplate).exchange(requestCaptor.capture());
@@ -163,11 +160,9 @@ public class AuditControllerComponentTest {
     when(esClient.search(anyString(), any(SearchSourceBuilder.class)))
         .thenReturn(serviceDefinitionSearchHits(getClass().getClassLoader()));
     when(restTemplate.exchange(isA(RequestEntity.class)))
-        .thenReturn(ResponseEntity.ok(VALIDATION_RESPONSE));
+        .thenReturn(ResponseEntity.accepted().build());
 
-    var result = auditController.validate(request);
-
-    assertThat(result, is("validDiagnosticsHtml"));
+    auditController.validate(request);
 
     var requestCaptor = ArgumentCaptor.forClass(RequestEntity.class);
     verify(restTemplate).exchange(requestCaptor.capture());

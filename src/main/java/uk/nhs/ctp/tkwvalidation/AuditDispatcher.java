@@ -1,6 +1,5 @@
 package uk.nhs.ctp.tkwvalidation;
 
-import ca.uhn.fhir.context.FhirContext;
 import java.io.IOException;
 import java.net.URI;
 import java.time.ZoneOffset;
@@ -8,9 +7,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.jsoup.Jsoup;
-import org.jsoup.safety.Whitelist;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -23,7 +19,6 @@ import uk.nhs.ctp.tkwvalidation.model.AuditMetadata.Headers;
 @RequiredArgsConstructor
 @Slf4j
 public class AuditDispatcher {
-  private final FhirContext fhirContext;
   private final AlternativeRestTemplate restTemplate;
 
   @Value("${reports.validation.server}")
@@ -33,7 +28,7 @@ public class AuditDispatcher {
     return reportValidationServer + "/$evaluate";
   }
 
-  public String dispatchToTkw(byte[] zipData, AuditMetadata zipMetadata) throws IOException {
+  public void dispatchToTkw(byte[] zipData, AuditMetadata zipMetadata) throws IOException {
 
     var base64Zip = Base64.getEncoder().encode(zipData);
     var validatorUrl = URI.create(getValidationUrl());
@@ -63,19 +58,5 @@ public class AuditDispatcher {
           response.getStatusCode(),
           response.getBody());
     }
-
-      var operationOutcome = fhirContext.newJsonParser()
-            .parseResource(OperationOutcome.class, response.getBody());
-      String html = operationOutcome.getIssueFirstRep().getDiagnostics();
-
-      return cleanHtml(html);
-  }
-
-  private String cleanHtml(String html) {
-    Whitelist whitelist = Whitelist.relaxed()
-        .addTags("hr")
-        .addAttributes("tr", "bgcolor");
-
-    return Jsoup.clean(html, whitelist);
   }
 }
