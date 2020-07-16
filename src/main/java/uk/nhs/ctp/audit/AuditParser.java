@@ -1,19 +1,19 @@
 package uk.nhs.ctp.audit;
 
+import static java.util.function.Predicate.not;
 import static org.apache.commons.lang3.StringUtils.strip;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Component
 public class AuditParser {
-  public static Map<String, Collection<String>> getHeadersFrom(String headers) {
+  public Map<String, Collection<String>> getHeadersFrom(String headers) {
     return Stream.of(headers.split("\n"))
-        .map(header -> header.split(": "))
+        .map(header -> header.split(":"))
         .filter(headerParts -> headerParts.length == 2)
         .collect(Collectors.toUnmodifiableMap(
             headerParts -> headerParts[0],
@@ -21,8 +21,10 @@ public class AuditParser {
         ));
   }
 
-  public static Collection<String> getHeaderValueFrom(String headerValue) {
-    return Stream.of(strip(headerValue, "[]").split(","))
+  public Collection<String> getHeaderValueFrom(String headerValue) {
+    return Stream.of(strip(headerValue, "[ ]").split(","))
+        .map(String::strip)
+        .filter(not(String::isEmpty))
         .collect(Collectors.toUnmodifiableList());
   }
 }

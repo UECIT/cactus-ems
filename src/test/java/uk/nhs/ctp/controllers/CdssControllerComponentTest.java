@@ -112,7 +112,6 @@ public class CdssControllerComponentTest {
     CdssSupplier testSupplier = new CdssSupplier();
     testSupplier.setSupplierId(MOCK_SUPPLIER_ID);
     testSupplier.setBaseUrl("mock.base.url");
-    testSupplier.setName("Test supplier");
 
     final Long supplierId = cdssRepository.save(testSupplier).getId();
     final String serviceId = "serviceDef";
