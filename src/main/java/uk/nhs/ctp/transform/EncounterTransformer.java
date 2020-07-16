@@ -5,9 +5,8 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 
 import java.util.Collections;
 import lombok.RequiredArgsConstructor;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Condition;
+import org.hl7.fhir.dstu3.model.Condition.ConditionClinicalStatus;
 import org.hl7.fhir.dstu3.model.Condition.ConditionVerificationStatus;
 import org.hl7.fhir.dstu3.model.Duration;
 import org.hl7.fhir.dstu3.model.Encounter;
@@ -19,6 +18,7 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.enums.ConditionCategory;
+import uk.nhs.ctp.enums.ConditionCodeUEC;
 import uk.nhs.ctp.enums.ParticipationType;
 import uk.nhs.ctp.service.NarrativeService;
 import uk.nhs.ctp.service.fhir.ReferenceService;
@@ -40,10 +40,6 @@ public class EncounterTransformer {
     // episodeOfCare
     // incomingReferral
 
-    // Guidance for 2.0.0 states that this MUST NOT be populated
-//    encounter.setClass_(new Coding("http://hl7.org/fhir/ValueSet/v3-ActEncounterCode",
-//        "unscheduled", "unscheduled"));
-
     encounter.setId(caseEntity.getId().toString());
     encounter.setText(transformNarrative(caseEntity));
     encounter.setSubject(new Reference(caseEntity.getPatientId()));
@@ -60,10 +56,11 @@ public class EncounterTransformer {
 
     //TODO: Contained/hard coded for now, find out which condition this should be, when it should be set and where to get it from? RefReq?
     Condition condition = new Condition();
+    condition.setClinicalStatus(ConditionClinicalStatus.ACTIVE);
     condition.setVerificationStatus(ConditionVerificationStatus.CONFIRMED);
-    condition.setCode(new CodeableConcept().addCoding(new Coding("ems", "47658378", "Diagnosis Condition")));
+    condition.setCode(ConditionCodeUEC.CHEST_PAIN.toCodeableConcept());
     condition.setSubject(new Reference(caseEntity.getPatientId()));
-    condition.setCategory(Collections.singletonList(ConditionCategory.ENCOUNTER_DIAGNOSIS.toCodeableConcept()));
+    condition.setCategory(Collections.singletonList(ConditionCategory.CONCERN.toCodeableConcept()));
     encounter.addDiagnosis()
         .setCondition(new Reference(condition));
 
