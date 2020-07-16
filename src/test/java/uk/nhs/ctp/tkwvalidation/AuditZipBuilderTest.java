@@ -12,23 +12,18 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.nhs.ctp.audit.model.AuditEntry;
-import uk.nhs.ctp.audit.model.AuditSession;
-import uk.nhs.ctp.auditFinder.model.OperationType;
-import uk.nhs.ctp.tkwvalidation.models.HttpMessageAudit;
-import uk.nhs.ctp.tkwvalidation.rules.AuditValidationRule;
+import uk.nhs.ctp.tkwvalidation.model.FhirMessageAudit;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ValidationServiceTest {
+public class AuditZipBuilderTest {
   private static final Instant CREATED_AT_1 = Instant.parse("2020-07-06T10:23:31Z");
   private static final Instant CREATED_AT_2 = Instant.parse("2019-06-05T09:12:20Z");
 
@@ -37,14 +32,8 @@ public class ValidationServiceTest {
   @Mock
   private ZipBuilderFactory zipBuilderFactory;
 
-  @Mock
-  private AuditSelector auditSelector;
-
-  @Mock
-  private Map<String, AuditValidationRule> validationRules;
-
   @InjectMocks
-  private ValidationService validationService;
+  private AuditZipBuilder auditZipBuilder;
 
   @Before
   public void setup() {
@@ -53,23 +42,11 @@ public class ValidationServiceTest {
   }
 
   @Test
-  public void zipAudits_shouldEnsureValidationRules() throws IOException {
-    var audits = new ArrayList<AuditSession>();
-    var rule = mock(AuditValidationRule.class);
-    when(validationRules.get("encounter")).thenReturn(rule);
-
-    validationService.zipAudits(audits, OperationType.ENCOUNTER);
-
-    verify(rule).ensure(audits);
-  }
-
-  @Test
   public void zipAudits_withNoAudits_shouldReturnEmpty() throws IOException {
-    when(validationRules.get("encounter")).thenReturn(mock(AuditValidationRule.class));
     var expectedZipData = new byte[]{};
     when(zipBuilder.buildAndCloseZip()).thenReturn(expectedZipData);
 
-    var zipData = validationService.zipAudits(emptyList(), OperationType.ENCOUNTER);
+    var zipData = auditZipBuilder.zipMessageAudits(emptyList());
 
     verify(zipBuilder, never()).addEntry(anyString(), anyString(), any(Instant.class));
     assertThat(zipData, is(expectedZipData));
@@ -77,43 +54,33 @@ public class ValidationServiceTest {
 
   @Test
   public void zipAudits_shouldReturnUnmodifiedZip() throws IOException {
-    when(validationRules.get("service_search")).thenReturn(mock(AuditValidationRule.class));
     var expectedZipData = new byte[]{0, 1, 2, 3, 4, 5, 6, 7};
     when(zipBuilder.buildAndCloseZip()).thenReturn(expectedZipData);
 
-    var entry = AuditEntry.builder()
-        .requestMethod("GET")
-        .dateOfEntry(CREATED_AT_1)
-        .requestUrl("http://valid.com/request/url1")
-        .responseBody("{}")
-        .build();
-    var audits = List.of(AuditSession.builder()
-        .entry(entry)
-        .build());
-    var zipData = validationService.zipAudits(audits, OperationType.SERVICE_SEARCH);
+    var selectedAudits = Collections.singletonList(
+        FhirMessageAudit.builder()
+            .filePath("path")
+            .responseBody("responseBody1")
+            .moment(CREATED_AT_1).build());
+    var zipData = auditZipBuilder.zipMessageAudits(selectedAudits);
 
     assertThat(zipData, is(expectedZipData));
   }
 
   @Test
   public void zipAudits_shouldIncrementSequenceCounts() throws IOException {
-    when(validationRules.get("encounter")).thenReturn(mock(AuditValidationRule.class));
-
-    var initialAudits = new ArrayList<AuditSession>();
     var selectedAudits = List.of(
-        HttpMessageAudit.builder()
+        FhirMessageAudit.builder()
             .filePath("path")
             .responseBody("responseBody1")
             .moment(CREATED_AT_1).build(),
-        HttpMessageAudit.builder()
+        FhirMessageAudit.builder()
             .filePath("path")
             .requestBody("requestBody2")
             .responseBody("responseBody2")
             .moment(CREATED_AT_2).build());
-    when(auditSelector.selectAudits(initialAudits, OperationType.ENCOUNTER))
-        .thenReturn(selectedAudits);
 
-    validationService.zipAudits(initialAudits, OperationType.ENCOUNTER);
+    auditZipBuilder.zipMessageAudits(selectedAudits);
 
     verify(zipBuilder).addEntry(
         "path.1.response.xml",
@@ -131,30 +98,25 @@ public class ValidationServiceTest {
 
   @Test
   public void zipAudits_shouldNaivelyIdentifyContentType() throws IOException {
-    when(validationRules.get("encounter")).thenReturn(mock(AuditValidationRule.class));
-
-    var initialAudits = new ArrayList<AuditSession>();
     var selectedAudits = List.of(
-        HttpMessageAudit.builder()
+        FhirMessageAudit.builder()
             .filePath("jsonPath")
             .responseBody("{ \"a\": \"b\" }")
             .moment(CREATED_AT_1).build(),
-        HttpMessageAudit.builder()
+        FhirMessageAudit.builder()
             .filePath("xmlPath")
             .responseBody("<a>b</a>")
             .moment(CREATED_AT_1).build(),
-        HttpMessageAudit.builder()
+        FhirMessageAudit.builder()
             .filePath("emptyPath")
             .responseBody("")
             .moment(CREATED_AT_1).build(),
-        HttpMessageAudit.builder()
+        FhirMessageAudit.builder()
             .filePath("undefinedPath")
             .responseBody("Base64==")
             .moment(CREATED_AT_1).build());
-    when(auditSelector.selectAudits(initialAudits, OperationType.ENCOUNTER))
-        .thenReturn(selectedAudits);
 
-    validationService.zipAudits(initialAudits, OperationType.ENCOUNTER);
+    auditZipBuilder.zipMessageAudits(selectedAudits);
 
     verify(zipBuilder).addEntry(
         "jsonPath.1.response.json",

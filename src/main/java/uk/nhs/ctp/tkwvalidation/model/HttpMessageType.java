@@ -1,4 +1,4 @@
-package uk.nhs.ctp.tkwvalidation.models;
+package uk.nhs.ctp.tkwvalidation.model;
 
 public enum HttpMessageType {
   REQUEST,

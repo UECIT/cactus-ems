@@ -1,30 +1,16 @@
 package uk.nhs.ctp.service;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.methods.RequestBuilder;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.jsoup.Jsoup;
-import org.jsoup.safety.Whitelist;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -43,6 +29,7 @@ import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.dto.ReportType;
 import uk.nhs.ctp.service.dto.ReportsDTO;
 import uk.nhs.ctp.service.report.Reportable;
+import uk.nhs.ctp.tkwvalidation.AuditDispatcher;
 import uk.nhs.ctp.tkwvalidation.ValidationService;
 
 @Service
@@ -53,17 +40,14 @@ public class ReportService {
   private final Collection<Reportable> reportServices;
   private final ValidationService validationService;
   private final ObjectMapper mapper;
-  private final FhirContext fhirContext;
   private final AuditFinder auditFinder;
+  private final AuditDispatcher auditDispatcher;
 
   @Value("${reports.server}")
   private String reportsServer;
 
   @Value("${reports.server.auth.token}")
   private String reportServerToken;
-
-  @Value("${reports.validation.server}")
-  private String reportValidationServer;
 
   public Collection<ReportsDTO> generateReports(ReportRequestDTO request) {
 
@@ -159,70 +143,31 @@ public class ReportService {
   }
 
   public ReportsDTO validate(String encounterRef) {
-    String validatorUrl = reportValidationServer + "/$evaluate";
-
     ReportsDTO reportsDTO = ReportsDTO.builder()
         .contentType(ContentType.HTML)
         .reportType(ReportType.VALIDATION)
-        .request(validatorUrl)
+        .request(validationService.getValidationUrl())
         .build();
 
-    try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
-      var caseId = new IdType(encounterRef).getIdPart();
-      var audits = auditFinder.findAllEmsEncountersByCaseId(caseId);
-      byte[] zipData = validationService.zipAudits(audits, OperationType.ENCOUNTER);
+    var caseId = new IdType(encounterRef).getIdPart();
+    var audits = auditFinder.findAllEmsEncountersByCaseId(caseId);
 
-      var base64Zip = Base64.getEncoder().encode(zipData);
-
-      // Send to validation service
-
-      HttpUriRequest request = RequestBuilder
-          .post(validatorUrl)
-          .addHeader(HttpHeaders.ACCEPT, "application/fhir+json")
-          .addHeader(HttpHeaders.CONTENT_TYPE, "application/zip")
-          .addHeader("Content-Transfer-Encoding", "base64")
-          .setEntity(new ByteArrayEntity(base64Zip))
-          .build();
-
-      try (CloseableHttpResponse response = httpClient.execute(request)) {
-        if (response.getStatusLine().getStatusCode() != 200) {
-          log.warn("Call to validation service on {} returned status {}, with message:\n{}",
-              validatorUrl,
-              response.getStatusLine().getStatusCode(),
-              response.getStatusLine().getReasonPhrase());
-        }
-
-        OperationOutcome operationOutcome;
-        String content = IOUtils.toString(response.getEntity().getContent(), UTF_8);
-        try {
-          operationOutcome = fhirContext.newJsonParser()
-              .parseResource(OperationOutcome.class, content);
-        } catch (DataFormatException e) {
-          reportsDTO.setResponse("Error parsing response: " + cleanHtml(content));
-          return reportsDTO;
-        }
-        String html = operationOutcome.getIssueFirstRep().getDiagnostics();
-
-        String safeHtml = cleanHtml(html);
-
-        reportsDTO.setResponse(safeHtml);
-        return reportsDTO;
-      } catch (HttpClientErrorException e) {
-        reportsDTO.setResponse("Failed to request validation: " + e.getMessage());
-        return reportsDTO;
-      }
-    } catch (ResourceAccessException | IOException e) {
+    try {
+      validationService.validateAudits(audits, OperationType.ENCOUNTER, "");
+      return reportsDTO;
+    } catch (DataFormatException e) {
+      reportsDTO.setResponse("Error parsing response");
+      return reportsDTO;
+    } catch (HttpClientErrorException e) {
+      reportsDTO.setResponse("Failed to request validation: " + e.getMessage());
+      return reportsDTO;
+    } catch (ResourceAccessException e) {
       reportsDTO.setResponse("Creating Reports: Unable to contact validation service: " + e.getMessage());
       return reportsDTO;
+    } catch (IOException e) {
+      reportsDTO.setResponse("Creating Reports: Unable to create zip file: " + e.getMessage());
+      return reportsDTO;
     }
-  }
-
-  private String cleanHtml(String html) {
-    Whitelist whitelist = Whitelist.relaxed()
-        .addTags("hr")
-        .addAttributes("tr", "bgcolor");
-
-    return Jsoup.clean(html, whitelist);
   }
 
 }

@@ -1,7 +1,6 @@
 package uk.nhs.ctp.tkwvalidation;
 
 import static com.shazam.shazamcrest.matcher.Matchers.sameBeanAs;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.temporal.ChronoField.MICRO_OF_SECOND;
 import static java.time.temporal.ChronoField.MILLI_OF_SECOND;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -9,21 +8,15 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static uk.nhs.ctp.testhelper.AuditUnzipper.unzipEntries;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Value;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import uk.nhs.ctp.testhelper.AuditUnzipper.ZippedEntry;
 
 public class ZipBuilderTest {
 
@@ -95,34 +88,5 @@ public class ZipBuilderTest {
 
     expectedException.expect(IOException.class);
     zipBuilder.addEntry(entry.getPath(), entry.getBody(), entry.getInstant());
-  }
-
-  private List<ZippedEntry> unzipEntries(byte[] bytes) throws IOException {
-    try (var input = new ByteArrayInputStream(bytes)) {
-      try (var zip = new ZipInputStream(input)) {
-        var entries = new ArrayList<ZippedEntry>();
-
-        ZipEntry zipEntry;
-        while ((zipEntry = zip.getNextEntry()) != null) {
-          entries.add(ZippedEntry.builder()
-              .instant(zipEntry.getCreationTime().toInstant())
-              .path(zipEntry.getName())
-              .body(new String(zip.readAllBytes(), UTF_8))
-              .build());
-        }
-        zip.closeEntry();
-
-        return entries;
-      }
-    }
-  }
-
-  @Value
-  @Builder
-  @EqualsAndHashCode
-  private static class ZippedEntry {
-    String path;
-    String body;
-    Instant instant;
   }
 }

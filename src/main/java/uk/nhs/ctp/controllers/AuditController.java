@@ -4,6 +4,7 @@ import static org.thymeleaf.util.StringUtils.isEmpty;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ import uk.nhs.ctp.auditFinder.model.AuditValidationRequest;
 import uk.nhs.ctp.caseSearch.CaseSearchRequest;
 import uk.nhs.ctp.caseSearch.CaseSearchResultDTO;
 import uk.nhs.ctp.caseSearch.CaseSearchService;
+import uk.nhs.ctp.tkwvalidation.ValidationService;
 
 @CrossOrigin
 @RestController
@@ -34,6 +36,7 @@ public class AuditController {
 	private final ObjectMapper mapper;
 	private final AuditFinder auditFinder;
 	private final CaseSearchService caseSearchService;
+	private final ValidationService validationService;
 
 	/**
 	 * Retrieve all audit sessions for a given case ID.
@@ -57,22 +60,26 @@ public class AuditController {
 	}
 
 	@PostMapping(path = "/validate")
-	public void validate(@RequestBody AuditValidationRequest request) {
+	public void validate(@RequestBody AuditValidationRequest request) throws IOException {
+		// TODO CDSCT-400: unify different queries
+
 		if (!isEmpty(request.getCaseId())) {
 			// client must be asking for evaluate requests
 			var audits = auditFinder.findAllEncountersByCaseId(request.getCaseId());
-			log.info("retrieved {} encounter audits", audits.size());
-
-			// TODO: CDSCT-94
+			validationService.validateAudits(
+					audits,
+					request.getType(),
+					request.getInstanceBaseUrl());
 			return;
 		}
 
 		if (!isEmpty(request.getSearchAuditId())) {
 			var audit = auditFinder.findByAuditId(request.getSearchAuditId())
 					.orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
-			log.info("retrieved service definition search request audit");
-
-			// TODO: CDSCT-94
+			validationService.validateAudits(
+					Collections.singletonList(audit),
+					request.getType(),
+					request.getInstanceBaseUrl());
 			return;
 		}
 
