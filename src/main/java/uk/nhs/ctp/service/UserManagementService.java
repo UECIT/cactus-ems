@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import uk.nhs.cactus.common.security.JWTHandler;
 import uk.nhs.cactus.common.security.JWTRequest;
+import uk.nhs.ctp.auditFinder.role.RoleMapper;
 import uk.nhs.ctp.entities.UserEntity;
 import uk.nhs.ctp.exception.EMSException;
 import uk.nhs.ctp.model.RegisterSupplierRequest;
@@ -32,6 +33,7 @@ public class UserManagementService {
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
   private final CognitoService cognitoService;
+  private final RoleMapper roleMapper;
   private final JWTHandler jwtHandler;
 
   @Value("${ems.fhir.server}")
@@ -96,6 +98,7 @@ public class UserManagementService {
           .build();
       // Create the user in cognito for ElasticSearch searching.
       cognitoService.signUp(supplierId, supplierAccountDetails);
+      roleMapper.setupSupplierRoles(supplierId, supplierAccountDetails.getUsername());
       return supplierAccountDetails;
     } catch (Exception e) {
       log.error("Error creating user: {}", supplierId);

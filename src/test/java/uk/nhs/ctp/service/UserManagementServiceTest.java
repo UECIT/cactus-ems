@@ -25,6 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.nhs.cactus.common.security.JWTHandler;
 import uk.nhs.cactus.common.security.JWTRequest;
+import uk.nhs.ctp.auditFinder.role.RoleMapper;
 import uk.nhs.ctp.entities.UserEntity;
 import uk.nhs.ctp.exception.EMSException;
 import uk.nhs.ctp.model.RegisterSupplierRequest;
@@ -51,6 +52,9 @@ public class UserManagementServiceTest {
 
   @Mock
   private JWTHandler jwtHandler;
+
+  @Mock
+  private RoleMapper roleMapper;
 
   @InjectMocks
   private UserManagementService userManagementService;
@@ -101,6 +105,7 @@ public class UserManagementServiceTest {
     assertThat(returned, sameBeanAs(expected)
       .with("password", any(String.class)));
     verify(cognitoService).signUp("supplier_id", returned);
+    verify(roleMapper).setupSupplierRoles("supplier_id", returned.getUsername());
   }
 
   @Test
@@ -114,7 +119,7 @@ public class UserManagementServiceTest {
     expectedException.expect(EntityExistsException.class);
     userManagementService.createNewSupplierUser(request);
 
-    verifyZeroInteractions(cognitoService);
+    verifyZeroInteractions(cognitoService, roleMapper);
   }
 
   private NewUserDTO getTestUser() {
