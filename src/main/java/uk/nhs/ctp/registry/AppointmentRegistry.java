@@ -17,7 +17,7 @@ public class AppointmentRegistry implements Registry<Appointment> {
     var now = Instant.now();
     return List.of(Appointment.builder()
         .status(AppointmentStatus.BOOKED)
-        .serviceCategory(ServiceCategory.SPECIALIST_MEDICAL)
+        .serviceCategory(ServiceCategory.ART_MUSIC_DRAMA)
         .serviceType(ServiceType.GENERAL_PRACTICE)
         .specialty(PracticeSetting.GENERAL_MEDICAL_PRACTICE)
         .appointmentType(AppointmentType.ROUTINE)
