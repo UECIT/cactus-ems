@@ -2,15 +2,15 @@ package uk.nhs.ctp.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import uk.nhs.ctp.SystemURL;
 
 @Getter
 @RequiredArgsConstructor
-public enum  ConditionCategory implements Concept {
+public enum ConditionCodeUEC implements Concept {
 
-  CONCERN("concern", "Concern");
+  CHEST_PAIN("29857009", "Chest pain");
 
-  private final String system = "https://fhir.nhs.uk/STU3/CodeSystem/UEC-ConditionCategory-1";
+  private final String system = SystemURL.SNOMED;
   private final String value;
   private final String display;
-
 }
