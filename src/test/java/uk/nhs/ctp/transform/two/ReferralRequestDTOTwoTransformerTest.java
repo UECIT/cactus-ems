@@ -36,7 +36,7 @@ public class ReferralRequestDTOTwoTransformerTest {
 
   @Test
   public void shouldTransformReferralRequest() {
-    ReferralRequest referralRequest = ReferralRequestFixtures.fhirReferralRequest();
+    ReferralRequest referralRequest = ReferralRequestFixtures.fhirReferralRequestv2();
     Condition reasonRef = ConditionFixtures.fhirCondition();
     ConditionDTO expectedReason = ConditionDTO.builder()
         .onset("onset")

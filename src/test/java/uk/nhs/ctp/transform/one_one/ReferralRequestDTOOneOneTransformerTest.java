@@ -33,7 +33,7 @@ public class ReferralRequestDTOOneOneTransformerTest {
 
   @Test
   public void shouldTransformReferralRequest() {
-    ReferralRequest referralRequest = ReferralRequestFixtures.fhirReferralRequest();
+    ReferralRequest referralRequest = ReferralRequestFixtures.fhirReferralRequestv1();
     Condition reasonRef = ConditionFixtures.fhirCondition();
     ConditionDTO expectedReason = ConditionDTO.builder()
         .onset("onset")
@@ -43,15 +43,15 @@ public class ReferralRequestDTOOneOneTransformerTest {
         .onset("onset")
         .condition("supporting")
         .build();
-    var supportingInfo = Collections.singletonList(ConditionFixtures.fhirCondition());
+    var conditions = Collections.singletonList(ConditionFixtures.fhirCondition());
     when(storageService.findResource("reason/reference", Condition.class))
         .thenReturn(reasonRef);
     when(storageService
-        .findResources(Collections.singletonList("supporting/reference"), Condition.class))
-        .thenReturn(supportingInfo);
+        .findResources(Collections.singletonList("Condition/reference"), Condition.class))
+        .thenReturn(conditions);
     when(conditionDTOTransformer.transform(reasonRef))
         .thenReturn(expectedReason);
-    when(conditionDTOTransformer.transform(getOnlyElement(supportingInfo)))
+    when(conditionDTOTransformer.transform(getOnlyElement(conditions)))
         .thenReturn(expectedSupporting);
 
     ReferralRequestDTO result = transformer.transform(referralRequest);
