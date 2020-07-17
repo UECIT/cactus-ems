@@ -27,7 +27,8 @@ public class ReferralRequestFixtures {
         .setDescription("Referral Description")
         .addRelevantHistory(new Reference("history/reference").setDisplay("history display"))
         .addReasonReference(new Reference("reason/reference"))
-        .addSupportingInfo(new Reference("supporting/reference"));
+        .addSupportingInfo(new Reference("ProcedureRequest/reference"))
+        .addSupportingInfo(new Reference("Condition/reference"));
 
     rr.setId("referral/id");
     return rr;

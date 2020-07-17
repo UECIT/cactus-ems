@@ -1,5 +1,7 @@
 package uk.nhs.ctp.transform.two;
 
+import static uk.nhs.ctp.utils.ResourceUtils.referenceTo;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -8,8 +10,10 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.service.dto.ReferralRequestDTO;
 import uk.nhs.ctp.service.fhir.StorageService;
@@ -29,18 +33,26 @@ public class ReferralRequestDTOTwoTransformer implements ReferralRequestDTOTrans
     Condition reasonRefCondition = storageService
         .findResource(referralRequest.getReasonReferenceFirstRep().getReference(), Condition.class);
 
-    List<String> supportingInfoReferences = referralRequest.getSupportingInfo().stream()
+    List<String> secondaryReasonReferences = referralRequest.getSupportingInfo().stream()
+        .filter(referenceTo(ResourceType.Condition))
         .map(Reference::getReference)
         .collect(Collectors.toUnmodifiableList());
     List<Condition> secondaryReasonConditions = storageService
-        .findResources(supportingInfoReferences, Condition.class);
+        .findResources(secondaryReasonReferences, Condition.class);
+    Reference procedureRequestRef = referralRequest.getSupportingInfo().stream()
+        .filter(referenceTo(ResourceType.ProcedureRequest))
+        .findFirst().orElseThrow();
+    String nextAction = storageService.findResource(procedureRequestRef.getReference(),
+        ProcedureRequest.class)
+        .getCode().getCodingFirstRep().getDisplay();
+
     return ReferralRequestDTO.builder()
         .resourceId(referralRequest.getId())
         .contextReference(referralRequest.getContext().getReference())
         .status(referralRequest.getStatus().getDisplay())
         .priority(referralRequest.getPriority().getDisplay())
         .occurrence(formatPeriod(referralRequest.getOccurrencePeriod()))
-        .action("Next action not yet supported in Cactus EMS for CDS API v2.0") //TODO: API v2 Populate from procedure
+        .action("Procedure Request: " + nextAction)
         .description(referralRequest.getDescription())
         .relevantHistory(transformRelevantHistory(referralRequest.getRelevantHistory()))
         .reasonReference(conditionDTOTransformer.transform(reasonRefCondition))
