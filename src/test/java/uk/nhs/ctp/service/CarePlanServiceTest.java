@@ -24,7 +24,6 @@ import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.nhs.ctp.service.fhir.AuthenticatedStorageService;
 import uk.nhs.ctp.service.fhir.ReferenceService;
 import uk.nhs.ctp.service.fhir.StorageService;
 import uk.nhs.ctp.testhelper.MockingUtils;
@@ -37,9 +36,6 @@ public class CarePlanServiceTest {
 
   @Mock
   private StorageService storageService;
-
-  @Mock
-  private AuthenticatedStorageService authenticatedStorageService;
 
   @Mock
   private ReferenceService referenceService;
@@ -94,15 +90,15 @@ public class CarePlanServiceTest {
     var completedCarePlan2 = carePlan2.copy().setStatus(CarePlanStatus.COMPLETED);
     var completedCarePlan3 = carePlan3.copy().setStatus(CarePlanStatus.COMPLETED);
 
-    when(authenticatedStorageService.get("id1", CarePlan.class)).thenReturn(carePlan1);
-    when(authenticatedStorageService.get("id2", CarePlan.class)).thenReturn(carePlan2);
-    when(authenticatedStorageService.get("id3", CarePlan.class)).thenReturn(carePlan3);
+    when(storageService.findResource("id1", CarePlan.class)).thenReturn(carePlan1);
+    when(storageService.findResource("id2", CarePlan.class)).thenReturn(carePlan2);
+    when(storageService.findResource("id3", CarePlan.class)).thenReturn(carePlan3);
 
     carePlanService.completeCarePlans(new String[]{"id1", "id2", "id3"});
 
-    verify(authenticatedStorageService).upsert(argThat(isFhir(completedCarePlan1)));
-    verify(authenticatedStorageService).upsert(argThat(isFhir(completedCarePlan2)));
-    verify(authenticatedStorageService, never()).upsert(argThat(isFhir(completedCarePlan3)));
+    verify(storageService).updateExternal(argThat(isFhir(completedCarePlan1)));
+    verify(storageService).updateExternal(argThat(isFhir(completedCarePlan2)));
+    verify(storageService, never()).updateExternal(argThat(isFhir(completedCarePlan3)));
   }
 
 }

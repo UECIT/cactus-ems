@@ -11,7 +11,6 @@ import org.hl7.fhir.dstu3.model.CarePlan.CarePlanStatus;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.springframework.stereotype.Service;
-import uk.nhs.ctp.service.fhir.AuthenticatedStorageService;
 import uk.nhs.ctp.service.fhir.ReferenceService;
 import uk.nhs.ctp.service.fhir.StorageService;
 import uk.nhs.ctp.utils.RetryUtils;
@@ -22,7 +21,6 @@ public class CarePlanService {
 
   private final StorageService storageService;
   private final ReferenceService referenceService;
-  private final AuthenticatedStorageService authenticatedStorageService;
 
   public List<CarePlan> getByCaseId(Long id) {
     return RetryUtils.retry(() -> storageService.getClient().search()
@@ -39,11 +37,11 @@ public class CarePlanService {
 
   public void completeCarePlans(String[] carePlanIds) {
     Stream.of(carePlanIds)
-        .map(id -> authenticatedStorageService.get(id, CarePlan.class))
+        .map(id -> storageService.findResource(id, CarePlan.class))
         .filter(carePlan -> carePlan.getStatus() == CarePlanStatus.DRAFT
           || carePlan.getStatus() == CarePlanStatus.ACTIVE)
         .map(carePlan -> carePlan.setStatus(CarePlanStatus.COMPLETED))
-        .forEach(authenticatedStorageService::upsert);
+        .forEach(storageService::updateExternal);
   }
 
 }
