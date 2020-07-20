@@ -204,30 +204,14 @@
           <mat-tab label="Interim result:">
             <mat-card>
               <mat-card-content *ngIf="questionnaire.referralRequest">
-                <app-referral-request [(referralRequest)]="questionnaire.referralRequest"></app-referral-request>
+                <app-referral-request [referralRequest]="questionnaire.referralRequest"></app-referral-request>
               </mat-card-content>
             </mat-card>
           </mat-tab>
           <mat-tab label="Interim Care Advice">
             <mat-card *ngIf="questionnaire.careAdvice">
               <mat-card-content *ngFor="let careAdvice of questionnaire.careAdvice">
-                <p *ngIf="careAdvice.title"><strong>Title:</strong> {{ careAdvice.title}}</p>
-                <p *ngIf="careAdvice.description">
-                  <strong>Description:</strong> {{ careAdvice.description}}</p>
-                <p *ngIf="careAdvice.category"><strong>Category:</strong>  {{ careAdvice.category}}
-                </p>
-                <p *ngIf="careAdvice.system"><strong>System:</strong>  {{ careAdvice.system}}</p>
-                <p *ngIf="careAdvice.code"><strong>Code:</strong>  {{ careAdvice.code}}</p>
-                <p *ngIf="careAdvice.text"><strong>Text:</strong> {{ careAdvice.text}}</p>
-                <p *ngIf="careAdvice.supportingInfo"><strong>SupportingInfo:</strong></p>
-                <ul *ngFor="let info of careAdvice.supportingInfo">
-                  <li *ngIf="info.reference"><strong>Reference:</strong> {{ info.reference}}</li>
-                  <li *ngIf="info.display"><strong>Display:</strong> {{ info.display}}</li>
-                </ul>
-                <p *ngIf="careAdvice.notes"><strong>Notes:</strong></p>
-                <ul *ngFor="let note of careAdvice.notes">
-                  <li *ngIf="note.text"><strong>Text:</strong> {{ note.text}}</li>
-                </ul>
+                <app-care-plan [carePlan]="careAdvice"></app-care-plan>
                 <hr>
               </mat-card-content>
             </mat-card>
@@ -256,7 +240,7 @@
             <mat-card>
               <div class="container">
                 <div class="row">
-                  <app-referral-request [(referralRequest)]="questionnaire.referralRequest"></app-referral-request>
+                  <app-referral-request [referralRequest]="questionnaire.referralRequest"></app-referral-request>
                 </div>
               </div>
             </mat-card>
@@ -265,26 +249,7 @@
           <mat-tab label="Care Advice">
             <mat-card *ngIf="questionnaire.careAdvice">
               <mat-card-content *ngFor="let careAdvice of questionnaire.careAdvice">
-                <p *ngIf="careAdvice.title"><strong>Title:</strong> {{ careAdvice.title}}</p>
-                <p *ngIf="careAdvice.description">
-                  <strong>Description:</strong> {{ careAdvice.description}}</p>
-                <p *ngIf="careAdvice.category"><strong>Category:</strong>  {{ careAdvice.category}}
-                </p>
-                <p *ngIf="careAdvice.system"><strong>System:</strong>  {{ careAdvice.system}}</p>
-                <p *ngIf="careAdvice.code"><strong>Code:</strong>  {{ careAdvice.code}}</p>
-                <p *ngIf="careAdvice.text"><strong>Text:</strong> {{ careAdvice.text}}</p>
-
-                <p *ngIf="careAdvice.supportingInfo"><strong>SupportingInfo:</strong></p>
-                <ul *ngFor="let info of careAdvice.supportingInfo">
-                  <li *ngIf="info.reference"><strong>Reference:</strong> {{ info.reference}}</li>
-                  <li *ngIf="info.display"><strong>Display:</strong> {{ info.display}}</li>
-                </ul>
-
-                <p *ngIf="careAdvice.notes"><strong>Notes:</strong></p>
-                <ul *ngFor="let note of careAdvice.notes">
-                  <li *ngIf="note.text"><strong>Text:</strong> {{ note.text}}</li>
-                </ul>
-
+                <app-care-plan [carePlan]="careAdvice"></app-care-plan>
                 <hr>
               </mat-card-content>
             </mat-card>
@@ -296,7 +261,7 @@
 
   <app-dos-display
       *ngIf="questionnaire.referralRequest"
-      [(caseId)]="questionnaire.caseId"
-      [(referralRequest)]="questionnaire.referralRequest"></app-dos-display>
+      [caseId]="questionnaire.caseId"
+      [referralRequest]="questionnaire.referralRequest"></app-dos-display>
 
 </ng-template>

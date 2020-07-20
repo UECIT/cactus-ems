@@ -68,6 +68,7 @@ import { EmsService } from './service/ems.service';
 import { ReportSearchDialogComponent } from './main/report-search-dialog/report-search-dialog.component';
 import { ValidationReportComponent } from './validation-report/validation-report.component';
 import { ImagemapQuestionComponent } from './triage/questionnaire/question-types/imagemap-question/imagemap-question.component';
+import { CarePlanComponent } from "./triage/care-plan/care-plan.component";
 
 export function hljsLanguages() {
   return [
@@ -112,6 +113,7 @@ export function hljsLanguages() {
     PatientSelectionComponent,
     HealthcareServiceDialog,
     ReferralRequestComponent,
+    CarePlanComponent,
     ConditionDialog,
     PractitionerSelectionComponent,
     EmsSupplierComponent,
