@@ -86,17 +86,23 @@ public class CarePlanServiceTest {
     var carePlan2 = new CarePlan();
     carePlan2.setId("id2");
     carePlan2.setStatus(CarePlanStatus.DRAFT);
+    var carePlan3 = new CarePlan();
+    carePlan3.setId("id3");
+    carePlan3.setStatus(CarePlanStatus.CANCELLED);
 
     var completedCarePlan1 = carePlan1.copy().setStatus(CarePlanStatus.COMPLETED);
     var completedCarePlan2 = carePlan2.copy().setStatus(CarePlanStatus.COMPLETED);
+    var completedCarePlan3 = carePlan3.copy().setStatus(CarePlanStatus.COMPLETED);
 
     when(authenticatedStorageService.get("id1", CarePlan.class)).thenReturn(carePlan1);
     when(authenticatedStorageService.get("id2", CarePlan.class)).thenReturn(carePlan2);
+    when(authenticatedStorageService.get("id3", CarePlan.class)).thenReturn(carePlan3);
 
-    carePlanService.completeCarePlans(new String[]{"id1", "id2"});
+    carePlanService.completeCarePlans(new String[]{"id1", "id2", "id3"});
 
-    verify(authenticatedStorageService, never()).upsert(argThat(isFhir(completedCarePlan1)));
+    verify(authenticatedStorageService).upsert(argThat(isFhir(completedCarePlan1)));
     verify(authenticatedStorageService).upsert(argThat(isFhir(completedCarePlan2)));
+    verify(authenticatedStorageService, never()).upsert(argThat(isFhir(completedCarePlan3)));
   }
 
 }
