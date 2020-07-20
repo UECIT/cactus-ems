@@ -16,7 +16,9 @@ import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntrySearchComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
+import org.hl7.fhir.dstu3.model.Bundle.SearchEntryMode;
 import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.Composition;
 import org.hl7.fhir.dstu3.model.Encounter;
@@ -77,7 +79,7 @@ public class EncounterProvider implements IResourceProvider {
       @IncludeParam Set<Include> include //Ignored
   ) {
     Bundle bundle = new Bundle();
-    bundle.setType(BundleType.DOCUMENT);
+    bundle.setType(BundleType.SEARCHSET);
     Long caseId = Long.valueOf(encounterParam.getValue());
 
     addEncounter(bundle, caseId);
@@ -86,6 +88,15 @@ public class EncounterProvider implements IResourceProvider {
     addCarePlans(bundle, caseId);
     addList(bundle, caseId);
     addCompositions(bundle, caseId);
+
+    bundle.setTotal(1);
+    for (var entry : bundle.getEntry()) {
+      var searchMode = entry.getResource().getResourceType() == ResourceType.Encounter
+          ? SearchEntryMode.MATCH
+          : SearchEntryMode.INCLUDE;
+      var search = new BundleEntrySearchComponent().setMode(searchMode);
+      entry.setSearch(search);
+    }
 
     return bundle;
   }
@@ -149,9 +160,9 @@ public class EncounterProvider implements IResourceProvider {
   private Encounter addEncounter(Bundle bundle, Long caseId) {
     Encounter encounter = encounterService.getEncounter(caseId);
     String encounterRefString = referenceService.buildId(ResourceType.Encounter, caseId);
-    bundle.addEntry(new BundleEntryComponent()
+    bundle.addEntry()
         .setFullUrl(encounterRefString)
-        .setResource(encounter));
+        .setResource(encounter);
 
     // Add patient
     addResource(bundle, encounter.getSubject(), encounter.getIdElement());
