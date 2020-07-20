@@ -1,0 +1,17 @@
+<p *ngIf="carePlan.title"><strong>Title:</strong> {{ carePlan.title}}</p>
+<p *ngIf="carePlan.description"><strong>Description:</strong> {{ carePlan.description}}</p>
+<p *ngIf="carePlan.category"><strong>Category:</strong>  {{ carePlan.category}}</p>
+<p *ngIf="carePlan.system"><strong>System:</strong>  {{ carePlan.system}}</p>
+<p *ngIf="carePlan.code"><strong>Code:</strong>  {{ carePlan.code}}</p>
+<p *ngIf="carePlan.text"><strong>Text:</strong> {{ carePlan.text}}</p>
+
+<p *ngIf="carePlan.supportingInfo"><strong>SupportingInfo:</strong></p>
+<ul *ngFor="let info of carePlan.supportingInfo">
+  <li *ngIf="info.reference"><strong>Reference:</strong> {{ info.reference}}</li>
+  <li *ngIf="info.display"><strong>Display:</strong> {{ info.display}}</li>
+</ul>
+
+<p *ngIf="carePlan.notes"><strong>Notes:</strong></p>
+<ul *ngFor="let note of carePlan.notes">
+  <li *ngIf="note.text"><strong>Text:</strong> {{ note.text}}</li>
+</ul>

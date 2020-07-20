@@ -8,14 +8,32 @@ export class Questionnaire {
   result: string;
   switchTrigger: string;
   referralRequest: ReferralRequest;
-  careAdvice: any[];
+  careAdvice: CarePlan[];
   errorMessage: ErrorMessage;
 }
 
 export class ErrorMessage {
-  type: String;
-  display: String;
-  diagnostic: String;
+  type: string;
+  display: string;
+  diagnostic: string;
+}
+
+export class CarePlan {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  system: string;
+  code: string;
+  text: string;
+  status: string;
+  supportingInfo: SupportingInfo[];
+  notes: { text: string }[];
+}
+
+export class SupportingInfo {
+  reference: string;
+  display: string;
 }
 
 export class ReferralRequest {

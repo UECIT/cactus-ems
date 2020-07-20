@@ -10,6 +10,7 @@ import org.hl7.fhir.dstu3.model.Element;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.PrimitiveType;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -36,10 +37,21 @@ public class FhirMatchers {
         actual -> actual.equalsDeep(expected),
         expected.toString());
   }
-  public static Matcher<Base> isFhir(Base expected) {
+  public static <T extends Base> Matcher<T> isFhir(T expected) {
     return new FunctionMatcher<>(
         actual -> actual.equalsDeep(expected),
         expected.toString());
+  }
+
+  public static Matcher<Reference> referenceTo(String ref) {
+    return new FunctionMatcher<>(actual ->
+        actual.hasReference()
+            ? actual.getReference().equals(ref)
+            : actual.getResource().getIdElement().getValue().equals(ref), "reference to " + ref);
+  }
+
+  public static Matcher<Reference> referenceTo(Resource resource) {
+    return referenceTo(resource.getId());
   }
 
   @SafeVarargs
