@@ -162,7 +162,7 @@ public class EvaluateParametersServiceTest {
     personDto.setTelecom("0123 123 1234");
 
     CodeDTO codeDto = new CodeDTO();
-    codeDto.setCode("phone");
+    codeDto.setCode("telephony");
     codeDto.setDisplay("Call Handler");
 
     CodeDTO languageDto = new CodeDTO();
