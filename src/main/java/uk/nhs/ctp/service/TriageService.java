@@ -1,6 +1,6 @@
 package uk.nhs.ctp.service;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Questionnaire;
@@ -16,17 +16,18 @@ import uk.nhs.ctp.service.dto.TriageQuestion;
 import uk.nhs.ctp.transform.CaseObservationTransformer;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 public class TriageService {
 
-  private CaseService caseService;
-  private CdssService cdssService;
-  private ResponseService responseService;
-  private EncounterService encounterService;
-  private EvaluateService evaluateService;
-  private CaseObservationTransformer caseObservationTransformer;
-  private CompositionService compositionService;
+  private final CaseService caseService;
+  private final CdssService cdssService;
+  private final ResponseService responseService;
+  private final EncounterService encounterService;
+  private final EvaluateService evaluateService;
+  private final CaseObservationTransformer caseObservationTransformer;
+  private final CompositionService compositionService;
+  private final CarePlanService carePlanService;
 
   /**
    * Creates case from test case scenario and patient details and launches first triage request
@@ -89,6 +90,9 @@ public class TriageService {
         requestDetails.getCdssSupplierId());
 
     compositionService.crupdate(caseId, cdssResult);
+    if (requestDetails.getCarePlanIds() != null) {
+      carePlanService.completeCarePlans(requestDetails.getCarePlanIds());
+    }
 
     return cdssResponse;
   }
