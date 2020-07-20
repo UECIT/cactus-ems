@@ -6,10 +6,11 @@ export class ProcessTriage {
   caseId: number;
   cdssSupplierId: number;
   questionResponse: QuestionnaireResponse[];
-  serviceDefinitionId: String;
+  serviceDefinitionId: string;
   settings: Settings;
   amendingPrevious: boolean;
   patientId: string;
+  carePlanIds: string[];
 }
 
 export class QuestionnaireResponse {

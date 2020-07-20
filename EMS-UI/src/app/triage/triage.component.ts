@@ -97,6 +97,9 @@ export class TriageComponent implements OnInit {
       this.triage = selectedTriage;
     }
 
+    if (this.questionnaire.careAdvice) {
+      this.triage.carePlanIds = this.questionnaire.careAdvice.map(cp => cp.id);
+    }
     this.triage.caseId = this.questionnaire.caseId;
     if (switchCdss) {
       this.triage.questionResponse = null;

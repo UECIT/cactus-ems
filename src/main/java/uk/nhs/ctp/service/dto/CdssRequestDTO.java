@@ -13,5 +13,6 @@ public class CdssRequestDTO {
 	private SettingsDTO settings;
 	private Boolean amendingPrevious;
 	private String patientId;
+	private String[] carePlanIds;
 
 }
