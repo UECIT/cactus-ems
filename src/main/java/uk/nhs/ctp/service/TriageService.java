@@ -81,6 +81,9 @@ public class TriageService {
   public CdssResponseDTO processTriageRequest(CdssRequestDTO requestDetails) throws Exception {
 
     Long caseId = requestDetails.getCaseId();
+    if (requestDetails.getCarePlanIds() != null) {
+      carePlanService.completeCarePlans(requestDetails.getCarePlanIds());
+    }
 
     CdssResult cdssResult = evaluateService.evaluate(requestDetails);
 
@@ -90,9 +93,6 @@ public class TriageService {
         requestDetails.getCdssSupplierId());
 
     compositionService.crupdate(caseId, cdssResult);
-    if (requestDetails.getCarePlanIds() != null) {
-      carePlanService.completeCarePlans(requestDetails.getCarePlanIds());
-    }
 
     return cdssResponse;
   }
