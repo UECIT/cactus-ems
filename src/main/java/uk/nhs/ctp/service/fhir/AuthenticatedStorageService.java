@@ -11,12 +11,12 @@ import org.springframework.stereotype.Service;
 import uk.nhs.cactus.common.security.AuthenticatedFhirClientFactory;
 import uk.nhs.ctp.utils.RetryUtils;
 
+/**
+ * FHIR resource storage service that is aware of the token exchange server and can
+ * appropriately authenticate with registered endpoints.
+ */
 @Service
 @RequiredArgsConstructor
-/*
-  FHIR resource storage service that is aware of the token exchange server and can
-  appropriately authenticate with registered endpoints.
- */
 public class AuthenticatedStorageService {
 
   @Value("${fhir.server}")
@@ -28,19 +28,17 @@ public class AuthenticatedStorageService {
     return clientFactory.getClient(serverBase);
   }
   private IGenericClient getClientFor(IdType id) {
-    return getClientFor(id.getBaseUrl());
+    return getClientFor(id.isAbsolute() ? id.getBaseUrl(): fhirServer);
   }
 
   public <T extends IBaseResource> T get(String id, Class<T> type) {
     var idType = new IdType(id);
     var client = getClientFor(idType);
-    var resource = RetryUtils.retry(() -> client.read()
+    return RetryUtils.retry(() -> client.read()
         .resource(type)
         .withId(idType)
         .execute(),
         client.getServerBase());
-    System.out.println("Obtained resource has lalala id " + resource.getIdElement());
-    return resource;
   }
 
   /**
@@ -52,7 +50,7 @@ public class AuthenticatedStorageService {
    */
   public Reference upsert(Resource resource) {
     if (resource.hasId()) {
-      var client = getClientFor(resource.getIdElement().getBaseUrl());
+      var client = getClientFor(resource.getIdElement());
       RetryUtils.retry(() -> client.update()
               .resource(resource)
               .execute(),

@@ -1,19 +1,19 @@
 package uk.nhs.ctp.service;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.nhs.ctp.service.dto.CdssRequestDTO;
@@ -24,8 +24,8 @@ import uk.nhs.ctp.transform.CaseObservationTransformer;
 @RunWith(MockitoJUnitRunner.class)
 public class TriageServiceTest {
 
+  @InjectMocks
   private TriageService triageService;
-  private TriageService spyTriageService;
 
   @Mock
   private CaseService caseService;
@@ -49,7 +49,7 @@ public class TriageServiceTest {
   private EvaluateService evaluateService;
 
   @Mock
-  private FhirContext fhirContext;
+  private CarePlanService carePlanService;
 
   CdssResult mockCdssResult;
   CdssResponseDTO mockCdssResponseDTO;
@@ -57,32 +57,14 @@ public class TriageServiceTest {
   Questionnaire mockQuestionnaire;
 
   @Before
-  public void setup() {
-    spyTriageService = spy(new TriageService(
-        caseService,
-        cdssService,
-        responseService,
-        encounterService,
-        evaluateService,
-        caseObservationTransformer,
-        compositionService
-    ));
-
-    triageService = new TriageService(
-        caseService,
-        cdssService,
-        responseService,
-        encounterService,
-        evaluateService,
-        caseObservationTransformer,
-        compositionService
-    );
-
+  public void setup() throws Exception {
     mockCdssResult = mock(CdssResult.class);
     mockCdssResponseDTO = mock(CdssResponseDTO.class);
     mockCdssRequestDTO = mock(CdssRequestDTO.class);
     when(mockCdssRequestDTO.getCaseId()).thenReturn(1L);
     when(mockCdssRequestDTO.getCdssSupplierId()).thenReturn(1L);
+
+    when(evaluateService.evaluate(mockCdssRequestDTO)).thenReturn(mockCdssResult);
 
     mockQuestionnaire = mock(Questionnaire.class);
 
@@ -138,6 +120,36 @@ public class TriageServiceTest {
     triageService.buildResponseDtoFromResult(mockCdssResult, 1L, 1L);
 
     verify(cdssService, times(0)).getQuestionnaire(anyLong(), anyString());
+  }
+
+  @Test
+  public void processTriageRequest_withCarePlanIds_willCompleteCarePlans() throws Exception {
+    var carePlanIds = new String[]{"id1", "id2"};
+    when(mockCdssRequestDTO.getCarePlanIds()).thenReturn(carePlanIds);
+
+    when(mockCdssResult.hasResult()).thenReturn(true);
+    when(mockCdssResult.hasQuestionnaire()).thenReturn(false);
+    when(responseService.buildResponse(mockCdssResult, null, 1L, 1L))
+        .thenReturn(mockCdssResponseDTO);
+
+    triageService.processTriageRequest(mockCdssRequestDTO);
+
+    verify(carePlanService).completeCarePlans(carePlanIds);
+
+  }
+
+  @Test
+  public void processTriageRequest_withNullCarePlanIds_willNotCompleteCarePlans() throws Exception {
+    when(mockCdssRequestDTO.getCarePlanIds()).thenReturn(null);
+
+    when(mockCdssResult.hasResult()).thenReturn(true);
+    when(mockCdssResult.hasQuestionnaire()).thenReturn(false);
+    when(responseService.buildResponse(mockCdssResult, null, 1L, 1L))
+        .thenReturn(mockCdssResponseDTO);
+
+    triageService.processTriageRequest(mockCdssRequestDTO);
+
+    verify(carePlanService, times(0)).completeCarePlans(any());
   }
 
 }
