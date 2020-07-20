@@ -40,7 +40,8 @@ public class CarePlanService {
   public void completeCarePlans(String[] carePlanIds) {
     Stream.of(carePlanIds)
         .map(id -> authenticatedStorageService.get(id, CarePlan.class))
-        .filter(carePlan -> carePlan.getStatus() == CarePlanStatus.DRAFT)
+        .filter(carePlan -> carePlan.getStatus() == CarePlanStatus.DRAFT
+          || carePlan.getStatus() == CarePlanStatus.ACTIVE)
         .map(carePlan -> carePlan.setStatus(CarePlanStatus.COMPLETED))
         .forEach(authenticatedStorageService::upsert);
   }
