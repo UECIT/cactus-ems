@@ -37,12 +37,7 @@ public class FhirMatchers {
         actual -> actual.equalsDeep(expected),
         expected.toString());
   }
-  public static Matcher<Base> isFhir(Base expected) {
-    return new FunctionMatcher<>(
-        actual -> actual.equalsDeep(expected),
-        expected.toString());
-  }
-  public static Matcher<Resource> isFhir(Resource expected) {
+  public static <T extends Base> Matcher<T> isFhir(T expected) {
     return new FunctionMatcher<>(
         actual -> actual.equalsDeep(expected),
         expected.toString());

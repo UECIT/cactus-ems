@@ -4,8 +4,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import static uk.nhs.ctp.testhelper.matchers.FhirMatchers.isFhir;
 
@@ -95,7 +95,7 @@ public class CarePlanServiceTest {
 
     carePlanService.completeCarePlans(new String[]{"id1", "id2"});
 
-    verify(authenticatedStorageService, times(0)).upsert(argThat(isFhir(completedCarePlan1)));
+    verify(authenticatedStorageService, never()).upsert(argThat(isFhir(completedCarePlan1)));
     verify(authenticatedStorageService).upsert(argThat(isFhir(completedCarePlan2)));
   }
 
