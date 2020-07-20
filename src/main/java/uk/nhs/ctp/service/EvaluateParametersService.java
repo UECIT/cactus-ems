@@ -46,7 +46,6 @@ import uk.nhs.ctp.service.dto.SettingsDTO;
 import uk.nhs.ctp.service.dto.TriageQuestion;
 import uk.nhs.ctp.service.fhir.ReferenceService;
 import uk.nhs.ctp.transform.ObservationTransformer;
-import uk.nhs.ctp.utils.ErrorHandlingUtils;
 
 @Service
 @AllArgsConstructor
@@ -413,7 +412,7 @@ public class EvaluateParametersService {
     }
 
     public Builder setSetting(CodeDTO settingDTO) {
-      CodeableConcept setting = toSnomedCode(settingDTO);
+      CodeableConcept setting = Setting.fromCode(settingDTO.getCode()).toCodeableConcept();
 
       addUniqueParameter(SystemConstants.SETTING)
           .setValue(setting);

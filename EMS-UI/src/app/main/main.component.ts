@@ -166,13 +166,13 @@ export class MainComponent implements OnInit {
       {
         'id': 2,
         'description': 'Phone call',
-        'code': 'phone',
+        'code': 'telephony',
         'display': 'Phone call'
       },
       {
         'id': 3,
         'description': 'Face to face',
-        'code': 'clinical',
+        'code': 'face-to-face',
         'display': 'Face to face'
       }
     ];
