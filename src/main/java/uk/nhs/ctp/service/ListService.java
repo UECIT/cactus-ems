@@ -11,13 +11,14 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.ListResource;
 import org.hl7.fhir.dstu3.model.ListResource.ListEntryComponent;
+import org.hl7.fhir.dstu3.model.ListResource.ListMode;
 import org.hl7.fhir.dstu3.model.ListResource.ListStatus;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ResourceType;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.entities.Cases;
+import uk.nhs.ctp.enums.ListCode;
 import uk.nhs.ctp.enums.ListOrder;
 import uk.nhs.ctp.exception.EMSException;
 import uk.nhs.ctp.repos.CaseRepository;
@@ -41,6 +42,9 @@ public class ListService {
 
     ListResource listResource = new ListResource();
     listResource.setStatus(ListStatus.CURRENT)
+        .setMode(ListMode.WORKING)
+        .setCode(ListCode.TRIAGE.toCodeableConcept())
+        .setStatus(ListStatus.CURRENT)
         .setEncounter(referenceService.buildRef(ResourceType.Encounter, caseId))
         .setSubject(new Reference(caseEntity.getPatientId()))
         .setDate(caseEntity.getClosedDate())
