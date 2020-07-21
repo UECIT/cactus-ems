@@ -150,6 +150,51 @@ public class AuditControllerComponentTest {
   }
 
   @Test
+  public void download_withCaseId_shouldReturnZip() throws IOException {
+    var request = new AuditValidationRequest();
+    request.setCaseId("validCaseId");
+    request.setInstanceBaseUrl("http://existing.cdss/supplier");
+    request.setSearchAuditId(null);
+    request.setType(OperationType.ENCOUNTER);
+
+    when(esClient.search(anyString(), any(SearchSourceBuilder.class)))
+        .thenReturn(encounterSearchHits(getClass().getClassLoader()));
+
+    var selectedCdss = new CdssSupplier();
+    selectedCdss.setName("selectedCdss");
+    selectedCdss.setBaseUrl("http://existing.cdss/supplier");
+    selectedCdss.setSupportedVersion(CdsApiVersion.ONE_ONE);
+    cdssSupplierRepository.saveAndFlush(selectedCdss);
+
+    ResponseEntity<byte[]> response = auditController.download(request);
+
+    var responseBytes = response.getBody();
+
+    var entry1 = ZippedEntry.builder()
+        .path("encounter91/null/case/.1.request.xml")
+        .body("auditRequestBody")
+        .instant(Instant.parse("2020-06-30T07:56:31Z"))
+        .build();
+    var entry2 = ZippedEntry.builder()
+        .path("encounter91/null/case/.1.response.xml")
+        .body("auditResponseBody")
+        .instant(Instant.parse("2020-06-30T07:56:31Z"))
+        .build();
+    var entry3 = ZippedEntry.builder()
+        .path("encounter91/cdss.cactus-staging.iucdspilot.uk/fhir/ServiceDefinition/palpitations2.1.response.xml")
+        .body("entry1ResponseBody")
+        .instant(Instant.parse("2020-06-30T07:56:32Z"))
+        .build();
+    var entry4 = ZippedEntry.builder()
+        .path("encounter91/fhir-server.cactus-staging.iucdspilot.uk/fhir/QuestionnaireResponse/849.1.response.xml")
+        .body("entry1ResponseBody")
+        .instant(Instant.parse("2020-06-30T07:56:33Z"))
+        .build();
+
+    assertThat(unzipEntries(responseBytes), contains(entry1, entry2, entry3, entry4));
+  }
+
+  @Test
   public void validate_withSearchAuditId_shouldSendSearchAudits() throws IOException {
     var request = new AuditValidationRequest();
     request.setCaseId(null);
