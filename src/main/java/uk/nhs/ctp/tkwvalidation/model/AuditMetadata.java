@@ -1,10 +1,13 @@
 package uk.nhs.ctp.tkwvalidation.model;
 
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.Value;
+import org.springframework.http.HttpHeaders;
 import uk.nhs.ctp.auditFinder.model.OperationType;
 import uk.nhs.ctp.enums.CdsApiVersion;
 
@@ -14,6 +17,7 @@ public class AuditMetadata {
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   public static class Headers {
+
     public static String SUPPLIER_ID = "Cactus-Supplier-ID";
     public static String API_VERSION = "Cactus-API-Version";
     public static String INTERACTION_TYPE = "Cactus-Interaction-Type";
@@ -42,4 +46,20 @@ public class AuditMetadata {
   // the URL of the service being audited for validation
   String serviceEndpoint;
 
+  public HttpHeaders toHeaders() {
+    var interactionDate = getInteractionDate()
+        .atOffset(ZoneOffset.UTC)
+        .format(DateTimeFormatter.ISO_INSTANT);
+
+    HttpHeaders httpHeaders = new HttpHeaders();
+    httpHeaders.add(Headers.SUPPLIER_ID, getSupplierId());
+    httpHeaders.add(Headers.API_VERSION, getApiVersion().getVersion());
+    httpHeaders.add(Headers.INTERACTION_TYPE, getInteractionType().getName());
+    // TODO CDSCT-400: enable the following line
+//        httpHeaders.add();();(Headers.INTERACTION_ID, getInteractionId())
+    httpHeaders.add(Headers.INTERACTION_DATE, interactionDate);
+    httpHeaders.add(Headers.SERVICE_ENDPOINT, getServiceEndpoint());
+
+    return httpHeaders;
+  }
 }
