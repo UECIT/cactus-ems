@@ -13,7 +13,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import com.google.common.base.Preconditions;
 import java.util.List;
 import java.util.Set;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntrySearchComponent;
@@ -41,18 +41,18 @@ import uk.nhs.ctp.service.fhir.GenericResourceLocator;
 import uk.nhs.ctp.service.fhir.ReferenceService;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class EncounterProvider implements IResourceProvider {
 
-  private GenericResourceLocator resourceLocator;
-  private EncounterService encounterService;
-  private AppointmentService appointmentService;
-  private ReferralRequestService referralRequestService;
-  private CarePlanService carePlanService;
-  private ReferenceService referenceService;
-  private ListService listService;
-  private CompositionService compositionService;
-  private FhirContext context;
+  private final GenericResourceLocator resourceLocator;
+  private final EncounterService encounterService;
+  private final AppointmentService appointmentService;
+  private final ReferralRequestService referralRequestService;
+  private final CarePlanService carePlanService;
+  private final ReferenceService referenceService;
+  private final ListService listService;
+  private final CompositionService compositionService;
+  private final FhirContext context;
 
   /**
    * Encounter Report Search
@@ -91,7 +91,10 @@ public class EncounterProvider implements IResourceProvider {
 
     bundle.setTotal(1);
     for (var entry : bundle.getEntry()) {
-      var searchMode = entry.getResource().getResourceType() == ResourceType.Encounter
+      var isRequestedEncounter = entry.getResource().getResourceType() == ResourceType.Encounter
+          && entry.getResource().hasId()
+          && entry.getResource().getId().equals(encounterParam.getValue());
+      var searchMode = isRequestedEncounter
           ? SearchEntryMode.MATCH
           : SearchEntryMode.INCLUDE;
       var search = new BundleEntrySearchComponent().setMode(searchMode);
