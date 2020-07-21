@@ -48,13 +48,6 @@ public class ObservationTransformer implements Transformer<CaseObservation, Obse
             caseObservation.getValueDisplay())));
     }
 
-    if (caseObservation.getDataAbsentCode() != null && caseObservation.getDataAbsentDisplay() != null) {
-      observation.setDataAbsentReason(new CodeableConcept().addCoding(new Coding(
-          caseObservation.getDataAbsentSystem(),
-          caseObservation.getDataAbsentCode(),
-          caseObservation.getDataAbsentDisplay())));
-    }
-
     observation.setText(narrativeService.buildNarrative(transformNarrative(caseObservation)));
 
     Cases caseEntity = caseObservation.getCaseEntity();
@@ -72,9 +65,6 @@ public class ObservationTransformer implements Transformer<CaseObservation, Obse
   private String transformNarrative(CaseObservation caseObservation) {
     var codeText = defaultString(caseObservation.getDisplay(), caseObservation.getCode());
     var text = "Observed that '" + codeText + "' was ";
-    if (caseObservation.getDataAbsentCode() != null) {
-      return text + "not present because '" + caseObservation.getDataAbsentDisplay() + "'";
-    }
 
     var valueText = defaultString(caseObservation.getValueDisplay(), caseObservation.getValueCode());
     switch (defaultString(caseObservation.getValueSystem(), "")) {
