@@ -41,11 +41,12 @@ public class SearchParametersTransformer {
         .observationTriggers(transformObservationTriggers(dataRequirements));
 
     if (settingsDTO != null) {
-      UserType initiatingType = Setting.fromCode(settingsDTO.getSetting().getCode()) == Setting.ONLINE
+      Setting setting = Setting.fromCode(settingsDTO.getSetting().getCode());
+      UserType initiatingType = setting == Setting.ONLINE
           ? UserType.fromCode(settingsDTO.getUserType().getCode())
           : UserType.PRACTITIONER;
       builder.contextValue("user", SystemURL.CS_PROVIDER_TAXONOMY, initiatingType.getValue())
-          .contextValue("setting", SystemURL.CS_PROVIDER_TAXONOMY, settingsDTO.getSetting().getCode())
+          .contextValue("725221000000100", setting.getSystem(), setting.getValue())
           .contextValue("task", SystemURL.CS_CDS_STUB, settingsDTO.getUserTaskContext().getCode())
           .jurisdiction(settingsDTO.getJurisdiction().getCode());
     }

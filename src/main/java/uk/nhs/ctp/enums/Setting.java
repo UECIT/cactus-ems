@@ -9,11 +9,12 @@ import lombok.RequiredArgsConstructor;
 public enum Setting implements Concept {
 
   ONLINE("online", "Online"),
-  PHONE("phone", "Phone Call"),
-  FACE_TO_FACE("clinical", "Face to face");
+  PHONE("telephony", "Telephony"),
+  FACE_TO_FACE("face-to-face", "Face to face");
 
   private final String value;
   private final String display;
+  private final String system = SYSTEM;
 
   public static Setting fromCode(String code) {
     return Arrays.stream(Setting.values())
@@ -21,8 +22,5 @@ public enum Setting implements Concept {
         .findFirst().orElseThrow(IllegalArgumentException::new);
   }
 
-  @Override
-  public String getSystem() {
-    return "setting";
-  }
+  public static final String SYSTEM = "https://fhir.nhs.uk/STU3/CodeSystem/UEC-CommunicationChannel-1";
 }
