@@ -5,4 +5,5 @@ export const environment = {
   UECDI_API: '$UECDI_API',
   UECDI_VALIDATE_API: '$UECDI_VALIDATE_API',
   TERM_API: '$TERM_API',
+  USER_GUIDE: '$USER_GUIDE',
 };
