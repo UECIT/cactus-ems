@@ -72,8 +72,7 @@ public class AuditControllerComponentTest {
 
   @Before
   public void setup() {
-    when(authenticationService.requireSupplierId())
-        .thenReturn(TEST_SUPPLIER_ID);
+    when(authenticationService.requireSupplierId()).thenReturn(TEST_SUPPLIER_ID);
   }
 
   @Test
@@ -184,13 +183,6 @@ public class AuditControllerComponentTest {
 
     assertThat(unzipEntries(decodedBytes), contains(entry1, entry2));
   }
-
-  private static final String VALIDATION_RESPONSE = "{"
-      + "    \"resourceType\": \"OperationOutcome\","
-      + "    \"issue\": [{"
-      + "        \"diagnostics\": \"validDiagnosticsHtml\""
-      + "    }]"
-      + "}";
 
   @SuppressWarnings("unused")
   private static void saveZipToTempFile(byte[] zipData) throws IOException {
