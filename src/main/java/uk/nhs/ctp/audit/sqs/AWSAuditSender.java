@@ -61,7 +61,7 @@ public class AWSAuditSender implements AuditSender {
         log.warn("Audit request exceeded max size SQS can handle", e);
         //TODO: CDSCT-338 - Should we be auditing/paging audit search audits or excluding things
       }
-      log.error("an error occurred sending audit session {} to SQS", format(session), e);
+      log.error("an error occurred sending audit session {} to SQS: {}", format(session), e.getErrorMessage());
     } catch (Exception e) {
       log.error("an error occurred sending audit session {} to SQS", format(session), e);
     }
