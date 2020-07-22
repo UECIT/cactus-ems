@@ -16,7 +16,7 @@ public class AuditParser {
         .map(header -> header.split(":"))
         .filter(headerParts -> headerParts.length == 2)
         .collect(Collectors.toUnmodifiableMap(
-            headerParts -> headerParts[0],
+            headerParts -> headerParts[0].toLowerCase(),
             headerParts -> getHeaderValueFrom(headerParts[1])
         ));
   }

@@ -7,7 +7,7 @@
   "requestHeaders": "content-type: [application/fhir+xml]",
   "responseStatus": "200",
   "responseBody": "auditResponseBody",
-  "responseHeaders": "content-type: [application/fhir+json]",
+  "responseHeaders": "Content-Type: [application/fhir+json]",
   "createdDate": "2020-06-30T07:56:31.467917Z",
   "entries": [
     {
