@@ -11,7 +11,7 @@ export TERM_API="${TERM_API:-https://ontoserver.dataproducts.nhs.uk/fhir}"
 export USER_GUIDE="${USER_GUIDE:-https://uec-connect-conformance-guide.netlify.app/}"
 
 # shellcheck disable=SC2016
-SUBST_VARS='$ENV_NAME,$EMS_API,$UECDI_API,$UECDI_VALIDATE_API,$TERM_API'
+SUBST_VARS='$ENV_NAME,$EMS_API,$UECDI_API,$UECDI_VALIDATE_API,$TERM_API,$USER_GUIDE'
 
 TMP_FILE=$(mktemp)
 SUBST_FILE=$(ls main.*.js)
