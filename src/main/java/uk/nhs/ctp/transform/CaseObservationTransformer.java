@@ -20,11 +20,6 @@ public class CaseObservationTransformer implements Transformer<Observation, Case
 
     updateObservationCoding(observation, caseObservation);
 
-    // Try to set dataAbsenseReason here
-    Coding dataAbsentReason = observation.getDataAbsentReason().getCodingFirstRep();
-    caseObservation.setDataAbsentCode(dataAbsentReason.getCode());
-    caseObservation.setDataAbsentDisplay(dataAbsentReason.getDisplay());
-
     return caseObservation;
   }
 

@@ -42,15 +42,6 @@ public class CaseObservation extends SupplierPartitioned {
   @Column(name = "display")
   private String display;
 
-  @Column(name = "data_absent_system")
-  private String dataAbsentSystem;
-
-  @Column(name = "data_absent_code")
-  private String dataAbsentCode;
-
-  @Column(name = "data_absent_display")
-  private String dataAbsentDisplay;
-
   @Column(name = "value_system")
   private String valueSystem;
 
