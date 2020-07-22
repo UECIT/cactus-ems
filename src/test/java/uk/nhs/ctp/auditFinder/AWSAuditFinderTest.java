@@ -35,9 +35,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.nhs.cactus.common.audit.model.AuditEntry;
+import uk.nhs.cactus.common.audit.model.AuditSession;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
-import uk.nhs.ctp.audit.model.AuditEntry;
-import uk.nhs.ctp.audit.model.AuditSession;
 import uk.nhs.ctp.auditFinder.finder.AWSAuditFinder;
 import uk.nhs.ctp.testhelper.fixtures.ElasticSearchFixtures;
 
@@ -128,7 +128,7 @@ public class AWSAuditFinderTest {
     assertThat(searchSource.query(), hasToString(equalToJSON(
         "{ bool : { must : ["
             + " { term : { additionalProperties.supplierId : { value : test-supplier } } },"
-            + " { term : { additionalProperties.caseId : { value : \"76\" } } }"
+            + " { term : { additionalProperties.interactionId : { value : \"76\" } } }"
             + "] } }")));
   }
 
@@ -183,7 +183,7 @@ public class AWSAuditFinderTest {
         "{ bool : { must : ["
         + " { term : { @owner.keyword : { value : ems.cactus-staging } } },"
         + " { term : { additionalProperties.supplierId : { value : test-supplier } } },"
-        + " { term : { additionalProperties.caseId : { value : \"76\" } } }"
+        + " { term : { additionalProperties.interactionId : { value : \"76\" } } }"
         + "] } }")));
   }
 
@@ -253,7 +253,7 @@ public class AWSAuditFinderTest {
     assertThat(searchSource.query(), hasToString(equalToJSON(
         "{ bool : { must : ["
             + " { term : { additionalProperties.supplierId : { value : test-supplier } } },"
-            + " { exists : { field : additionalProperties.caseId } }"
+            + " { exists : { field : additionalProperties.interactionId } }"
             + "] } }")));
   }
 
@@ -355,7 +355,7 @@ public class AWSAuditFinderTest {
 
     assertThat(audit.getRequestUrl(), is("/case/"));
     assertThat(audit.getResponseStatus(), is("200"));
-    assertThat(audit.getAdditionalProperties().get("caseId"), is("57"));
+    assertThat(audit.getAdditionalProperties().get("interactionId"), is("57"));
     assertThat(audit.getEntries(), hasSize(28));
   }
 }

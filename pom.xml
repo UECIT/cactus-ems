@@ -25,7 +25,7 @@
 
     <elastic-search-version>7.7.1</elastic-search-version>
 
-    <cactus-common.version>0.0.5.6</cactus-common.version>
+    <cactus-common.version>0.0.5.7</cactus-common.version>
   </properties>
 
   <repositories>
@@ -157,10 +157,6 @@
     <dependency>
       <groupId>com.amazonaws</groupId>
       <artifactId>aws-java-sdk-cognitoidp</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.amazonaws</groupId>
-      <artifactId>aws-java-sdk-sqs</artifactId>
     </dependency>
 
     <!-- Other -->

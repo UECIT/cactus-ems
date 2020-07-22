@@ -6,9 +6,9 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
-import uk.nhs.ctp.audit.AuditService;
-import uk.nhs.ctp.audit.model.HttpRequest;
-import uk.nhs.ctp.audit.model.HttpResponse;
+import uk.nhs.cactus.common.audit.AuditService;
+import uk.nhs.cactus.common.audit.model.HttpRequest;
+import uk.nhs.cactus.common.audit.model.HttpResponse;
 
 @Component
 @RequiredArgsConstructor

@@ -1,6 +1,8 @@
 package uk.nhs.ctp.auditFinder.finder;
 
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,10 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
-import uk.nhs.ctp.audit.model.AuditSession;
-
-import java.util.Collections;
-import java.util.List;
+import uk.nhs.cactus.common.audit.model.AuditSession;
 
 @Service
 @Slf4j

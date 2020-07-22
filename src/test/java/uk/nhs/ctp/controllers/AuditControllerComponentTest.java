@@ -9,6 +9,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static uk.nhs.cactus.common.audit.model.OperationType.ENCOUNTER;
+import static uk.nhs.cactus.common.audit.model.OperationType.SERVICE_SEARCH;
 import static uk.nhs.ctp.testhelper.AuditUnzipper.unzipEntries;
 import static uk.nhs.ctp.testhelper.fixtures.ElasticSearchFixtures.encounterSearchHits;
 import static uk.nhs.ctp.testhelper.fixtures.ElasticSearchFixtures.serviceDefinitionSearchHits;
@@ -37,7 +39,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.auditFinder.ElasticSearchClient;
 import uk.nhs.ctp.auditFinder.model.AuditValidationRequest;
-import uk.nhs.ctp.auditFinder.model.OperationType;
 import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.enums.CdsApiVersion;
 import uk.nhs.ctp.repos.CdssSupplierRepository;
@@ -104,7 +105,7 @@ public class AuditControllerComponentTest {
     request.setCaseId("validCaseId");
     request.setInstanceBaseUrl("http://existing.cdss/supplier");
     request.setSearchAuditId(null);
-    request.setType(OperationType.ENCOUNTER);
+    request.setType(ENCOUNTER);
 
     when(esClient.search(anyString(), any(SearchSourceBuilder.class)))
         .thenReturn(encounterSearchHits(getClass().getClassLoader()));
@@ -155,7 +156,7 @@ public class AuditControllerComponentTest {
     request.setCaseId(null);
     request.setInstanceBaseUrl("http://non-existing.cdss/supplier");
     request.setSearchAuditId("validSearchAuditId");
-    request.setType(OperationType.SERVICE_SEARCH);
+    request.setType(SERVICE_SEARCH);
 
     when(esClient.search(anyString(), any(SearchSourceBuilder.class)))
         .thenReturn(serviceDefinitionSearchHits(getClass().getClassLoader()));

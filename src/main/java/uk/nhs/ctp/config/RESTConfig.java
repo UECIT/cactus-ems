@@ -35,17 +35,6 @@ public class RESTConfig {
   }
 
   @Bean
-  public RestTemplate auditRestTemplate() {
-    // Currently only used for local-only services (i.e. audit server)
-    // a timeout of 50 should be acceptable locally
-    var timeout = 50;
-    return new RestTemplateBuilder()
-            .setConnectTimeout(timeout)
-            .setReadTimeout(timeout)
-            .build();
-  }
-
-  @Bean
   public RestTemplate blobRestTemplate(RestTemplateBuilder builder) {
     return builder.build();
   }

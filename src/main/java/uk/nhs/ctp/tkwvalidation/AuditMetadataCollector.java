@@ -1,6 +1,8 @@
 package uk.nhs.ctp.tkwvalidation;
 
 import static java.util.Comparator.comparing;
+import static uk.nhs.cactus.common.audit.model.AuditProperties.INTERACTION_ID;
+import static uk.nhs.cactus.common.audit.model.AuditProperties.SUPPLIER_ID;
 
 import java.util.List;
 import java.util.Objects;
@@ -8,8 +10,8 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import uk.nhs.ctp.audit.model.AuditSession;
-import uk.nhs.ctp.auditFinder.model.OperationType;
+import uk.nhs.cactus.common.audit.model.AuditSession;
+import uk.nhs.cactus.common.audit.model.OperationType;
 import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.enums.CdsApiVersion;
 import uk.nhs.ctp.service.CdssSupplierService;
@@ -19,8 +21,6 @@ import uk.nhs.ctp.tkwvalidation.model.AuditMetadata;
 @Slf4j
 @RequiredArgsConstructor
 public class AuditMetadataCollector {
-  private static final String SUPPLIER_ID = "supplierId";
-  private static final String CASE_ID = "caseId";
 
   private final CdssSupplierService cdssSupplierService;
 
@@ -42,15 +42,7 @@ public class AuditMetadataCollector {
         .map(CdssSupplier::getSupportedVersion)
         .orElse(CdsApiVersion.TWO);
     metadataBuilder.apiVersion(apiVersion);
-
-    switch (operationType) {
-      case ENCOUNTER:
-        metadataBuilder.interactionId(getSingleProperty(audits, CASE_ID));
-        break;
-      case SERVICE_SEARCH:
-        // TODO CDSCT-400: unify interaction id
-        break;
-    }
+    metadataBuilder.interactionId(getSingleProperty(audits, INTERACTION_ID));
 
     var earliestDate = audits.stream()
         .min(comparing(AuditSession::getCreatedDate))

@@ -20,7 +20,9 @@
     }
   ],
   "additionalProperties": {
-    "supplierId": "admin_supplier"
+    "supplierId": "admin_supplier",
+    "interactionId": "validGuidValue",
+    "operationType": "service_search"
   },
   "@timestamp": "2020-06-30T07:56:38.806Z",
   "@owner": "ems.cactus-staging"

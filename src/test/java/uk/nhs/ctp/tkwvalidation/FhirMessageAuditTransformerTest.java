@@ -14,9 +14,9 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.nhs.ctp.audit.AuditParser;
-import uk.nhs.ctp.audit.model.AuditEntry;
-import uk.nhs.ctp.audit.model.AuditSession;
+import uk.nhs.cactus.common.audit.AuditParser;
+import uk.nhs.cactus.common.audit.model.AuditEntry;
+import uk.nhs.cactus.common.audit.model.AuditSession;
 import uk.nhs.ctp.testhelper.matchers.FunctionMatcher;
 import uk.nhs.ctp.tkwvalidation.model.FhirMessageAudit;
 

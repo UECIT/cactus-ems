@@ -1,9 +1,8 @@
 package uk.nhs.ctp.auditFinder.finder;
 
-import java.util.Optional;
-import uk.nhs.ctp.audit.model.AuditSession;
-
 import java.util.List;
+import java.util.Optional;
+import uk.nhs.cactus.common.audit.model.AuditSession;
 
 public interface AuditFinder {
     Optional<AuditSession> findByAuditId(String auditId);

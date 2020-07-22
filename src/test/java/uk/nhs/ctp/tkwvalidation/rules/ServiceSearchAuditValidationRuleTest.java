@@ -4,8 +4,8 @@ import java.util.List;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import uk.nhs.ctp.audit.model.AuditEntry;
-import uk.nhs.ctp.audit.model.AuditSession;
+import uk.nhs.cactus.common.audit.model.AuditEntry;
+import uk.nhs.cactus.common.audit.model.AuditSession;
 
 public class ServiceSearchAuditValidationRuleTest {
   private final ServiceSearchAuditValidationRule rule = new ServiceSearchAuditValidationRule();

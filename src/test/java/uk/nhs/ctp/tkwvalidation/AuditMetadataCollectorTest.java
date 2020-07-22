@@ -13,8 +13,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.nhs.ctp.audit.model.AuditSession;
-import uk.nhs.ctp.auditFinder.model.OperationType;
+import uk.nhs.cactus.common.audit.model.AuditSession;
+import uk.nhs.cactus.common.audit.model.OperationType;
 import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.enums.CdsApiVersion;
 import uk.nhs.ctp.service.CdssSupplierService;
@@ -52,12 +52,12 @@ public class AuditMetadataCollectorTest {
         AuditSession.builder()
             .createdDate(CREATED_AT_2)
             .additionalProperty("supplierId", "validSupplierId")
-            .additionalProperty("caseId", "validCaseId")
+            .additionalProperty("interactionId", "validCaseId")
             .build(),
         AuditSession.builder()
             .createdDate(CREATED_AT_1)
             .additionalProperty("supplierId", "validSupplierId")
-            .additionalProperty("caseId", "validCaseId")
+            .additionalProperty("interactionId", "validCaseId")
             .build());
 
     when(cdssSupplierService.findCdssSupplierByBaseUrl("validEndpoint"))
@@ -86,7 +86,7 @@ public class AuditMetadataCollectorTest {
         AuditSession.builder()
             .createdDate(CREATED_AT_2)
             .additionalProperty("supplierId", "validSupplierId")
-            .additionalProperty("caseId", "validCaseId")
+            .additionalProperty("interactionId", "validCaseId")
             .build());
 
     var cdss = new CdssSupplier();

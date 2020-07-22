@@ -40,7 +40,8 @@
   ],
   "additionalProperties": {
     "supplierId": "admin_supplier",
-    "caseId": "91"
+    "interactionId": "91",
+    "operationType": "encounter"
   },
   "@timestamp": "2020-06-30T07:56:38.806Z",
   "@owner": "ems.cactus-staging"

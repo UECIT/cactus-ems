@@ -24,7 +24,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
-import uk.nhs.ctp.auditFinder.model.OperationType;
+import uk.nhs.cactus.common.audit.model.OperationType;
 import uk.nhs.ctp.enums.CdsApiVersion;
 import uk.nhs.ctp.tkwvalidation.model.AuditMetadata;
 

@@ -43,8 +43,7 @@ public class AuditDispatcher {
         .header(Headers.SUPPLIER_ID, zipMetadata.getSupplierId())
         .header(Headers.API_VERSION, zipMetadata.getApiVersion().getVersion())
         .header(Headers.INTERACTION_TYPE, zipMetadata.getInteractionType().getName())
-        // TODO CDSCT-400: enable the following line
-//        .header(Headers.INTERACTION_ID, zipMetadata.getInteractionId())
+        .header(Headers.INTERACTION_ID, zipMetadata.getInteractionId())
         .header(Headers.INTERACTION_DATE, interactionDate)
         .header(Headers.SERVICE_ENDPOINT, zipMetadata.getServiceEndpoint())
         .body(base64Zip);

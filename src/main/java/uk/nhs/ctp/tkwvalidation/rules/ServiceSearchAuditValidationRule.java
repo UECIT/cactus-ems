@@ -2,8 +2,8 @@ package uk.nhs.ctp.tkwvalidation.rules;
 
 import java.util.List;
 import org.springframework.stereotype.Component;
-import uk.nhs.ctp.audit.model.AuditSession;
-import uk.nhs.ctp.auditFinder.model.OperationType;
+import uk.nhs.cactus.common.audit.model.AuditSession;
+import uk.nhs.cactus.common.audit.model.OperationType;
 
 @Component
 public class ServiceSearchAuditValidationRule implements AuditValidationRule {

@@ -17,10 +17,10 @@ import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+import uk.nhs.cactus.common.audit.model.AuditSession;
+import uk.nhs.cactus.common.audit.model.OperationType;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
-import uk.nhs.ctp.audit.model.AuditSession;
 import uk.nhs.ctp.auditFinder.ElasticSearchClient;
-import uk.nhs.ctp.auditFinder.model.OperationType;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +34,7 @@ public class AWSAuditFinder implements AuditFinder {
   private static final String OWNER_FIELD = "@owner.keyword";
   private static final String TIMESTAMP_FIELD = "@timestamp";
   private static final String SUPPLIER_ID_FIELD = "additionalProperties.supplierId";
-  private static final String CASE_ID_FIELD = "additionalProperties.caseId";
+  private static final String INTERACTION_ID_FIELD = "additionalProperties.interactionId";
   private static final String OPERATION_FIELD = "additionalProperties.operation";
   private static final String REQUEST_ID_FIELD = "requestId.keyword";
 
@@ -46,6 +46,8 @@ public class AWSAuditFinder implements AuditFinder {
 
   @Override
   public Optional<AuditSession> findByAuditId(String auditId) {
+
+    // TODO CDSCT-400: generalise this
     var supplierId = authenticationService.requireSupplierId();
 
     var query = QueryBuilders.boolQuery()
@@ -63,7 +65,7 @@ public class AWSAuditFinder implements AuditFinder {
 
     var query = QueryBuilders.boolQuery()
         .must(QueryBuilders.termQuery(SUPPLIER_ID_FIELD, supplierId))
-        .must(QueryBuilders.termQuery(CASE_ID_FIELD, caseId));
+        .must(QueryBuilders.termQuery(INTERACTION_ID_FIELD, caseId));
 
     var source = buildSearchSource(query);
 
@@ -77,7 +79,7 @@ public class AWSAuditFinder implements AuditFinder {
     var query = QueryBuilders.boolQuery()
         .must(QueryBuilders.termQuery(OWNER_FIELD, EMS_NAME))
         .must(QueryBuilders.termQuery(SUPPLIER_ID_FIELD, supplierId))
-        .must(QueryBuilders.termQuery(CASE_ID_FIELD, caseId));
+        .must(QueryBuilders.termQuery(INTERACTION_ID_FIELD, caseId));
 
     var source = buildSearchSource(query);
 
@@ -90,7 +92,7 @@ public class AWSAuditFinder implements AuditFinder {
 
     var query = QueryBuilders.boolQuery()
         .must(QueryBuilders.termQuery(SUPPLIER_ID_FIELD, supplierId))
-        .must(QueryBuilders.existsQuery(CASE_ID_FIELD));
+        .must(QueryBuilders.existsQuery(INTERACTION_ID_FIELD));
 
     var source = buildSearchSource(query);
 
