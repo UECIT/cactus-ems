@@ -41,7 +41,7 @@ public class FHIRRestfulServer extends RestfulServer {
   }
 
   @Override
-  protected void initialize() throws ServletException {
+  protected void initialize() {
 
     setFhirContext(fhirContext);
     setETagSupport(ETagSupportEnum.ENABLED);
