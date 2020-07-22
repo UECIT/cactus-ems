@@ -1,4 +1,4 @@
-import { EnvironmentService } from './../service/environment.service';
+import { environment } from '../../environments/environment';
 import { Component, OnInit } from '@angular/core';
 import { LoginService } from '../service/login.service';
 import { Router } from '@angular/router';
@@ -39,5 +39,9 @@ export class NavigationComponent implements OnInit {
     this.isAdmin = this.loginService.isAdmin;
     this.isLoggedIn = this.loginService.isLoggedIn;
     this.username = this.loginService.username;
+  }
+
+  openGuide() {
+    window.open(environment.USER_GUIDE);
   }
 }
