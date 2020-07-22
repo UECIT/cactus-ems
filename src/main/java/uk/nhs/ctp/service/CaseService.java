@@ -30,6 +30,7 @@ import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.CaseParameter;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.entities.QuestionResponse;
+import uk.nhs.ctp.enums.Gender;
 import uk.nhs.ctp.exception.EMSException;
 import uk.nhs.ctp.repos.CaseRepository;
 import uk.nhs.ctp.service.dto.CdssResult;
@@ -107,8 +108,10 @@ public class CaseService {
     genderObservation.setSystem(SystemURL.SNOMED);
     genderObservation.setCode("263495000");
     genderObservation.setDisplay("Gender");
-    genderObservation.setValueSystem("string");
-    genderObservation.setValueCode(triageCase.getGender());
+    Gender gender = Gender.fromCode(triageCase.getGender());
+    genderObservation.setValueSystem(gender.getSystem());
+    genderObservation.setValueCode(gender.getValue());
+    genderObservation.setValueDisplay(gender.getDisplay());
     triageCase.addObservation(genderObservation);
 
     CaseObservation ageObservation = new CaseObservation();
