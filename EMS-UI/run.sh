@@ -8,7 +8,7 @@ export EMS_API="${EMS_API:-http://localhost:8083}"
 export UECDI_API="${UECDI_API:-http://localhost:5000}"
 export UECDI_VALIDATE_API="${UECDI_VALIDATE_API:-http://localhost:7000/tkw-client}"
 export TERM_API="${TERM_API:-https://ontoserver.dataproducts.nhs.uk/fhir}"
-export USER_GUIDE="${USER_GUIDE:-https://uec-connect-conformance-guide.netlify.app/"
+export USER_GUIDE="${USER_GUIDE:-https://uec-connect-conformance-guide.netlify.app/}"
 
 # shellcheck disable=SC2016
 SUBST_VARS='$ENV_NAME,$EMS_API,$UECDI_API,$UECDI_VALIDATE_API,$TERM_API'
