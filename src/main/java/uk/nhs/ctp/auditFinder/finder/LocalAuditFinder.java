@@ -3,7 +3,6 @@ package uk.nhs.ctp.auditFinder.finder;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
@@ -14,6 +13,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import uk.nhs.cactus.common.audit.model.AuditSession;
+import uk.nhs.cactus.common.audit.model.OperationType;
 
 @Service
 @Slf4j
@@ -27,12 +27,8 @@ public class LocalAuditFinder implements AuditFinder {
     private String auditFinderEndpoint;
 
     @Override
-    public Optional<AuditSession> findByAuditId(String auditId) {
-        throw new NotImplementedException("TODO: CDSCT-281");
-    }
-
-    @Override
-    public List<AuditSession> findAllEncountersByCaseId(String caseId) {
+    public List<AuditSession> findAllEncountersByOperationTypeAndInteractionId(
+        OperationType operationType, String interactionId) {
         throw new NotImplementedException("TODO: CDSCT-281");
     }
 

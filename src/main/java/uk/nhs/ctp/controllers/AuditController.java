@@ -4,7 +4,6 @@ import static org.thymeleaf.util.StringUtils.isEmpty;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -61,31 +60,21 @@ public class AuditController {
 
 	@PostMapping(path = "/validate")
 	public void validate(@RequestBody AuditValidationRequest request) throws IOException {
-		// TODO CDSCT-400: unify different queries
-
-		if (!isEmpty(request.getCaseId())) {
-			// client must be asking for evaluate requests
-			var audits = auditFinder.findAllEncountersByCaseId(request.getCaseId());
-			validationService.validateAudits(
-					audits,
-					request.getType(),
-					request.getInstanceBaseUrl());
-			return;
+		if (isEmpty(request.getInteractionId())) {
+			throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Must specify an interactionId");
 		}
 
-		if (!isEmpty(request.getSearchAuditId())) {
-			var audit = auditFinder.findByAuditId(request.getSearchAuditId())
-					.orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
-			validationService.validateAudits(
-					Collections.singletonList(audit),
-					request.getType(),
-					request.getInstanceBaseUrl());
-			return;
+		var audits = auditFinder.findAllEncountersByOperationTypeAndInteractionId(
+				request.getType(),
+				request.getInteractionId());
+		if (audits.isEmpty()) {
+			throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "No audits found with given interactionId");
 		}
 
-		throw new HttpClientErrorException(
-				HttpStatus.BAD_REQUEST,
-				"Must specify either caseId or searchAuditId");
+		validationService.validateAudits(
+				audits,
+				request.getType(),
+				request.getInstanceBaseUrl());
 	}
 	
 	@PostMapping

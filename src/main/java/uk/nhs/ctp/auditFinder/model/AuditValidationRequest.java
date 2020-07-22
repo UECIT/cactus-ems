@@ -8,7 +8,6 @@ public class AuditValidationRequest {
 
   private OperationType type;
   private String instanceBaseUrl;
-  private String searchAuditId; // For service searches
-  private String caseId; // For encounters
+  private String interactionId;
 
 }

@@ -36,6 +36,7 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.nhs.cactus.common.audit.model.OperationType;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.auditFinder.ElasticSearchClient;
 import uk.nhs.ctp.auditFinder.model.AuditValidationRequest;
@@ -76,20 +77,19 @@ public class AuditControllerComponentTest {
   }
 
   @Test
-  public void validate_withNoCaseIdAndSearchAuditId_shouldFail() throws IOException {
+  public void validate_withNoInteractionId_shouldFail() throws IOException {
     var request = new AuditValidationRequest();
-    request.setCaseId(null);
-    request.setSearchAuditId("");
+    request.setType(OperationType.CHECK_SERVICES);
 
     expectedException.expect(hasStatusCode(BAD_REQUEST));
     auditController.validate(request);
   }
 
   @Test
-  public void validate_withNonexistentSearchAuditId_shouldFail() throws IOException {
+  public void validate_withNonexistentInteractionId_shouldFail() throws IOException {
     var request = new AuditValidationRequest();
-    request.setCaseId(null);
-    request.setSearchAuditId("nonexistentSearchAuditId");
+    request.setType(OperationType.IS_VALID);
+    request.setInteractionId("nonexistentInteractionId");
 
     when(esClient.search(anyString(), any(SearchSourceBuilder.class)))
         .thenReturn(Collections.emptyList());
@@ -99,11 +99,10 @@ public class AuditControllerComponentTest {
   }
 
   @Test
-  public void validate_withCaseId_shouldSendEncounterAudits() throws IOException {
+  public void validate_shouldSendEncounterAudits() throws IOException {
     var request = new AuditValidationRequest();
-    request.setCaseId("validCaseId");
     request.setInstanceBaseUrl("http://existing.cdss/supplier");
-    request.setSearchAuditId(null);
+    request.setInteractionId("validInteractionId");
     request.setType(ENCOUNTER);
 
     when(esClient.search(anyString(), any(SearchSourceBuilder.class)))
@@ -150,11 +149,10 @@ public class AuditControllerComponentTest {
   }
 
   @Test
-  public void validate_withSearchAuditId_shouldSendSearchAudits() throws IOException {
+  public void validate_shouldSendSearchAudits() throws IOException {
     var request = new AuditValidationRequest();
-    request.setCaseId(null);
     request.setInstanceBaseUrl("http://non-existing.cdss/supplier");
-    request.setSearchAuditId("validSearchAuditId");
+    request.setInteractionId("validInteractionId");
     request.setType(SERVICE_SEARCH);
 
     when(esClient.search(anyString(), any(SearchSourceBuilder.class)))

@@ -18,7 +18,6 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.github.npathai.hamcrestopt.OptionalMatchers;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -37,6 +36,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.nhs.cactus.common.audit.model.AuditEntry;
 import uk.nhs.cactus.common.audit.model.AuditSession;
+import uk.nhs.cactus.common.audit.model.OperationType;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.auditFinder.finder.AWSAuditFinder;
 import uk.nhs.ctp.testhelper.fixtures.ElasticSearchFixtures;
@@ -60,62 +60,12 @@ public class AWSAuditFinderTest {
   private AWSAuditFinder auditFinder;
 
   @Test
-  public void findByAuditId_buildsRequest() throws IOException {
+  public void findAllEncountersByOperationTypeAndInteractionId_buildsRequest() throws IOException {
     when(authService.requireSupplierId()).thenReturn("test-supplier");
     when(elasticSearchClient.search(eq("test-supplier-audit"), any(SearchSourceBuilder.class)))
         .thenReturn(Collections.emptyList());
 
-    auditFinder.findByAuditId("validAuditId");
-
-    var searchSourceCaptor = ArgumentCaptor.forClass(SearchSourceBuilder.class);
-    verify(elasticSearchClient).search(eq("test-supplier-audit"), searchSourceCaptor.capture());
-
-    var searchSource = searchSourceCaptor.getValue();
-
-    assertThat(searchSource.size(), is(1));
-    assertThat(searchSource.query(), hasToString(equalToJSON(
-        "{ bool : { must : ["
-            + " { term : { additionalProperties.supplierId : { value : test-supplier } } },"
-            + " { term : { requestId.keyword : { value : validAuditId } } }"
-            + "] } }")));
-  }
-
-  @Test
-  public void findByAuditId_returnsAudit() throws IOException {
-    var auditSessionJson = "{ \"requestUrl\": \"/test-url\" }";
-    var auditSession = AuditSession.builder().requestUrl("/test-url").build();
-
-    var hit = ElasticSearchFixtures.buildSearchHit(auditSessionJson);
-
-    when(authService.requireSupplierId()).thenReturn("test-supplier");
-    when(elasticSearchClient.search(eq("test-supplier-audit"), any(SearchSourceBuilder.class)))
-        .thenReturn(Collections.singletonList(hit));
-    when(objectMapper.readValue(auditSessionJson, AuditSession.class))
-        .thenReturn(auditSession);
-
-    var returnedAudit = auditFinder.findByAuditId("validAuditId");
-
-    assertThat(returnedAudit, OptionalMatchers.isPresentAndIs(auditSession));
-  }
-
-  @Test
-  public void findByAuditId_withNoneFound_returnsEmpty() throws IOException {
-    when(authService.requireSupplierId()).thenReturn("test-supplier");
-    when(elasticSearchClient.search(eq("test-supplier-audit"), any(SearchSourceBuilder.class)))
-        .thenReturn(Collections.emptyList());
-
-    var returnedAudit = auditFinder.findByAuditId("validAuditId");
-
-    assertThat(returnedAudit, OptionalMatchers.isEmpty());
-  }
-
-  @Test
-  public void findAllEncountersByCaseId_buildsRequest() throws IOException {
-    when(authService.requireSupplierId()).thenReturn("test-supplier");
-    when(elasticSearchClient.search(eq("test-supplier-audit"), any(SearchSourceBuilder.class)))
-        .thenReturn(Collections.emptyList());
-
-    auditFinder.findAllEncountersByCaseId("76");
+    auditFinder.findAllEncountersByOperationTypeAndInteractionId(OperationType.SERVICE_SEARCH,"76");
 
     var searchSourceCaptor = ArgumentCaptor.forClass(SearchSourceBuilder.class);
     verify(elasticSearchClient).search(eq("test-supplier-audit"), searchSourceCaptor.capture());
@@ -128,12 +78,13 @@ public class AWSAuditFinderTest {
     assertThat(searchSource.query(), hasToString(equalToJSON(
         "{ bool : { must : ["
             + " { term : { additionalProperties.supplierId : { value : test-supplier } } },"
+            + " { term : { additionalProperties.operation : { value : service_search } } },"
             + " { term : { additionalProperties.interactionId : { value : \"76\" } } }"
             + "] } }")));
   }
 
   @Test
-  public void findAllEncountersByCaseId_returnsAudits() throws IOException {
+  public void findAllEncountersByOperationTypeAndInteractionId_returnsAudits() throws IOException {
     var auditSessionJson = "{ \"requestUrl\": \"/test-url\" }";
     var auditSession = AuditSession.builder().requestUrl("/test-url").build();
     var auditSessionWithEntryJson = "{"
@@ -158,7 +109,9 @@ public class AWSAuditFinderTest {
     when(objectMapper.readValue(auditSessionWithEntryJson, AuditSession.class))
         .thenReturn(auditSessionWithEntry);
 
-    var audits = auditFinder.findAllEncountersByCaseId("76");
+    var audits = auditFinder.findAllEncountersByOperationTypeAndInteractionId(
+        OperationType.ENCOUNTER,
+        "76");
 
     assertThat(audits, contains(auditSession, auditSessionWithEntry));
   }

@@ -1,13 +1,13 @@
 package uk.nhs.ctp.auditFinder.finder;
 
 import java.util.List;
-import java.util.Optional;
 import uk.nhs.cactus.common.audit.model.AuditSession;
+import uk.nhs.cactus.common.audit.model.OperationType;
 
 public interface AuditFinder {
-    Optional<AuditSession> findByAuditId(String auditId);
-
-    List<AuditSession> findAllEncountersByCaseId(String caseId);
+    List<AuditSession> findAllEncountersByOperationTypeAndInteractionId(
+        OperationType operationType,
+        String interactionId);
 
     /**
      * Find all audit sessions based on the caseId
