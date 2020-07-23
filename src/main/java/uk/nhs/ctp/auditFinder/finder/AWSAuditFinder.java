@@ -17,8 +17,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import uk.nhs.cactus.common.audit.model.AuditSession;
 import uk.nhs.cactus.common.audit.model.OperationType;
+import uk.nhs.cactus.common.elasticsearch.ElasticSearchClient;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
-import uk.nhs.ctp.auditFinder.ElasticSearchClient;
 
 @Service
 @RequiredArgsConstructor

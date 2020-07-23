@@ -37,6 +37,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import uk.nhs.cactus.common.audit.model.AuditEntry;
 import uk.nhs.cactus.common.audit.model.AuditSession;
 import uk.nhs.cactus.common.audit.model.OperationType;
+import uk.nhs.cactus.common.elasticsearch.ElasticSearchClient;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.auditFinder.finder.AWSAuditFinder;
 import uk.nhs.ctp.testhelper.fixtures.ElasticSearchFixtures;

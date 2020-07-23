@@ -23,9 +23,9 @@
     <thymeleaf.version>3.0.6.RELEASE</thymeleaf.version>
     <thymeleaf-layout-dialect.version>2.2.1</thymeleaf-layout-dialect.version>
 
-    <elastic-search-version>7.7.1</elastic-search-version>
-
     <cactus-common.version>0.0.5.7</cactus-common.version>
+
+    <elastic-search-version>7.8.0</elastic-search-version>
   </properties>
 
   <repositories>
@@ -68,6 +68,11 @@
         <version>1.11.789</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.elasticsearch</groupId>
+        <artifactId>elasticsearch</artifactId>
+        <version>${elastic-search-version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -213,16 +218,6 @@
       <groupId>org.passay</groupId>
       <artifactId>passay</artifactId>
       <version>1.6.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.elasticsearch.client</groupId>
-      <artifactId>elasticsearch-rest-high-level-client</artifactId>
-      <version>${elastic-search-version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.elasticsearch</groupId>
-      <artifactId>elasticsearch</artifactId>
-      <version>${elastic-search-version}</version>
     </dependency>
 
     <!-- Test -->
