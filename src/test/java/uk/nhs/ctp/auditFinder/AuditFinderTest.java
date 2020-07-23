@@ -39,11 +39,11 @@ import uk.nhs.cactus.common.audit.model.AuditSession;
 import uk.nhs.cactus.common.audit.model.OperationType;
 import uk.nhs.cactus.common.elasticsearch.ElasticSearchClient;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
-import uk.nhs.ctp.auditFinder.finder.AWSAuditFinder;
+import uk.nhs.ctp.auditFinder.finder.AuditFinder;
 import uk.nhs.ctp.testhelper.fixtures.ElasticSearchFixtures;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AWSAuditFinderTest {
+public class AuditFinderTest {
 
   @Mock
   private ElasticSearchClient elasticSearchClient;
@@ -58,7 +58,7 @@ public class AWSAuditFinderTest {
   public ExpectedException expectedException = ExpectedException.none();
 
   @InjectMocks
-  private AWSAuditFinder auditFinder;
+  private AuditFinder auditFinder;
 
   @Test
   public void findAllEncountersByOperationTypeAndInteractionId_buildsRequest() throws IOException {
@@ -194,7 +194,7 @@ public class AWSAuditFinderTest {
     when(elasticSearchClient.search(eq("test-supplier-audit"), any(SearchSourceBuilder.class)))
         .thenReturn(Collections.emptyList());
 
-    auditFinder.findAllEncounters();
+    auditFinder.findGroupedInteractions();
 
     var searchSourceCaptor = ArgumentCaptor.forClass(SearchSourceBuilder.class);
     verify(elasticSearchClient).search(eq("test-supplier-audit"), searchSourceCaptor.capture());
@@ -237,7 +237,7 @@ public class AWSAuditFinderTest {
     when(objectMapper.readValue(auditSessionWithEntryJson, AuditSession.class))
         .thenReturn(auditSessionWithEntry);
 
-    var audits = auditFinder.findAllEncounters();
+    var audits = auditFinder.findGroupedInteractions();
 
     assertThat(audits, contains(auditSession, auditSessionWithEntry));
   }
@@ -248,7 +248,7 @@ public class AWSAuditFinderTest {
     when(elasticSearchClient.search(eq("test-supplier-audit"), any(SearchSourceBuilder.class)))
         .thenReturn(Collections.emptyList());
 
-    auditFinder.findAllServiceSearches();
+    auditFinder.findGroupedInteractions();
 
     var searchSourceCaptor = ArgumentCaptor.forClass(SearchSourceBuilder.class);
     verify(elasticSearchClient).search(eq("test-supplier-audit"), searchSourceCaptor.capture());
@@ -291,7 +291,7 @@ public class AWSAuditFinderTest {
     when(objectMapper.readValue(auditSessionWithEntryJson, AuditSession.class))
         .thenReturn(auditSessionWithEntry);
 
-    var audits = auditFinder.findAllServiceSearches();
+    var audits = auditFinder.findGroupedInteractions();
 
     assertThat(audits, contains(auditSession, auditSessionWithEntry));
   }
