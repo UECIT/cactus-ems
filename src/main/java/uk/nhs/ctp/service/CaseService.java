@@ -151,6 +151,8 @@ public class CaseService {
           updateMedication(triageCase, (MedicationAdministration) resource);
         } else if (resource instanceof QuestionnaireResponse) {
           updateQuestionnaireResponse(triageCase, (QuestionnaireResponse) resource);
+        } else {
+          log.warn("Unsupported outputData type: {}", resource == null ? null : resource.getClass().getSimpleName());
         }
       } else {
         triageCase.addParameter(createCaseParameter(parameter));
@@ -228,6 +230,7 @@ public class CaseService {
   private void updateObservation(Cases triageCase, Observation currentObs) {
     boolean amended = false;
     for (CaseObservation observation : triageCase.getObservations()) {
+      // TODO match code system and code
       if (observation.getCode()
           .equalsIgnoreCase(currentObs.getCode().getCoding().get(0).getCode())) {
         log.info("Amending Observation {}-{} for case {}",
