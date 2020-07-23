@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
-import uk.nhs.ctp.auditFinder.finder.AuditFinder;
+import uk.nhs.ctp.auditFinder.AuditFinder;
 import uk.nhs.ctp.auditFinder.model.AuditInteraction;
 import uk.nhs.ctp.auditFinder.model.AuditValidationRequest;
 import uk.nhs.ctp.caseSearch.CaseSearchRequest;
@@ -50,7 +50,7 @@ public class AuditController {
 
 	@GetMapping(path = "/interactions")
 	public List<AuditInteraction> getAuditInteractions() {
-		return auditFinder.findGroupedInteractions();
+		return auditFinder.groupInteractions(auditFinder.findInteractions());
 	}
 
 	@PostMapping(path = "/validate")

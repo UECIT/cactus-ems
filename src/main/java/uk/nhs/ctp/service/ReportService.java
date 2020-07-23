@@ -23,7 +23,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.nhs.cactus.common.audit.model.OperationType;
-import uk.nhs.ctp.auditFinder.finder.AuditFinder;
+import uk.nhs.ctp.auditFinder.AuditFinder;
 import uk.nhs.ctp.enums.ContentType;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.dto.ReportType;

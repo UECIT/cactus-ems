@@ -1,4 +1,4 @@
-package uk.nhs.ctp.auditFinder.finder;
+package uk.nhs.ctp.auditFinder;
 
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.groupingBy;
@@ -73,7 +73,7 @@ public class AuditFinder {
     return search(supplierId, source).collect(toUnmodifiableList());
   }
 
-  public List<AuditInteraction> findGroupedInteractions() {
+  public List<AuditSession> findInteractions() {
     var supplierId = authenticationService.requireSupplierId();
 
     var query = QueryBuilders.boolQuery()
@@ -83,12 +83,17 @@ public class AuditFinder {
 
     var source = buildSearchSource(query);
 
-    return search(supplierId, source)
+    return search(supplierId, source).collect(toUnmodifiableList());
+
+  }
+
+  public List<AuditInteraction> groupInteractions(List<AuditSession> auditSessions) {
+    return auditSessions.stream()
         .collect(groupingBy(this::getKey, minBy(comparing(AuditSession::getCreatedDate))))
         .entrySet()
         .stream()
         .map(pair -> new AuditInteraction(
-            OperationType.valueOf(pair.getKey().getFirst()),
+            OperationType.fromName(pair.getKey().getFirst()),
             pair.getKey().getSecond(),
             pair.getValue().map(AuditSession::getCreatedDate).orElseThrow()))
         .collect(toUnmodifiableList());
