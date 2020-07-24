@@ -1,17 +1,17 @@
 package uk.nhs.ctp.service.fhir;
 
 import ca.uhn.fhir.context.FhirContext;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.utils.RetryUtils;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class GenericResourceLocator implements IResourceLocator {
 
-  private FhirContext fhirContext;
+  private final FhirContext fhirContext;
 
   @SuppressWarnings("unchecked")
   @Override

@@ -55,7 +55,7 @@ public class AuditMetadata {
     httpHeaders.add(Headers.SUPPLIER_ID, getSupplierId());
     httpHeaders.add(Headers.API_VERSION, getApiVersion().getVersion());
     httpHeaders.add(Headers.INTERACTION_TYPE, getInteractionType().getName());
-    httpHeaders.add(Headers.INTERACTION_ID, getInteractionId())
+    httpHeaders.add(Headers.INTERACTION_ID, getInteractionId());
     httpHeaders.add(Headers.INTERACTION_DATE, interactionDate);
     httpHeaders.add(Headers.SERVICE_ENDPOINT, getServiceEndpoint());
 

@@ -7,6 +7,7 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 import static uk.nhs.cactus.common.audit.model.AuditProperties.INTERACTION_ID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,7 @@ public class AuditFinder {
   private static final String OWNER_FIELD = "@owner.keyword";
   private static final String TIMESTAMP_FIELD = "@timestamp";
   private static final String SUPPLIER_ID_FIELD = "additionalProperties.supplierId";
-  private static final String INTERACTION_ID_FIELD = "additionalProperties.interactionId";
+  private static final String INTERACTION_ID_FIELD = "additionalProperties.interactionId.keyword";
   private static final String OPERATION_FIELD = "additionalProperties.operation";
 
   private static final String AUDIT_SUFFIX = "-audit";
@@ -95,7 +96,8 @@ public class AuditFinder {
         .map(pair -> new AuditInteraction(
             OperationType.fromName(pair.getKey().getFirst()),
             pair.getKey().getSecond(),
-            pair.getValue().map(AuditSession::getCreatedDate).orElseThrow()))
+            pair.getValue().map(AuditSession::getCreatedDate).map(Instant::toString).orElseThrow()))
+        .sorted(comparing(AuditInteraction::getStartedAt))
         .collect(toUnmodifiableList());
   }
 

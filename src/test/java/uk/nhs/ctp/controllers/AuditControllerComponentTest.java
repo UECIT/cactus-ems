@@ -151,9 +151,8 @@ public class AuditControllerComponentTest {
   @Test
   public void download_withCaseId_shouldReturnZip() throws IOException {
     var request = new AuditValidationRequest();
-    request.setCaseId("validCaseId");
+    request.setInteractionId("validCaseId");
     request.setInstanceBaseUrl("http://existing.cdss/supplier");
-    request.setSearchAuditId(null);
     request.setType(OperationType.ENCOUNTER);
 
     when(esClient.search(anyString(), any(SearchSourceBuilder.class)))

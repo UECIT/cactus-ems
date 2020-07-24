@@ -303,9 +303,9 @@ public class AuditFinderTest {
     var interactionGroups = auditFinder.groupInteractions(auditSessions);
 
     var expectedInteractionGroups = new Object[] {
-        new AuditInteraction(OperationType.ENCOUNTER, "1", CREATION_DATE_1),
-        new AuditInteraction(OperationType.ENCOUNTER, "2", CREATION_DATE_2),
-        new AuditInteraction(OperationType.SERVICE_SEARCH, "1", CREATION_DATE_1)
+        new AuditInteraction(OperationType.ENCOUNTER, "1", CREATION_DATE_1.toString()),
+        new AuditInteraction(OperationType.ENCOUNTER, "2", CREATION_DATE_2.toString()),
+        new AuditInteraction(OperationType.SERVICE_SEARCH, "1", CREATION_DATE_1.toString())
     };
 
     assertThat(interactionGroups, containsInAnyOrder(expectedInteractionGroups));
@@ -322,6 +322,7 @@ public class AuditFinderTest {
 
     var audit = mapper.readValue(auditJson, AuditSession.class);
 
+    assertThat(audit.getCreatedDate(), is(Instant.parse("2020-06-11T16:36:52.587218Z")));
     assertThat(audit.getRequestUrl(), is("/case/"));
     assertThat(audit.getResponseStatus(), is("200"));
     assertThat(audit.getAdditionalProperties().get("interactionId"), is("57"));

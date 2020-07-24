@@ -32,7 +32,7 @@ export class AuditService {
           'Authorization',
           this.sessionStorage['auth_token']
       );
-      const url = `${environment.EMS_API}/audit/interactions/`;
+      const url = `${environment.EMS_API}/audit/interactions`;
       return this.http.get<Interaction[]>(url, httpOptions).toPromise();
     }
   }

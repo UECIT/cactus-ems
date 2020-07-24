@@ -93,8 +93,7 @@ describe('ValidationReportComponent', () => {
   let emsServiceSpy: { getAllEmsSuppliers: jasmine.Spy };
   let cdssServiceSpy: { getCdssSuppliers: jasmine.Spy };
   let auditServiceSpy: {
-    getEncounterAudits: jasmine.Spy,
-    getServiceDefinitionSearchAudits: jasmine.Spy,
+    getAudits: jasmine.Spy,
     sendValidationRequest: jasmine.Spy
   };
 
@@ -102,7 +101,7 @@ describe('ValidationReportComponent', () => {
     emsServiceSpy = jasmine.createSpyObj('EmsService', ['getAllEmsSuppliers']);
     cdssServiceSpy = jasmine.createSpyObj('CdssService', ['getCdssSuppliers']);
     auditServiceSpy = jasmine.createSpyObj('AuditService',
-        ['getEncounterAudits', 'getServiceDefinitionSearchAudits', 'sendValidationRequest']);
+        ['getAudits', 'sendValidationRequest']);
 
     TestBed.configureTestingModule({
       imports: [MaterialModule],
@@ -139,11 +138,11 @@ describe('ValidationReportComponent', () => {
     encounter.type = "Encounter";
 
     let sdSearch = new Interaction();
+    sdSearch.interactionId = "6";
     sdSearch.startedAt = moment.unix(955335783); //'Apr 10, 2000, 3:03:03 AM' (UTC)
     sdSearch.type = "Service Search";
 
-    auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([encounter]));
-    auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([sdSearch]));
+    auditServiceSpy.getAudits.and.returnValue(Promise.resolve([encounter, sdSearch]));
     return {encounter, sdSearch};
   }
 
@@ -155,8 +154,7 @@ describe('ValidationReportComponent', () => {
 
     it('should display end points', fakeAsync(() => {
       let {cdss, ems} = setupSupplierSpies();
-      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
-      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+      auditServiceSpy.getAudits.and.returnValue(Promise.resolve([]));
 
       fixture.detectChanges(); // init
       tick();
@@ -179,7 +177,14 @@ describe('ValidationReportComponent', () => {
       fixture.detectChanges(); // resolve async promises
 
       expect(comp.loaded).toBeTruthy();
-      expect(page.interactions).toContain(encounter, sdSearch);
+      expect(page.interactions).toContain(
+          {
+            ...encounter,
+            startedAt: encounter.startedAt.toDate().toUTCString()
+          }, {
+            ...sdSearch,
+            startedAt: sdSearch.startedAt.toDate().toUTCString()
+          });
     }));
 
     it('should display one interaction per encounter', fakeAsync(() => {
@@ -200,22 +205,28 @@ describe('ValidationReportComponent', () => {
 
       cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
       emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
-      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([encounter, encounter2, encounter3]));
-      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+      auditServiceSpy.getAudits.and.returnValue(Promise.resolve([encounter, encounter2, encounter3]));
 
       fixture.detectChanges(); // init
       tick();
       fixture.detectChanges(); // resolve async promises
 
       expect(comp.loaded).toBeTruthy();
-      expect(page.interactions).toContain(encounter, encounter3);
+      expect(page.interactions).toContain(
+          {
+            ...encounter,
+            startedAt: encounter.startedAt.toDate().toUTCString()
+          },
+          {
+            ...encounter3,
+            startedAt: encounter3.startedAt.toDate().toUTCString()
+          });
     }));
 
     it('should not display when loading fails', () => {
       cdssServiceSpy.getCdssSuppliers.and.returnValue(of());
       emsServiceSpy.getAllEmsSuppliers.and.returnValue(of());
-      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.reject(""));
-      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.reject(""));
+      auditServiceSpy.getAudits.and.returnValue(Promise.reject(""));
 
       fixture.detectChanges(); // init
 
@@ -227,8 +238,7 @@ describe('ValidationReportComponent', () => {
 
     it('should select one when clicking on endpoint row', fakeAsync(() => {
       let {cdss,ems} = setupSupplierSpies();
-      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
-      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+      auditServiceSpy.getAudits.and.returnValue(Promise.resolve([]));
 
       fixture.detectChanges(); // init
       tick();
@@ -244,8 +254,7 @@ describe('ValidationReportComponent', () => {
 
     it('should select one when clicking on endpoint checkbox', fakeAsync(() => {
       let {cdss,ems} = setupSupplierSpies();
-      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
-      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+      auditServiceSpy.getAudits.and.returnValue(Promise.resolve([]));
 
       fixture.detectChanges(); // init
       tick();
@@ -262,8 +271,7 @@ describe('ValidationReportComponent', () => {
 
     it('should deselect when clicking on endpoint row', fakeAsync(() => {
       let {cdss} = setupSupplierSpies();
-      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
-      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+      auditServiceSpy.getAudits.and.returnValue(Promise.resolve([]));
 
       comp.endpointSelection.select(cdss);
 
@@ -281,8 +289,7 @@ describe('ValidationReportComponent', () => {
 
     it('should deselect when clicking on endpoint checkbox', fakeAsync(() => {
       let {cdss} = setupSupplierSpies();
-      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
-      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+      auditServiceSpy.getAudits.and.returnValue(Promise.resolve([]));
 
       comp.endpointSelection.select(cdss);
 
@@ -300,8 +307,7 @@ describe('ValidationReportComponent', () => {
 
     it('should deselect existing when selecting a different endpoint', fakeAsync(() => {
       let {cdss,ems} = setupSupplierSpies();
-      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
-      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+      auditServiceSpy.getAudits.and.returnValue(Promise.resolve([]));
 
       comp.endpointSelection.select(cdss);
 
@@ -420,8 +426,7 @@ describe('ValidationReportComponent', () => {
     function initEmpty() {
       cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
       emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
-      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
-      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+      auditServiceSpy.getAudits.and.returnValue(Promise.resolve([]));
     }
 
     it('should send validation request to validation service', fakeAsync(() => {
@@ -430,7 +435,6 @@ describe('ValidationReportComponent', () => {
       let selectedSupplier = new EmsSupplier();
       selectedSupplier.baseUrl = "this.is.a.fake";
       let selectedInteraction = new Interaction();
-      selectedInteraction.interactionId = "someGuid";
       selectedInteraction.type = "Encounter";
       selectedInteraction.interactionId = "6";
 
@@ -447,9 +451,8 @@ describe('ValidationReportComponent', () => {
       expect(auditServiceSpy.sendValidationRequest).toHaveBeenCalledWith(
           jasmine.objectContaining({
             instanceBaseUrl: "this.is.a.fake",
-            searchAuditId: "someGuid",
             type: "Encounter",
-            caseId: "6"
+            interactionId: "6"
           })
       );
     }));
