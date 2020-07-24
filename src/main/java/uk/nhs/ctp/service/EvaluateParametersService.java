@@ -93,7 +93,9 @@ public class EvaluateParametersService {
   }
 
   private void addInputData(Cases caseEntity, Builder builder, ReferencingType inputDataRefType) {
-    Stream<Observation> observations = getObservations(caseEntity);
+    Stream<Observation> observations = getObservations(caseEntity)
+        .peek(observation -> log.info("Adding Observation to inputData: {}",
+            observation.getCode().getCodingFirstRep().getDisplay()));
     if (inputDataRefType == null) {
       // don't fall over just default to referencing
       inputDataRefType = ReferencingType.BY_REFERENCE;

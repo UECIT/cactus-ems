@@ -21,7 +21,6 @@ import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.Narrative;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ResourceType;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.entities.CaseImmunization;
@@ -124,7 +123,7 @@ public class CompositionService {
 
   private CompositionEntity createCompositionEntity(Cases caseEntity) {
     Composition composition = new Composition()
-        .setType(DocumentType.OUTPATIENT_MEDICAL_NOTE.toCodeableConcept())
+        .setType(DocumentType.REPORT_CLINICAL_ENCOUNTER.toCodeableConcept())
         .setSubject(referenceService.buildRef(ResourceType.Patient, caseEntity.getPatientId()))
         .setEncounter(referenceService.buildRef(ResourceType.Encounter, caseEntity.getId()))
         .addAuthor(referenceService.buildRef(ResourceType.Device, EMSDeviceService.MAIN_ID))

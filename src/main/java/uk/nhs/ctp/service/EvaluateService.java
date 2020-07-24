@@ -77,6 +77,8 @@ public class EvaluateService {
 
     if (result.hasOutputData() || result.getSessionId() != null) {
       caseService.updateCase(caseId, result, result.getSessionId());
+    } else {
+      log.warn("Result has no outputData");
     }
 
     result.setApiVersion(cdssSupplier.getSupportedVersion());

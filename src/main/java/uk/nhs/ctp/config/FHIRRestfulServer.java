@@ -2,6 +2,7 @@ package uk.nhs.ctp.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
+import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
@@ -10,7 +11,8 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -19,14 +21,17 @@ import uk.nhs.ctp.resourceProvider.CheckServicesProvider;
 
 @WebServlet(urlPatterns = {"/fhir/*"}, displayName = "FHIR Server")
 @Configuration
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class FHIRRestfulServer extends RestfulServer {
 
   private static final long serialVersionUID = 1L;
 
-  private List<IResourceProvider> providers;
-  private CheckServicesProvider checkServicesProvider;
-  private FhirContext fhirContext;
+  @Value("${ems.fhir.server}")
+  private String emsFhirServer;
+
+  private final List<IResourceProvider> providers;
+  private final CheckServicesProvider checkServicesProvider;
+  private final FhirContext fhirContext;
 
   @PostConstruct
   public void setResourceProviders() {
@@ -36,10 +41,11 @@ public class FHIRRestfulServer extends RestfulServer {
   }
 
   @Override
-  protected void initialize() throws ServletException {
+  protected void initialize() {
 
     setFhirContext(fhirContext);
     setETagSupport(ETagSupportEnum.ENABLED);
+    setServerAddressStrategy(new HardcodedServerAddressStrategy(emsFhirServer));
 
     CorsConfiguration config = new CorsConfiguration();
     config.setMaxAge(10L);

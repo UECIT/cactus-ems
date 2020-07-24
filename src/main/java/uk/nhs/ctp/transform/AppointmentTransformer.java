@@ -1,26 +1,19 @@
 package uk.nhs.ctp.transform;
 
 import java.util.Date;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.Transformer;
 import org.hl7.fhir.dstu3.model.Appointment.AppointmentStatus;
 import org.hl7.fhir.dstu3.model.Appointment.ParticipantRequired;
 import org.hl7.fhir.dstu3.model.Appointment.ParticipationStatus;
-import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.CareConnectPatient;
-import org.hl7.fhir.dstu3.model.DocumentReference;
-import org.hl7.fhir.dstu3.model.DocumentReference.DocumentReferenceContentComponent;
-import org.hl7.fhir.dstu3.model.Enumerations.DocumentReferenceStatus;
 import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.Schedule;
 import org.hl7.fhir.dstu3.model.Slot;
 import org.hl7.fhir.dstu3.model.Slot.SlotStatus;
 import org.springframework.stereotype.Component;
-import uk.nhs.ctp.SystemURL;
 import uk.nhs.ctp.builder.CareConnectPatientBuilder;
 import uk.nhs.ctp.entities.PatientEntity;
 import uk.nhs.ctp.model.Appointment;
@@ -61,28 +54,11 @@ public class AppointmentTransformer
     PatientEntity patientEntity = patientRepository.findById(new IdType(from.getPatientId()).getIdPartAsLong());
     CareConnectPatient patient = patientBuilder.build(patientEntity);
     appointment.addParticipant()
-        .setActor(new Reference(patient.setId("#patient")))
+        .setActor(new Reference(patient))
         .setRequired(ParticipantRequired.REQUIRED)
         .setStatus(ParticipationStatus.ACCEPTED);
-    appointment.addContained(patient); // Must be contained according to scheduling profile.
-
-    DocumentReference document = createDocument();
-    appointment.addSupportingInformation(new Reference(document));
-    appointment.addContained(document); // Must be contained according to scheduling profile
 
     return appointment;
-  }
-
-  private DocumentReference createDocument() {
-    DocumentReference documentReference = new DocumentReference();
-    documentReference.setId("#document");
-    documentReference.setStatus(DocumentReferenceStatus.CURRENT);
-    documentReference.setIndexed(new Date());
-    documentReference.addIdentifier(
-        new Identifier().setSystem(SystemURL.APPT_DOCUMENT_IDENTIFIER).setValue(UUID.randomUUID().toString()));
-    documentReference.addContent(new DocumentReferenceContentComponent(
-        new Attachment().setContentType("text/plain").setLanguage("en")));
-    return documentReference;
   }
 
   private Slot createSlot(Appointment from) {
