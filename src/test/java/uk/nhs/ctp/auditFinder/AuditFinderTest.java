@@ -18,17 +18,12 @@ import static org.mockito.Mockito.when;
 import static uk.nhs.ctp.testhelper.matchers.IsEqualJSON.equalToJSON;
 
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.io.IOUtils;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.junit.Rule;
 import org.junit.Test;
@@ -70,7 +65,7 @@ public class AuditFinderTest {
     when(elasticSearchClient.search(eq("test-supplier-audit"), any(SearchSourceBuilder.class)))
         .thenReturn(emptyList());
 
-    auditFinder.findAllEncountersByOperationTypeAndInteractionId(OperationType.SERVICE_SEARCH,"76");
+    auditFinder.findAllEncountersByOperationTypeAndInteractionId(OperationType.SERVICE_SEARCH,"caseId");
 
     var searchSourceCaptor = ArgumentCaptor.forClass(SearchSourceBuilder.class);
     verify(elasticSearchClient).search(eq("test-supplier-audit"), searchSourceCaptor.capture());
@@ -84,7 +79,7 @@ public class AuditFinderTest {
         "{ bool : { must : ["
             + " { term : { additionalProperties.supplierId : { value : test-supplier } } },"
             + " { term : { additionalProperties.operation : { value : service_search } } },"
-            + " { term : { additionalProperties.interactionId : { value : \"76\" } } }"
+            + " { term : { additionalProperties.interactionId.keyword : { value : caseId } } }"
             + "] } }")));
   }
 
@@ -116,7 +111,7 @@ public class AuditFinderTest {
 
     var audits = auditFinder.findAllEncountersByOperationTypeAndInteractionId(
         OperationType.ENCOUNTER,
-        "76");
+        "caseId");
 
     assertThat(audits, contains(auditSession, auditSessionWithEntry));
   }
@@ -127,7 +122,7 @@ public class AuditFinderTest {
     when(elasticSearchClient.search(eq("test-supplier-audit"), any(SearchSourceBuilder.class)))
         .thenReturn(emptyList());
 
-    auditFinder.findAllEmsEncountersByCaseId("76");
+    auditFinder.findAllEmsEncountersByCaseId("caseId");
 
     var searchSourceCaptor = ArgumentCaptor.forClass(SearchSourceBuilder.class);
     verify(elasticSearchClient).search(eq("test-supplier-audit"), searchSourceCaptor.capture());
@@ -141,7 +136,7 @@ public class AuditFinderTest {
         "{ bool : { must : ["
         + " { term : { @owner.keyword : { value : ems.cactus-staging } } },"
         + " { term : { additionalProperties.supplierId : { value : test-supplier } } },"
-        + " { term : { additionalProperties.interactionId : { value : \"76\" } } }"
+        + " { term : { additionalProperties.interactionId.keyword : { value : caseId } } }"
         + "] } }")));
   }
 
@@ -171,7 +166,7 @@ public class AuditFinderTest {
     when(objectMapper.readValue(auditSessionWithEntryJson, AuditSession.class))
         .thenReturn(auditSessionWithEntry);
 
-    var audits = auditFinder.findAllEmsEncountersByCaseId("76");
+    var audits = auditFinder.findAllEmsEncountersByCaseId("caseId");
 
     assertThat(audits, contains(auditSession, auditSessionWithEntry));
   }
@@ -189,7 +184,7 @@ public class AuditFinderTest {
       .thenThrow(new JsonParseException(null, "Failed to parse"));
 
     expectedException.expect(JsonParseException.class);
-    auditFinder.findAllEmsEncountersByCaseId("76");
+    auditFinder.findAllEmsEncountersByCaseId("caseId");
   }
 
   @Test
@@ -211,7 +206,7 @@ public class AuditFinderTest {
     assertThat(searchSource.query(), hasToString(equalToJSON(
         "{ bool : { must : ["
             + " { term : { additionalProperties.supplierId : { value : test-supplier } } },"
-            + " { exists : { field : additionalProperties.interactionId } },"
+            + " { exists : { field : additionalProperties.interactionId.keyword } },"
             + " { exists : { field : additionalProperties.operation } }"
             + "] } }")));
   }
@@ -309,23 +304,5 @@ public class AuditFinderTest {
     };
 
     assertThat(interactionGroups, containsInAnyOrder(expectedInteractionGroups));
-  }
-
-  @Test
-  public void objectMapper_readValue_canDeserialiseAudit() throws IOException {
-    var auditFile = getClass().getClassLoader().getResource("exampleAudit.json");
-    var auditJson = IOUtils.toString(Objects.requireNonNull(auditFile), StandardCharsets.UTF_8);
-
-    var mapper = new ObjectMapper();
-    mapper.registerModule(new JavaTimeModule());
-    mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-
-    var audit = mapper.readValue(auditJson, AuditSession.class);
-
-    assertThat(audit.getCreatedDate(), is(Instant.parse("2020-06-11T16:36:52.587218Z")));
-    assertThat(audit.getRequestUrl(), is("/case/"));
-    assertThat(audit.getResponseStatus(), is("200"));
-    assertThat(audit.getAdditionalProperties().get("interactionId"), is("57"));
-    assertThat(audit.getEntries(), hasSize(28));
   }
 }
