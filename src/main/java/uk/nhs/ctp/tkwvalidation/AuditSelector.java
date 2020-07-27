@@ -27,9 +27,8 @@ public class AuditSelector {
     var zippableAudits = new ArrayList<FhirMessageAudit>();
 
     for (var audit : audits) {
-      var baseName = operationType == OperationType.SERVICE_SEARCH
-          ? operationType.getName()
-          : "encounter" + audit.getAdditionalProperties().get(INTERACTION_ID);
+      var baseName = operationType.getName()
+          + audit.getAdditionalProperties().get(INTERACTION_ID);
 
       if (isMethod(audit.getRequestMethod(), POST)) {
         zippableAudits.add(fhirMessageAuditTransformer.from(audit, baseName, true));
