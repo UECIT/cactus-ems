@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import uk.nhs.ctp.audit.model.AuditEntry;
-import uk.nhs.ctp.audit.model.AuditSession;
+import uk.nhs.cactus.common.audit.model.AuditEntry;
+import uk.nhs.cactus.common.audit.model.AuditSession;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AuditSelectorFixtures {
@@ -34,7 +34,7 @@ public class AuditSelectorFixtures {
         .entries(entries)
         .requestMethod(method.toUpperCase())
         .createdDate(createdAt)
-        .additionalProperty("caseId", "_" + method)
+        .additionalProperty("interactionId", "_" + method)
         .requestUrl("http://" + method)
         .requestBody(format("{ request %s }", method))
         .responseBody(format("{ response %s }", method))

@@ -8,7 +8,7 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.Value;
 import org.springframework.http.HttpHeaders;
-import uk.nhs.ctp.auditFinder.model.OperationType;
+import uk.nhs.cactus.common.audit.model.OperationType;
 import uk.nhs.ctp.enums.CdsApiVersion;
 
 @Value
@@ -55,8 +55,7 @@ public class AuditMetadata {
     httpHeaders.add(Headers.SUPPLIER_ID, getSupplierId());
     httpHeaders.add(Headers.API_VERSION, getApiVersion().getVersion());
     httpHeaders.add(Headers.INTERACTION_TYPE, getInteractionType().getName());
-    // TODO CDSCT-400: enable the following line
-//        httpHeaders.add();();(Headers.INTERACTION_ID, getInteractionId())
+    httpHeaders.add(Headers.INTERACTION_ID, getInteractionId());
     httpHeaders.add(Headers.INTERACTION_DATE, interactionDate);
     httpHeaders.add(Headers.SERVICE_ENDPOINT, getServiceEndpoint());
 

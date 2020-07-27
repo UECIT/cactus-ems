@@ -1,4 +1,4 @@
-package uk.nhs.ctp.auditFinder.role;
+package uk.nhs.ctp.elasticsearch.role;
 
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
@@ -7,8 +7,8 @@ import org.elasticsearch.client.security.user.privileges.Role.IndexPrivilegeName
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
-import uk.nhs.ctp.auditFinder.ElasticSearchClient;
-import uk.nhs.ctp.auditFinder.role.PutRoleRequest.IndexPermissions;
+import uk.nhs.ctp.elasticsearch.ElasticSearchRoleClient;
+import uk.nhs.ctp.elasticsearch.role.PutRoleRequest.IndexPermissions;
 
 @Service
 @RequiredArgsConstructor
@@ -16,12 +16,12 @@ import uk.nhs.ctp.auditFinder.role.PutRoleRequest.IndexPermissions;
 @Slf4j
 public class AWSElasticSearchRoleMapper implements RoleMapper {
 
-  private final ElasticSearchClient esClient;
+  private final ElasticSearchRoleClient esRoleClient;
 
   @Value("${cognito.user.pool}")
   private String userPool;
 
-  private static final String COGNITO_PREXIX = "Cognito/";
+  private static final String COGNITO_PREFIX = "Cognito/";
   private static final String ROLE_SUFFIX = "_role";
 
   @Override
@@ -34,7 +34,7 @@ public class AWSElasticSearchRoleMapper implements RoleMapper {
             .build())
         .build();
 
-    String cognitoUser = COGNITO_PREXIX + userPool + "/" + username;
+    String cognitoUser = COGNITO_PREFIX + userPool + "/" + username;
     String roleName = supplierId + ROLE_SUFFIX;
 
     PutRoleMappingRequest roleMappingRequest = PutRoleMappingRequest.builder()
@@ -42,7 +42,7 @@ public class AWSElasticSearchRoleMapper implements RoleMapper {
         .build();
 
     try{
-      esClient.mapRole(roleName, roleRequest, roleMappingRequest);
+      esRoleClient.mapRole(roleName, roleRequest, roleMappingRequest);
     } catch (IOException e) {
       log.error("Error occurred creating elasticsearch roles for user {}", username, e);
       throw new RuntimeException(e.getMessage());

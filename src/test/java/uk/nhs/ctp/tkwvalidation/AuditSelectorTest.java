@@ -18,9 +18,9 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.nhs.ctp.audit.model.AuditEntry;
-import uk.nhs.ctp.audit.model.AuditSession;
-import uk.nhs.ctp.auditFinder.model.OperationType;
+import uk.nhs.cactus.common.audit.model.AuditEntry;
+import uk.nhs.cactus.common.audit.model.AuditSession;
+import uk.nhs.cactus.common.audit.model.OperationType;
 import uk.nhs.ctp.testhelper.matchers.FunctionMatcher;
 import uk.nhs.ctp.tkwvalidation.model.FhirMessageAudit;
 
@@ -90,7 +90,7 @@ public class AuditSelectorTest {
     var audit = AuditSession.builder()
         .entry(getEntry)
         .entry(postEntry)
-        .additionalProperty("caseId", "6")
+        .additionalProperty("interactionId", "6")
         .requestMethod("GET")
         .responseHeaders("content-type: [application/fhir+json]")
         .requestUrl("http://valid.com/request/base")
@@ -186,7 +186,7 @@ public class AuditSelectorTest {
         .createdDate(date1)
         .entry(laterEntry)
         .entry(earlierEntry)
-        .additionalProperty("caseId", "_earlier")
+        .additionalProperty("interactionId", "_earlier")
         .build();
     var laterAudit = AuditSession.builder()
         .requestMethod("GET")
@@ -194,7 +194,7 @@ public class AuditSelectorTest {
         .responseBody("laterSessionBody")
         .responseHeaders("content-type: [application/fhir+json]")
         .createdDate(date4)
-        .additionalProperty("caseId", "_later")
+        .additionalProperty("interactionId", "_later")
         .build();
 
     var audits = List.of(laterAudit, earlierAudit);

@@ -1,4 +1,4 @@
-package uk.nhs.ctp.auditFinder.role;
+package uk.nhs.ctp.elasticsearch.role;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;

@@ -1,4 +1,4 @@
-package uk.nhs.ctp.auditFinder.role;
+package uk.nhs.ctp.elasticsearch.role;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

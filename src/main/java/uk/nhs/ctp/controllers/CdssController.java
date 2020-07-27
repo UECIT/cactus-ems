@@ -1,8 +1,12 @@
 package uk.nhs.ctp.controllers;
 
+import static uk.nhs.cactus.common.audit.model.AuditProperties.INTERACTION_ID;
+import static uk.nhs.cactus.common.audit.model.AuditProperties.OPERATION_TYPE;
+
 import ca.uhn.fhir.context.FhirContext;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.binary.Base64;
@@ -20,13 +24,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import uk.nhs.cactus.common.audit.AuditService;
+import uk.nhs.cactus.common.audit.model.OperationType;
 import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.service.CdssService;
 import uk.nhs.ctp.service.CdssSupplierService;
-import uk.nhs.ctp.service.isvalid.CdssValidityService;
 import uk.nhs.ctp.service.dto.CdssSupplierDTO;
 import uk.nhs.ctp.service.dto.NewCdssSupplierDTO;
 import uk.nhs.ctp.service.dto.ServiceDefinitionDTO;
+import uk.nhs.ctp.service.isvalid.CdssValidityService;
 import uk.nhs.ctp.service.search.SearchParameters;
 
 @CrossOrigin
@@ -38,6 +44,7 @@ public class CdssController {
   private final CdssSupplierService cdssSupplierService;
   private final CdssService cdssService;
   private final CdssValidityService cdssValidityService;
+  private final AuditService auditService;
 
   private final FhirContext fhirContext;
 
@@ -69,10 +76,11 @@ public class CdssController {
 
   /**
    * Invoke $isValid on all registered cdss instances for the supplier for the given patient
-   * @return
    */
   @PostMapping(path = "/isValid")
   public Map<String, Boolean> invokeIsValid(@RequestBody String patientId) {
+    auditService.addAuditProperty(OPERATION_TYPE, OperationType.IS_VALID.getName());
+    auditService.addAuditProperty(INTERACTION_ID, UUID.randomUUID().toString());
     return cdssValidityService.checkValidity(patientId);
   }
 

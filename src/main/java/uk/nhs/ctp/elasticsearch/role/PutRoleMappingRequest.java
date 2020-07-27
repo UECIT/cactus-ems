@@ -1,4 +1,4 @@
-package uk.nhs.ctp.auditFinder.role;
+package uk.nhs.ctp.elasticsearch.role;
 
 import java.util.List;
 import lombok.Builder;

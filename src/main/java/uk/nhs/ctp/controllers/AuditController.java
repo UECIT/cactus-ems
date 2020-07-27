@@ -22,8 +22,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
-import uk.nhs.ctp.audit.model.AuditSession;
-import uk.nhs.ctp.auditFinder.finder.AuditFinder;
+import uk.nhs.cactus.common.audit.model.AuditSession;
+import uk.nhs.ctp.auditFinder.AuditFinder;
+import uk.nhs.ctp.auditFinder.AuditTransformer;
+import uk.nhs.ctp.auditFinder.model.AuditInteraction;
 import uk.nhs.ctp.auditFinder.model.AuditValidationRequest;
 import uk.nhs.ctp.caseSearch.CaseSearchRequest;
 import uk.nhs.ctp.caseSearch.CaseSearchResultDTO;
@@ -40,6 +42,7 @@ public class AuditController {
 
   private final ObjectMapper mapper;
   private final AuditFinder auditFinder;
+  private final AuditTransformer auditTransformer;
   private final CaseSearchService caseSearchService;
   private final ValidationService validationService;
 
@@ -55,41 +58,32 @@ public class AuditController {
     return mapper.writeValueAsString(auditFinder.findAllEmsEncountersByCaseId(id.toString()));
   }
 
-  @GetMapping(path = "/encounters")
-  public List<AuditSession> getAuditEncounters() {
-    return auditFinder.findAllEncounters();
+	@GetMapping(path = "/interactions")
+	public List<AuditInteraction> getAuditInteractions() {
+		return auditTransformer.groupAndTransformInteractions(auditFinder.findInteractions());
   }
 
-  @GetMapping(path = "/servicesearches")
-  public List<AuditSession> getAuditServiceSearch() {
-    return auditFinder.findAllServiceSearches();
-  }
+	private List<AuditSession> findAudits(AuditValidationRequest request) {
+		if (isEmpty(request.getInteractionId())) {
+			throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Must specify an interactionId");
+		}
 
-  private List<AuditSession> findAudits(AuditValidationRequest request) {
-    // TODO CDSCT-400: unify different queries
-    if (!isEmpty(request.getCaseId())) {
-      // client must be asking for evaluate requests
-      return auditFinder.findAllEncountersByCaseId(request.getCaseId());
-    }
+		var audits = auditFinder.findAllEncountersByOperationTypeAndInteractionId(
+				request.getType(),
+				request.getInteractionId());
+		if (audits.isEmpty()) {
+			throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "No audits found with given interactionId");
+		}
 
-    if (!isEmpty(request.getSearchAuditId())) {
-      var audit = auditFinder.findByAuditId(request.getSearchAuditId())
-          .orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
-      return List.of(audit);
-    }
+		return audits;
+	}
 
-    throw new HttpClientErrorException(
-        HttpStatus.BAD_REQUEST,
-        "Must specify either caseId or searchAuditId");
-  }
-
-  @PostMapping(path = "/validate")
-  public void validate(@RequestBody AuditValidationRequest request) throws IOException {
-    var audits = findAudits(request);
-    validationService.validateAudits(
-        audits,
-        request.getType(),
-        request.getInstanceBaseUrl());
+	@PostMapping(path = "/validate")
+	public void validate(@RequestBody AuditValidationRequest request) throws IOException {
+		validationService.validateAudits(
+				findAudits(request),
+				request.getType(),
+				request.getInstanceBaseUrl());
   }
 
 

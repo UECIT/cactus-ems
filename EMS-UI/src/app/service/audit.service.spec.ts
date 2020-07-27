@@ -1,9 +1,10 @@
-import { Interaction, InteractionType } from './../model/audit';
+import { Interaction } from '../model';
 import { HttpClient } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { AuditService } from './audit.service';
 import { asyncData } from '../testing/async-observable-helpers';
 import { SESSION_STORAGE_OBJECT, SessionStorage, SERDES_OBJECT, STORAGE_OPTIONS } from 'h5webstorage';
+import * as moment from "moment";
 
 xdescribe('Audit Service', () => {
 
@@ -26,41 +27,18 @@ xdescribe('Audit Service', () => {
         auditService = TestBed.get(AuditService);
     });
 
-    it('should get encounter audits', () => {
+    it('should get interaction audits', () => {
         const expectedInteraction: Interaction = {
-            requestId: "someid",
-            interactionType: InteractionType.ENCOUNTER,
-            createdDate: 835222942,
-            additionalProperties: new Map([['caseId', '4']])
+            interactionId: "someId",
+            type: "Encounter",
+            startedAt: moment.unix(835222942)
         };
 
         httpClientSpy.get.and.returnValue(asyncData(expectedInteraction));
 
-        auditService.getEncounterAudits()
-            .then(interactionArray => {
-                expect(interactionArray)
-                    .toContain(expectedInteraction, 'expected interaction');
-            })
-            .catch(fail);
-        expect(httpClientSpy.get.calls.count()).toBe(1, 'one call');
-        //TODO: complete CDSCT-336
-    });
-
-    it('should get service definition search audits', () => {
-        const expectedInteraction: Interaction = {
-            requestId: "someguid",
-            interactionType: InteractionType.SERVICE_SEARCH,
-            createdDate: 835222942,
-            additionalProperties: new Map([])
-        };
-
-        httpClientSpy.get.and.returnValue(asyncData(expectedInteraction));
-
-        auditService.getServiceDefinitionSearchAudits()
-            .then(interactionArray => {
-                expect(interactionArray)
-                    .toContain(expectedInteraction, 'expected interaction');
-            })
+        auditService.getAudits()
+            .then(interactionArray =>
+                expect(interactionArray).toContain(expectedInteraction, 'expected interaction'))
             .catch(fail);
         expect(httpClientSpy.get.calls.count()).toBe(1, 'one call');
         //TODO: complete CDSCT-336

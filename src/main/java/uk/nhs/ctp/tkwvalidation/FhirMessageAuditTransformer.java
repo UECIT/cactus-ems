@@ -10,9 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import uk.nhs.ctp.audit.AuditParser;
-import uk.nhs.ctp.audit.model.AuditEntry;
-import uk.nhs.ctp.audit.model.AuditSession;
+import uk.nhs.cactus.common.audit.AuditParser;
+import uk.nhs.cactus.common.audit.model.AuditEntry;
+import uk.nhs.cactus.common.audit.model.AuditSession;
 import uk.nhs.ctp.tkwvalidation.model.FhirMessageAudit;
 
 @Component

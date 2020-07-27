@@ -9,6 +9,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static uk.nhs.cactus.common.audit.model.OperationType.ENCOUNTER;
+import static uk.nhs.cactus.common.audit.model.OperationType.SERVICE_SEARCH;
 import static uk.nhs.ctp.testhelper.AuditUnzipper.unzipEntries;
 import static uk.nhs.ctp.testhelper.fixtures.ElasticSearchFixtures.encounterSearchHits;
 import static uk.nhs.ctp.testhelper.fixtures.ElasticSearchFixtures.serviceDefinitionSearchHits;
@@ -34,10 +36,10 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.nhs.cactus.common.audit.model.OperationType;
+import uk.nhs.cactus.common.elasticsearch.ElasticSearchClient;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
-import uk.nhs.ctp.auditFinder.ElasticSearchClient;
 import uk.nhs.ctp.auditFinder.model.AuditValidationRequest;
-import uk.nhs.ctp.auditFinder.model.OperationType;
 import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.enums.CdsApiVersion;
 import uk.nhs.ctp.repos.CdssSupplierRepository;
@@ -71,25 +73,23 @@ public class AuditControllerComponentTest {
 
   @Before
   public void setup() {
-    when(authenticationService.requireSupplierId())
-        .thenReturn(TEST_SUPPLIER_ID);
+    when(authenticationService.requireSupplierId()).thenReturn(TEST_SUPPLIER_ID);
   }
 
   @Test
-  public void validate_withNoCaseIdAndSearchAuditId_shouldFail() throws IOException {
+  public void validate_withNoInteractionId_shouldFail() throws IOException {
     var request = new AuditValidationRequest();
-    request.setCaseId(null);
-    request.setSearchAuditId("");
+    request.setType(OperationType.CHECK_SERVICES);
 
     expectedException.expect(hasStatusCode(BAD_REQUEST));
     auditController.validate(request);
   }
 
   @Test
-  public void validate_withNonexistentSearchAuditId_shouldFail() throws IOException {
+  public void validate_withNonexistentInteractionId_shouldFail() throws IOException {
     var request = new AuditValidationRequest();
-    request.setCaseId(null);
-    request.setSearchAuditId("nonexistentSearchAuditId");
+    request.setType(OperationType.IS_VALID);
+    request.setInteractionId("nonexistentInteractionId");
 
     when(esClient.search(anyString(), any(SearchSourceBuilder.class)))
         .thenReturn(Collections.emptyList());
@@ -99,12 +99,11 @@ public class AuditControllerComponentTest {
   }
 
   @Test
-  public void validate_withCaseId_shouldSendEncounterAudits() throws IOException {
+  public void validate_shouldSendEncounterAudits() throws IOException {
     var request = new AuditValidationRequest();
-    request.setCaseId("validCaseId");
     request.setInstanceBaseUrl("http://existing.cdss/supplier");
-    request.setSearchAuditId(null);
-    request.setType(OperationType.ENCOUNTER);
+    request.setInteractionId("validInteractionId");
+    request.setType(ENCOUNTER);
 
     when(esClient.search(anyString(), any(SearchSourceBuilder.class)))
         .thenReturn(encounterSearchHits(getClass().getClassLoader()));
@@ -152,9 +151,8 @@ public class AuditControllerComponentTest {
   @Test
   public void download_withCaseId_shouldReturnZip() throws IOException {
     var request = new AuditValidationRequest();
-    request.setCaseId("validCaseId");
+    request.setInteractionId("validCaseId");
     request.setInstanceBaseUrl("http://existing.cdss/supplier");
-    request.setSearchAuditId(null);
     request.setType(OperationType.ENCOUNTER);
 
     when(esClient.search(anyString(), any(SearchSourceBuilder.class)))
@@ -195,12 +193,11 @@ public class AuditControllerComponentTest {
   }
 
   @Test
-  public void validate_withSearchAuditId_shouldSendSearchAudits() throws IOException {
+  public void validate_shouldSendSearchAudits() throws IOException {
     var request = new AuditValidationRequest();
-    request.setCaseId(null);
     request.setInstanceBaseUrl("http://non-existing.cdss/supplier");
-    request.setSearchAuditId("validSearchAuditId");
-    request.setType(OperationType.SERVICE_SEARCH);
+    request.setInteractionId("validInteractionId");
+    request.setType(SERVICE_SEARCH);
 
     when(esClient.search(anyString(), any(SearchSourceBuilder.class)))
         .thenReturn(serviceDefinitionSearchHits(getClass().getClassLoader()));
@@ -228,13 +225,6 @@ public class AuditControllerComponentTest {
 
     assertThat(unzipEntries(decodedBytes), contains(entry1, entry2));
   }
-
-  private static final String VALIDATION_RESPONSE = "{"
-      + "    \"resourceType\": \"OperationOutcome\","
-      + "    \"issue\": [{"
-      + "        \"diagnostics\": \"validDiagnosticsHtml\""
-      + "    }]"
-      + "}";
 
   @SuppressWarnings("unused")
   private static void saveZipToTempFile(byte[] zipData) throws IOException {

@@ -11,7 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import uk.nhs.cactus.common.security.JWTHandler;
 import uk.nhs.cactus.common.security.JWTRequest;
-import uk.nhs.ctp.auditFinder.role.RoleMapper;
+import uk.nhs.ctp.elasticsearch.role.RoleMapper;
 import uk.nhs.ctp.entities.UserEntity;
 import uk.nhs.ctp.exception.EMSException;
 import uk.nhs.ctp.model.RegisterSupplierRequest;

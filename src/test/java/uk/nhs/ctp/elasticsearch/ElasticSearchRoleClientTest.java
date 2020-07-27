@@ -1,4 +1,4 @@
-package uk.nhs.ctp.auditFinder;
+package uk.nhs.ctp.elasticsearch;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -29,15 +29,16 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
-import uk.nhs.ctp.auditFinder.role.PutRoleMappingRequest;
-import uk.nhs.ctp.auditFinder.role.PutRoleRequest;
-import uk.nhs.ctp.auditFinder.role.PutRoleRequest.IndexPermissions;
+import uk.nhs.cactus.common.elasticsearch.ElasticRestClientFactory;
+import uk.nhs.ctp.elasticsearch.role.PutRoleMappingRequest;
+import uk.nhs.ctp.elasticsearch.role.PutRoleRequest;
+import uk.nhs.ctp.elasticsearch.role.PutRoleRequest.IndexPermissions;
 import uk.nhs.ctp.testhelper.matchers.FunctionMatcher;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ElasticSearchClientTest {
+public class ElasticSearchRoleClientTest {
 
-  private ElasticSearchClient esClient;
+  private ElasticSearchRoleClient esRoleClient;
 
   @Mock
   private ElasticRestClientFactory mockFactory;
@@ -46,8 +47,8 @@ public class ElasticSearchClientTest {
 
   @Before
   public void setup() {
-    esClient = new ElasticSearchClient(mockFactory, new ObjectMapper());
-    ReflectionTestUtils.setField(esClient, "endpoint", MOCK_ENDPOINT);
+    esRoleClient = new ElasticSearchRoleClient(mockFactory, new ObjectMapper());
+    ReflectionTestUtils.setField(esRoleClient, "endpoint", MOCK_ENDPOINT);
   }
 
   @Test
@@ -68,7 +69,7 @@ public class ElasticSearchClientTest {
         .user("test_user")
         .build();
 
-    esClient.mapRole(roleName, putRoleRequest, putRoleMappingRequest);
+    esRoleClient.mapRole(roleName, putRoleRequest, putRoleMappingRequest);
 
     var putCaptor = ArgumentCaptor.forClass(HttpPut.class);
     HttpHost expectedHost = HttpHost.create(MOCK_ENDPOINT);

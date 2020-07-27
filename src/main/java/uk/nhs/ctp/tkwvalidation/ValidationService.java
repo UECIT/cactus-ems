@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import uk.nhs.ctp.audit.model.AuditSession;
-import uk.nhs.ctp.auditFinder.model.OperationType;
+import uk.nhs.cactus.common.audit.model.AuditSession;
+import uk.nhs.cactus.common.audit.model.OperationType;
 import uk.nhs.ctp.tkwvalidation.model.AuditMetadata;
 import uk.nhs.ctp.tkwvalidation.rules.AuditValidationRule;
 

@@ -21,6 +21,7 @@ import ca.uhn.fhir.rest.gclient.IRead;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.IReadTyped;
 import java.util.Map;
+import java.util.Optional;
 import javax.transaction.Transactional;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -47,6 +48,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
+import uk.nhs.cactus.common.audit.AuditService;
+import uk.nhs.cactus.common.audit.AuditThreadStore;
+import uk.nhs.cactus.common.audit.model.AuditSession;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.enums.CdsApiVersion;
@@ -66,6 +70,12 @@ public class CdssControllerComponentTest {
   @Autowired
   private CdssSupplierRepository cdssRepository;
 
+  @Autowired
+  private AuditService auditService;
+
+  @Autowired
+  private AuditThreadStore auditThreadStore;
+
   @MockBean
   @Qualifier("restTemplate")
   private RestTemplate restTemplate;
@@ -84,6 +94,9 @@ public class CdssControllerComponentTest {
   @Before
   public void setup() {
     when(authenticationService.requireSupplierId()).thenReturn(MOCK_SUPPLIER_ID);
+    when(authenticationService.getCurrentSupplierId()).thenReturn(Optional.of(MOCK_SUPPLIER_ID));
+
+    auditThreadStore.setCurrentSession(AuditSession.builder().build());
   }
 
   @Test
@@ -192,8 +205,8 @@ public class CdssControllerComponentTest {
       .setValue(new BooleanType(true)));
     mockIsValid(returnParams);
 
-
     Map<String, Boolean> results = cdssController.invokeIsValid(patientId);
+
     assertThat(results, hasEntry("mock.base.url/fhir", Boolean.TRUE));
   }
 

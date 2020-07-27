@@ -4,7 +4,7 @@ import java.util.List;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import uk.nhs.ctp.audit.model.AuditSession;
+import uk.nhs.cactus.common.audit.model.AuditSession;
 
 public class EncounterAuditValidationRuleTest {
 
@@ -18,7 +18,7 @@ public class EncounterAuditValidationRuleTest {
     var audits = List.of(
         AuditSession.builder().build(),
         AuditSession.builder()
-            .additionalProperty("caseId", "validCaseId")
+            .additionalProperty("interactionId", "validCaseId")
             .build());
 
     expectedException.expect(UnsupportedOperationException.class);
@@ -37,10 +37,10 @@ public class EncounterAuditValidationRuleTest {
   public void ensure_withEncounters_shouldPass() {
     var audits = List.of(
         AuditSession.builder()
-            .additionalProperty("caseId", "validCaseId2")
+            .additionalProperty("interactionId", "validCaseId2")
             .build(),
         AuditSession.builder()
-            .additionalProperty("caseId", "validCaseId1")
+            .additionalProperty("interactionId", "validCaseId1")
             .build());
 
     rule.ensure(audits);
@@ -50,7 +50,7 @@ public class EncounterAuditValidationRuleTest {
   public void ensure_withEncounter_shouldPass() {
     var audits = List.of(
         AuditSession.builder()
-            .additionalProperty("caseId", "validCaseId2")
+            .additionalProperty("interactionId", "validCaseId2")
             .build());
 
     rule.ensure(audits);

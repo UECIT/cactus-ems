@@ -1,12 +1,10 @@
-package uk.nhs.ctp.auditFinder;
+package uk.nhs.ctp.elasticsearch;
 
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.apache.http.entity.ContentType.APPLICATION_JSON;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.Header;
@@ -17,21 +15,18 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicHeader;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-import uk.nhs.ctp.auditFinder.role.PutRoleMappingRequest;
-import uk.nhs.ctp.auditFinder.role.PutRoleRequest;
+import uk.nhs.cactus.common.elasticsearch.ElasticRestClientFactory;
+import uk.nhs.ctp.elasticsearch.role.PutRoleMappingRequest;
+import uk.nhs.ctp.elasticsearch.role.PutRoleRequest;
 
 @Component
 @Slf4j
 @Profile("!dev")
 @RequiredArgsConstructor
-public class ElasticSearchClient {
+public class ElasticSearchRoleClient {
 
   @Value("${es.audit}")
   private String endpoint;
@@ -41,19 +36,6 @@ public class ElasticSearchClient {
 
   private static final String PUT_ROLE = "/_opendistro/_security/api/roles/";
   private static final String PUT_ROLE_MAPPING = "/_opendistro/_security/api/rolesmapping/";
-
-  public List<SearchHit> search(String index, SearchSourceBuilder source) throws IOException {
-    var request = new SearchRequest()
-        .indices(index)
-        .source(source);
-
-    log.info("Sending ElasticSearch request to index " + index + ":");
-    log.info(request.toString());
-
-    var response = clientFactory.highLevelClient(endpoint)
-        .search(request, RequestOptions.DEFAULT);
-    return Arrays.asList(response.getHits().getHits());
-  }
 
   public void mapRole(
       String roleName,

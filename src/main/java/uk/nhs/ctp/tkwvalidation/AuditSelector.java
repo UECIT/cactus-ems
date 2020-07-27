@@ -2,6 +2,7 @@ package uk.nhs.ctp.tkwvalidation;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static uk.nhs.cactus.common.audit.model.AuditProperties.INTERACTION_ID;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,15 +12,13 @@ import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMethod;
-import uk.nhs.ctp.audit.model.AuditSession;
-import uk.nhs.ctp.auditFinder.model.OperationType;
+import uk.nhs.cactus.common.audit.model.AuditSession;
+import uk.nhs.cactus.common.audit.model.OperationType;
 import uk.nhs.ctp.tkwvalidation.model.FhirMessageAudit;
 
 @Component
 @RequiredArgsConstructor
 public class AuditSelector {
-  private static final String CASE_ID = "caseId";
-
   private final FhirMessageAuditTransformer fhirMessageAuditTransformer;
 
   public List<FhirMessageAudit> selectAudits(
@@ -30,7 +29,7 @@ public class AuditSelector {
     for (var audit : audits) {
       var baseName = operationType == OperationType.SERVICE_SEARCH
           ? operationType.getName()
-          : "encounter" + audit.getAdditionalProperties().get(CASE_ID);
+          : "encounter" + audit.getAdditionalProperties().get(INTERACTION_ID);
 
       if (isMethod(audit.getRequestMethod(), POST)) {
         zippableAudits.add(fhirMessageAuditTransformer.from(audit, baseName, true));

@@ -1,10 +1,8 @@
-import { ValidationRequest } from './../model/audit';
+import { ValidationRequest, Token, Interaction } from '../model';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { Token } from '../model/token';
 import { SessionStorage } from 'h5webstorage';
-import { Interaction } from '../model';
 
 const httpOptions = {
   headers: new HttpHeaders()
@@ -28,24 +26,13 @@ export class AuditService {
     }
   }
 
-  getEncounterAudits(): Promise<Interaction[]> {
+  getAudits(): Promise<Interaction[]> {
     if (this.sessionStorage['auth_token'] != null) {
       httpOptions.headers = httpOptions.headers.set(
-        'Authorization',
-        this.sessionStorage['auth_token']
+          'Authorization',
+          this.sessionStorage['auth_token']
       );
-      const url = `${environment.EMS_API}/audit/encounters/`;
-      return this.http.get<Interaction[]>(url, httpOptions).toPromise();
-    }
-  }
-
-  getServiceDefinitionSearchAudits(): Promise<Interaction[]> {
-    if (this.sessionStorage['auth_token'] != null) {
-      httpOptions.headers = httpOptions.headers.set(
-        'Authorization',
-        this.sessionStorage['auth_token']
-      );
-      const url = `${environment.EMS_API}/audit/servicesearches/`;
+      const url = `${environment.EMS_API}/audit/interactions`;
       return this.http.get<Interaction[]>(url, httpOptions).toPromise();
     }
   }

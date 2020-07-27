@@ -1,4 +1,4 @@
-package uk.nhs.ctp.auditFinder.role;
+package uk.nhs.ctp.elasticsearch.role;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -15,8 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
-import uk.nhs.ctp.auditFinder.ElasticSearchClient;
-import uk.nhs.ctp.auditFinder.role.PutRoleRequest.IndexPermissions;
+import uk.nhs.ctp.elasticsearch.ElasticSearchRoleClient;
+import uk.nhs.ctp.elasticsearch.role.PutRoleRequest.IndexPermissions;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AWSElasticSearchRoleMapperTest {
@@ -25,7 +25,7 @@ public class AWSElasticSearchRoleMapperTest {
   private AWSElasticSearchRoleMapper roleMapper;
 
   @Mock
-  private ElasticSearchClient esClient;
+  private ElasticSearchRoleClient esRoleClient;
 
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
@@ -49,14 +49,17 @@ public class AWSElasticSearchRoleMapperTest {
             .build())
         .build();
 
-    PutRoleMappingRequest expectedMappingRequest = PutRoleMappingRequest.builder()
+    PutRoleMappingRequest expectedMappingRequest = PutRoleMappingRequest
+        .builder()
         .user("Cognito/" + USER_POOL + "/someUsername")
         .build();
 
     roleMapper.setupSupplierRoles(supplierId, username);
 
-    verify(esClient)
-        .mapRole("supplierID_role", expectedRoleRequest, expectedMappingRequest);
+    verify(esRoleClient).mapRole(
+        "supplierID_role",
+        expectedRoleRequest,
+        expectedMappingRequest);
   }
 
   @Test
@@ -65,7 +68,7 @@ public class AWSElasticSearchRoleMapperTest {
     String username = "someUsername";
 
     doThrow(new IOException("something went wrong"))
-        .when(esClient).mapRole(any(), any(), any());
+        .when(esRoleClient).mapRole(any(), any(), any());
 
     expectedException.expect(RuntimeException.class);
     expectedException.expectMessage("something went wrong");

@@ -48,9 +48,9 @@
           <tbody>
             <tr class="interaction" *ngFor="let interaction of interactions"
                 (click)="interactionSelection.toggle(interaction)">
-              <td class="interactionType">{{ interaction.interactionType }}</td>
-              <td class="interactionCreatedDate">{{ interaction.createdDate * 1000 | date:'medium' }}</td>
-              <td class="interactionCaseId">{{ interaction.additionalProperties["caseId"] }}</td>
+              <td class="interactionType">{{ interaction.type }}</td>
+              <td class="interactionCreatedDate">{{ interaction.startedAt | date:'medium' }}</td>
+              <td class="interactionCaseId">{{ interaction.interactionId }}</td>
               <td>
                 <mat-checkbox class="interactionCheckbox"
                     (click)="$event.stopPropagation()"

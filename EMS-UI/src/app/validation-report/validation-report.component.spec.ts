@@ -1,4 +1,4 @@
-import { Interaction, InteractionType, EmsSupplier, CdssSupplier } from '../model';
+import { Interaction, EmsSupplier, CdssSupplier } from '../model';
 import { of } from 'rxjs';
 import { AuditService, EmsService } from '../service';
 import { ComponentFixture, TestBed, tick, fakeAsync } from '@angular/core/testing';
@@ -8,6 +8,7 @@ import { Predicate, DebugElement, Component, Input, PipeTransform, Pipe } from '
 import { CdssService } from '../service';
 import { MaterialModule } from '../material.module';
 import { By } from '@angular/platform-browser';
+import * as moment from "moment";
 
 @Component({selector: 'app-error-display', template: ''})
 class ErrorDisplayStub {
@@ -66,11 +67,11 @@ class ValidationReportComponentPage {
   get interactions() {
     const rows = this.queryAll(By.css('.interaction'));
     return rows.map(row => {
-      const origin = row.query(By.css('.interactionType')).nativeElement.innerText;
-      const createdDate = row.query(By.css('.interactionCreatedDate')).nativeElement.innerText;
-      const caseId: number = +row.query(By.css('.interactionCaseId')).nativeElement.innerText;
+      const type = row.query(By.css('.interactionType')).nativeElement.innerText;
+      const startedAt = row.query(By.css('.interactionCreatedDate')).nativeElement.innerText;
+      const interactionId = row.query(By.css('.interactionCaseId')).nativeElement.innerText;
 
-      return {origin, createdDate, caseId};
+      return {type, startedAt, interactionId};
     });
   }
 
@@ -92,8 +93,7 @@ describe('ValidationReportComponent', () => {
   let emsServiceSpy: { getAllEmsSuppliers: jasmine.Spy };
   let cdssServiceSpy: { getCdssSuppliers: jasmine.Spy };
   let auditServiceSpy: {
-    getEncounterAudits: jasmine.Spy,
-    getServiceDefinitionSearchAudits: jasmine.Spy,
+    getAudits: jasmine.Spy,
     sendValidationRequest: jasmine.Spy
   };
 
@@ -101,7 +101,7 @@ describe('ValidationReportComponent', () => {
     emsServiceSpy = jasmine.createSpyObj('EmsService', ['getAllEmsSuppliers']);
     cdssServiceSpy = jasmine.createSpyObj('CdssService', ['getCdssSuppliers']);
     auditServiceSpy = jasmine.createSpyObj('AuditService',
-        ['getEncounterAudits', 'getServiceDefinitionSearchAudits', 'sendValidationRequest']);
+        ['getAudits', 'sendValidationRequest']);
 
     TestBed.configureTestingModule({
       imports: [MaterialModule],
@@ -133,16 +133,16 @@ describe('ValidationReportComponent', () => {
 
   function setupInteractionSpies() {
     let encounter = new Interaction();
-    encounter.additionalProperties["caseId"] = 4;
-    encounter.createdDate = 835222942; //'Jun 19, 1996, 10:22:22 PM' (UTC)
-    encounter.interactionType = InteractionType.ENCOUNTER;
+    encounter.interactionId = "4";
+    encounter.startedAt = moment.unix(835222942); //'Jun 19, 1996, 10:22:22 PM' (UTC)
+    encounter.type = "Encounter";
 
     let sdSearch = new Interaction();
-    sdSearch.createdDate = 955335783; //'Apr 10, 2000, 3:03:03 AM' (UTC)
-    sdSearch.interactionType = InteractionType.SERVICE_SEARCH;
+    sdSearch.interactionId = "6";
+    sdSearch.startedAt = moment.unix(955335783); //'Apr 10, 2000, 3:03:03 AM' (UTC)
+    sdSearch.type = "Service Search";
 
-    auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([encounter]));
-    auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([sdSearch]));
+    auditServiceSpy.getAudits.and.returnValue(Promise.resolve([encounter, sdSearch]));
     return {encounter, sdSearch};
   }
 
@@ -154,8 +154,7 @@ describe('ValidationReportComponent', () => {
 
     it('should display end points', fakeAsync(() => {
       let {cdss, ems} = setupSupplierSpies();
-      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
-      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+      auditServiceSpy.getAudits.and.returnValue(Promise.resolve([]));
 
       fixture.detectChanges(); // init
       tick();
@@ -180,38 +179,33 @@ describe('ValidationReportComponent', () => {
       expect(comp.loaded).toBeTruthy();
       expect(page.interactions).toContain(
           {
-            origin: encounter.interactionType,
-            createdDate: new Date(encounter.createdDate * 1000).toUTCString(),
-            caseId: encounter.additionalProperties['caseId']
-          },
-          {
-            origin: sdSearch.interactionType,
-            createdDate: new Date(sdSearch.createdDate * 1000).toUTCString(),
-            caseId: 0
-          }
-      );
+            ...encounter,
+            startedAt: encounter.startedAt.toDate().toUTCString()
+          }, {
+            ...sdSearch,
+            startedAt: sdSearch.startedAt.toDate().toUTCString()
+          });
     }));
 
     it('should display one interaction per encounter', fakeAsync(() => {
       let encounter = new Interaction();
-      encounter.additionalProperties["caseId"] = 4;
-      encounter.createdDate = 835222942; //'Jun 19, 1996, 10:22:22 PM' (UTC)
-      encounter.interactionType = InteractionType.ENCOUNTER;
+      encounter.interactionId = "4";
+      encounter.startedAt = moment.unix(835222942); //'Jun 19, 1996, 10:22:22 PM' (UTC)
+      encounter.type = "Encounter";
 
       let encounter2 = new Interaction();
-      encounter2.additionalProperties["caseId"] = 4;
-      encounter2.createdDate = 955335783; //'Apr 10, 2000, 3:03:03 AM' (UTC)
-      encounter2.interactionType = InteractionType.ENCOUNTER;
+      encounter2.interactionId = "4";
+      encounter2.startedAt = moment.unix(955335783); //'Apr 10, 2000, 3:03:03 AM' (UTC)
+      encounter2.type = "Encounter";
 
       let encounter3 = new Interaction();
-      encounter3.additionalProperties["caseId"] = 5;
-      encounter3.createdDate = 955335783; //'Apr 10, 2000, 3:03:03 AM' (UTC)
-      encounter3.interactionType = InteractionType.ENCOUNTER;
+      encounter3.interactionId = "5";
+      encounter3.startedAt = moment.unix(955335783); //'Apr 10, 2000, 3:03:03 AM' (UTC)
+      encounter3.type = "Encounter";
 
       cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
       emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
-      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([encounter, encounter2, encounter3]));
-      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+      auditServiceSpy.getAudits.and.returnValue(Promise.resolve([encounter, encounter2, encounter3]));
 
       fixture.detectChanges(); // init
       tick();
@@ -220,23 +214,19 @@ describe('ValidationReportComponent', () => {
       expect(comp.loaded).toBeTruthy();
       expect(page.interactions).toContain(
           {
-            origin: encounter.interactionType,
-            createdDate: new Date(encounter.createdDate * 1000).toUTCString(),
-            caseId: encounter.additionalProperties['caseId']
+            ...encounter,
+            startedAt: encounter.startedAt.toDate().toUTCString()
           },
           {
-            origin: encounter3.interactionType,
-            createdDate: new Date(encounter3.createdDate * 1000).toUTCString(),
-            caseId: encounter3.additionalProperties['caseId']
-          },
-      );
+            ...encounter3,
+            startedAt: encounter3.startedAt.toDate().toUTCString()
+          });
     }));
 
     it('should not display when loading fails', () => {
       cdssServiceSpy.getCdssSuppliers.and.returnValue(of());
       emsServiceSpy.getAllEmsSuppliers.and.returnValue(of());
-      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.reject(""));
-      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.reject(""));
+      auditServiceSpy.getAudits.and.returnValue(Promise.reject(""));
 
       fixture.detectChanges(); // init
 
@@ -248,8 +238,7 @@ describe('ValidationReportComponent', () => {
 
     it('should select one when clicking on endpoint row', fakeAsync(() => {
       let {cdss,ems} = setupSupplierSpies();
-      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
-      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+      auditServiceSpy.getAudits.and.returnValue(Promise.resolve([]));
 
       fixture.detectChanges(); // init
       tick();
@@ -265,8 +254,7 @@ describe('ValidationReportComponent', () => {
 
     it('should select one when clicking on endpoint checkbox', fakeAsync(() => {
       let {cdss,ems} = setupSupplierSpies();
-      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
-      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+      auditServiceSpy.getAudits.and.returnValue(Promise.resolve([]));
 
       fixture.detectChanges(); // init
       tick();
@@ -283,8 +271,7 @@ describe('ValidationReportComponent', () => {
 
     it('should deselect when clicking on endpoint row', fakeAsync(() => {
       let {cdss} = setupSupplierSpies();
-      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
-      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+      auditServiceSpy.getAudits.and.returnValue(Promise.resolve([]));
 
       comp.endpointSelection.select(cdss);
 
@@ -302,8 +289,7 @@ describe('ValidationReportComponent', () => {
 
     it('should deselect when clicking on endpoint checkbox', fakeAsync(() => {
       let {cdss} = setupSupplierSpies();
-      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
-      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+      auditServiceSpy.getAudits.and.returnValue(Promise.resolve([]));
 
       comp.endpointSelection.select(cdss);
 
@@ -321,8 +307,7 @@ describe('ValidationReportComponent', () => {
 
     it('should deselect existing when selecting a different endpoint', fakeAsync(() => {
       let {cdss,ems} = setupSupplierSpies();
-      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
-      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+      auditServiceSpy.getAudits.and.returnValue(Promise.resolve([]));
 
       comp.endpointSelection.select(cdss);
 
@@ -441,8 +426,7 @@ describe('ValidationReportComponent', () => {
     function initEmpty() {
       cdssServiceSpy.getCdssSuppliers.and.returnValue(of([]));
       emsServiceSpy.getAllEmsSuppliers.and.returnValue(of([]));
-      auditServiceSpy.getEncounterAudits.and.returnValue(Promise.resolve([]));
-      auditServiceSpy.getServiceDefinitionSearchAudits.and.returnValue(Promise.resolve([]));
+      auditServiceSpy.getAudits.and.returnValue(Promise.resolve([]));
     }
 
     it('should send validation request to validation service', fakeAsync(() => {
@@ -451,9 +435,8 @@ describe('ValidationReportComponent', () => {
       let selectedSupplier = new EmsSupplier();
       selectedSupplier.baseUrl = "this.is.a.fake";
       let selectedInteraction = new Interaction();
-      selectedInteraction.requestId = "someguid";
-      selectedInteraction.interactionType = InteractionType.ENCOUNTER;
-      selectedInteraction.additionalProperties["caseId"] = "6";
+      selectedInteraction.type = "Encounter";
+      selectedInteraction.interactionId = "6";
 
       comp.endpointSelection.select(selectedSupplier);
       comp.interactionSelection.select(selectedInteraction);
@@ -468,9 +451,8 @@ describe('ValidationReportComponent', () => {
       expect(auditServiceSpy.sendValidationRequest).toHaveBeenCalledWith(
           jasmine.objectContaining({
             instanceBaseUrl: "this.is.a.fake",
-            searchAuditId: "someguid",
-            type: InteractionType.ENCOUNTER,
-            caseId: "6"
+            type: "Encounter",
+            interactionId: "6"
           })
       );
     }));
@@ -496,8 +478,7 @@ describe('ValidationReportComponent', () => {
       let selectedSupplier = new EmsSupplier();
       selectedSupplier.id = 5;
       let selectedInteraction = new Interaction();
-      selectedInteraction.requestId = "someguid";
-      selectedInteraction.additionalProperties["caseId"] = "6";
+      selectedInteraction.interactionId = "someGuid";
 
       comp.endpointSelection.select(selectedSupplier);
       comp.interactionSelection.select(selectedInteraction);
