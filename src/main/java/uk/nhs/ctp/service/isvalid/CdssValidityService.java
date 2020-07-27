@@ -27,15 +27,15 @@ public class CdssValidityService {
   private final TokenAuthenticationService authService;
   private final IsValidOperationService isValidOperationService;
 
-  public Map<String, Boolean> checkValidity(String patientId) {
+  public Map<String, Boolean> checkValidity(String patientId, String requestId) {
     Patient patient = resourceLocator.findResource(patientId);
 
     return registeredGp(patient)
-        .map(gp -> invokeValidity(gp, patient))
+        .map(gp -> invokeValidity(gp, patient, requestId))
         .orElse(Collections.emptyMap());
   }
 
-  private Map<String, Boolean> invokeValidity(Organization gp, Patient patient) {
+  private Map<String, Boolean> invokeValidity(Organization gp, Patient patient, String requestId) {
     Optional<Identifier> odsCode = odsIdentifier(gp);
     if (odsCode.isEmpty()) {
       log.warn("GP {} for patient {} has no ODS code", gp.getId(), patient.getId());
@@ -44,7 +44,7 @@ public class CdssValidityService {
     var results = new HashMap<String, Boolean>();
     cdssSupplierRepository.findAllBySupplierId(authService.requireSupplierId()) //TODO: More efficient in parallel CDSCT-41
         .forEach(supplier -> {
-          Boolean result = isValidOperationService.invokeIsValid(supplier, odsCode.get(), patient);
+          Boolean result = isValidOperationService.invokeIsValid(supplier, odsCode.get(), patient, requestId);
           results.put(supplier.getBaseUrl(), result);
         });
     return results;

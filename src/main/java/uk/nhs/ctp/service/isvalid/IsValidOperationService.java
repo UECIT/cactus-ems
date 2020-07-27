@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import com.google.common.base.Preconditions;
 import java.time.Clock;
 import java.util.Date;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.DateTimeType;
@@ -35,25 +34,25 @@ public class IsValidOperationService {
    * Invoke the $isValid operation on a CDSS for a patients GP
    * @return true if the CDSS claims to be valid
    */
-  public Boolean invokeIsValid(CdssSupplier supplier, Identifier odsCode, Patient patient) {
+  public Boolean invokeIsValid(CdssSupplier supplier, Identifier odsCode, Patient patient, String requestId) {
     Preconditions.checkNotNull(odsCode, "$isValid requires an ODS code");
     BooleanType isValidResponse =
         (BooleanType)fhirContext.newRestfulGenericClient(supplier.getBaseUrl())
             .operation()
             .onType(ServiceDefinition.class)
             .named(IS_VALID)
-            .withParameters(buildIsValidParameters(odsCode, patient.getBirthDate()))
+            .withParameters(buildIsValidParameters(odsCode, patient.getBirthDate(),requestId))
             .execute()
             .getParameterFirstRep()
             .getValue();
     return isValidResponse.booleanValue();
   }
 
-  private Parameters buildIsValidParameters(Identifier odsCode, Date dateOfBirth) {
+  private Parameters buildIsValidParameters(Identifier odsCode, Date dateOfBirth, String requestId) {
     return new Parameters()
         .addParameter(new ParametersParameterComponent()
             .setName(REQUEST_ID)
-            .setValue(new IdType(UUID.randomUUID().toString())))
+            .setValue(new IdType(requestId)))
         .addParameter(new ParametersParameterComponent()
             .setName(ODS_CODE)
             .setValue(odsCode))

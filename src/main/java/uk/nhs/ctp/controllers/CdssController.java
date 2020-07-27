@@ -79,9 +79,10 @@ public class CdssController {
    */
   @PostMapping(path = "/isValid")
   public Map<String, Boolean> invokeIsValid(@RequestBody String patientId) {
+    var requestId = UUID.randomUUID().toString();
     auditService.addAuditProperty(OPERATION_TYPE, OperationType.IS_VALID.getName());
-    auditService.addAuditProperty(INTERACTION_ID, UUID.randomUUID().toString());
-    return cdssValidityService.checkValidity(patientId);
+    auditService.addAuditProperty(INTERACTION_ID, requestId);
+    return cdssValidityService.checkValidity(patientId, requestId);
   }
 
   /**
