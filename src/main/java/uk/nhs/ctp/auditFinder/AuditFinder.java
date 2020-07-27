@@ -13,6 +13,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.nhs.cactus.common.audit.model.AuditSession;
 import uk.nhs.cactus.common.audit.model.OperationType;
@@ -25,8 +26,6 @@ public class AuditFinder {
 
   private static final int MAX_RETURNED_AUDITS = 100;
 
-  private static final String EMS_NAME = "ems.cactus-staging";
-
   private static final String OWNER_FIELD = "@owner.keyword";
   private static final String TIMESTAMP_FIELD = "@timestamp";
   private static final String SUPPLIER_ID_FIELD = "additionalProperties.supplierId";
@@ -34,6 +33,9 @@ public class AuditFinder {
   private static final String OPERATION_FIELD = "additionalProperties.operation";
 
   private static final String AUDIT_SUFFIX = "-audit";
+
+  @Value("${service.name}")
+  private String emsName;
 
   private final ElasticSearchClient esClient;
   private final TokenAuthenticationService authenticationService;
@@ -57,7 +59,7 @@ public class AuditFinder {
     var supplierId = authenticationService.requireSupplierId();
 
     var query = QueryBuilders.boolQuery()
-        .must(QueryBuilders.termQuery(OWNER_FIELD, EMS_NAME))
+        .must(QueryBuilders.termQuery(OWNER_FIELD, emsName))
         .must(QueryBuilders.termQuery(SUPPLIER_ID_FIELD, supplierId))
         .must(QueryBuilders.termQuery(INTERACTION_ID_FIELD, caseId));
 

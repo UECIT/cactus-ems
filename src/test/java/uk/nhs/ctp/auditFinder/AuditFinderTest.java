@@ -29,6 +29,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.nhs.cactus.common.audit.model.AuditEntry;
 import uk.nhs.cactus.common.audit.model.AuditSession;
 import uk.nhs.cactus.common.audit.model.OperationType;
@@ -60,7 +61,7 @@ public class AuditFinderTest {
     when(elasticSearchClient.search(eq("test-supplier-audit"), any(SearchSourceBuilder.class)))
         .thenReturn(emptyList());
 
-    auditFinder.findAllEncountersByOperationTypeAndInteractionId(OperationType.SERVICE_SEARCH,"caseId");
+    auditFinder.findAllEncountersByOperationTypeAndInteractionId(OperationType.SERVICE_SEARCH,"interactionId");
 
     var searchSourceCaptor = ArgumentCaptor.forClass(SearchSourceBuilder.class);
     verify(elasticSearchClient).search(eq("test-supplier-audit"), searchSourceCaptor.capture());
@@ -74,7 +75,7 @@ public class AuditFinderTest {
         "{ bool : { must : ["
             + " { term : { additionalProperties.supplierId : { value : test-supplier } } },"
             + " { term : { additionalProperties.operation : { value : service_search } } },"
-            + " { term : { additionalProperties.interactionId.keyword : { value : caseId } } }"
+            + " { term : { additionalProperties.interactionId.keyword : { value : interactionId } } }"
             + "] } }")));
   }
 
@@ -113,11 +114,13 @@ public class AuditFinderTest {
 
   @Test
   public void findAllEmsEncountersByCaseId_buildsRequest() throws IOException {
+    ReflectionTestUtils.setField(auditFinder, "emsName", "validEmsName");
+
     when(authService.requireSupplierId()).thenReturn("test-supplier");
     when(elasticSearchClient.search(eq("test-supplier-audit"), any(SearchSourceBuilder.class)))
         .thenReturn(emptyList());
 
-    auditFinder.findAllEmsEncountersByCaseId("caseId");
+    auditFinder.findAllEmsEncountersByCaseId("interactionId");
 
     var searchSourceCaptor = ArgumentCaptor.forClass(SearchSourceBuilder.class);
     verify(elasticSearchClient).search(eq("test-supplier-audit"), searchSourceCaptor.capture());
@@ -129,14 +132,16 @@ public class AuditFinderTest {
         "{ @timestamp : {order : asc } }")));
     assertThat(searchSource.query(), hasToString(equalToJSON(
         "{ bool : { must : ["
-        + " { term : { @owner.keyword : { value : ems.cactus-staging } } },"
+        + " { term : { @owner.keyword : { value : validEmsName } } },"
         + " { term : { additionalProperties.supplierId : { value : test-supplier } } },"
-        + " { term : { additionalProperties.interactionId.keyword : { value : caseId } } }"
+        + " { term : { additionalProperties.interactionId.keyword : { value : interactionId } } }"
         + "] } }")));
   }
 
   @Test
   public void findAllEmsEncountersByCaseId_returnsAudits() throws IOException {
+    ReflectionTestUtils.setField(auditFinder, "emsName", "validEmsName");
+
     var auditSessionJson = "{ \"requestUrl\": \"/test-url\" }";
     var auditSession = AuditSession.builder().requestUrl("/test-url").build();
     var auditSessionWithEntryJson = "{"
@@ -168,6 +173,8 @@ public class AuditFinderTest {
 
   @Test
   public void findAllEmsEncountersByCaseId_withFailedParsing_shouldFail() throws IOException {
+    ReflectionTestUtils.setField(auditFinder, "emsName", "validEmsName");
+
     var auditSessionJson = "{ \"requestUrl\": \"/test-url\" }";
 
     when(authService.requireSupplierId()).thenReturn("test-supplier");
