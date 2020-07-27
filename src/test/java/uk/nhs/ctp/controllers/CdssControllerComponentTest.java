@@ -49,7 +49,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
 import uk.nhs.cactus.common.audit.AuditService;
-import uk.nhs.cactus.common.audit.model.HttpRequest;
+import uk.nhs.cactus.common.audit.AuditThreadStore;
+import uk.nhs.cactus.common.audit.model.AuditSession;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.enums.CdsApiVersion;
@@ -71,6 +72,9 @@ public class CdssControllerComponentTest {
 
   @Autowired
   private AuditService auditService;
+
+  @Autowired
+  private AuditThreadStore auditThreadStore;
 
   @MockBean
   @Qualifier("restTemplate")
@@ -199,7 +203,7 @@ public class CdssControllerComponentTest {
       .setValue(new BooleanType(true)));
     mockIsValid(returnParams);
 
-    auditService.startAuditSession(HttpRequest.builder().uri("").method("GET").build());
+    auditThreadStore.setCurrentSession(AuditSession.builder().build());
 
     Map<String, Boolean> results = cdssController.invokeIsValid(patientId);
 
