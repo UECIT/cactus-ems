@@ -1,13 +1,8 @@
 package uk.nhs.ctp.auditFinder;
 
-import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.minBy;
 import static java.util.stream.Collectors.toUnmodifiableList;
-import static uk.nhs.cactus.common.audit.model.AuditProperties.INTERACTION_ID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.Instant;
 import java.util.List;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
@@ -18,14 +13,11 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
-import uk.nhs.cactus.common.audit.model.AuditProperties;
 import uk.nhs.cactus.common.audit.model.AuditSession;
 import uk.nhs.cactus.common.audit.model.OperationType;
 import uk.nhs.cactus.common.elasticsearch.ElasticSearchClient;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
-import uk.nhs.ctp.auditFinder.model.AuditInteraction;
 
 @Service
 @RequiredArgsConstructor
@@ -86,24 +78,6 @@ public class AuditFinder {
 
     return search(supplierId, source).collect(toUnmodifiableList());
 
-  }
-
-  public List<AuditInteraction> groupInteractions(List<AuditSession> auditSessions) {
-    return auditSessions.stream()
-        .collect(groupingBy(this::getKey, minBy(comparing(AuditSession::getCreatedDate))))
-        .entrySet()
-        .stream()
-        .map(pair -> new AuditInteraction(
-            OperationType.fromName(pair.getKey().getFirst()),
-            pair.getKey().getSecond(),
-            pair.getValue().map(AuditSession::getCreatedDate).map(Instant::toString).orElseThrow()))
-        .sorted(comparing(AuditInteraction::getStartedAt))
-        .collect(toUnmodifiableList());
-  }
-
-  private Pair<String, String> getKey(AuditSession interactionAudit) {
-    var properties = interactionAudit.getAdditionalProperties();
-    return Pair.of(properties.get(AuditProperties.OPERATION_TYPE), properties.get(INTERACTION_ID));
   }
 
   @SneakyThrows

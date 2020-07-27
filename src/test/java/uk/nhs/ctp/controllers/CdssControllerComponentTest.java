@@ -95,6 +95,8 @@ public class CdssControllerComponentTest {
   public void setup() {
     when(authenticationService.requireSupplierId()).thenReturn(MOCK_SUPPLIER_ID);
     when(authenticationService.getCurrentSupplierId()).thenReturn(Optional.of(MOCK_SUPPLIER_ID));
+
+    auditThreadStore.setCurrentSession(AuditSession.builder().build());
   }
 
   @Test
@@ -202,8 +204,6 @@ public class CdssControllerComponentTest {
       .setName("return")
       .setValue(new BooleanType(true)));
     mockIsValid(returnParams);
-
-    auditThreadStore.setCurrentSession(AuditSession.builder().build());
 
     Map<String, Boolean> results = cdssController.invokeIsValid(patientId);
 

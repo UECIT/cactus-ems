@@ -3,8 +3,6 @@ package uk.nhs.ctp.auditFinder;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
@@ -20,8 +18,6 @@ import static uk.nhs.ctp.testhelper.matchers.IsEqualJSON.equalToJSON;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.time.Instant;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -38,7 +34,6 @@ import uk.nhs.cactus.common.audit.model.AuditSession;
 import uk.nhs.cactus.common.audit.model.OperationType;
 import uk.nhs.cactus.common.elasticsearch.ElasticSearchClient;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
-import uk.nhs.ctp.auditFinder.model.AuditInteraction;
 import uk.nhs.ctp.testhelper.fixtures.ElasticSearchFixtures;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -240,69 +235,5 @@ public class AuditFinderTest {
     var interactions = auditFinder.findInteractions();
 
     assertThat(interactions, contains(auditSession, auditSessionWithEntry));
-  }
-
-  @Test
-  public void groupInteractions_withEmptyList_returnsEmpty() {
-    assertThat(auditFinder.groupInteractions(emptyList()), empty());
-  }
-
-  @Test
-  public void groupInteractions_withInvalidOperationType_fails() {
-    final var CREATION_DATE = Instant.parse("2019-08-22T12:11:54Z");
-
-    var encounter1Audit1 = AuditSession.builder()
-        .createdDate(CREATION_DATE)
-        .additionalProperty("operation", "invalid_operation_type")
-        .additionalProperty("interactionId", "1")
-        .build();
-
-    var auditSessions = List.of(encounter1Audit1);
-
-    expectedException.expect(IllegalArgumentException.class);
-    auditFinder.groupInteractions(auditSessions);
-  }
-
-  @Test
-  public void groupInteractions_returnsGroups() {
-    final var CREATION_DATE_1 = Instant.parse("2019-08-22T12:11:54Z");
-    final var CREATION_DATE_2 = Instant.parse("2020-07-23T13:12:55Z");
-
-    var encounter1Audit1 = AuditSession.builder()
-        .createdDate(CREATION_DATE_1)
-        .additionalProperty("operation", "encounter")
-        .additionalProperty("interactionId", "1")
-        .build();
-    var encounter1Audit2 = AuditSession.builder()
-        .createdDate(CREATION_DATE_2)
-        .additionalProperty("operation", "encounter")
-        .additionalProperty("interactionId", "1")
-        .build();
-    var encounter2Audit = AuditSession.builder()
-        .createdDate(CREATION_DATE_2)
-        .additionalProperty("operation", "encounter")
-        .additionalProperty("interactionId", "2")
-        .build();
-    var serviceSearch1Audit = AuditSession.builder()
-        .createdDate(CREATION_DATE_1)
-        .additionalProperty("operation", "service_search")
-        .additionalProperty("interactionId", "1")
-        .build();
-
-    var auditSessions = List.of(
-        encounter1Audit1,
-        encounter1Audit2,
-        encounter2Audit,
-        serviceSearch1Audit);
-
-    var interactionGroups = auditFinder.groupInteractions(auditSessions);
-
-    var expectedInteractionGroups = new Object[] {
-        new AuditInteraction(OperationType.ENCOUNTER, "1", CREATION_DATE_1.toString()),
-        new AuditInteraction(OperationType.ENCOUNTER, "2", CREATION_DATE_2.toString()),
-        new AuditInteraction(OperationType.SERVICE_SEARCH, "1", CREATION_DATE_1.toString())
-    };
-
-    assertThat(interactionGroups, containsInAnyOrder(expectedInteractionGroups));
   }
 }

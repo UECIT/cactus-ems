@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 import uk.nhs.cactus.common.audit.model.AuditSession;
 import uk.nhs.ctp.auditFinder.AuditFinder;
+import uk.nhs.ctp.auditFinder.AuditTransformer;
 import uk.nhs.ctp.auditFinder.model.AuditInteraction;
 import uk.nhs.ctp.auditFinder.model.AuditValidationRequest;
 import uk.nhs.ctp.caseSearch.CaseSearchRequest;
@@ -41,6 +42,7 @@ public class AuditController {
 
   private final ObjectMapper mapper;
   private final AuditFinder auditFinder;
+  private final AuditTransformer auditTransformer;
   private final CaseSearchService caseSearchService;
   private final ValidationService validationService;
 
@@ -58,7 +60,7 @@ public class AuditController {
 
 	@GetMapping(path = "/interactions")
 	public List<AuditInteraction> getAuditInteractions() {
-		return auditFinder.groupInteractions(auditFinder.findInteractions());
+		return auditTransformer.groupAndTransformInteractions(auditFinder.findInteractions());
   }
 
 	private List<AuditSession> findAudits(AuditValidationRequest request) {
