@@ -213,12 +213,12 @@ public class AuditControllerComponentTest {
     var decodedBytes = Base64.getDecoder().decode((byte[])tkwRequest.getBody());
 
     var entry1 = ZippedEntry.builder()
-        .path("service_search/null/case/serviceDefinitions.1.response.xml")
+        .path("service_searchvalidGuidValue/null/case/serviceDefinitions.1.response.xml")
         .body("auditResponseBody")
         .instant(Instant.parse("2020-06-30T07:56:31Z"))
         .build();
     var entry2 = ZippedEntry.builder()
-        .path("service_search/cdss.cactus-staging.iucdspilot.uk/fhir/ServiceDefinition/palpitations2.1.response.xml")
+        .path("service_searchvalidGuidValue/cdss.cactus-staging.iucdspilot.uk/fhir/ServiceDefinition/palpitations2.1.response.xml")
         .body("entry1ResponseBody")
         .instant(Instant.parse("2020-06-30T07:56:32Z"))
         .build();

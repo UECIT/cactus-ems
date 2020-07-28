@@ -62,11 +62,12 @@ public class CdssValidityServiceTest {
     Reference gpRef = new Reference("Practitioner/notanorg");
     Patient patientNoGpOrg = new Patient()
         .addGeneralPractitioner(gpRef);
+    String requestId = "validRequestId";
 
     when(resourceLocator.findResource(patientId))
         .thenReturn(patientNoGpOrg);
 
-    Map<String, Boolean> results = cdssValidityService.checkValidity(patientId);
+    Map<String, Boolean> results = cdssValidityService.checkValidity(patientId, requestId);
 
     assertThat(results, not(hasEntry(anything(), anything())));
     verifyZeroInteractions(authService, cdssSupplierRepository);
@@ -79,6 +80,7 @@ public class CdssValidityServiceTest {
     Reference gpRef = new Reference("Practitioner/notanorg");
     Patient patientNoGpOrg = new Patient()
         .addGeneralPractitioner(gpRef);
+    String requestId = "validRequestId";
 
     Organization gp = new Organization()
         .addIdentifier(new Identifier().setSystem(IdentifierType.SDSR.getSystem()).setValue("no_oc"));
@@ -89,7 +91,7 @@ public class CdssValidityServiceTest {
         argThat(new FunctionMatcher<>(id -> id.getValue().equals(patientId), patientId))))
         .thenReturn(gp);
 
-    Map<String, Boolean> results = cdssValidityService.checkValidity(patientId);
+    Map<String, Boolean> results = cdssValidityService.checkValidity(patientId, requestId);
 
     assertThat(results, not(hasEntry(anything(), anything())));
     verifyZeroInteractions(authService, cdssSupplierRepository);
@@ -107,6 +109,7 @@ public class CdssValidityServiceTest {
         .setValue("someoc");
     Organization gp = new Organization()
         .addIdentifier(odsCode);
+    String requestId = "validRequestId";
 
     when(resourceLocator.findResource(patientId))
         .thenReturn(patient);
@@ -119,12 +122,12 @@ public class CdssValidityServiceTest {
     supplier2.setBaseUrl("supplier2.base.url");
     when(cdssSupplierRepository.findAllBySupplierId(SUPPLIER_ID))
         .thenReturn(List.of(supplier1, supplier2));
-    when(isValidOperationService.invokeIsValid(supplier1, odsCode, patient))
+    when(isValidOperationService.invokeIsValid(supplier1, odsCode, patient, requestId))
         .thenReturn(Boolean.TRUE);
-    when(isValidOperationService.invokeIsValid(supplier2, odsCode, patient))
+    when(isValidOperationService.invokeIsValid(supplier2, odsCode, patient, requestId))
         .thenReturn(Boolean.FALSE);
 
-    Map<String, Boolean> results = cdssValidityService.checkValidity(patientId);
+    Map<String, Boolean> results = cdssValidityService.checkValidity(patientId, requestId);
 
     assertThat(results, hasEntry("supplier1.base.url", true));
     assertThat(results, hasEntry("supplier2.base.url", false));

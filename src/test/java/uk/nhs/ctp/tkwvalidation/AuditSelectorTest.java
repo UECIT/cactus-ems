@@ -51,6 +51,7 @@ public class AuditSelectorTest {
         .requestUrl("http://valid.com/request/base")
         .responseBody("validResponseBody2")
         .responseHeaders("content-type: [application/fhir+json]")
+        .additionalProperty("interactionId", "6")
         .createdDate(CREATED_AT_1)
         .build();
 
@@ -58,9 +59,9 @@ public class AuditSelectorTest {
 
     var auditMessage = FhirMessageAudit.builder().filePath("1").moment(CREATED_AT_1).build();
     var entryMessage = FhirMessageAudit.builder().filePath("2").moment(CREATED_AT_2).build();
-    when(auditTransformer.from(audit, "service_search", false))
+    when(auditTransformer.from(audit, "service_search6", false))
         .thenReturn(auditMessage);
-    when(auditTransformer.from(entry, "service_search", false))
+    when(auditTransformer.from(entry, "service_search6", false))
         .thenReturn(entryMessage);
 
     var messageAudits = auditSelector.selectAudits(audits, OperationType.SERVICE_SEARCH);

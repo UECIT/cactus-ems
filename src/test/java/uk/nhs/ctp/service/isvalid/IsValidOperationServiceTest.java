@@ -69,11 +69,12 @@ public class IsValidOperationServiceTest {
         .setValue("123456");
     Date birthDate = (new SimpleDateFormat("dd/MM/yyyy").parse("01/02/2003"));
     Patient patient = new Patient().setBirthDate(birthDate);
+    String requestId = "validRequestId";
 
     mockOperation("some.base.url", odsCode, birthDate, new BooleanType(true));
     when(mockClock.instant()).thenReturn(FIXED_INSTANT);
 
-    Boolean result = isValidOperationService.invokeIsValid(cdss, odsCode, patient);
+    Boolean result = isValidOperationService.invokeIsValid(cdss, odsCode, patient, requestId);
 
     assertThat(result, is(true));
   }
@@ -115,9 +116,10 @@ public class IsValidOperationServiceTest {
     cdss.setBaseUrl("some.base.url");
     Date birthDate = (new SimpleDateFormat("dd/MM/yyyy").parse("01/02/2003"));
     Patient patient = new Patient().setBirthDate(birthDate);
+    String requestId = "validRequestId";
 
     expectedException.expect(NullPointerException.class);
-    isValidOperationService.invokeIsValid(cdss, null, patient);
+    isValidOperationService.invokeIsValid(cdss, null, patient, requestId);
   }
 
 }
