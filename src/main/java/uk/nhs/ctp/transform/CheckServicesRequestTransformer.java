@@ -1,6 +1,5 @@
 package uk.nhs.ctp.transform;
 
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.Transformer;
 import org.hl7.fhir.dstu3.model.Address;
@@ -56,7 +55,7 @@ public class CheckServicesRequestTransformer implements
     return new ParametersBuilder()
         .add("patient", patient)
         .add("referralRequest", referralRequest)
-        .add("requestId", new IdType(UUID.randomUUID().toString()))
+        .add("requestId", new IdType(bundle.getRequestId()))
         .add("location", location)
         .add("requester", requester)
         .add("searchDistance", new IntegerType(46))

@@ -34,7 +34,7 @@ public class DoSService {
 	private final CheckServicesRequestTransformer requestTransformer;
 	private final CheckServicesResponseTransformer responseTransformer;
 
-	public List<HealthcareServiceDTO> getDoS(String referralRequestRef, String patientRef) {
+	public List<HealthcareServiceDTO> getDoS(String referralRequestRef, String patientRef, String requestId) {
 
 		IGenericClient fhirClient = fhirContext.newRestfulGenericClient(emsServer);
 
@@ -53,6 +53,7 @@ public class DoSService {
 		var requestBundle = CheckServicesRequestBundle.builder()
 				.referralRequest(referralRequest)
 				.patient(patient)
+				.requestId(requestId)
 				.build();
 
 		return Stream.of(dosServer, emsServer)
