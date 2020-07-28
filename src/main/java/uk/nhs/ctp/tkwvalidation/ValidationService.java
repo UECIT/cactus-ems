@@ -7,13 +7,12 @@ import org.springframework.stereotype.Service;
 import uk.nhs.cactus.common.audit.model.AuditSession;
 import uk.nhs.cactus.common.audit.model.OperationType;
 import uk.nhs.ctp.tkwvalidation.model.AuditMetadata;
-import uk.nhs.ctp.tkwvalidation.rules.AuditValidationRule;
 
 @Service
 @RequiredArgsConstructor
 public class ValidationService {
 
-  private final List<AuditValidationRule> validationRules;
+  private final InteractionAuditValidator validationRule;
   private final AuditSelector auditSelector;
   private final AuditZipBuilder auditZipBuilder;
   private final AuditMetadataCollector auditMetadataCollector;
@@ -38,10 +37,7 @@ public class ValidationService {
 
   public byte[] getZipData(List<AuditSession> audits, OperationType operationType)
       throws IOException {
-    validationRules.stream()
-        .filter(rule -> rule.getSupportedType() == operationType)
-        .findFirst()
-        .ifPresent(rule -> rule.ensure(audits));
+    validationRule.validate(audits);
 
     var messageAudits = auditSelector.selectAudits(audits, operationType);
     return auditZipBuilder.zipMessageAudits(messageAudits);
