@@ -46,7 +46,7 @@ public class SearchParametersTransformer {
           ? UserType.fromCode(settingsDTO.getUserType().getCode())
           : UserType.PRACTITIONER;
       builder.contextValue("user", SystemURL.CS_PROVIDER_TAXONOMY, initiatingType.getValue())
-          .contextValue("725221000000100", setting.getSystem(), setting.getValue())
+          .contextValue("setting", setting.getSystem(), setting.getValue())
           .contextValue("task", SystemURL.CS_CDS_STUB, settingsDTO.getUserTaskContext().getCode())
           .jurisdiction(settingsDTO.getJurisdiction().getCode());
     }

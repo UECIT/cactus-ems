@@ -79,7 +79,7 @@ public class SearchParametersTransformerTest {
     assertThat(searchParameters.getContextValueCode(),
         containsInAnyOrder(
             "user$http://hl7.org/fhir/valueset-provider-taxonomy.html|Patient",
-            "725221000000100$https://fhir.nhs.uk/STU3/CodeSystem/UEC-CommunicationChannel-1|online",
+            "setting$https://fhir.nhs.uk/STU3/CodeSystem/UEC-CommunicationChannel-1|online",
             "task$cdss/supplier/stub|example"));
 
   }
