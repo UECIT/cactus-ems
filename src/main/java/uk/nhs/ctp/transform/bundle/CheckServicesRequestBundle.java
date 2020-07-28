@@ -10,4 +10,5 @@ import org.hl7.fhir.dstu3.model.ReferralRequest;
 public class CheckServicesRequestBundle {
   Patient patient;
   ReferralRequest referralRequest;
+  String requestId;
 }
