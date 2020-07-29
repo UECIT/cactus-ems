@@ -51,7 +51,7 @@ public class CaseController {
   Long launchTriage(@RequestBody TriageLaunchDTO requestDTO) {
     if (StringUtils.isNotEmpty(requestDTO.getEncounterId())) {
       auditService.addAuditProperty(OPERATION_TYPE, OperationType.ENCOUNTER_REPORT.getName());
-      auditService.addAuditProperty(INTERACTION_ID, requestDTO.getEncounterId());
+      auditService.addAuditProperty(INTERACTION_ID, UUID.randomUUID().toString());
     }
     return triageService.launchTriage(requestDTO);
   }

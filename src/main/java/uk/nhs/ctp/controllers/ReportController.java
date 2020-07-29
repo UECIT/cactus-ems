@@ -6,6 +6,7 @@ import static uk.nhs.cactus.common.audit.model.AuditProperties.OPERATION_TYPE;
 import ca.uhn.fhir.context.FhirContext;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.springframework.beans.factory.annotation.Value;
@@ -60,19 +61,17 @@ public class ReportController {
   @GetMapping(path = "/encounter")
   @ResponseBody
   public EncounterHandoverDTO getEncounterReport(@RequestParam String encounterId) {
-    var id = new IdType(encounterId);
-
     auditService.addAuditProperty(OPERATION_TYPE, OperationType.ENCOUNTER_REPORT.getName());
-    auditService.addAuditProperty(INTERACTION_ID, id.getIdPart());
+    auditService.addAuditProperty(INTERACTION_ID, UUID.randomUUID().toString());
 
-    return encounterService.getEncounterReportHandover(id);
+    return encounterService.getEncounterReportHandover(new IdType(encounterId));
   }
 
   @GetMapping(path = "/search")
   @ResponseBody
   public List<String> findEncountersByPatient(@RequestParam String nhsNumber) {
     auditService.addAuditProperty(OPERATION_TYPE, OperationType.ENCOUNTER_SEARCH.getName());
-    auditService.addAuditProperty(INTERACTION_ID, nhsNumber);
+    auditService.addAuditProperty(INTERACTION_ID, UUID.randomUUID().toString());
 
     return encounterService.searchEncounterIdsByPatientNhsNumber(nhsNumber);
   }

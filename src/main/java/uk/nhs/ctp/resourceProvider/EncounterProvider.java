@@ -1,5 +1,8 @@
 package uk.nhs.ctp.resourceProvider;
 
+import static uk.nhs.cactus.common.audit.model.AuditProperties.INTERACTION_ID;
+import static uk.nhs.cactus.common.audit.model.AuditProperties.OPERATION_TYPE;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -13,6 +16,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import com.google.common.base.Preconditions;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
@@ -31,6 +35,8 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.stereotype.Component;
+import uk.nhs.cactus.common.audit.AuditService;
+import uk.nhs.cactus.common.audit.model.OperationType;
 import uk.nhs.ctp.service.AppointmentService;
 import uk.nhs.ctp.service.CarePlanService;
 import uk.nhs.ctp.service.CompositionService;
@@ -52,6 +58,7 @@ public class EncounterProvider implements IResourceProvider {
   private final ReferenceService referenceService;
   private final ListService listService;
   private final CompositionService compositionService;
+  private final AuditService auditService;
   private final FhirContext context;
 
   /**
@@ -78,6 +85,9 @@ public class EncounterProvider implements IResourceProvider {
       @IncludeParam(reverse = true) Set<Include> revIncludes, //Ignored
       @IncludeParam Set<Include> include //Ignored
   ) {
+    auditService.addAuditProperty(OPERATION_TYPE, OperationType.ENCOUNTER_REPORT.getName());
+    auditService.addAuditProperty(INTERACTION_ID, UUID.randomUUID().toString());
+
     Bundle bundle = new Bundle();
     bundle.setType(BundleType.SEARCHSET);
     Long caseId = Long.valueOf(encounterParam.getValue());
@@ -182,7 +192,7 @@ public class EncounterProvider implements IResourceProvider {
         .forEach(bundle::addEntry);
   }
 
-  public void addCarePlans(Bundle bundle, Long caseId) {
+  private void addCarePlans(Bundle bundle, Long caseId) {
     List<CarePlan> carePlans = carePlanService.getByCaseId(caseId);
     for (CarePlan carePlan : carePlans) {
       Reference reference = new Reference(carePlan.getId());
@@ -216,7 +226,11 @@ public class EncounterProvider implements IResourceProvider {
 
   @Search
   public List<Encounter> searchByPatient(
-      @RequiredParam(name = Encounter.SP_PATIENT, chainWhitelist = Patient.SP_IDENTIFIER) ReferenceParam param) {
+      @RequiredParam(name = Encounter.SP_PATIENT, chainWhitelist = Patient.SP_IDENTIFIER)
+          ReferenceParam param) {
+
+    auditService.addAuditProperty(OPERATION_TYPE, OperationType.ENCOUNTER_SEARCH.getName());
+    auditService.addAuditProperty(INTERACTION_ID, UUID.randomUUID().toString());
 
     TokenParam identifier = param.toTokenParam(context);
 
