@@ -5,7 +5,7 @@
 
 <!-- Patient selection -->
 <patient-selection
-    [disabled]="encounterReportInput"
+    [disabled]="!!encounterReportInput"
     [patients]="patients"
     [selectedPatient]="selectedPatient"
     (onChange)="addPatientToStore($event)">
@@ -95,8 +95,8 @@
 
 <div class="row" *ngIf="selectedServiceDefinition != null">
   <app-service-definition class="col-md-12"
-      [(selectedServiceDefinition)]="selectedServiceDefinition"
-      [(selectedSupplier)]="selectedSupplier">
+      [selectedServiceDefinition]="selectedServiceDefinition"
+      [selectedSupplier]="selectedSupplier">
   </app-service-definition>
 </div>
 

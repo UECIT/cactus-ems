@@ -89,25 +89,25 @@ public class TriageServiceTest {
   }
 
   @Test
-  public void processTriageRequest_withCarePlanIds_willCompleteCarePlans() throws Exception {
+  public void progressTriageRequest_withCarePlanIds_willCompleteCarePlans() throws Exception {
     var requestDTO = new CdssRequestDTO();
     requestDTO.setCaseId(1L);
     requestDTO.setCarePlanIds(new String[]{"id1", "id2"});
     when(evaluateService.evaluate(requestDTO)).thenReturn(new CdssResult());
 
-    triageService.processTriageRequest(requestDTO);
+    triageService.progressTriage(requestDTO);
 
     verify(carePlanService).completeCarePlans(requestDTO.getCarePlanIds());
 
   }
 
   @Test
-  public void processTriageRequest_withNullCarePlanIds_willNotCompleteCarePlans() throws Exception {
+  public void progressTriageRequest_withNullCarePlanIds_willNotCompleteCarePlans() throws Exception {
     var requestDTO = new CdssRequestDTO();
     requestDTO.setCaseId(1L);
     when(evaluateService.evaluate(requestDTO)).thenReturn(new CdssResult());
 
-    triageService.processTriageRequest(requestDTO);
+    triageService.progressTriage(requestDTO);
 
     verify(carePlanService, never()).completeCarePlans(any());
   }

@@ -1,10 +1,11 @@
 package uk.nhs.ctp.controllers;
 
+import static uk.nhs.cactus.common.audit.model.AuditProperties.INTERACTION_ID;
+import static uk.nhs.cactus.common.audit.model.AuditProperties.OPERATION_TYPE;
+
 import ca.uhn.fhir.context.FhirContext;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Collection;
 import java.util.List;
-import javax.xml.bind.JAXBException;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,12 +17,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import uk.nhs.cactus.common.audit.AuditService;
+import uk.nhs.cactus.common.audit.model.OperationType;
 import uk.nhs.ctp.service.EncounterService;
 import uk.nhs.ctp.service.ReportService;
 import uk.nhs.ctp.service.dto.EncounterHandoverDTO;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.dto.ReportsDTO;
-import uk.nhs.ctp.transform.EncounterReportInputTransformer;
 
 @CrossOrigin
 @RestController
@@ -31,6 +33,7 @@ public class ReportController {
 
   private final ReportService reportService;
   private final EncounterService encounterService;
+  private final AuditService auditService;
   private final FhirContext fhirContext;
 
   @Value("${reports.enabled}")
@@ -43,10 +46,7 @@ public class ReportController {
 
   @PostMapping
   @ResponseBody
-  public Collection<ReportsDTO> getReport(
-      @RequestBody ReportRequestDTO reportRequestDTO)
-      throws JAXBException, JsonProcessingException {
-
+  public Collection<ReportsDTO> getReport(@RequestBody ReportRequestDTO reportRequestDTO) {
     reportRequestDTO.setFhirContext(fhirContext);
     return reportService.generateReports(reportRequestDTO);
   }
@@ -60,12 +60,20 @@ public class ReportController {
   @GetMapping(path = "/encounter")
   @ResponseBody
   public EncounterHandoverDTO getEncounterReport(@RequestParam String encounterId) {
-    return encounterService.getEncounterReportHandover(new IdType(encounterId));
+    var id = new IdType(encounterId);
+
+    auditService.addAuditProperty(OPERATION_TYPE, OperationType.ENCOUNTER_REPORT.getName());
+    auditService.addAuditProperty(INTERACTION_ID, id.getIdPart());
+
+    return encounterService.getEncounterReportHandover(id);
   }
 
   @GetMapping(path = "/search")
   @ResponseBody
   public List<EncounterHandoverDTO> findEncountersByPatient(@RequestParam String nhsNumber) {
+    auditService.addAuditProperty(OPERATION_TYPE, OperationType.ENCOUNTER_SEARCH.getName());
+    auditService.addAuditProperty(INTERACTION_ID, nhsNumber);
+
     return encounterService.searchEncounterIdsByPatientNhsNumber(nhsNumber);
   }
 

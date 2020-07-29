@@ -1,5 +1,4 @@
-import { Observable } from 'rxjs';
-import { EncounterReportInput } from './../model/launchTriage';
+import {EncounterReportInput} from '../model';
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {environment} from '../../environments/environment';

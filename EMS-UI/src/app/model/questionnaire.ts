@@ -69,7 +69,7 @@ export class TriageQuestion {
   questionType: string;
   response: Options;
   responseString: string;
-  responseInterger: number;
+  responseInteger: number;
   responseDecimal: number;
   responseBoolean: boolean;
   responseDate: string;
@@ -99,7 +99,7 @@ export class QuestionResponse {
   triageQuestion: TriageQuestion;
   answer: Options;
   responseString: string;
-  responseInterger: number;
+  responseInteger: number;
   responseDecimal: number;
   responseBoolean: boolean;
   responseDate: string;

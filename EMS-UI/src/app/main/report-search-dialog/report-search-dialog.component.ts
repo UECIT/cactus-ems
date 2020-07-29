@@ -1,4 +1,4 @@
-import { EncounterReportInput } from './../../model/launchTriage';
+import { EncounterReportInput } from '../../model';
 import { Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { ReportService } from 'src/app/service';

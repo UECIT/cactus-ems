@@ -4,8 +4,8 @@ import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {
   Questionnaire,
-  LaunchTriage,
-  ProcessTriage,
+  LaunchTriageRequest,
+  ProgressTriageRequest,
   SelectService,
   CdssSupplier,
   HealthcareService,
@@ -24,7 +24,7 @@ const httpOptions = {
   providedIn: 'root'
 })
 export class TriageService {
-  launchTriage: LaunchTriage = new LaunchTriage();
+  launchTriageRequest = new LaunchTriageRequest();
 
   constructor(
     private http: HttpClient, 
@@ -32,41 +32,39 @@ export class TriageService {
     private authService: AuthService) {
   }
 
-  getQuestionnaire(patientId: string): Observable<Questionnaire> {
-    this.launchTriage.patientId = patientId;
-    this.launchTriage.serviceDefinitionId = this.sessionStorage['serviceDefinitionId'];
-    this.launchTriage.cdssSupplierId = Number.parseInt(
+  launchTriage(patientId: string): Observable<number> {
+    this.launchTriageRequest.patientId = patientId;
+    this.launchTriageRequest.serviceDefinitionId = this.sessionStorage['serviceDefinitionId'];
+    this.launchTriageRequest.cdssSupplierId = Number.parseInt(
         this.sessionStorage['cdssSupplierId']
     );
-    this.launchTriage.settings = JSON.parse(sessionStorage['settings']);
+    this.launchTriageRequest.settings = JSON.parse(sessionStorage['settings']);
     let encounterHandover = this.sessionStorage['encounterHandover'];
-    this.launchTriage.encounterId = encounterHandover ? encounterHandover.encounterId : null;
+    this.launchTriageRequest.encounterId = encounterHandover ? encounterHandover.encounterId : null;
 
     let authToken = this.authService.getAuthToken();
     if (authToken) {
       httpOptions.headers = httpOptions.headers.set('Authorization', authToken);
       const url = `${environment.EMS_API}/case/`;
-      return this.http.post<Questionnaire>(
+      return this.http.post<number>(
           url,
-          JSON.stringify(this.launchTriage),
+          JSON.stringify(this.launchTriageRequest),
           httpOptions
       );
     }
   }
 
-  processTriage(triage: ProcessTriage, back: boolean) {
+  progressTriage(triage: ProgressTriageRequest, back: boolean) {
     let authToken = this.authService.getAuthToken();
     if (authToken) {
       triage.settings = JSON.parse(sessionStorage['settings']);
       httpOptions.headers = httpOptions.headers.set('Authorization', authToken);
-      let url = ``;
+      let url: string;
       let triageItems = this.sessionStorage['triageItems'];
       if (back) {
         url = `${environment.EMS_API}/case/back/`;
         // remove lastItem from memory
-        triageItems = triageItems.filter(function (value, index, arr) {
-          return value !== triage;
-        });
+        triageItems = triageItems.filter(value => value !== triage);
       } else {
         url = `${environment.EMS_API}/case/`;
         // store latest triage in memory

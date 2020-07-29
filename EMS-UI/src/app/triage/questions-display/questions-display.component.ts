@@ -1,32 +1,27 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { ProcessTriage } from 'src/app/model/processTriage';
-import {SessionStorage, StorageProperty, LocalStorage} from 'h5webstorage';
+import { Component, Input } from '@angular/core';
+import { ProgressTriageRequest } from 'src/app/model/progressTriageRequest';
+import {StorageProperty} from 'h5webstorage';
 
 @Component({
   selector: 'app-questions-display',
   templateUrl: './questions-display.component.html',
   styleUrls: ['./questions-display.component.css']
 })
-export class QuestionsDisplayComponent implements OnInit {
-  @StorageProperty({ storageKey: 'triageItems', storage: 'Session'}) public triageQuestions: string = null;
+export class QuestionsDisplayComponent {
+  @StorageProperty({ storageKey: 'triageItems', storage: 'Session'})
+  public triageQuestions: ProgressTriageRequest[] = null;
   @Input() amendingPrevious: boolean;
-  @Input() ExternalProcessTriage: (
+  @Input() ExternalProgressTriage: (
     switchCdss: boolean,
     back: boolean,
-    selectedTriage: ProcessTriage
+    selectedTriage: ProgressTriageRequest
   ) => boolean;
-
-  constructor(private localStorage: LocalStorage, private sessionStorage: SessionStorage) {
-   }
-
-  ngOnInit() {
-  }
 
   async selectQuestion(triageQuestion) {
     console.log(triageQuestion);
     console.log(this.amendingPrevious);
     if (!this.amendingPrevious) {
-      await this.ExternalProcessTriage(false, true, triageQuestion);
+      await this.ExternalProgressTriage(false, true, triageQuestion);
     }
   }
 
