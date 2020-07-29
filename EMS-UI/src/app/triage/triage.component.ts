@@ -259,7 +259,7 @@ export class TriageComponent implements OnInit, OnDestroy {
   }
 
   openDialog(): void {
-    const dialogRef = this.dialog.open(SwitchServicePromptDialogComponent, {
+    this.dialog.open(SwitchServicePromptDialogComponent, {
       width: '520px',
       data: {
         cdssSupplierId: this.questionnaire.cdssSupplierId,
@@ -267,8 +267,6 @@ export class TriageComponent implements OnInit, OnDestroy {
         newServiceDefinition: this.newServiceDefinition
       }
     });
-
-    dialogRef.afterClosed().subscribe(() => {});
   }
 
   ngOnDestroy() {
