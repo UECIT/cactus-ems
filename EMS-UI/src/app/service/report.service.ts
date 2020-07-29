@@ -38,15 +38,17 @@ export class ReportService {
     }
   }
 
-  searchByPatient(nhsNumber: string) {
+  async searchByPatient(nhsNumber: string) {
     const httpOptions = {headers: new HttpHeaders()};
     if (this.sessionStorage['auth_token'] != null) {
       httpOptions.headers = httpOptions.headers.set(
           'Authorization',
           this.sessionStorage['auth_token']
       );
-      const url = `${environment.EMS_API}/report/search?nhsNumber=${nhsNumber}`;
-      return this.http.get<EncounterReportInput[]>(url, httpOptions).toPromise();
+      const encounterSearchUrl = `${environment.EMS_API}/report/search?nhsNumber=${nhsNumber}`;
+      const encounterIds = await this.http.get<string[]>(encounterSearchUrl, httpOptions).toPromise();
+
+      return await Promise.all(encounterIds.map(id => this.getEncounterReport(id)));
     }
   }
 
@@ -58,8 +60,7 @@ export class ReportService {
           this.sessionStorage['auth_token']
       );
       const url = `${environment.EMS_API}/report/encounter`;
-      return this.http.post<any>(url, encounterId, httpOptions)
-      .toPromise();
+      return this.http.post<any>(url, encounterId, httpOptions).toPromise();
     }
   }
 

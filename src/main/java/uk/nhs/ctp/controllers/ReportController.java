@@ -70,7 +70,7 @@ public class ReportController {
 
   @GetMapping(path = "/search")
   @ResponseBody
-  public List<EncounterHandoverDTO> findEncountersByPatient(@RequestParam String nhsNumber) {
+  public List<String> findEncountersByPatient(@RequestParam String nhsNumber) {
     auditService.addAuditProperty(OPERATION_TYPE, OperationType.ENCOUNTER_SEARCH.getName());
     auditService.addAuditProperty(INTERACTION_ID, nhsNumber);
 

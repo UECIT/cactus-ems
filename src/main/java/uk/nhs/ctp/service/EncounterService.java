@@ -123,7 +123,7 @@ public class EncounterService {
         .collect(Collectors.toUnmodifiableList());
   }
 
-  public List<EncounterHandoverDTO> searchEncounterIdsByPatientNhsNumber(String nhsNumber) {
+  public List<String> searchEncounterIdsByPatientNhsNumber(String nhsNumber) {
     List<EmsSupplier> suppliers = emsSupplierService.getAll();
 
     return suppliers.stream()
@@ -142,8 +142,6 @@ public class EncounterService {
             .map(BundleEntryComponent::getFullUrl)
             .collect(Collectors.toUnmodifiableList()))
         .flatMap(List::stream)
-        .map(IdType::new)
-        .map(this::getEncounterReportHandover)
         .collect(Collectors.toUnmodifiableList());
   }
 
