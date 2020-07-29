@@ -114,7 +114,7 @@ public class AuditTransformerTest {
   }
 
   @Test
-  public void groupInteractions_returnsOrderedGroups() {
+  public void groupInteractions_returnsOrderedByMostRecentGroups() {
     final var creationDate1 = Instant.parse("2019-08-22T12:11:54Z");
     final var creationDate2 = Instant.parse("2020-07-23T13:12:55Z");
     final var creationDate3 = Instant.parse("2021-08-24T14:13:56Z");
@@ -135,14 +135,14 @@ public class AuditTransformerTest {
         .additionalProperty("interactionId", "3")
         .build();
 
-    var auditSessions = List.of(audit3, audit2, audit1);
+    var auditSessions = List.of(audit2, audit1, audit3);
 
     var interactionGroups = auditTransformer.groupAndTransformInteractions(auditSessions);
 
-    var expectedInteractionGroups = new Object[] {
-        new AuditInteraction(OperationType.ENCOUNTER, "1", creationDate1.toString()),
-        new AuditInteraction(OperationType.ENCOUNTER, "2", creationDate2.toString()),
+    var expectedInteractionGroups = new AuditInteraction[] {
         new AuditInteraction(OperationType.ENCOUNTER, "3", creationDate3.toString()),
+        new AuditInteraction(OperationType.ENCOUNTER, "2", creationDate2.toString()),
+        new AuditInteraction(OperationType.ENCOUNTER, "1", creationDate1.toString()),
     };
 
     assertThat(interactionGroups, contains(expectedInteractionGroups));

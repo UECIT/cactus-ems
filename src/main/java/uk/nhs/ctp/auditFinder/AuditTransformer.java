@@ -27,7 +27,7 @@ public class AuditTransformer {
             OperationType.fromName(pair.getKey().getFirst()),
             pair.getKey().getSecond(),
             pair.getValue().map(AuditSession::getCreatedDate).map(Instant::toString).orElseThrow()))
-        .sorted(comparing(AuditInteraction::getStartedAt))
+        .sorted(comparing(AuditInteraction::getStartedAt).reversed())
         .collect(toUnmodifiableList());
   }
 
