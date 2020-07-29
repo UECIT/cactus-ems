@@ -2,13 +2,15 @@
   <button class="homeButton" mat-button routerLink="/main">Home</button>
   <button class="homeButton" mat-button [matMenuTriggerFor]="account">Account</button>
   <mat-menu #account="matMenu" [overlapTrigger]="false">
-    <button mat-menu-item routerLink="/account/password" [queryParams]="{username: username}"> Change Password</button>
+    <!-- TODO: CDSCT-473 Work out how this should work -->
+    <!-- <button mat-menu-item routerLink="/account/password" [queryParams]="{username: username}"> Change Password</button> -->
     <button mat-menu-item (click)="logoff()">Log Off</button>
   </mat-menu>
 
   <button class="homeButton" mat-button [matMenuTriggerFor]="menu" *ngIf="isAdmin">Admin</button>
   <mat-menu #menu="matMenu" [overlapTrigger]="false">
-    <button mat-menu-item routerLink="/users">Manage Users</button>
+    <!-- TODO: CDSCT-180, CDSCT-245 Work out how this should work -->
+    <!-- <button mat-menu-item routerLink="/users">Manage Users</button> -->
     <button mat-menu-item routerLink="/suppliers">Manage CDSS Suppliers</button>
     <button mat-menu-item routerLink="/ems_suppliers">Manage EMS Suppliers</button>
     <button mat-menu-item routerLink="/settings">Manage Settings</button>
