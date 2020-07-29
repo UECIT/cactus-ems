@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { ProgressTriageRequest } from 'src/app/model/progressTriageRequest';
-import {StorageProperty} from 'h5webstorage';
+import {LocalStorage, SessionStorage, StorageProperty} from 'h5webstorage';
 
 @Component({
   selector: 'app-questions-display',
@@ -16,6 +16,9 @@ export class QuestionsDisplayComponent {
     back: boolean,
     selectedTriage: ProgressTriageRequest
   ) => boolean;
+
+  constructor(private localStorage: LocalStorage, private sessionStorage: SessionStorage) {
+  }
 
   async selectQuestion(triageQuestion) {
     console.log(triageQuestion);
