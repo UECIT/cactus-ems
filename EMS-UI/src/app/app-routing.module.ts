@@ -31,7 +31,8 @@ const routes: Routes = [
   { path: 'ems_suppliers', component: EmsSupplierComponent, canActivate: [AuthGuard]},
   { path: 'settings', component: ManageSettingsComponent, canActivate: [AuthGuard]  },
   { path: 'triage', component: TriageComponent, canActivate: [AuthGuard]  },
-  { path: 'account/password', component: ResetPasswordComponent, canActivate: [AuthGuard]  },
+  //TODO: CDSCT-473 Work out how this should work.
+  // { path: 'account/password', component: ResetPasswordComponent, canActivate: [AuthGuard]  },
   { path: 'view-audits', component: ViewAuditsComponent, canActivate: [AuthGuard]  },
   { path: 'create_report', component: ValidationReportComponent, canActivate: [AuthGuard]}
 ];
