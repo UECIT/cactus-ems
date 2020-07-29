@@ -24,7 +24,7 @@ import uk.nhs.cactus.common.security.TokenAuthenticationService;
 @RequiredArgsConstructor
 public class AuditFinder {
 
-  private static final int MAX_RETURNED_AUDITS = 100;
+  private static final int MAX_RETURNED_AUDITS = 300;
 
   private static final String OWNER_FIELD = "@owner.keyword";
   private static final String TIMESTAMP_FIELD = "@timestamp";
@@ -94,7 +94,7 @@ public class AuditFinder {
     return new SearchSourceBuilder()
         .query(query)
         .size(MAX_RETURNED_AUDITS)
-        .sort(new FieldSortBuilder(TIMESTAMP_FIELD).order(SortOrder.ASC));
+        .sort(new FieldSortBuilder(TIMESTAMP_FIELD).order(SortOrder.DESC));
   }
   @SneakyThrows
   private AuditSession asAudit(String source) {

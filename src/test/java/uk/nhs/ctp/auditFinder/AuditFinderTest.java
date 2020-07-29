@@ -3,7 +3,6 @@ package uk.nhs.ctp.auditFinder;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -68,9 +67,9 @@ public class AuditFinderTest {
 
     var searchSource = searchSourceCaptor.getValue();
 
-    assertThat(searchSource.sorts(), hasSize(1));
-    assertThat(searchSource.sorts().get(0), hasToString(equalToJSON(
-        "{ @timestamp : {order : asc } }")));
+    assertThat(searchSource.size(), is(300));
+    assertThat(searchSource.sorts(),
+        contains(hasToString(equalToJSON("{ @timestamp : {order : desc } }"))));
     assertThat(searchSource.query(), hasToString(equalToJSON(
         "{ bool : { must : ["
             + " { term : { additionalProperties.supplierId : { value : test-supplier } } },"
@@ -127,9 +126,9 @@ public class AuditFinderTest {
 
     var searchSource = searchSourceCaptor.getValue();
 
-    assertThat(searchSource.sorts(), hasSize(1));
-    assertThat(searchSource.sorts().get(0), hasToString(equalToJSON(
-        "{ @timestamp : {order : asc } }")));
+    assertThat(searchSource.size(), is(300));
+    assertThat(searchSource.sorts(),
+        contains(hasToString(equalToJSON("{ @timestamp : {order : desc } }"))));
     assertThat(searchSource.query(), hasToString(equalToJSON(
         "{ bool : { must : ["
         + " { term : { @owner.keyword : { value : validEmsName } } },"
@@ -202,9 +201,9 @@ public class AuditFinderTest {
 
     var searchSource = searchSourceCaptor.getValue();
 
-    assertThat(searchSource.sorts(), hasSize(1));
-    assertThat(searchSource.sorts().get(0),
-        hasToString(equalToJSON("{ @timestamp : {order : asc } }")));
+    assertThat(searchSource.size(), is(300));
+    assertThat(searchSource.sorts(),
+        contains(hasToString(equalToJSON("{ @timestamp : {order : desc } }"))));
     assertThat(searchSource.query(), hasToString(equalToJSON(
         "{ bool : { must : ["
             + " { term : { additionalProperties.supplierId : { value : test-supplier } } },"
