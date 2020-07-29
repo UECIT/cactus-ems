@@ -2,7 +2,6 @@ import { AuthService } from './auth.service';
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {environment} from '../../environments/environment';
-import {SessionStorage} from 'h5webstorage';
 import {ToastrService} from 'ngx-toastr';
 import {CdssSupplier} from '../model';
 

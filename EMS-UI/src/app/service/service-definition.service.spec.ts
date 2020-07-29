@@ -1,7 +1,6 @@
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from './auth.service';
 import { ServiceDefinitionService } from './service-definition.service';
-import { ServiceDefinition } from './../model/cdssSupplier';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { asyncData } from '../testing/async-observable-helpers';

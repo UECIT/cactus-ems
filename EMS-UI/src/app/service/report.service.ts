@@ -3,48 +3,47 @@ import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {environment} from '../../environments/environment';
 import {SessionStorage} from 'h5webstorage';
+import {AuthService} from "./auth.service";
+
+const httpOptions = {
+  headers: new HttpHeaders()
+};
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReportService {
 
-  constructor(private http: HttpClient, private sessionStorage: SessionStorage) {
+  constructor(
+      private http: HttpClient,
+      private sessionStorage: SessionStorage,
+      private authService: AuthService) {
   }
 
   getEnabled(): Promise<boolean> {
-    const httpOptions = {
-      headers: new HttpHeaders()
-    };
-    if (this.sessionStorage['auth_token'] != null) {
-      httpOptions.headers = httpOptions.headers.set(
-          'Authorization',
-          this.sessionStorage['auth_token']
-      );
+    const token = this.authService.getAuthToken();
+    if (token != null) {
+      httpOptions.headers = httpOptions.headers.set('Authorization', token);
       const url = `${environment.EMS_API}/report/enabled`;
       return this.http.get<any>(url, httpOptions).toPromise();
     }
   }
   
-  getEncounterReport(encounterId: string): Promise<EncounterReportInput> {
-    const httpOptions = {headers: new HttpHeaders()};
-    if (this.sessionStorage['auth_token'] != null) {
-      httpOptions.headers = httpOptions.headers.set(
-          'Authorization',
-          this.sessionStorage['auth_token']
-      );
+  async getEncounterReport(encounterId: string): Promise<EncounterReportInput> {
+    const token = this.authService.getAuthToken();
+    if (token != null) {
+      httpOptions.headers = httpOptions.headers.set('Authorization', token);
+
       const url = `${environment.EMS_API}/report/encounter?encounterId=${encounterId}`;
-      return this.http.get<EncounterReportInput>(url, httpOptions).toPromise();
+      return await this.http.get<EncounterReportInput>(url, httpOptions).toPromise();
     }
   }
 
   async searchByPatient(nhsNumber: string) {
-    const httpOptions = {headers: new HttpHeaders()};
-    if (this.sessionStorage['auth_token'] != null) {
-      httpOptions.headers = httpOptions.headers.set(
-          'Authorization',
-          this.sessionStorage['auth_token']
-      );
+    const token = this.authService.getAuthToken();
+    if (token != null) {
+      httpOptions.headers = httpOptions.headers.set('Authorization', token);
+
       const encounterSearchUrl = `${environment.EMS_API}/report/search?nhsNumber=${nhsNumber}`;
       const encounterIds = await this.http.get<string[]>(encounterSearchUrl, httpOptions).toPromise();
 
@@ -53,12 +52,10 @@ export class ReportService {
   }
 
   generateReport(encounterId: string) {
-    const httpOptions = {headers: new HttpHeaders()};
-    if (this.sessionStorage['auth_token'] != null) {
-      httpOptions.headers = httpOptions.headers.set(
-          'Authorization',
-          this.sessionStorage['auth_token']
-      );
+    const token = this.authService.getAuthToken();
+    if (token != null) {
+      httpOptions.headers = httpOptions.headers.set('Authorization', token);
+
       const url = `${environment.EMS_API}/report/encounter`;
       return this.http.post<any>(url, encounterId, httpOptions).toPromise();
     }
