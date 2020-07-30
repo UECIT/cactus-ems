@@ -41,14 +41,10 @@ export class DosDisplayComponent {
     await this.dosService
     .getDosResponse(this.referralRequest, this.patientId)
     .toPromise()
-    .then(
-        response => {
-          this.response = response;
-        },
-        error => {
-          this.error = error;
-        }
-    );
+      .then(
+        response => this.response = response,
+        error => this.error = error
+      );
     this.isReportEnabled = await this.reportService.getEnabled();
   }
 
@@ -58,18 +54,14 @@ export class DosDisplayComponent {
     });
   }
 
-  async invoke() {
-    try {
-      const encounterRef = this.referralRequest.contextReference;
-      const url = `${this.selectedService.endpoint}?encounter=${encounterRef}`;
+  invoke() {
+    const encounterRef = this.referralRequest.contextReference;
+    const url = `${this.selectedService.endpoint}?encounterId=${encounterRef}`;
 
-      // Service must be updated in referral request before invoking handover
-      await this.selectService();
-
-      window.open(url);
-    } catch (e) {
-      this.toastr.error('Unable to update selected service for case - ' + e.message);
-    }
+    // Service must be updated in referral request before invoking handover
+    this.selectService()
+      .then(() => window.open(url))
+      .catch(e => this.toastr.error('Unable to update selected service for case - ' + e.message));
   }
 
   async generateReport() {
@@ -86,7 +78,7 @@ export class DosDisplayComponent {
   }
 
   private async selectService() {
-    await this.triageService.updateSelectedService(this.caseId, this.selectedService);
+    return await this.triageService.updateSelectedService(this.caseId, this.selectedService);
   }
 
   openDialog(reports) {
