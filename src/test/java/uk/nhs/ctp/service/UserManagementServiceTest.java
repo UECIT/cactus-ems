@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import javax.persistence.EntityExistsException;
+import org.elasticsearch.indices.InvalidIndexNameException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -67,7 +68,7 @@ public class UserManagementServiceTest {
   @Test
   public void createNewSupplierUser() {
     var jwtRequest = JWTRequest.builder()
-        .username("admin_supplier_id")
+        .username("supplier_id")
         .supplierId("supplier_id")
         .role("ROLE_SUPPLIER_ADMIN")
         .build();
@@ -83,12 +84,12 @@ public class UserManagementServiceTest {
     ReflectionTestUtils.setField(userManagementService, "blobServer", "http://blob-palace.com");
 
     RegisterSupplierRequest request = new RegisterSupplierRequest();
-    request.setSupplierId("supplier_id");
+    request.setSupplierId("suPpliEr_iD");
 
     SupplierAccountDetails returned = userManagementService.createNewSupplierUser(request);
 
     SupplierAccountDetails expected = SupplierAccountDetails.builder()
-        .username("admin_supplier_id")
+        .username("supplier_id")
         .jwt("random_jwt_value")
         .endpoints(EndpointDetails.builder()
             .ems("http://ems.com")
@@ -120,6 +121,17 @@ public class UserManagementServiceTest {
     userManagementService.createNewSupplierUser(request);
 
     verifyZeroInteractions(cognitoService, roleMapper);
+  }
+
+  @Test
+  public void createNewSupplierUser_invalidIndexFails() {
+    RegisterSupplierRequest request = new RegisterSupplierRequest();
+    request.setSupplierId("contains <invalid>#charcters?");
+
+    expectedException.expect(InvalidIndexNameException.class);
+    userManagementService.createNewSupplierUser(request);
+
+    verifyZeroInteractions(cognitoService, userRepository, roleMapper);
   }
 
   private NewUserDTO getTestUser() {

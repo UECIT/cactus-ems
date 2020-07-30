@@ -1,10 +1,13 @@
 package uk.nhs.ctp.service;
 
+import static org.elasticsearch.cluster.metadata.MetadataCreateIndexService.validateIndexOrAliasName;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.indices.InvalidIndexNameException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -62,11 +65,12 @@ public class UserManagementService {
 
   public SupplierAccountDetails createNewSupplierUser(RegisterSupplierRequest request) {
     final String role = "ROLE_SUPPLIER_ADMIN";
-    String supplierId = request.getSupplierId();
-    String username = "admin_" + supplierId;
+    String supplierId = request.getSupplierId().toLowerCase();
+
+    validateIndexOrAliasName(supplierId, InvalidIndexNameException::new);
 
     var userDetails = new NewUserDTO();
-    userDetails.setUsername(username);
+    userDetails.setUsername(supplierId);
     userDetails.setPassword(PasswordUtil.getStrongPassword());
     userDetails.setEnabled(true);
     userDetails.setName("<Change me>");
@@ -78,11 +82,11 @@ public class UserManagementService {
 
       SupplierAccountDetails supplierAccountDetails = SupplierAccountDetails.builder()
           .jwt(jwtHandler.generate(JWTRequest.builder()
-              .username(username)
+              .username(supplierId)
               .supplierId(supplierId)
               .role(role)
               .build()))
-          .username(username)
+          .username(supplierId)
           .password(userDetails.getPassword())
           .email(request.getEmail())
           .endpoints(EndpointDetails.builder()
