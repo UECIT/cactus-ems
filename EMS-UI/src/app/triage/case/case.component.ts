@@ -1,21 +1,21 @@
-import { AnswerService } from './../../service/answer.service';
-import { ProcessTriage } from 'src/app/model/processTriage';
+import { AnswerService } from '../../service';
 import {
   Component,
   OnInit,
-  Input
+  Input, OnDestroy
 } from '@angular/core';
 import {
+  Case,
+  CdssSupplier,
   QuestionResponse,
-  Questionnaire
-} from '../../model/questionnaire';
-import { Case } from '../../model/case';
+  Questionnaire,
+  ProgressTriageRequest,
+  Settings
+} from '../../model';
 import { MatDialog } from '@angular/material';
-import { SwitchSupplierDialogComponent } from 'src/app/switch-supplier-dialog/switch-supplier-dialog.component';
-import { CdssSupplier } from 'src/app/model/cdssSupplier';
+import { SwitchSupplierDialogComponent } from '../../switch-supplier-dialog/switch-supplier-dialog.component';
 import { Router } from '@angular/router';
 import { SessionStorage } from 'h5webstorage';
-import { Settings } from 'src/app/model/settings';
 import { Subscription } from 'rxjs';
 
 export interface DialogData {
@@ -28,7 +28,7 @@ export interface DialogData {
   templateUrl: './case.component.html',
   styleUrls: ['./case.component.css']
 })
-export class CaseComponent implements OnInit {
+export class CaseComponent implements OnInit, OnDestroy {
 
   //TODO: CDSCT-35 Remove this property once all question types using answer service
   @Input() answerSelected: QuestionResponse[];
@@ -36,10 +36,10 @@ export class CaseComponent implements OnInit {
   @Input() cdssSupplierName: string;
   @Input() questionnaire: Questionnaire;
   @Input() amendingPrevious: boolean;
-  @Input() ExternalProcessTriage: (
+  @Input() ExternalProgressTriage: (
     switchCdss: boolean,
     back: boolean,
-    selectedTriage: ProcessTriage
+    selectedTriage: ProgressTriageRequest
   ) => boolean;
 
   caseId: Number;
@@ -79,7 +79,7 @@ export class CaseComponent implements OnInit {
 
   ngOnInit() {
     if (this.case) {
-      this.caseId = new Number(this.case.id);
+      this.caseId = this.case.id;
     }
 
     var settings: Settings = this.sessionStorage['settings'];
@@ -91,9 +91,9 @@ export class CaseComponent implements OnInit {
   }
 
   async continue(switchCdss: boolean) {
-    const isValid = await this.ExternalProcessTriage(switchCdss, false, null);
+    const isValid = await this.ExternalProgressTriage(switchCdss, false, null);
     if (isValid) {
-      this.caseId = new Number(this.case.id);
+      this.caseId = this.case.id;
     }
   }
 
@@ -101,13 +101,13 @@ export class CaseComponent implements OnInit {
     this.sessionStorage.setItem('cdssSupplierId', cdssSupplierId);
     this.sessionStorage.setItem('serviceDefinitionId', serviceDefinitionId);
     // carry on with triage process
-    this.continue(true);
+    await this.continue(true);
   }
 
-  endTriage() {
+  async endTriage() {
     // call audit close endpoint
     // redirect to the homepage
-    this.router.navigate(['/main']);
+    await this.router.navigate(['/main']);
   }
 
   checkAllRequiredQuestionsAreAnswered(): boolean {

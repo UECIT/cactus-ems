@@ -1,9 +1,13 @@
 import { QuestionnaireType } from './question-types/questionnaire-type.enum';
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {Options, Questionnaire, QuestionResponse, TriageQuestion} from '../../model/questionnaire';
-import {QuestionnaireResponse} from '../../model/processTriage';
+import {
+  Options,
+  Questionnaire,
+  QuestionnaireResponse,
+  QuestionResponse,
+  TriageQuestion} from '../../model';
 import {MatDialog} from '@angular/material';
-import {ServiceDefinitionService} from '../../service/service-definition.service';
+import {ServiceDefinitionService} from '../../service';
 
 @Component({
   selector: 'app-questionnaire',
@@ -123,7 +127,7 @@ export class QuestionnaireComponent implements OnInit {
   }
 
   onIntegerAnswerChange(
-      responseInterger: number,
+      responseInteger: number,
       triageQuestion: TriageQuestion
   ) {
     this.answerSelected = this.answerSelected.filter(
@@ -131,10 +135,10 @@ export class QuestionnaireComponent implements OnInit {
     );
     const questionResponse: QuestionResponse = new QuestionResponse();
     questionResponse.triageQuestion = triageQuestion;
-    questionResponse.responseInterger = responseInterger;
+    questionResponse.responseInteger = responseInteger;
     this.answerSelected.push(questionResponse);
     this.answerSelectedChange.emit(this.answerSelected);
-    this.freeText.set(triageQuestion.questionId, responseInterger.toString());
+    this.freeText.set(triageQuestion.questionId, responseInteger.toString());
   }
 
   onDecimalAnswerChange(

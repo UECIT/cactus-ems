@@ -1,20 +1,18 @@
-import { AnswerService } from './../service/answer.service';
-import { ErrorMessage } from './../model/questionnaire';
-import { Component, OnInit } from '@angular/core';
-import { TriageService } from '../service/triage.service';
+import { AnswerService, CaseService, TriageService } from '../service';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {
+  ErrorMessage,
+  Case,
+  ProgressTriageRequest,
+  QuestionnaireResponse,
   Questionnaire,
   Options,
   QuestionResponse
-} from '../model/questionnaire';
+} from '../model';
 import { Store } from '@ngrx/store';
 import { Router } from '@angular/router';
 import { AppState } from '../app.state';
-import { Observable, Subscription } from 'rxjs';
-import { Patient } from '../model/patient';
-import { ProcessTriage, QuestionnaireResponse } from '../model/processTriage';
-import { CaseService } from '../service/case.service';
-import { Case } from '../model/case';
+import { Subscription } from 'rxjs';
 import 'rxjs/operators/map';
 import 'rxjs/add/operator/finally';
 import { MatDialog } from '@angular/material';
@@ -33,17 +31,17 @@ export interface DialogData {
   templateUrl: './triage.component.html',
   styleUrls: ['./triage.component.css']
 })
-export class TriageComponent implements OnInit {
-  questionnaire: Questionnaire;
+export class TriageComponent implements OnInit, OnDestroy {
+  questionnaire = new Questionnaire();
   patientId: string;
   answerSelected: QuestionResponse[];
-  triage = new ProcessTriage();
+  triage = new ProgressTriageRequest();
   questionnaireResponse = new QuestionnaireResponse();
   case: Case;
   isLoading = true;
   cdssSupplierName: string;
   errorMessage: ErrorMessage;
-  ExternalProcessTriage: Function;
+  ExternalProgressTriage: Function;
   oldServiceDefinition: string;
   newServiceDefinition: string;
   amendingPrevious = false;
@@ -57,40 +55,40 @@ export class TriageComponent implements OnInit {
     private sessionStorage: SessionStorage,
     private toastr: ToastrService,
     store: Store<AppState>,
-    private answerSevice: AnswerService
+    answerService: AnswerService
   ) {
     store.select('patient').subscribe(({ id }) => this.patientId = id);
-    this.answerSubscription = answerSevice.answerSelected$.subscribe(qr => {
-      this.answerSelected = qr;
-    })
+    this.answerSubscription = answerService.answerSelected$.subscribe(qr => this.answerSelected = qr);
   }
 
   async ngOnInit() {
     if (this.patientId) {
-      await this.getQuestionnaire().catch(err => {
+      await this.launchTriage().catch(err => {
         this.toastr.error(
           err.error.target.__zone_symbol__xhrURL + ' - ' +
           err.message);
       });
     } else {
-      this.router.navigate(['/main']);
+      await this.router.navigate(['/main']);
     }
 
-    this.ExternalProcessTriage = this.processTriage.bind(this);
+    this.ExternalProgressTriage = this.progressTriage.bind(this);
   }
 
-  async getQuestionnaire() {
-    this.questionnaire = await this.triageService
-      .getQuestionnaire(this.patientId)
+  async launchTriage() {
+    this.questionnaire.caseId = await this.triageService
+      .launchTriage(this.patientId)
       .toPromise();
-    this.getCaseAndSupplierName(this.questionnaire.caseId);
+
+    await this.getCaseAndSupplierName(this.questionnaire.caseId);
+    await this.progressTriage(false, false, null);
     if (this.questionnaire.switchTrigger != null) {
       this.triage.caseId = this.questionnaire.caseId;
-      this.redirect(false);
+      await this.redirect(false);
     }
   }
 
-  async processTriage(switchCdss: boolean, back: boolean, selectedTriage: ProcessTriage) {
+  async progressTriage(switchCdss: boolean, back: boolean, selectedTriage: ProgressTriageRequest) {
     this.isLoading = true;
 
     if (selectedTriage) {
@@ -103,70 +101,8 @@ export class TriageComponent implements OnInit {
     this.triage.caseId = this.questionnaire.caseId;
     if (switchCdss) {
       this.triage.questionResponse = null;
-    } else if (!back) {
-      this.triage.questionResponse = [];
-
-      // Add blank questions
-      if (!this.answerSelected) {
-        this.answerSelected = [];
-      }
-      this.questionnaire.triageQuestions.forEach(question => {
-        this.triage.questionnaireId = question.questionnaireId;
-        this.answerSelected.forEach(answer => {
-          if (
-            question !== answer.triageQuestion &&
-            question.questionType !== 'GROUP'
-          ) {
-            const questionResponse = new QuestionResponse();
-            const qrAnswer = new Options();
-            qrAnswer.code = '260413007';
-            qrAnswer.display = 'None';
-            qrAnswer.extension = null;
-            questionResponse.answer = qrAnswer;
-            questionResponse.triageQuestion = question;
-
-            if (
-              this.answerSelected.filter(
-                e => e.triageQuestion === questionResponse.triageQuestion
-              ).length === 0
-            ) {
-              this.answerSelected.push(questionResponse);
-            }
-          }
-        });
-      });
-
-      // loop over each answer and add it to the response. in the below if block.
-      this.answerSelected.forEach(element => {
-        const questionnaireResponse: QuestionnaireResponse = new QuestionnaireResponse();
-        questionnaireResponse.questionnaireId =
-          element.triageQuestion.questionnaireId;
-        questionnaireResponse.question = element.triageQuestion.question;
-        questionnaireResponse.questionId = element.triageQuestion.questionId;
-        questionnaireResponse.questionType =
-          element.triageQuestion.questionType;
-        questionnaireResponse.extension = element.triageQuestion.extension;
-        if (questionnaireResponse.questionType === 'STRING' || questionnaireResponse.questionType === 'TEXT') {
-          questionnaireResponse.responseString = element.responseString;
-        } else if (questionnaireResponse.questionType === 'INTEGER') {
-          questionnaireResponse.responseInterger = element.responseInterger;
-        } else if (questionnaireResponse.questionType === 'BOOLEAN') {
-          questionnaireResponse.responseBoolean = element.responseBoolean;
-        } else if (questionnaireResponse.questionType === 'DECIMAL') {
-          questionnaireResponse.responseDecimal = element.responseDecimal;
-        } else if (questionnaireResponse.questionType === 'DATE' || questionnaireResponse.questionType === 'DATETIME') {
-          questionnaireResponse.responseDate = element.responseDate;
-        } else if (questionnaireResponse.questionType === 'ATTACHMENT') {
-          questionnaireResponse.responseAttachment = element.responseAttachment;
-          questionnaireResponse.responseAttachmentType =
-            element.responseAttachmentType;
-        } else if (questionnaireResponse.questionType === 'REFERENCE' && element.triageQuestion.extension.code == 'imagemap') {
-            questionnaireResponse.responseCoordinates = element.triageQuestion.responseCoordinates;
-        } else {
-          questionnaireResponse.response = element.answer;
-        }
-        this.triage.questionResponse.push(questionnaireResponse);
-      });
+    } else if (!back && this.questionnaire.triageQuestions) {
+      this.triage.questionResponse = this.buildQuestionnaireResponses();
     }
 
     this.triage.serviceDefinitionId = this.sessionStorage['serviceDefinitionId'];
@@ -175,11 +111,10 @@ export class TriageComponent implements OnInit {
     );
     this.triage.amendingPrevious = this.amendingPrevious;
     this.triage.patientId = this.patientId;
-    this.questionnaire = await this.triageService.processTriage(this.triage, back)
-      .then(res => {
-        var quesionnaire = res as Questionnaire;
-        this.errorMessage = quesionnaire.errorMessage;
-        return quesionnaire;
+    this.questionnaire = await this.triageService.progressTriage(this.triage, back)
+      .then(questionnaire => {
+        this.errorMessage = questionnaire.errorMessage;
+        return questionnaire;
       })
       .catch(error => {
         this.errorMessage = {
@@ -195,7 +130,7 @@ export class TriageComponent implements OnInit {
     }
 
     if (this.questionnaire.switchTrigger != null) {
-      this.redirect(back);
+      await this.redirect(back);
     }
 
     // reset the value.
@@ -238,6 +173,66 @@ export class TriageComponent implements OnInit {
     return true;
   }
 
+  private buildQuestionnaireResponses() {
+    // Add blank questions
+    if (!this.answerSelected) {
+      this.answerSelected = [];
+    }
+    this.questionnaire.triageQuestions.forEach(question => {
+      this.triage.questionnaireId = question.questionnaireId;
+      this.answerSelected.forEach(answer => {
+        if (
+            question !== answer.triageQuestion &&
+            question.questionType !== 'GROUP'
+        ) {
+          const questionResponse = new QuestionResponse();
+          const qrAnswer = new Options();
+          qrAnswer.code = '260413007';
+          qrAnswer.display = 'None';
+          qrAnswer.extension = null;
+          questionResponse.answer = qrAnswer;
+          questionResponse.triageQuestion = question;
+
+          if (this.answerSelected.some(e => e.triageQuestion === questionResponse.triageQuestion)) {
+            this.answerSelected.push(questionResponse);
+          }
+        }
+      });
+    });
+
+    // loop over each answer and build it into a response
+    return this.answerSelected.map(element => {
+      const questionnaireResponse: QuestionnaireResponse = new QuestionnaireResponse();
+      questionnaireResponse.questionnaireId =
+          element.triageQuestion.questionnaireId;
+      questionnaireResponse.question = element.triageQuestion.question;
+      questionnaireResponse.questionId = element.triageQuestion.questionId;
+      questionnaireResponse.questionType =
+          element.triageQuestion.questionType;
+      questionnaireResponse.extension = element.triageQuestion.extension;
+      if (questionnaireResponse.questionType === 'STRING' || questionnaireResponse.questionType === 'TEXT') {
+        questionnaireResponse.responseString = element.responseString;
+      } else if (questionnaireResponse.questionType === 'INTEGER') {
+        questionnaireResponse.responseInteger = element.responseInteger;
+      } else if (questionnaireResponse.questionType === 'BOOLEAN') {
+        questionnaireResponse.responseBoolean = element.responseBoolean;
+      } else if (questionnaireResponse.questionType === 'DECIMAL') {
+        questionnaireResponse.responseDecimal = element.responseDecimal;
+      } else if (questionnaireResponse.questionType === 'DATE' || questionnaireResponse.questionType === 'DATETIME') {
+        questionnaireResponse.responseDate = element.responseDate;
+      } else if (questionnaireResponse.questionType === 'ATTACHMENT') {
+        questionnaireResponse.responseAttachment = element.responseAttachment;
+        questionnaireResponse.responseAttachmentType =
+            element.responseAttachmentType;
+      } else if (questionnaireResponse.questionType === 'REFERENCE' && element.triageQuestion.extension.code == 'imagemap') {
+        questionnaireResponse.responseCoordinates = element.triageQuestion.responseCoordinates;
+      } else {
+        questionnaireResponse.response = element.answer;
+      }
+      return questionnaireResponse;
+    });
+  }
+
   async redirect(back) {
       this.oldServiceDefinition = this.sessionStorage['serviceDefinitionId'];
       this.sessionStorage.setItem(
@@ -249,7 +244,7 @@ export class TriageComponent implements OnInit {
       this.triage.serviceDefinitionId = this.sessionStorage['serviceDefinitionId'];
       this.triage.cdssSupplierId = Number.parseInt(
           this.questionnaire.switchTrigger.split('/').shift());
-      this.questionnaire = await this.triageService.processTriage(
+      this.questionnaire = await this.triageService.progressTriage(
         this.triage,
         back
       );
@@ -264,7 +259,7 @@ export class TriageComponent implements OnInit {
   }
 
   openDialog(): void {
-    const dialogRef = this.dialog.open(SwitchServicePromptDialogComponent, {
+    this.dialog.open(SwitchServicePromptDialogComponent, {
       width: '520px',
       data: {
         cdssSupplierId: this.questionnaire.cdssSupplierId,
@@ -272,8 +267,6 @@ export class TriageComponent implements OnInit {
         newServiceDefinition: this.newServiceDefinition
       }
     });
-
-    dialogRef.afterClosed().subscribe(result => {});
   }
 
   ngOnDestroy() {

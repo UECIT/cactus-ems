@@ -7,6 +7,7 @@ import static uk.nhs.cactus.common.audit.model.AuditProperties.OPERATION_TYPE;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,11 +48,12 @@ public class CaseController {
 
   @PostMapping(path = "/")
   public @ResponseBody
-  CdssResponseDTO launchTriage(@RequestBody TriageLaunchDTO requestDTO) throws Exception {
-    CdssResponseDTO response = triageService.launchTriage(requestDTO);
-    auditService.addAuditProperty(OPERATION_TYPE, OperationType.ENCOUNTER.getName());
-    auditService.addAuditProperty(INTERACTION_ID, response.getCaseId().toString());
-    return response;
+  Long launchTriage(@RequestBody TriageLaunchDTO requestDTO) {
+    if (StringUtils.isNotEmpty(requestDTO.getEncounterId())) {
+      auditService.addAuditProperty(OPERATION_TYPE, OperationType.ENCOUNTER_REPORT.getName());
+      auditService.addAuditProperty(INTERACTION_ID, UUID.randomUUID().toString());
+    }
+    return triageService.launchTriage(requestDTO);
   }
 
   @PostMapping(path = "/serviceDefinitions")
@@ -66,18 +68,18 @@ public class CaseController {
 
   @PutMapping(path = "/")
   public @ResponseBody
-  CdssResponseDTO sendTriageRequest(@RequestBody CdssRequestDTO requestDTO) throws Exception {
+  CdssResponseDTO progressTriage(@RequestBody CdssRequestDTO requestDTO) throws Exception {
     auditService.addAuditProperty(OPERATION_TYPE, OperationType.ENCOUNTER.getName());
     auditService.addAuditProperty(INTERACTION_ID, requestDTO.getCaseId().toString());
-    return triageService.processTriageRequest(requestDTO);
+    return triageService.progressTriage(requestDTO);
   }
 
   @PutMapping(path = "/back")
   public @ResponseBody
-  CdssResponseDTO amendTriageRequest(@RequestBody CdssRequestDTO requestDTO) throws Exception {
+  CdssResponseDTO amendTriage(@RequestBody CdssRequestDTO requestDTO) throws Exception {
     auditService.addAuditProperty(OPERATION_TYPE, OperationType.ENCOUNTER.getName());
     auditService.addAuditProperty(INTERACTION_ID, requestDTO.getCaseId().toString());
-    return triageService.processTriageAmendRequest(requestDTO);
+    return triageService.amendTriage(requestDTO);
   }
 
   @GetMapping(path = "/{id}")

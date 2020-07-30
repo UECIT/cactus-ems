@@ -35,7 +35,7 @@ public class TriageService {
    * @param requestDetails {@link TriageLaunchDTO}
    * @return response {@link CdssResponseDTO}
    */
-  public CdssResponseDTO launchTriage(TriageLaunchDTO requestDetails) throws Exception {
+  public Long launchTriage(TriageLaunchDTO requestDetails) {
 
     Long caseId = caseService.createCase(
         requestDetails.getPatientId(),
@@ -47,18 +47,11 @@ public class TriageService {
       updateCaseFromEncounterReport(caseId, encounterId);
     }
 
-    CdssRequestDTO cdssRequest = new CdssRequestDTO();
-    cdssRequest.setCaseId(caseId);
-    cdssRequest.setCdssSupplierId(requestDetails.getCdssSupplierId());
-    cdssRequest.setServiceDefinitionId(requestDetails.getServiceDefinitionId());
-    cdssRequest.setSettings(requestDetails.getSettings());
-    cdssRequest.setPatientId(requestDetails.getPatientId());
-
     // Fetch for audit
     cdssService.getServiceDefinition(
         requestDetails.getCdssSupplierId(), requestDetails.getServiceDefinitionId());
 
-    return processTriageRequest(cdssRequest);
+    return caseId;
   }
 
   private void updateCaseFromEncounterReport(Long caseId, String encounterId) {
@@ -78,7 +71,7 @@ public class TriageService {
    * @param requestDetails {@link CdssRequestDTO}
    * @return response {@link CdssResponseDTO}
    */
-  public CdssResponseDTO processTriageRequest(CdssRequestDTO requestDetails) throws Exception {
+  public CdssResponseDTO progressTriage(CdssRequestDTO requestDetails) throws Exception {
 
     Long caseId = requestDetails.getCaseId();
     if (requestDetails.getCarePlanIds() != null) {
@@ -103,7 +96,7 @@ public class TriageService {
    * @param requestDetails {@link CdssRequestDTO}
    * @return response {@link CdssResponseDTO}
    */
-  public CdssResponseDTO processTriageAmendRequest(CdssRequestDTO requestDetails)
+  public CdssResponseDTO amendTriage(CdssRequestDTO requestDetails)
       throws Exception {
 
     Long caseId = requestDetails.getCaseId();

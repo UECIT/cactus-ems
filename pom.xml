@@ -23,7 +23,7 @@
     <thymeleaf.version>3.0.6.RELEASE</thymeleaf.version>
     <thymeleaf-layout-dialect.version>2.2.1</thymeleaf-layout-dialect.version>
 
-    <cactus-common.version>0.0.5.8</cactus-common.version>
+    <cactus-common.version>0.0.5.9</cactus-common.version>
 
     <elastic-search-version>7.8.0</elastic-search-version>
   </properties>

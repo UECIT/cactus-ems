@@ -12,7 +12,7 @@ export type InteractionType =
     | "Is Valid"
     | "Check Services"
     | "Encounter Report"
-    | "Handover";
+    | "Encounter Search";
 
 export class ValidationRequest {
     instanceBaseUrl: string;
