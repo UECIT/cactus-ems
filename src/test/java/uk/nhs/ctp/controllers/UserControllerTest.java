@@ -62,7 +62,7 @@ public class UserControllerTest {
     assertThat(response.getStatusCode(), is(HttpStatus.OK));
 
     var body = SupplierAccountDetails.builder()
-        .username("admin_testid")
+        .username("testid")
         .email("testemail")
         .endpoints(EndpointDetails.builder()
             .cdss("http://localhost:8080/fhir")
