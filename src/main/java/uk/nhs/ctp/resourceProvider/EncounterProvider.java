@@ -71,7 +71,9 @@ public class EncounterProvider implements IResourceProvider {
    * <ul>
    *   <li>Encounter</li>
    *   <li>Encounter.subject (Patient)</li>
+   *   <li>Encounter.participant (RelatedPerson/Practitioner)</li>
    *   <li>ReferralRequest</li>
+   *   <li>ReferralRequest.recipient (HealthcareService)</li>
    *   <li>ReferralRequest.reason (Condition)</li>
    *   <li>ReferralRequest.supportingInformation (Condition)</li>
    *   <li>CarePlans</li>
