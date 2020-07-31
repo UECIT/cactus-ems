@@ -19,6 +19,7 @@ import uk.nhs.ctp.utils.PasswordUtil;
 @Slf4j
 public class CognitoService {
 
+  public static final String EMAIL_VERIFIED_ATTRIBUTE = "email_verified";
   @Value("${cognito.user.pool}")
   private String userPool;
 
@@ -45,11 +46,14 @@ public class CognitoService {
         .withTemporaryPassword(tempPassword)
         .withUserAttributes(
             new AttributeType()
-              .withName(SUPPLIER_ID_ATTRIBUTE)
-              .withValue(supplierId),
+                .withName(SUPPLIER_ID_ATTRIBUTE)
+                .withValue(supplierId),
             new AttributeType()
-              .withName(EMAIL_ATTRIBUTE)
-              .withValue(accountDetails.getEmail())
+                .withName(EMAIL_ATTRIBUTE)
+                .withValue(accountDetails.getEmail()),
+            new AttributeType()
+                .withName(EMAIL_VERIFIED_ATTRIBUTE)
+                .withValue("true")
         );
     // Create the user
     cognitoIdentityProvider.adminCreateUser(adminCreateUserRequest);
