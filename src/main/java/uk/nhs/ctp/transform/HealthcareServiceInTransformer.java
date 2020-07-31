@@ -1,5 +1,7 @@
 package uk.nhs.ctp.transform;
 
+import static org.apache.commons.lang3.StringUtils.trimToEmpty;
+
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.StringJoiner;
@@ -31,7 +33,8 @@ public class HealthcareServiceInTransformer
         .endpoint(((Endpoint)healthcareService.getEndpointFirstRep().getResource()).getAddress())
         .appointmentRequired(healthcareService.getAppointmentRequired())
         .name(healthcareService.getName())
-        .description(healthcareService.getComment() + " " + healthcareService.getExtraDetails())
+        .description(
+            trimToEmpty(healthcareService.getComment()) + " " + healthcareService.getExtraDetails())
         .email(getContactPoint(healthcareService.getTelecom(), ContactPointSystem.EMAIL))
         .phoneNumber(getContactPoint(healthcareService.getTelecom(), ContactPointSystem.PHONE))
         .provision(getCodeDisplay(healthcareService.getServiceProvisionCode()))

@@ -54,10 +54,7 @@ public class HealthcareServiceService {
 
   private HealthcareServiceDTO setEndpointAndId(HealthcareServiceDTO healthcareService, String encounterId) {
     String encodedEncounterRefBase64 = Base64.encodeBase64URLSafeString(encounterId.getBytes(StandardCharsets.UTF_8));
-    String encodedEncounterRef = URLEncoder.encode(encounterId, StandardCharsets.UTF_8);
-    String endpoint = emsUi
-        + "/#/main?encounterId="
-        + encodedEncounterRef;
+    String endpoint = emsUi + "/#/main";
     return healthcareService.toBuilder()
         .id(encodedEncounterRefBase64)
         .endpoint(endpoint)
