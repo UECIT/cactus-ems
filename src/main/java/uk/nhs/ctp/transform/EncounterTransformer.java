@@ -92,7 +92,9 @@ public class EncounterTransformer {
       period.setEnd(caseEntity.getClosedDate());
 
       var duration = new Duration();
-      duration.setUnit("seconds");
+      duration.setCode("s");
+      duration.setSystem("http://unitsofmeasure.org");
+      duration.setUnit("sec");
       duration.setValue(SECONDS.between(
           caseEntity.getCreatedDate().toInstant(),
           caseEntity.getClosedDate().toInstant()
