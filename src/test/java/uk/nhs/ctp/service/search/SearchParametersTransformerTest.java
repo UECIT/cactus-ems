@@ -150,7 +150,7 @@ public class SearchParametersTransformerTest {
 
   private DataRequirement createPatientRequirement(LocalDate date) {
     DataRequirement dataRequirement = new DataRequirement();
-    dataRequirement.setType("CareConnectPatient");
+    dataRequirement.setType("Patient");
 
     DataRequirementDateFilterComponent birthDateFilter = new DataRequirementDateFilterComponent();
     birthDateFilter.setPath("birthDate");
