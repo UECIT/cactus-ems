@@ -26,6 +26,7 @@ import org.hl7.fhir.dstu3.model.Bundle.SearchEntryMode;
 import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.Composition;
 import org.hl7.fhir.dstu3.model.Encounter;
+import org.hl7.fhir.dstu3.model.Encounter.EncounterParticipantComponent;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -70,7 +71,9 @@ public class EncounterProvider implements IResourceProvider {
    * <ul>
    *   <li>Encounter</li>
    *   <li>Encounter.subject (Patient)</li>
+   *   <li>Encounter.participant (RelatedPerson/Practitioner)</li>
    *   <li>ReferralRequest</li>
+   *   <li>ReferralRequest.recipient (HealthcareService)</li>
    *   <li>ReferralRequest.reason (Condition)</li>
    *   <li>ReferralRequest.supportingInformation (Condition)</li>
    *   <li>CarePlans</li>
@@ -156,6 +159,10 @@ public class EncounterProvider implements IResourceProvider {
           referralRequest.getSupportingInfo()
               .forEach(reference -> addResource(bundle, reference, referralRequest.getIdElement()));
 
+          // Dereference healthcare service
+          referralRequest.getRecipient()
+              .forEach(reference -> addResource(bundle, reference, referralRequest.getIdElement()));
+
           addAppointment(url, bundle);
         });
   }
@@ -179,6 +186,11 @@ public class EncounterProvider implements IResourceProvider {
 
     // Add patient
     addResource(bundle, encounter.getSubject(), encounter.getIdElement());
+
+    // Add participants
+    encounter.getParticipant().stream()
+        .map(EncounterParticipantComponent::getIndividual)
+        .forEach(reference -> addResource(bundle, reference, encounter.getIdElement()));
     return encounter;
   }
 
