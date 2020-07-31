@@ -83,7 +83,7 @@ public class SearchParameters {
 
       observationTriggers.forEach(trigger -> {
         StringJoiner joiner = new StringJoiner("$")
-            .add("CareConnectObservation")
+            .add("Observation")
             .add("code")
             .add(trigger.getCode())
             .add("value")
@@ -104,7 +104,7 @@ public class SearchParameters {
 
       patientTriggers.forEach(trigger -> {
         StringJoiner joiner = new StringJoiner("$")
-            .add("CareConnectPatient")
+            .add("Patient")
             .add("birthDate")
             .add(trigger.getBirthDate());
 

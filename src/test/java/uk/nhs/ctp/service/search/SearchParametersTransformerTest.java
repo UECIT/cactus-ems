@@ -49,9 +49,9 @@ public class SearchParametersTransformerTest {
         searchParametersTransformer.transform(ImmutableList.of(observationRequirement, patientRequirement), null, null);
 
     assertThat(searchParameters.getObservationTriggers(),
-        contains("CareConnectObservation$code$system|coughing$value$system|absent$effective$2001-02-03T04:05:06"));
+        contains("Observation$code$system|coughing$value$system|absent$effective$2001-02-03T04:05:06"));
     assertThat(searchParameters.getPatientTriggers(),
-        contains("CareConnectPatient$birthDate$2004-02-01"));
+        contains("Patient$birthDate$2004-02-01"));
   }
 
   @Test
