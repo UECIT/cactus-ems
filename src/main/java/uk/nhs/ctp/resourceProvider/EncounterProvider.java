@@ -64,9 +64,10 @@ public class EncounterProvider implements IResourceProvider {
 
   /**
    * Encounter Report Search
+   *
    * @param encounterParam id search parameter of the encounter
-   * @param revIncludes resources to include that reference this encounter (ignored)
-   * @param include resources to include that are referenced by this encounter (ignored)
+   * @param revIncludes    resources to include that reference this encounter (ignored)
+   * @param include        resources to include that are referenced by this encounter (ignored)
    * @return Bundle containing the encounter report:
    * <ul>
    *   <li>Encounter</li>
@@ -130,7 +131,7 @@ public class EncounterProvider implements IResourceProvider {
       referenceService.resolve(parentId.getBaseUrl(), reference);
     }
 
-    String fullUrl = referenceService.buildId(reference.getReferenceElement());
+    String fullUrl = referenceService.buildId(reference.getReferenceElement().toVersionless());
 
     Resource resource = reference.getResource() != null ?
         (Resource) reference.getResource() :
@@ -146,7 +147,8 @@ public class EncounterProvider implements IResourceProvider {
     referralRequestService.getByCaseId(caseId)
         .forEach(referralRequest -> {
           String url = referenceService
-              .buildId(ResourceType.ReferralRequest, referralRequest.getId());
+              .buildId(ResourceType.ReferralRequest,
+                  referralRequest.getIdElement().toVersionless().toString());
           bundle.addEntry()
               .setFullUrl(url)
               .setResource(referralRequest);
@@ -170,7 +172,7 @@ public class EncounterProvider implements IResourceProvider {
   private void addAppointment(String referralRequest, Bundle bundle) {
     appointmentService.getByReferral(referralRequest)
         .ifPresent(app -> {
-          String id = referenceService.buildId(app.getIdElement());
+          String id = referenceService.buildId(app.getIdElement().toVersionless());
           bundle.addEntry()
               .setFullUrl(id)
               .setResource(app);
@@ -199,7 +201,7 @@ public class EncounterProvider implements IResourceProvider {
     observations.stream()
         .map(obs -> new BundleEntryComponent()
             .setFullUrl(referenceService
-                .buildId(ResourceType.Observation, obs.getIdElement().getIdPartAsLong()))
+                .buildId(ResourceType.Observation, obs.getIdElement().toVersionless().toString()))
             .setResource(obs))
         .forEach(bundle::addEntry);
   }
@@ -217,7 +219,8 @@ public class EncounterProvider implements IResourceProvider {
   private void addList(Bundle bundle, Long caseId) {
     bundle.addEntry()
         .setResource(listService.buildFromCase(caseId))
-        .setFullUrl(referenceService.buildId(ResourceType.List, caseId)); //Use EncounterID as ListID
+        .setFullUrl(
+            referenceService.buildId(ResourceType.List, caseId)); //Use EncounterID as ListID
 
   }
 
@@ -226,7 +229,7 @@ public class EncounterProvider implements IResourceProvider {
     compositions.stream()
         .map(comp -> new BundleEntryComponent()
             .setFullUrl(referenceService
-                .buildId(ResourceType.Composition, comp.getIdElement().getIdPartAsLong()))
+                .buildId(ResourceType.Composition, comp.getIdElement().toVersionless().toString()))
             .setResource(comp))
         .forEach(bundle::addEntry);
   }
