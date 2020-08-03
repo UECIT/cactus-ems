@@ -13,6 +13,8 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DataRequirement;
 import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementCodeFilterComponent;
 import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementDateFilterComponent;
+import org.hl7.fhir.dstu3.model.Enumerations.FHIRAllTypes;
+import org.hl7.fhir.dstu3.model.Enumerations.FHIRDefinedType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.SystemURL;
@@ -88,7 +90,7 @@ public class SearchParametersTransformer {
 
   private List<PatientTrigger> transformPatientTriggers(List<DataRequirement> dataRequirements) {
     return dataRequirements.stream()
-        .filter(data -> data.getType().equals(CareConnectPatient.class.getSimpleName()))
+        .filter(data -> data.getType().equals(FHIRAllTypes.PATIENT.toCode()))
         .map(dataRequirement -> {
           List<DataRequirementDateFilterComponent> dateFilter = dataRequirement.getDateFilter();
 
