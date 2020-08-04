@@ -105,6 +105,7 @@ public class ListService {
 
   private void addTriageState(Cases caseEntity, List<Pair<Date, Reference>> dateRefList) {
     List<Pair<Date, Reference>> paramRefs = caseEntity.getParameters().stream()
+        .filter(caseParameter -> !caseParameter.isDeleted())
         .map(param -> Pair.of(param.getTimestamp(), new Reference(param.getReference())))
         .collect(Collectors.toUnmodifiableList());
     dateRefList.addAll(paramRefs);

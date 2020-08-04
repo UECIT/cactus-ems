@@ -5,6 +5,7 @@ import static uk.nhs.ctp.SystemConstants.DATE_FORMAT;
 import com.google.common.base.Preconditions;
 import java.time.Clock;
 import java.util.Date;
+import java.util.List;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,12 +19,12 @@ import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.springframework.stereotype.Service;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.SystemURL;
-import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.CaseParameter;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.enums.Gender;
@@ -51,6 +52,11 @@ public class CaseService {
   public Cases findCase(Long id) {
     return caseRepository.getOneByIdAndSupplierId(id, authService.requireSupplierId())
         .orElseThrow(EMSException::notFound);
+  }
+
+  @Transactional
+  public List<CaseParameter> getCaseParameters(Long id) {
+    return findCase(id).getParameters();
   }
 
   public Cases createCase(String patientRef, PractitionerDTO practitioner) {
@@ -168,14 +174,16 @@ public class CaseService {
     return caseRepository.saveAndFlush(triageCase);
   }
 
-  public void addObservation(Long caseId, CaseObservation observation) {
+  public void addResourceToCaseInputData(Long caseId, Resource resource) {
     Cases existingCase = caseRepository
         .getOneByIdAndSupplierId(caseId, authService.requireSupplierId())
         .orElseThrow(EMSException::notFound);
-    if (!existingCase.getObservations().contains(observation)) {
-      existingCase.addObservation(observation);
-      caseRepository.save(existingCase);
-    }
+
+    CaseParameter caseParameter = new CaseParameter();
+    caseParameter.setReference(storageService.storeExternal(resource));
+    caseParameter.setTimestamp(Date.from(clock.instant()));
+    existingCase.addParameter(caseParameter);
+    caseRepository.save(existingCase);
   }
 
 }

@@ -54,7 +54,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
-import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.enums.ReferencingType;
@@ -99,12 +98,6 @@ public class EvaluateParametersServiceTest {
     calendar = Calendar.getInstance();
     calendar.set(2018, Calendar.JUNE, 3);
 
-    var caseObservation = new CaseObservation();
-    caseObservation.setId(1L);
-    caseObservation.setCode("123456");
-    caseObservation.setDisplay("Test Observation");
-    caseObservation.setValueCode("true");
-
     caseWithNoData = newCase();
 
     caseWithImmunization = newCase();
@@ -112,10 +105,8 @@ public class EvaluateParametersServiceTest {
     caseWithMedication = newCase();
 
     caseWithObservation = newCase();
-    caseWithObservation.addObservation(caseObservation);
 
     caseWithData = newCase();
-    caseWithData.addObservation(caseObservation);
 
     var questionnaire = new Questionnaire();
     questionnaire.setId("1");

@@ -4,7 +4,6 @@ package uk.nhs.ctp.service;
 import ca.uhn.fhir.context.FhirContext;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -16,7 +15,6 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.stereotype.Service;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.SystemURL;
-import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.entities.EmsSupplier;
 import uk.nhs.ctp.exception.EMSException;
@@ -25,7 +23,6 @@ import uk.nhs.ctp.service.dto.EncounterHandoverDTO;
 import uk.nhs.ctp.service.dto.EncounterReportInput;
 import uk.nhs.ctp.transform.EncounterReportInputTransformer;
 import uk.nhs.ctp.transform.EncounterTransformer;
-import uk.nhs.ctp.transform.ObservationTransformer;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
 import uk.nhs.ctp.utils.RetryUtils;
 
@@ -35,7 +32,6 @@ import uk.nhs.ctp.utils.RetryUtils;
 public class EncounterService {
 
   private final EncounterTransformer encounterTransformer;
-  private final ObservationTransformer observationTransformer;
   private final CaseRepository caseRepository;
   private final EncounterReportInputTransformer encounterReportInputTransformer;
   private final EmsSupplierService emsSupplierService;
@@ -49,17 +45,6 @@ public class EncounterService {
     Encounter encounter = encounterTransformer.transform(triageCase);
     encounter.setId(caseId.toString());
     return encounter;
-  }
-
-  @Transactional
-  public List<Observation> getObservationsForEncounter(Long caseId) {
-    List<CaseObservation> observations = caseRepository
-        .getOneByIdAndSupplierId(caseId, authService.requireSupplierId())
-        .orElseThrow(EMSException::notFound)
-        .getObservations();
-    return observations.stream()
-        .map(observationTransformer::transform)
-        .collect(Collectors.toList());
   }
 
   public EncounterReportInput getEncounterReport(IdType encounterId) {

@@ -55,9 +55,6 @@ public class Cases extends SupplierPartitioned {
   @Column(name = "nhs_number")
   private String nhsNumber;
 
-  @OneToMany(mappedBy = "caseEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<CaseObservation> observations = new ArrayList<>();
-
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "case_id")
   private List<CaseParameter> parameters = new ArrayList<>();
@@ -83,11 +80,6 @@ public class Cases extends SupplierPartitioned {
   public void addComposition(CompositionEntity composition) {
     this.compositions.add(composition);
     composition.setCaseEntity(this);
-  }
-
-  public void addObservation(CaseObservation observation) {
-    this.observations.add(observation);
-    observation.setCaseEntity(this);
   }
 
   public void addParameter(CaseParameter parameter) {

@@ -40,7 +40,6 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.config.FHIRConfig;
-import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.entities.CompositionEntity;
 import uk.nhs.ctp.repos.CaseRepository;
@@ -167,15 +166,10 @@ public class CompositionServiceTest {
             ));
     observation.setId("Observation/1");
     locateResource("Observation/1", observation);
-    CaseObservation caseObservation = new CaseObservation();
-    caseObservation.setId(1L);
-    caseObservation.setDisplay("test code");
-    caseObservation.setValueDisplay("Test observation");
 
     Cases caseEntity = new Cases();
     caseEntity.setId(1L);
     caseEntity.setPatientId("Patient/1");
-    caseEntity.addObservation(caseObservation);
     when(caseRepository.getOneByIdAndSupplierId(1L, SUPPLIER)).thenReturn(Optional.of(caseEntity));
 
     cdssResult = new CdssResult();
