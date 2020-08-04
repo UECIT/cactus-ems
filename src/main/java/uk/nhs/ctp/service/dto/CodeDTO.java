@@ -1,22 +1,15 @@
 package uk.nhs.ctp.service.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class CodeDTO {
-	private String code;
-	private String display;
 
-	public String getCode() {
-		return code;
-	}
-
-	public void setCode(String code) {
-		this.code = code;
-	}
-
-	public String getDisplay() {
-		return display;
-	}
-
-	public void setDisplay(String display) {
-		this.display = display;
-	}
+  private String code;
+  private String display;
+  private String system;
 }

@@ -1,0 +1,7 @@
+<div class="answers">
+  <div class="alert alert-danger" *ngIf="error">
+    <app-error-display id="imageError" [(errorObject)]="error"></app-error-display>
+  </div>
+  <img id="image" *ngIf="imgSrc" [src]="imgSrc" height="400" (click)="mouseClickOnImage($event, triageQuestion)">
+  <p id="imageSelection">Current Selection - {{currentSelection}}</p>
+</div>

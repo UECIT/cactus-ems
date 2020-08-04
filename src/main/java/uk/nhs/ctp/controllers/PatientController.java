@@ -1,31 +1,47 @@
 package uk.nhs.ctp.controllers;
 
 import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
 import uk.nhs.ctp.entities.PatientEntity;
-import uk.nhs.ctp.service.PatientService;
+import uk.nhs.ctp.repos.PatientRepository;
+import uk.nhs.ctp.service.dto.PatientDTO;
+import uk.nhs.ctp.service.fhir.GenericResourceLocator;
+import uk.nhs.ctp.transform.PatientTransformer;
 
 @CrossOrigin
 @RestController
 @RequestMapping(path = "/patient")
+@RequiredArgsConstructor
 public class PatientController {
 
-	/*
-	 * Endpoints to retrieve, update and delete patients
-	 */
+  private final PatientRepository patientRepository;
+  private final GenericResourceLocator resourceLocator;
+  private final PatientTransformer patientTransformer;
 
-	@Autowired
-	private PatientService patientService;
+  @GetMapping(path = "/all")
+  public @ResponseBody
+  List<PatientDTO> getAllPatients() {
+    List<PatientEntity> all = patientRepository.findAll();
+    return all.stream()
+        .map(patientTransformer::transform)
+        .collect(Collectors.toList());
+  }
 
-	@GetMapping(path = "/all")
-	public @ResponseBody List<PatientEntity> getAllPatients() {
-		return patientService.getAllPatients();
-	}
+  @GetMapping
+  public @ResponseBody
+  PatientDTO getPatient(@RequestParam String patientRef, @RequestParam String encounterRef) {
+    Patient patientResource = resourceLocator
+        .findResource(new Reference(patientRef), new IdType(encounterRef));
+    return patientTransformer.transform(patientResource);
+  }
 }

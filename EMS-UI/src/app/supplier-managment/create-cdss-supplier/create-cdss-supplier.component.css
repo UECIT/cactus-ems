@@ -13,11 +13,6 @@
     white-space: nowrap;
 }
 
-.input {
-    display: flex;
-    justify-content: center;
-}
-
 .buttons {
     display: flex;
     justify-content: center;
@@ -54,4 +49,8 @@
 }
 .serviceDefinitionListClose {
     cursor: pointer;
+}
+
+mat-button-toggle-group {
+    margin-bottom: 20px;
 }

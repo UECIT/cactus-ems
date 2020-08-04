@@ -1,21 +1,31 @@
-export class CdssSupplier {
-  id: number;
-  name: string;
+import { SupplierInstance } from "./supplierInstance";
+
+export class CdssSupplier extends SupplierInstance{
   serviceDefinitions: ServiceDefinition[];
-}
+  inputParamsRefType: ResourceReferenceType;
+  inputDataRefType: ResourceReferenceType;
+  supportedVersion: string;
+  authToken: string;
 
-export class ServiceDefinition {
-  serviceDefinitionId: number;
-  description: string;
-}
-
-export class NewCdssSupplier extends CdssSupplier {
-  baseUrl: string;
   constructor() {
-    super();
+    super()
     this.id = 0;
     this.name = '';
     this.baseUrl = '';
     this.serviceDefinitions = [];
+    this.inputDataRefType = ResourceReferenceType.ByReference;
+    this.inputParamsRefType = ResourceReferenceType.ByReference;
+    this.supportedVersion = '';
+    this.authToken = '';
   }
+}
+
+export enum ResourceReferenceType {
+  ByReference = 0,
+  ByResource
+}
+
+export class ServiceDefinition {
+  serviceDefinitionId: string;
+  description: string;
 }

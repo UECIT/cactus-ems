@@ -1,8 +1,8 @@
-import { Component, OnInit, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
-import { DialogData } from '../triage/triage.component';
-import { ServiceDefinitionService } from '../service/service-definition.service';
-import { ToastrService } from 'ngx-toastr';
+import {Component, Inject, OnInit} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
+import {DialogData} from '../triage/triage.component';
+import {ServiceDefinitionService} from '../service';
+import {ToastrService} from 'ngx-toastr';
 
 @Component({
   selector: 'app-switch-service-prompt-dialog',
@@ -14,36 +14,24 @@ export class SwitchServicePromptDialogComponent implements OnInit {
   newServiceDefinition: any;
 
   constructor(
-    public dialogRef: MatDialogRef<SwitchServicePromptDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: DialogData,
-    private serviceDefintionService: ServiceDefinitionService,
-    private toastr: ToastrService
-  ) {}
+      public dialogRef: MatDialogRef<SwitchServicePromptDialogComponent>,
+      @Inject(MAT_DIALOG_DATA) public data: DialogData,
+      private serviceDefinitionService: ServiceDefinitionService,
+      private toastr: ToastrService
+  ) {
+  }
 
   async ngOnInit() {
-    const CdssUrl = await this.serviceDefintionService.getCdssSupplierUrl(
-      this.data.cdssSupplierId
-    ).catch(err => {
-      this.toastr.error(
-        err.error.target.__zone_symbol__xhrURL + ' - ' +
-        err.message);
-    });
-    this.oldServiceDefinition = await this.serviceDefintionService
-      .getServiceDefinition(
-        CdssUrl + 'ServiceDefinition/' + this.data.oldServiceDefinition
-      ).toPromise().catch(err => {
-        this.toastr.error(
-          err.error.target.__zone_symbol__xhrURL + ' - ' +
-          err.message);
-      });
-    this.newServiceDefinition = await this.serviceDefintionService
-      .getServiceDefinition(
-        CdssUrl + 'ServiceDefinition/' + this.data.newServiceDefinition
-      ).toPromise().catch(err => {
-        this.toastr.error(
-          err.error.target.__zone_symbol__xhrURL + ' - ' +
-          err.message);
-      });
+    try {
+      this.oldServiceDefinition = await this.serviceDefinitionService
+        .getServiceDefinition(this.data.cdssSupplierId, this.data.oldServiceDefinition)
+        .toPromise();
+      this.newServiceDefinition = await this.serviceDefinitionService
+        .getServiceDefinition(this.data.cdssSupplierId, this.data.newServiceDefinition)
+        .toPromise();
+    } catch (err) {
+      this.toastr.error(err.error.target.__zone_symbol__xhrURL + ' - ' + err.message);
+    }
   }
 
   onNoClick(): void {

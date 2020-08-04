@@ -2,7 +2,7 @@
     <div class="row bar">
         <div class="col-sm-5 offset-sm-1">
             <span class="context" *ngIf="case">
-                {{case.party.description}}
+                {{questionnaire.serviceDefinitionId}}
             </span>
         </div>
         <div class="col-sm-5">
@@ -13,11 +13,11 @@
     </div>
     <div class="row">
         <div class="col-sm-12 skillset">
-            <span>User Skillset: <strong *ngIf="case"> {{case.skillset.description}}</strong></span>
+            <span>Role: <strong *ngIf="case"> {{role}}</strong></span>
         </div>
     </div>
     <div class="row">
-        <button [disabled]="!checkAllRequieredQuestionsAreAnswered()" id="continue" class="col-sm-5" (click)="continue(false)">
+        <button [disabled]="!checkAllRequiredQuestionsAreAnswered()" id="continue" class="col-sm-5" (click)="continue(false)">
             Continue
         </button>
         <button id="continue" class="col-sm-5 offset-sm-2" (click)="openDialog()">

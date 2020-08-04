@@ -2,9 +2,9 @@
   <div class="row col-12">
     <div class="container">
       <div class="row bar">
-        <span class="col-12 question" style="font-weight: bold;">
+        <div class="col-12 question" style="font-weight: bold;">
           Past Questions:
-        </span>
+        </div>
       </div>
 
       <mat-selection-list class="row" dense *ngFor="let triageQuestion of triageQuestions">
@@ -17,11 +17,11 @@
           <p matLine *ngIf="questionResponse.responseString" matTooltip="{{questionResponse.question}}: {{questionResponse.responseString}}"
         matTooltipPosition="right">{{questionResponse.question}}: {{questionResponse.responseString}}</p>
 
-        <p matLine *ngIf="questionResponse.responseInterger" matTooltip="{{questionResponse.question}}: {{questionResponse.responseInterger}}"
-        matTooltipPosition="right">{{questionResponse.question}}: {{questionResponse.responseInterger}}</p>
+        <p matLine *ngIf="questionResponse.responseInteger" matTooltip="{{questionResponse.question}}: {{questionResponse.responseInteger}}"
+        matTooltipPosition="right">{{questionResponse.question}}: {{questionResponse.responseInteger}}</p>
 
-        <p matLine *ngIf="questionResponse.responceBoolean" matTooltip="{{questionResponse.question}}: {{questionResponse.responceBoolean}}"
-        matTooltipPosition="right">{{questionResponse.question}}: {{questionResponse.responceBoolean}}</p>
+        <p matLine *ngIf="questionResponse.responseBoolean" matTooltip="{{questionResponse.question}}: {{questionResponse.responseBoolean}}"
+        matTooltipPosition="right">{{questionResponse.question}}: {{questionResponse.responseBoolean}}</p>
 
         <p matLine *ngIf="questionResponse.responseDecimal" matTooltip="{{questionResponse.question}}: {{questionResponse.responseDecimal}}"
         matTooltipPosition="right">{{questionResponse.question}}: {{questionResponse.responseDecimal}}</p>
@@ -31,6 +31,9 @@
 
         <p matLine *ngIf="questionResponse.responseAttachment" matTooltip="{{questionResponse.question}}: {{questionResponse.responseAttachment}}"
         matTooltipPosition="right">{{questionResponse.question}}: {{questionResponse.responseAttachment}}</p>
+
+        <p matLine *ngIf="questionResponse.responseCoordinates" matTooltip="{{coordinatesString(questionResponse)}}"
+        matTooltipPosition="right">{{coordinatesString(questionResponse)}}</p>
 
           <mat-icon *ngIf="!amendingPrevious" matListIcon>edit</mat-icon>
           <mat-icon *ngIf="amendingPrevious" matListIcon>report_off</mat-icon>

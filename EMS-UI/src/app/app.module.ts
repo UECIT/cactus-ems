@@ -1,3 +1,5 @@
+import { AnswerService } from './service/answer.service';
+import { AuthService } from './service/auth.service';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { HashLocationStrategy, LocationStrategy } from '@angular/common';
@@ -13,14 +15,13 @@ import { BannerComponent } from './banner/banner.component';
 import { ManageUsersComponent } from './user-management/manage-users/manage-users.component';
 import { LoginService } from './service/login.service';
 import { ManageUsersService } from './service/manage-users.service';
-import {platformBrowserDynamic} from '@angular/platform-browser-dynamic';
 import { PatientService } from './service/patient.service';
 import { TriageComponent } from './triage/triage.component';
 import { StoreModule } from '@ngrx/store';
 import { patientReducer } from './reducers/patient.reducer';
 import { tokenReducer } from './reducers/auth-token.reducer';
 import { QuestionnaireComponent } from './triage/questionnaire/questionnaire.component';
-import { QuestionnaireService } from './service/questionnaire.service';
+import { TriageService } from './service/triage.service';
 import { AgePipe } from './pipe/age';
 import { UpdateUsersComponent } from './user-management/update-users/update-users.component';
 import { CreateUsersComponent } from './user-management/create-users/create-users.component';
@@ -46,18 +47,28 @@ import { AuditService } from './service/audit.service';
 import { SwitchSupplierDialogComponent } from './switch-supplier-dialog/switch-supplier-dialog.component';
 import { SwitchServicePromptDialogComponent } from './switch-service-prompt-dialog/switch-service-prompt-dialog.component';
 import { DosService } from './service/dos.service';
-import { DosDisplayComponent } from './triage/dos-display/dos-display.component';
+import { DosDisplayComponent, HealthcareServiceDialog } from './triage/dos-display/dos-display.component';
 import { ManageSettingsComponent } from './manage-settings/manage-settings.component';
 import { QuestionsDisplayComponent } from './triage/questions-display/questions-display.component';
 import {WebStorageModule} from 'h5webstorage';
 import { ViewAuditsComponent } from './view-audits/view-audits.component';
 import { HandoverMessageDialogComponent } from './triage/handover-message-dialog/handover-message-dialog.component';
-import { ResourceService } from './service/resource.service';
 import { ReportService } from './service/report.service';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { HighlightModule } from 'ngx-highlightjs';
 import xml from 'highlight.js/lib/languages/xml';
 import { ToastrModule } from 'ngx-toastr';
+import { TriageSelectionComponent } from './main/triage-selection/triage-selection.component';
+import { PatientSelectionComponent } from './main/patient-selection/patient-selection.component';
+import { ReferralRequestComponent, ConditionDialog } from './triage/referral-request/referral-request.component';
+import { PractitionerSelectionComponent } from './main/practitioner-selection/practitioner-selection.component';
+import { EnvironmentService } from './service/environment.service';
+import { EmsSupplierComponent, EditEmsDialog } from './supplier-managment/ems-supplier/ems-supplier.component';
+import { EmsService } from './service/ems.service';
+import { ReportSearchDialogComponent } from './main/report-search-dialog/report-search-dialog.component';
+import { ValidationReportComponent } from './validation-report/validation-report.component';
+import { ImagemapQuestionComponent } from './triage/questionnaire/question-types/imagemap-question/imagemap-question.component';
+import { CarePlanComponent } from "./triage/care-plan/care-plan.component";
 
 export function hljsLanguages() {
   return [
@@ -97,9 +108,29 @@ export function hljsLanguages() {
     ManageSettingsComponent,
     QuestionsDisplayComponent,
     ViewAuditsComponent,
-    HandoverMessageDialogComponent
+    HandoverMessageDialogComponent,
+    TriageSelectionComponent,
+    PatientSelectionComponent,
+    HealthcareServiceDialog,
+    ReferralRequestComponent,
+    CarePlanComponent,
+    ConditionDialog,
+    PractitionerSelectionComponent,
+    EmsSupplierComponent,
+    EditEmsDialog,
+    ReportSearchDialogComponent,
+    ValidationReportComponent,
+    ImagemapQuestionComponent,
   ],
-  entryComponents: [SwitchSupplierDialogComponent, SwitchServicePromptDialogComponent, HandoverMessageDialogComponent],
+  entryComponents: [
+    SwitchSupplierDialogComponent, 
+    SwitchServicePromptDialogComponent, 
+    HandoverMessageDialogComponent, 
+    HealthcareServiceDialog, 
+    ConditionDialog, 
+    EditEmsDialog, 
+    ReportSearchDialogComponent
+  ],
   imports: [
     BrowserModule,
     StoreModule.forRoot({
@@ -124,19 +155,20 @@ export function hljsLanguages() {
     LoginService,
     ManageUsersService,
     PatientService,
-    QuestionnaireService,
+    TriageService,
     CdssService,
     CaseService,
+    EmsService,
     DosService,
     {provide: LocationStrategy, useClass: HashLocationStrategy},
     {provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher},
     ServiceDefinitionService,
     AuditService,
-    ResourceService,
     ReportService,
+    EnvironmentService,
+    AuthService,
+    AnswerService,
     {provide: MAT_DATE_LOCALE, useValue: 'en-GB'}],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
-platformBrowserDynamic().bootstrapModule(AppModule);
-

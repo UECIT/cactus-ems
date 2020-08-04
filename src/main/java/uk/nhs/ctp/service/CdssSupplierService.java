@@ -1,12 +1,13 @@
 package uk.nhs.ctp.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
+import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.entities.CdssSupplier;
 import uk.nhs.ctp.entities.ServiceDefinition;
@@ -18,107 +19,101 @@ import uk.nhs.ctp.repos.UserRepository;
 import uk.nhs.ctp.service.dto.CdssSupplierDTO;
 import uk.nhs.ctp.service.dto.NewCdssSupplierDTO;
 import uk.nhs.ctp.service.dto.ServiceDefinitionDTO;
+import uk.nhs.ctp.transform.CdssSupplierDTOTransformer;
 
 @Service
+@RequiredArgsConstructor
 public class CdssSupplierService {
 
-	@Autowired
-	private UserRepository userRepository;
+  private final UserRepository userRepository;
+  private final CdssSupplierRepository cdssSupplierRepository;
+  private final ServiceDefinitionRepository serviceDefinitionRepository;
+  private final TokenAuthenticationService authService;
+  private final CdssSupplierDTOTransformer cdssTransformer;
 
-	@Autowired
-	private CdssSupplierRepository cdssSupplierRepository;
+  /**
+   * Returns a list of CDSS suppliers that the user has access to.
+   *
+   * @param username Username
+   * @return {@link CdssSupplierDTO}
+   */
+  public List<CdssSupplierDTO> getCdssSuppliers(String username) {
+    UserEntity userEntity = userRepository.findByUsername(username);
+    authService.requireSupplierId(userEntity.getSupplierId());
 
-	@Autowired
-	private ServiceDefinitionRepository serviceDefinitionRepository;
+    List<CdssSupplier> suppliers;
 
-	/**
-	 * Returns a list of CDSS suppliers that the user has access to.
-	 * 
-	 * @param username Username
-	 * @return {@link CdssSupplierDTO}
-	 */
-	public List<CdssSupplierDTO> getCdssSuppliers(String username) {
-		UserEntity userEntity = userRepository.findByUsername(username);
+    if (userEntity.getRole().equals(SystemConstants.ROLE_NHS)
+        || userEntity.getRole().equals(SystemConstants.ROLE_ADMIN)
+        || userEntity.getRole().equals(SystemConstants.ROLE_SUPPLIER_ADMIN)) {
+      suppliers = cdssSupplierRepository
+          .findAllBySupplierId(authService.requireSupplierId());
+    } else {
+      throw new EMSException(HttpStatus.FORBIDDEN, "User has invalid role");
+    }
 
-		List<CdssSupplier> suppliers;
+    return suppliers.stream()
+        .map(cdssTransformer::transform)
+        .collect(Collectors.toList());
+  }
 
-		if (userEntity.getRole().equals(SystemConstants.ROLE_NHS)
-				|| userEntity.getRole().equals(SystemConstants.ROLE_ADMIN)) {
-			suppliers = cdssSupplierRepository.findAll();
-		} else if (userEntity.getRole().equals(SystemConstants.ROLE_CDSS)) {
-			suppliers = userEntity.getCdssSuppliers();
-		} else {
-			throw new EMSException(HttpStatus.FORBIDDEN, "User has invalid role");
-		}
+  public CdssSupplier getCdssSupplier(Long id) {
+    return cdssSupplierRepository.getOneByIdAndSupplierId(id, authService.requireSupplierId())
+        .orElseThrow(EMSException::notFound);
+  }
 
-		return convertToSupplierDTO(suppliers);
-	}
+  public Optional<CdssSupplier> findCdssSupplierByBaseUrl(String baseUrl) {
+    return cdssSupplierRepository
+        .getOneBySupplierIdAndBaseUrl(authService.requireSupplierId(), baseUrl);
+  }
 
-	public List<CdssSupplier> getCdssSuppliersUnfiltered(String username) {
-		UserEntity userEntity = userRepository.findByUsername(username);
+  public CdssSupplier createCdssSupplier(NewCdssSupplierDTO newCdssSupplierDTO) {
+    String supplierId = authService.requireSupplierId();
 
-		List<CdssSupplier> suppliers;
+    CdssSupplier cdssSupplier = new CdssSupplier();
+    cdssSupplier.setName(newCdssSupplierDTO.getName());
+    cdssSupplier.setBaseUrl(newCdssSupplierDTO.getBaseUrl());
+    cdssSupplier.setInputDataRefType(newCdssSupplierDTO.getInputDataRefType());
+    cdssSupplier.setInputParamsRefType(newCdssSupplierDTO.getInputParamsRefType());
+    cdssSupplier.setSupportedVersion(newCdssSupplierDTO.getSupportedVersion());
+    cdssSupplier.setSupplierId(supplierId);
+    cdssSupplier.setAuthToken(newCdssSupplierDTO.getAuthToken());
+    cdssSupplier = cdssSupplierRepository.save(cdssSupplier);
 
-		if (userEntity.getRole().equals(SystemConstants.ROLE_NHS)
-				|| userEntity.getRole().equals(SystemConstants.ROLE_ADMIN)) {
-			suppliers = cdssSupplierRepository.findAll();
-		} else if (userEntity.getRole().equals(SystemConstants.ROLE_CDSS)) {
-			suppliers = userEntity.getCdssSuppliers();
-		} else {
-			throw new EMSException(HttpStatus.FORBIDDEN, "User has invalid role");
-		}
+    // for each service definition DTO, loop through and create a service definition
+    // and add it to the service definition list.
+    for (ServiceDefinitionDTO serviceDefinitionDTO : newCdssSupplierDTO.getServiceDefinitions()) {
+      ServiceDefinition newServiceDefinition = new ServiceDefinition();
+      newServiceDefinition.setDescription(serviceDefinitionDTO.getDescription());
+      newServiceDefinition.setServiceDefinitionId(serviceDefinitionDTO.getServiceDefinitionId());
+      newServiceDefinition.setCdssSupplierId(cdssSupplier.getId());
+      newServiceDefinition.setSupplierId(supplierId);
+      // call service definition repository and save the service definition.
+      serviceDefinitionRepository.save(newServiceDefinition);
+    }
 
-		return suppliers;
-	}
+    return cdssSupplierRepository.getOne(cdssSupplier.getId());
+  }
 
-	protected List<CdssSupplierDTO> convertToSupplierDTO(List<CdssSupplier> suppliers) {
-		return suppliers.stream().map(supplier -> {
-			CdssSupplierDTO supplierDTO = new CdssSupplierDTO(supplier);
-			return supplierDTO;
-		}).collect(Collectors.toList());
-	}
+  public CdssSupplier updateCdssSupplier(CdssSupplier cdssSupplier) {
+    String supplierId = authService.requireSupplierId();
+    cdssSupplierRepository.getOneByIdAndSupplierId(cdssSupplier.getId(), supplierId)
+        .orElseThrow(EMSException::notFound);
 
-	public CdssSupplier getCdssSupplier(Long id) {
-		return findBySupplierId(id);
-	}
+    cdssSupplier.setSupplierId(supplierId);
 
-	protected CdssSupplier findBySupplierId(Long id) {
-		return cdssSupplierRepository.findOne(id);
-	}
+    // save new/update service definitions
+    // TODO check service definition supplierIDs match
+    for (ServiceDefinition serviceDefinition : cdssSupplier.getServiceDefinitions()) {
+      serviceDefinition.setSupplierId(supplierId);
+      serviceDefinition.setCdssSupplierId(cdssSupplier.getId());
+    }
 
-	public CdssSupplier createCdssSupplier(NewCdssSupplierDTO newCdssSupplierDTO) {
-		CdssSupplier cdssSupplier = new CdssSupplier();
-		cdssSupplier.setName(newCdssSupplierDTO.getName());
-		cdssSupplier.setBaseUrl(newCdssSupplierDTO.getBaseUrl());
-		cdssSupplier = cdssSupplierRepository.save(cdssSupplier);
+    return cdssSupplierRepository.saveAndFlush(cdssSupplier);
+  }
 
-		// for each service definition DTO, loop through and create a service definition
-		// and add it to the service definition list.
-		for (ServiceDefinitionDTO serviceDefinitionDTO : newCdssSupplierDTO.getServiceDefinitions()) {
-			ServiceDefinition newServiceDefinition = new ServiceDefinition();
-			newServiceDefinition.setDescription(serviceDefinitionDTO.getDescription());
-			newServiceDefinition.setServiceDefinitionId(serviceDefinitionDTO.getServiceDefinitionId());
-			newServiceDefinition.setCdssSupplierId(cdssSupplier.getId().toString());
-			// call service definition repository and save the service definition.
-			serviceDefinitionRepository.save(newServiceDefinition);
-		}
-
-		return cdssSupplierRepository.getOne(cdssSupplier.getId());
-	}
-
-	public CdssSupplier updateCdssSupplier(CdssSupplier cdssSupplier) {
-
-		// save new/update service definitions
-		for (ServiceDefinition serviceDefinition : cdssSupplier.getServiceDefinitions()) {
-			serviceDefinition.setCdssSupplierId(cdssSupplier.getId().toString());
-		}
-
-		cdssSupplierRepository.saveAndFlush(cdssSupplier);
-
-		return cdssSupplierRepository.findOne(cdssSupplier.getId());
-	}
-
-	public void deleteCdssSupplier(Long cdssSupplierId) {
-		cdssSupplierRepository.delete(cdssSupplierId);
-	}
+  @Transactional
+  public void deleteCdssSupplier(Long id) {
+    cdssSupplierRepository.deleteByIdAndSupplierId(id, authService.requireSupplierId());
+  }
 }

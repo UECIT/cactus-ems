@@ -1,0 +1,39 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-xs-12 col-md-10 offset-md-1">
+      <div class="header">Current EMS Suppliers</div>
+      <mat-progress-bar mode="indeterminate" *ngIf="!loaded"></mat-progress-bar>
+      <div *ngIf="!error && loaded" class="suppliers table-responsive">
+        <table class="table table-borderless table-hover">
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">URL</th>
+              <th></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="emsSupplier" *ngFor="let supplier of suppliers">
+              <td class="emsSupplierName">{{ supplier.name }}</td>
+              <td class="emsSupplierBaseUrl">{{ supplier.baseUrl }}</td>
+              <td>
+                <div class="actions">
+                  <span class="actionButton" (click)="edit(supplier)">Edit</span>
+                  <span class="actionButton" (click)="remove(supplier)">Remove</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div>
+          <span class="actionButton" (click)="edit()">Create New Supplier</span> 
+        </div>
+      </div>
+      <div class="alert alert-danger" *ngIf="error">
+            <app-error-display [(errorObject)]="error"></app-error-display>
+      </div>
+    </div>
+  </div>
+</div>
+  

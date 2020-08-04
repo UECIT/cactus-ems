@@ -1,10 +1,11 @@
 package uk.nhs.ctp.service;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.CareConnectCarePlan;
@@ -16,26 +17,28 @@ import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import uk.nhs.ctp.OperationOutcomeFactory;
 import uk.nhs.ctp.SystemCode;
+import uk.nhs.ctp.enums.CdsApiVersion;
 import uk.nhs.ctp.service.dto.CdssResponseDTO;
 import uk.nhs.ctp.service.dto.CdssResult;
 import uk.nhs.ctp.service.dto.ExtensionDTO;
-import uk.nhs.ctp.service.dto.ProcedureRequestDTO;
-import uk.nhs.ctp.service.dto.ReferralRequestDTO;
 import uk.nhs.ctp.service.dto.TriageOption;
 import uk.nhs.ctp.service.dto.TriageQuestion;
+import uk.nhs.ctp.transform.ErrorMessageTransformer;
+import uk.nhs.ctp.transform.QuestionnaireOptionValueTransformer;
+import uk.nhs.ctp.transform.ReferralRequestDTOTransformer;
+import uk.nhs.ctp.utils.ImplementationResolver;
 import uk.nhs.ctp.utils.ResourceProviderUtils;
 
 @Service
+@RequiredArgsConstructor
 public class ResponseService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ResponseService.class);
+	private final ErrorMessageTransformer errorMessageTransformer;
+	private final ImplementationResolver<ReferralRequestDTOTransformer> referralRequestTransformerResolver;
+	private final QuestionnaireOptionValueTransformer optionValueTransformer;
 
 	/**
 	 * Build response DTO with a summary of the CDSS response
@@ -46,29 +49,33 @@ public class ResponseService {
 	 * @param cdssSupplierId CDSS supplier ID
 	 * @return {@link CdssResponseDTO}
 	 */
-	public CdssResponseDTO buildResponse(CdssResult cdssResult, Questionnaire questionnaire, Long caseId,
+	public CdssResponseDTO buildResponse(
+			CdssResult cdssResult,
+			Questionnaire questionnaire,
+			Long caseId,
 			Long cdssSupplierId) throws FHIRException {
 		CdssResponseDTO response = new CdssResponseDTO();
 
 		setTriageRequestDetails(caseId, cdssSupplierId, cdssResult.getServiceDefinitionId(), response);
 		if (cdssResult.hasResult()) {
 			setResult(cdssResult.getResult().getActionFirstRep().getResource().getResource(), response);
-			if (cdssResult.hasTrigger()) {
-				response.setSwitchTrigger(cdssResult.getSwitchTrigger());
-			}
 		} else if (questionnaire != null) {
 			setTriageQuestion(questionnaire, response, null);
 		}
+
+		if (cdssResult.hasTrigger()) {
+			response.setSwitchTrigger(cdssResult.getSwitchTrigger());
+		}
 		
 		if (cdssResult.hasReferralRequest()) {
-			response.setReferralRequest(new ReferralRequestDTO(cdssResult.getReferralRequest()));
+			var referralRequestDTOTransformer = resolveTransformer(cdssResult.getApiVersion());
+			response.setReferralRequest(referralRequestDTOTransformer.transform(cdssResult.getReferralRequest()));
 		}
 		if (cdssResult.hasCareAdvice()) {
 			response.setCareAdvice(cdssResult.getCareAdvice());
 		}
-		if (cdssResult.hasProcedureRequest()) {
-			response.setProcedureRequest(new ProcedureRequestDTO(cdssResult.getProcedureRequest()));
-		}
+
+		response.setErrorMessage(errorMessageTransformer.transform(cdssResult.getOperationOutcome()));
 
 		return response;
 	}
@@ -80,7 +87,7 @@ public class ResponseService {
 	 * @param questionnaire    {@link Questionnaire}
 	 * @param caseId           Case ID
 	 * @param cdssSupplierId   CDSS supplier ID
-	 * @param previousResponse
+	 * @param previousQuestions {@link TriageQuestion[]}
 	 * @return {@link CdssResponseDTO}
 	 */
 	public CdssResponseDTO buildAmendResponse(CdssResult cdssResult, Questionnaire questionnaire, Long caseId,
@@ -101,21 +108,15 @@ public class ResponseService {
 
 			setTriageQuestion(questionnaire, response, triageResponses);
 			if (cdssResult.hasReferralRequest()) {
-				response.setReferralRequest(new ReferralRequestDTO(cdssResult.getReferralRequest()));
+				var referralRequestDTOTransformer = resolveTransformer(cdssResult.getApiVersion());
+				response.setReferralRequest(referralRequestDTOTransformer.transform(cdssResult.getReferralRequest()));
 			}
 		}
 
 		return response;
 	}
 
-	/**
-	 * Add result to the CDSS response
-	 * 
-	 * @param cdssResult
-	 * @param response
-	 * @throws FHIRException
-	 */
-	void addCdssResult(CdssResult cdssResult, CdssResponseDTO response) throws FHIRException {
+	private void addCdssResult(CdssResult cdssResult, CdssResponseDTO response) throws FHIRException {
 		if (cdssResult.hasResult()) {
 			CarePlan careplan = ResourceProviderUtils
 					.castToType(cdssResult.getResult().getActionFirstRep().getResource().getResource(), CareConnectCarePlan.class);
@@ -124,7 +125,8 @@ public class ResponseService {
 				response.setSwitchTrigger(cdssResult.getSwitchTrigger());
 			}
 			if (cdssResult.hasReferralRequest()) {
-				response.setReferralRequest(new ReferralRequestDTO(cdssResult.getReferralRequest()));
+				var referralRequestDTOTransformer = resolveTransformer(cdssResult.getApiVersion());
+				response.setReferralRequest(referralRequestDTOTransformer.transform(cdssResult.getReferralRequest()));
 			}
 			if (cdssResult.getCareAdvice() != null) {
 				response.setCareAdvice(cdssResult.getCareAdvice());
@@ -132,15 +134,7 @@ public class ResponseService {
 		}
 	}
 
-	/**
-	 * Add basic details to CdssResponse
-	 * 
-	 * @param caseId
-	 * @param cdssSupplierId
-	 * @param serviceDefinitionId
-	 * @param response
-	 */
-	void setTriageRequestDetails(Long caseId, Long cdssSupplierId, String serviceDefinitionId,
+	private void setTriageRequestDetails(Long caseId, Long cdssSupplierId, String serviceDefinitionId,
 			CdssResponseDTO response) {
 		response.setCaseId(caseId);
 		response.setCdssSupplierId(cdssSupplierId);
@@ -198,21 +192,9 @@ public class ResponseService {
 					}
 				}
 
-				question.getOption().forEach(option -> {
-					try {
-						Coding optionCode = option.getValueCoding();
-						if (optionCode != null) {
-							if (option.getExtensionFirstRep().isEmpty()) {
-								triageQuestion.addOption(optionCode.getCode(), optionCode.getDisplay());
-							} else {
-								triageQuestion.addOption(optionCode.getCode(), optionCode.getDisplay(),
-										option.getExtensionFirstRep());
-							}
-						}
-					} catch (FHIRException e) {
-						LOG.error("Could not get value coding", e);
-					}
-				});
+				question.getOption().stream()
+						.map(optionValueTransformer::transform)
+						.forEach(triageQuestion::addOption);
 				triageQuestions.add(triageQuestion);
 			}
 		}
@@ -250,21 +232,9 @@ public class ResponseService {
 				triageQuestion.setResponseAttachmentInitial(intial.getUrl());
 			}
 
-			question.getOption().forEach(option -> {
-				try {
-					Coding optionCode = option.getValueCoding();
-					if (optionCode != null) {
-						if (option.getExtensionFirstRep().isEmpty()) {
-							triageQuestion.addOption(optionCode.getCode(), optionCode.getDisplay());
-						} else {
-							triageQuestion.addOption(optionCode.getCode(), optionCode.getDisplay(),
-									option.getExtensionFirstRep());
-						}
-					}
-				} catch (FHIRException e) {
-					LOG.error("Could not get value coding", e);
-				}
-			});
+			question.getOption().stream()
+					.map(optionValueTransformer::transform)
+					.forEach(triageQuestion::addOption);
 			subQuestions.add(triageQuestion);
 		}
 		return subQuestions;
@@ -294,6 +264,10 @@ public class ResponseService {
 					SystemCode.BAD_REQUEST, IssueType.INVALID);
 		}
 
+	}
+
+	private ReferralRequestDTOTransformer resolveTransformer(CdsApiVersion version) {
+		return referralRequestTransformerResolver.resolve(version);
 	}
 
 }

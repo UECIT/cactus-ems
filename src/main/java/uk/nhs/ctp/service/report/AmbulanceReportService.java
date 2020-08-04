@@ -9,7 +9,6 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.transform.TransformerException;
 
-import org.hl7.fhir.dstu3.model.codesystems.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -17,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.mifmif.common.regex.Generex;
 
+import uk.nhs.ctp.enums.ContentType;
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
 import uk.nhs.ctp.service.dto.ReportType;
 import uk.nhs.ctp.service.dto.ReportsDTO;

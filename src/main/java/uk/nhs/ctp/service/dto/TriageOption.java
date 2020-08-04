@@ -1,16 +1,18 @@
 package uk.nhs.ctp.service.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class TriageOption {
 
+	private String system;
 	private String code;
-
 	private String display;
-
 	private TriageExtension extension;
-
-	public TriageOption() {
-
-	}
 
 	public TriageOption(String code, String display) {
 		this.code = code;
@@ -18,34 +20,9 @@ public class TriageOption {
 		this.extension = null;
 	}
 
-	public TriageOption(String code, String display, TriageExtension extension) {
-		this.code = code;
-		this.display = display;
-		this.extension = extension;
-	}
-
-	public String getCode() {
-		return code;
-	}
-
-	public String getDisplay() {
-		return display;
-	}
-
-	public void setCode(String code) {
-		this.code = code;
-	}
-
-	public void setDisplay(String display) {
-		this.display = display;
-	}
-
-	public TriageExtension getExtension() {
-		return extension;
-	}
-
-	public void setExtension(TriageExtension extension) {
-		this.extension = extension;
+	public TriageOption(String system, String code, String display) {
+		this(code, display);
+		this.system = system;
 	}
 
 }

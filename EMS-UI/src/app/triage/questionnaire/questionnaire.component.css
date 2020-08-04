@@ -14,7 +14,7 @@
 
 .question {
     vertical-align: middle;
-    line-height: 70px;
+    padding: 20px;
 }
 
 .answers {
@@ -95,7 +95,7 @@
     font-size: inherit;
 }
 
-#continue,#back {
+.continue,#back {
     border: none;
     background-color: #009639;
     color: white;
@@ -106,7 +106,22 @@
     float: right;
 }
 
-#continue:disabled,#back:disabled {
+.continue:disabled,#back:disabled {
     background-color: #0096398a;
     cursor: not-allowed;
+}
+
+.continue {
+    margin: 2px;
+    display:inline-block;
+}
+
+.continue mat-progress-bar {
+    width:100%;
+    padding: 0;
+    margin: 0;
+}
+
+.no-padding {
+    padding:0!important;
 }

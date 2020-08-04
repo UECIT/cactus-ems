@@ -13,6 +13,9 @@
               <th scope="col">Name</th>
               <th scope="col">BaseUrl</th>
               <th scope="col">Service Descriptions</th>
+              <th scope="col">Input Data Referencing</th>
+              <th scope="col">Input Params Referencing</th>
+              <th scope="col">API Version</th>
               <th scope="col"></th>
             </tr>
           </thead>
@@ -25,6 +28,15 @@
                   <li *ngFor="let serviceDefinition of supplier.serviceDefinitions">{{ serviceDefinition.description }}</li>
                 </ul>
               </td>
+              <td [ngSwitch]="supplier.inputDataRefType">
+                <p *ngSwitchCase="'resourceReferenceType.ByReference'">Referenced</p>
+                <p *ngSwitchCase="'resourceReferenceType.ByResource'">Contained</p>
+              </td>
+              <td [ngSwitch]="supplier.inputParamsRefType">
+                <p *ngSwitchCase="'resourceReferenceType.ByReference'">Referenced</p>
+                <p *ngSwitchCase="'resourceReferenceType.ByResource'">Contained</p>
+              </td>
+              <td>{{ supplier.supportedVersion }}</td>
               <td>
                 <div class="actions">
                   <span class="actionButton" [routerLink]="['/suppliers/update']" [queryParams]="{supplier: supplier.id}">Edit</span>

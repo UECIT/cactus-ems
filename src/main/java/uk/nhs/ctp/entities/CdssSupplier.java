@@ -1,7 +1,7 @@
 package uk.nhs.ctp.entities;
 
+import java.util.ArrayList;
 import java.util.List;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,57 +9,49 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import uk.nhs.ctp.enums.CdsApiVersion;
+import uk.nhs.ctp.enums.ReferencingType;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "cdss_supplier")
-public class CdssSupplier {
+@Table(name = "cdss_supplier",
+    indexes = {
+      @Index(columnList = "supplierId"),
+      @Index(columnList = "supplierId,base_url"),
+    })
+@Data
+public class CdssSupplier extends SupplierPartitioned {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-	@Column(name = "name")
-	private String name;
+  @Column(name = "name")
+  private String name;
 
-	@Column(name = "base_url")
-	private String baseUrl;
+  @Column(name = "base_url")
+  private String baseUrl;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "cdss_supplier_id")
-	private List<ServiceDefinition> serviceDefinitions;
+  @Column(name = "input_params_referencing_type")
+  private ReferencingType inputParamsRefType;
 
-	public Long getId() {
-		return id;
-	}
+  @Column(name = "input_data_referencing_type")
+  private ReferencingType inputDataRefType;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+  @Column(name = "supported_version")
+  private CdsApiVersion supportedVersion;
 
-	public String getBaseUrl() {
-		return baseUrl;
-	}
+  @Column(name = "auth_token")
+  private String authToken;
 
-	public void setBaseUrl(String baseUrl) {
-		this.baseUrl = baseUrl;
-	}
+  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+  @JoinColumn(name = "cdss_supplier_id")
+  private List<ServiceDefinition> serviceDefinitions = new ArrayList<>();
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public List<ServiceDefinition> getServiceDefinitions() {
-		return serviceDefinitions;
-	}
-
-	public void setServiceDefinitions(List<ServiceDefinition> serviceDefinitions) {
-		this.serviceDefinitions = serviceDefinitions;
-	}
 }

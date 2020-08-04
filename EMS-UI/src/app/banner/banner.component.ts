@@ -10,10 +10,13 @@ import { Patient } from '../model/patient';
   styleUrls: ['./banner.component.css']
 })
 export class BannerComponent implements OnInit {
-  state: Observable<Patient>;
+  patient: Patient;
   constructor(private store: Store<AppState>) {
-    this.state = this.store.select('patient');
+    
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.store.select('patient')
+      .subscribe(patient => this.patient = patient);
+  }
 }

@@ -3,19 +3,31 @@
     <app-banner></app-banner>
 
     <div class="container-fluid">
-        <div class="row" *ngIf="!error; else elseBlock">
-            <app-questions-display class="section col-md-2" [ExternalProcessTriage]="ExternalProcessTriage" [(amendingPrevious)]="amendingPrevious"></app-questions-display>
+        <div class="row" *ngIf="!errorMessage; else elseBlock">
+            <app-questions-display class="section col-md-2"
+                                   [ExternalProgressTriage]="ExternalProgressTriage"
+                                   [amendingPrevious]="amendingPrevious"></app-questions-display>
 
-            <app-questionnaire *ngIf="!isLoading" class="section col-md-6" [(questionnaire)]="questionnaire" [(answerSelected)]="answerSelected" [(questionnaireResponse)]="questionnaireResponse"></app-questionnaire>
+            <app-questionnaire *ngIf="!isLoading"
+                               class="section col-md-6"
+                               [questionnaire]="questionnaire"
+                               [(answerSelected)]="answerSelected"
+                               [questionnaireResponse]="questionnaireResponse"></app-questionnaire>
             <div *ngIf="isLoading" class="section col-md-6"></div>
-            <app-case class="section col-md-4" [(questionnaire)]="questionnaire" [(answerSelected)]="answerSelected" [(case)]="case" [(cdssSupplierName)]="cdssSupplierName" [(amendingPrevious)]="amendingPrevious"
-                [ExternalProcessTriage]="ExternalProcessTriage" ></app-case>
+            <app-case class="section col-md-4"
+                      [questionnaire]="questionnaire"
+                      [answerSelected]="answerSelected"
+                      [case]="case"
+                      [cdssSupplierName]="cdssSupplierName"
+                      [ExternalProgressTriage]="ExternalProgressTriage"></app-case>
         </div>
 
         <ng-template #elseBlock>
             <div class="alert alert-danger">
-                {{ errorMessage }}
-                <app-error-display [(errorObject)]="errorObject"></app-error-display>
+                <h3>ERROR</h3>
+                <p>Error Type: {{errorMessage.type}} </p>
+                <p>Message: {{errorMessage.display}} </p>
+                <p>Diagnostics: {{errorMessage.diagnostic}} </p>
             </div>
         </ng-template>
 

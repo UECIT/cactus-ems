@@ -23,7 +23,7 @@ export class ManageCdssSupplierComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.manageCdssService.getCdssSuppliersUnfiltered().subscribe(
+    this.manageCdssService.getCdssSuppliers().subscribe(
       suppliers => {
         this.suppliers = suppliers;
         this.loaded = true;
@@ -32,7 +32,7 @@ export class ManageCdssSupplierComponent implements OnInit {
         this.error = true;
         this.loaded = true;
         if (error.status === 401) {
-          this.loginService.logout(null);
+          this.loginService.logout(null, null);
         } else {
           this.errorMessage = 'Error retrieving suppliers';
           this.errorObject = error;

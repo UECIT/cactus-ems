@@ -1,2 +1,17 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-7 parent">
+            <h5 class="child"><strong>EMS Test Harness</strong></h5>
+        </div>
+        <div class="col-5">
+            <img class="navbar-right logo" src="assets/logo.png" >
+        </div>
+    </div>
+</div>
 <app-navigation></app-navigation>
 <router-outlet></router-outlet>
+<div *ngIf="env" class="buildinfo">
+    <p>Build: {{env.appVersion}}</p>
+    <p>Environment: {{env.name}}</p>
+    <p>CDS-API Version: {{env.apiVersion}}</p>
+</div>

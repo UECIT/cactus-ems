@@ -1,0 +1,15 @@
+<h1 mat-dialog-title>Concern: {{condition.condition}}</h1>
+<div mat-dialog-content>
+    <p>Clinical Status: {{condition.clinicalStatus}}</p>
+    <p>Verification Status: {{condition.verificationStatus}}</p>
+    <p>Body Site: {{condition.bodySite}}</p>
+    <p>Onset: {{condition.onset}}</p>
+    <p>Stage: {{condition.stageSummary}}</p>
+    <p>Evidence:</p>
+    <ul>
+        <li *ngFor="let ev of condition.evidence">{{ev}}</li>
+    </ul>
+</div>
+<div mat-dialog-actions>
+    <button mat-button (click)="close()">Close</button>
+</div>

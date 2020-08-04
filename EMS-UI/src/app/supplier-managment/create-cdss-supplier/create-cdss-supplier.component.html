@@ -4,53 +4,111 @@
     <div class="header col-10 offset-1 col-sm-6 offset-sm-3">
       {{ title }}
     </div>
-    <form [formGroup]="formData"  (ngSubmit)="createSupplier(formData.value)" class="form col-10 offset-1 col-sm-6 offset-sm-3">
+    <form [formGroup]="formData" (ngSubmit)="createSupplier(formData.value)"
+          class="form col-10 offset-1 col-sm-6 offset-sm-3">
       <div class="alert alert-warning" *ngIf="warning">
-          {{ warningMessage }}
+        {{ warningMessage }}
       </div>
-      <div class="input">
+      <div>
         <mat-form-field class="full-width">
-          <input matInput placeholder="Name" formControlName="name">
+          <input id="cdssNameInput" matInput placeholder="Name" formControlName="name">
           <mat-error *ngIf="name.invalid && (name.dirty || name.touched)">
             Name is required (max 20)
           </mat-error>
         </mat-form-field>
       </div>
-      <div class="input">
+      <div>
         <mat-form-field class="full-width">
-          <input matInput placeholder="BaseURL" formControlName="baseUrl">
+          <input id="cdssBaseUrlInput" matInput placeholder="Base URL" formControlName="baseUrl">
           <mat-error *ngIf="baseUrl.invalid && (baseUrl.dirty || baseUrl.touched)">
             BaseUrl is required (max 1000)
           </mat-error>
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field class="full-width">
+          <input matInput placeholder="Bearer token (included in Authorization header)"
+                 id="authToken" formControlName="authToken">
         </mat-form-field>
       </div>
 
       <hr>
 
       <div>
-      Service Definitions:
-        <mat-list class="serviceDefinitionList" dense *ngFor="let serviceDefinition of serviceDefinitions">
-          <mat-list-item class="serviceDefinitionListItem"> {{serviceDefinition.serviceDefinitionId}}: {{serviceDefinition.description}} <mat-icon class="serviceDefinitionListClose" matListIcon (click)="removeServiceDefinition(serviceDefinition)">close</mat-icon></mat-list-item>
+        Service Definitions:
+        <mat-list class="serviceDefinitionList" dense
+                  *ngFor="let serviceDefinition of serviceDefinitions">
+          <mat-list-item
+              class="serviceDefinitionListItem"> {{serviceDefinition.serviceDefinitionId}}
+            : {{serviceDefinition.description}}
+            <mat-icon class="serviceDefinitionListClose" matListIcon
+                      (click)="removeServiceDefinition(serviceDefinition)">close
+            </mat-icon>
+          </mat-list-item>
         </mat-list>
       </div>
 
       <div>
         <mat-form-field class="">
-          <input matInput placeholder="Service Definition Id e.g. CD1" formControlName="serviceDefinitionId">
+          <input matInput placeholder="Service Definition Id e.g. CD1"
+                 formControlName="serviceDefinitionId">
         </mat-form-field>
         <mat-form-field class="">
-          <input matInput placeholder="Service Description e.g. Headache" formControlName="serviceDescription">
+          <input matInput placeholder="Service Description e.g. Headache"
+                 formControlName="serviceDescription">
         </mat-form-field>
         <span class="actionButton" (click)="addSeviceDefinition(formData.value)">Add Service Definition</span>
       </div>
 
+      <div>
+        <p title="Defines how input parameter resources will be defined in the $evaluate request">
+          Input Parameter Reference types:
+        </p>
+        <mat-button-toggle-group [(ngModel)]="inputParamRefType"
+                                 [ngModelOptions]="{standalone: true}">
+          <mat-button-toggle id="param-ref-ref" value="resourceReferenceType.ByReference">
+            References
+          </mat-button-toggle>
+          <mat-button-toggle id="param-ref-res" value="resourceReferenceType.ByResource">
+            Contained
+          </mat-button-toggle>
+        </mat-button-toggle-group>
+      </div>
+
+      <div>
+        <p title="Defines how input data resources will be defined in the $evaluate request">
+          Input Data Reference types:
+        </p>
+        <mat-button-toggle-group [(ngModel)]="inputDataRefType"
+                                 [ngModelOptions]="{standalone: true}">
+          <mat-button-toggle id="data-ref-ref" value="resourceReferenceType.ByReference">
+            References
+          </mat-button-toggle>
+          <mat-button-toggle id="data-ref-res" value="resourceReferenceType.ByResource">
+            Contained
+          </mat-button-toggle>
+        </mat-button-toggle-group>
+      </div>
+
+      <div>
+        <mat-form-field>
+          <mat-label>CDS API Version:</mat-label>
+          <mat-select id="supportedVersion" formControlName="supportedVersion">
+            <mat-option class="versionOption" *ngFor="let version of supportedVersions"
+                        [value]="version">{{version}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
       <div class="buttons">
-        <button type="submit" [disabled]="!formData.valid" class="actionButton">Save</button>
+        <button id="saveCdssSupplier" type="submit" [disabled]="!formData.valid"
+                class="actionButton">Save
+        </button>
         <span class="cancelButton" [routerLink]="['/suppliers']">Cancel</span>
       </div>
       <div class="alert alert-danger" *ngIf="error">
-          {{ errorMessage }}
-          <app-error-display [(errorObject)]="errorObject"></app-error-display>
+        {{ errorMessage }}
+        <app-error-display [(errorObject)]="errorObject"></app-error-display>
       </div>
     </form>
   </div>

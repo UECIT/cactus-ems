@@ -1,58 +1,107 @@
-  <div class="row">
-    <div class="col-sm-12 text-center">
-      <div class="sectionTitle patientSection">1. Select Patient</div>
-      <nav class="patientSection d-flex flex-wrap">
-          <div *ngFor="let patient of patients" class="">
-            <button mat-raised-button [class.selected]="patient == selectedPatient" class="btn btn-primary btnSearch text-center" (click)="addPatientToStore(patient)">
-                <div>
-                  {{ patient.title }} {{ patient.firstName }} {{ patient.lastName }}
-                </div>
-                <div>
-                  Age: {{ patient.dateOfBirth | age }}
-                </div>
+<div class="section col-sm-12 text-center" *ngIf="encounterReportInput">
+    Encounter report received from: {{encounterReportInput.encounterId}}
+    <button mat-icon-button matTooltip="{{encounterReportInput.observations}}" (click)="viewEncounterReportInfo()"><mat-icon>info</mat-icon></button>
+</div>
+
+<!-- Patient selection -->
+<patient-selection
+    [disabled]="!!encounterReportInput"
+    [patients]="patients"
+    [selectedPatient]="selectedPatient"
+    (onChange)="addPatientToStore($event)">
+</patient-selection>
+
+<!-- Setting selection -->
+<triage-selection
+  [title]="'Select Setting Context'"
+  [options]="settings"
+  (onChange)="addSettingToStore($event)">
+</triage-selection>
+
+<!-- Role selection -->
+<triage-selection
+    [title]="isPractitioner() ? 'Select Receiving User Type' : 'Select User Type'"
+    [options]="roles"
+    (onChange)="addRoleToStore($event)">
+</triage-selection>
+
+<!-- Practitioner selection -->
+<practitioner-selection *ngIf="isPractitioner()" 
+    [practitioners]="practitioners"
+    (onChange)="addPractitionerToStore($event)">
+</practitioner-selection>
+
+<!-- Jurisdiction selection -->
+<triage-selection
+  [title]="'Select Jurisdiction'"
+  [options]="jurisdictions"
+  (onChange)="addJurisdictionToStore($event)">
+</triage-selection>
+
+<!-- Selection mode selection -->
+<triage-selection
+  [title]="'Service Definition Selection Mode'"
+  [options]="selectionModeOptions"
+  (onChange)="changeSelectionMode($event)">
+</triage-selection>
+
+<!-- Supplier selection (manual) -->
+<triage-selection *ngIf="serviceDefinitionMode == 'manual'"
+  [title]="'Select CDSS'"
+  [options]="cdssSuppliers"
+  (onChange)="setSelectedSupplier($event)">
+</triage-selection>
+
+<!-- Service selection (manual) -->
+<div class="row" *ngIf="serviceDefinitionMode == 'manual' && serviceDefinitions != null">
+  <div class="col-sm-12 text-center">
+    <div class="section">
+        <div class="sectionTitle">Select Service Definition</div>
+        <nav class="d-flex flex-wrap">
+          <mat-form-field *ngIf="serviceDefinitions != null">
+            <mat-select placeholder="Service Definition" [(ngModel)]="selectedServiceDefinition">
+              <mat-option *ngFor="let serviceDefinition of serviceDefinitions"
+                          [value]="serviceDefinition.serviceDefinitionId">{{ getServiceDefinitionText(serviceDefinition) }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </nav>
+    </div>
+  </div>
+</div>
+
+<!-- Service selection (automated) -->
+<div class="row" *ngIf="serviceDefinitionMode == 'automated'">
+  <div class="col-sm-12 text-center">
+    <div class="section">
+      <div class="sectionTitle">Select Service Definition</div>
+
+      <div class="d-flex flex-row">
+        <div *ngFor="let supplier of availableServiceDefinitions"
+              class="supplierGroup d-flex flex-column">
+          {{ supplier.name }}
+          <div *ngFor="let serviceDefinition of supplier.serviceDefinitions">
+            <button mat-raised-button
+                    [class.selected]="serviceDefinition.serviceDefinitionId == selectedServiceDefinition && supplier.id == selectedSupplier"
+                    class="btn btn-primary btnSearch text-center"
+                    (click)="selectServiceDefinition(serviceDefinition); setSelectedSupplier(supplier);">
+              {{ getServiceDefinitionText(serviceDefinition) }}
             </button>
           </div>
-      </nav>
+        </div>
+      </div>
     </div>
   </div>
+</div>
 
-  <div class="row">
-    <div class="col-sm-12 text-center">
-      <div class="sectionTitle cdssSection">2. Select CDSS</div>
-      <!-- Overrides the background color from the patients section -->
-      <nav class="cdssSection d-flex flex-wrap">
-          <div *ngFor="let supplier of cdssSuppliers">
-            <button mat-raised-button [class.selected]="supplier == selectedSupplier" class="btn btn-primary btnSearch text-center" (click)="getServiceDefinitionForSupplier(supplier)">
-                {{ supplier.name }}
-            </button>
-          </div>
-      </nav>
-    </div>
-  </div>  
+<div class="row" *ngIf="selectedServiceDefinition != null">
+  <app-service-definition class="col-md-12"
+      [selectedServiceDefinition]="selectedServiceDefinition"
+      [selectedSupplier]="selectedSupplier">
+  </app-service-definition>
+</div>
 
-  <div class="row"  *ngIf="serviceDefinitions != null">
-    <div class="col-sm-12 text-center">
-      <div class="sectionTitle contextSection">3. Set Context</div>
-      <nav class="contextSection">
-        <mat-form-field  *ngIf="serviceDefinitions != null">
-          <mat-select placeholder="Service Definition" [(ngModel)]="selectedServiceDefinition">
-            <mat-option *ngFor="let serviceDefinition of serviceDefinitions" [value]="serviceDefinition.serviceDefinitionId">{{ serviceDefinition.description }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field  *ngIf="serviceDefinitions != null">
-          <mat-select [(ngModel)]="selectedQueryType">
-            <mat-option value="id">Get by Id</mat-option>
-            <mat-option value="attributes">Search by Attributes</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </nav>
-    </div>
-  </div>
-  
-
-  <button mat-button class="btn btn-primary launch" (click)="triage()"
-  [disabled]="disableLaunch()">Launch</button>
-
-  <div class="row" *ngIf="selectedServiceDefinition != null">
-    <app-service-definition class="col-md-6" [(selectedServiceDefinition)]="selectedServiceDefinition" [(selectedQueryType)]="selectedQueryType" [(selectedSupplier)]="selectedSupplier"></app-service-definition>
-  </div>
+<div class="launchSection">
+  <button mat-button class="btn btn-primary btn-block launch" (click)="triage()" [disabled]="disableLaunch()">
+    {{ encounterReportInput ? 'Continue Triage' : 'Start Triage' }}
+  </button>
+</div>

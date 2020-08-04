@@ -1,104 +1,81 @@
 package uk.nhs.ctp.service;
 
-import java.io.IOException;
-import java.util.Base64;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import dos.wsdl.AgeFormatType;
-import dos.wsdl.ArrayOfInt;
-import dos.wsdl.Case;
-import dos.wsdl.CheckCapacitySummary;
-import dos.wsdl.CheckCapacitySummaryResponse;
-import dos.wsdl.ObjectFactory;
-import dos.wsdl.UserInfo;
-import uk.nhs.ctp.service.dto.DoSRequestDTO;
-import uk.nhs.ctp.service.report.dos.rest.DosApiResponseDTO;
+import uk.nhs.ctp.service.dto.HealthcareServiceDTO;
+import uk.nhs.ctp.transform.CheckServicesRequestTransformer;
+import uk.nhs.ctp.transform.CheckServicesResponseTransformer;
+import uk.nhs.ctp.transform.bundle.CheckServicesRequestBundle;
+import uk.nhs.ctp.transform.bundle.CheckServicesResponseBundle;
+import uk.nhs.ctp.utils.RetryUtils;
 
 @Service
-public class DoSService extends WebServiceGatewaySupport {
+@Slf4j
+@RequiredArgsConstructor
+public class DoSService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DoSService.class);
+	@Value("${dos.server}")
+	private String dosServer;
 
-	@Autowired
-	RestTemplate restTemplate;
-	
-	@Value("${dos.username}")
-	private String dosUsername;
-	
-	@Value("${dos.password}")
-	private String dosPassword;
+	@Value("${ems.fhir.server}")
+	private String emsServer;
 
-	public CheckCapacitySummaryResponse getDoSSOAPService(DoSRequestDTO doSRequestDTO) {
+	private final FhirContext fhirContext;
+	private final CheckServicesRequestTransformer requestTransformer;
+	private final CheckServicesResponseTransformer responseTransformer;
 
-		ObjectFactory ob = new ObjectFactory();
+	public List<HealthcareServiceDTO> getDoS(String referralRequestRef, String patientRef, String requestId) {
 
-		CheckCapacitySummary request = ob.createCheckCapacitySummary();
-		UserInfo user = ob.createUserInfo();
-		user.setUsername(dosUsername);
-		user.setPassword(dosPassword);
-		request.setUserInfo(user);
+		IGenericClient fhirClient = fhirContext.newRestfulGenericClient(emsServer);
 
-		Case cas = ob.createCase();
-		cas.setCaseRef("hackday");
-		cas.setCaseId("hackdayTest-DW");
-		cas.setPostcode(doSRequestDTO.getPostcode());
-		cas.setSurgery("UNK");
-		cas.setAge((short) 1);
-		cas.setAgeFormat(AgeFormatType.AGE_GROUP);
-		cas.setDisposition(doSRequestDTO.getDisposition());
-		cas.setSymptomGroup(doSRequestDTO.getSymptomGroup());
+		var referralRequest = RetryUtils.retry(() -> fhirClient.read()
+				.resource(ReferralRequest.class)
+				.withUrl(referralRequestRef)
+				.execute(),
+				emsServer);
 
-		ArrayOfInt symptomDiscriminatorList = ob.createArrayOfInt();
-		symptomDiscriminatorList.getInt().add(doSRequestDTO.getSymptomDiscriminatorInt());
+		var patient = RetryUtils.retry(() -> fhirClient.read()
+				.resource(Patient.class)
+				.withUrl(patientRef)
+				.execute(),
+				emsServer);
 
-		cas.setSymptomDiscriminatorList(symptomDiscriminatorList);
-		cas.setSearchDistance(doSRequestDTO.getSearchDistance());
-		cas.setGender(doSRequestDTO.getGender());
-		request.setC(cas);
-		CheckCapacitySummaryResponse response = (CheckCapacitySummaryResponse) getWebServiceTemplate()
-				.marshalSendAndReceive(request);
-		return response;
+		var requestBundle = CheckServicesRequestBundle.builder()
+				.referralRequest(referralRequest)
+				.patient(patient)
+				.requestId(requestId)
+				.build();
+
+		return Stream.of(dosServer, emsServer)
+				.map(dos -> new CheckServicesResponseBundle(dos, callDos(dos, requestBundle)))
+				.flatMap(responseTransformer::transform)
+				.collect(Collectors.toList());
+
 	}
 
-	public DosApiResponseDTO getDoSRESTService(DoSRequestDTO requestDTO) {
-		HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(null,
-				createHeaders(dosUsername, dosPassword));
-
-		ResponseEntity<String> response = restTemplate.exchange(requestDTO.getRESTUrl(), HttpMethod.GET, requestEntity,
-				String.class);
-
+	private Parameters callDos(String dos, CheckServicesRequestBundle bundle) {
 		try {
-			ObjectMapper mapper = new ObjectMapper();
-			return mapper.readValue(response.getBody(), DosApiResponseDTO.class);
-		} catch (IOException e) {
-			LOG.error("Can't convert response to DosApiResponse.");
+			return RetryUtils.retry(() -> fhirContext.newRestfulGenericClient(dos)
+					.operation()
+					.onServer()
+					.named("$check-services")
+					.withParameters(requestTransformer.transform(bundle))
+					.returnResourceType(Parameters.class)
+					.execute(),
+					dos);
+		} catch (Exception e) {
+			log.warn("Error calling DOS: " + dos, e);
+			return null;
 		}
-		return null;
 	}
-
-	HttpHeaders createHeaders(String username, String password) {
-		HttpHeaders headers = new HttpHeaders();
-
-		// auth
-		String auth = username + ":" + password;
-		String authHeader = "Basic " + Base64.getUrlEncoder().withoutPadding().encodeToString(auth.getBytes());
-		headers.add("Authorization", authHeader);
-
-		return headers;
-	}
-
 }

@@ -1,3 +1,4 @@
+import { environment } from '../../environments/environment';
 import { Component, OnInit } from '@angular/core';
 import { LoginService } from '../service/login.service';
 import { Router } from '@angular/router';
@@ -15,18 +16,22 @@ export class NavigationComponent implements OnInit {
   username: string;
   tokenInfo: Token;
 
-  constructor(private loginService: LoginService, public router: Router, private sessionStorage: SessionStorage) {}
+  constructor(
+    private loginService: LoginService, 
+    public router: Router, 
+    private sessionStorage: SessionStorage) {}
 
   ngOnInit() {
     this.checkLoginStatus();
     this.loginService.watchAuthToken().subscribe((loggedIn: boolean) => {
       this.checkLoginStatus();
     });
+    
   }
 
   logoff() {
     if (this.sessionStorage['auth_token'] != null) {
-      this.loginService.logout(null);
+      this.loginService.logout(null, null);
     }
   }
 
@@ -34,5 +39,9 @@ export class NavigationComponent implements OnInit {
     this.isAdmin = this.loginService.isAdmin;
     this.isLoggedIn = this.loginService.isLoggedIn;
     this.username = this.loginService.username;
+  }
+
+  openGuide() {
+    window.open(environment.USER_GUIDE);
   }
 }

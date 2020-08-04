@@ -1,0 +1,29 @@
+{
+  "requestId": "f4670094-2dba-468a-b891-e4551820b3e7",
+  "requestOrigin": "86.6.98.170",
+  "requestUrl": "/case/serviceDefinitions",
+  "requestMethod": "GET",
+  "requestBody": null,
+  "responseStatus": "200",
+  "responseHeaders": "content-type: [application/fhir+json]",
+  "responseBody": "auditResponseBody",
+  "createdDate": "2020-06-30T07:56:31.467917Z",
+  "entries": [
+    {
+      "requestUrl": "https://cdss.cactus-staging.iucdspilot.uk/fhir/ServiceDefinition/palpitations2",
+      "requestMethod": "GET",
+      "requestBody": null,
+      "responseStatus": "200",
+      "responseBody": "entry1ResponseBody",
+      "responseHeaders": "content-type: [application/fhir+json]",
+      "dateOfEntry": "2020-06-30T07:56:32.482913Z"
+    }
+  ],
+  "additionalProperties": {
+    "supplierId": "admin_supplier",
+    "interactionId": "validGuidValue",
+    "operation": "service_search"
+  },
+  "@timestamp": "2020-06-30T07:56:38.806Z",
+  "@owner": "ems.cactus-staging"
+}

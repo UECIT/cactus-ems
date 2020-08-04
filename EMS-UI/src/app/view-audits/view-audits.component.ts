@@ -12,6 +12,7 @@ export class ViewAuditsComponent implements OnInit {
   audits: any;
   displayedColumns: string[] = ['id', 'firstName', 'lastName', 'timestamp', 'action'];
   dataSource = new MatTableDataSource([]);
+  error = false;
   loaded = true;
   selectedAudit: any;
   numberOfElements = 10;

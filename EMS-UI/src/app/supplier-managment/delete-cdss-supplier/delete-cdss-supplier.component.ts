@@ -56,7 +56,7 @@ export class DeleteCdssSupplierComponent implements OnInit, OnDestroy {
       error => {
         this.error = true;
         if (error.status === 401) {
-          this.loginService.logout(null);
+          this.loginService.logout(null, null);
         } else {
           this.errorMessage = 'Error deleting supplier.';
           this.errorObject = error;

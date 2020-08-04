@@ -13,91 +13,40 @@
           {{ warningMessage }}
       </div>
 
-      <h3>Initiating Person</h3>
-      <div class="input">
-        <mat-form-field class="full-width">
-          <input matInput placeholder="Name" formControlName="initiatingPersonName">
-        </mat-form-field>
-      </div>
-      <div class="input">
-        <mat-form-field class="full-width">
-          <input matInput placeholder="Telecom" formControlName="initiatingPersonTelecom">
-        </mat-form-field>
-      </div>
-      <div class="input">
-        <mat-form-field class="full-width">
-          <input matInput placeholder="Gender" formControlName="initiatingPersonGender">
-        </mat-form-field>
-      </div>
-      <div class="input">
-        <mat-form-field class="full-width">
-          <input matInput placeholder="Birth Date" formControlName="initiatingPersonBirthDate">
-        </mat-form-field>
-      </div>
+      <h3>Triage settings</h3>
 
       <div class="input">
         <mat-form-field class="full-width">
-          <input matInput placeholder="User Type" formControlName="userType">
+          <mat-label>User Language</mat-label>
+          <input matInput placeholder="English" formControlName="userLanguage">
         </mat-form-field>
       </div>
+      <br />
       <div class="input">
         <mat-form-field class="full-width">
-          <input matInput placeholder="User Language" formControlName="userLanguage">
+          <mat-label>User Task Context</mat-label>
+          <input matInput placeholder="triage" formControlName="userTaskContext">
         </mat-form-field>
       </div>
+      <br />
       <div class="input">
         <mat-form-field class="full-width">
-          <input matInput placeholder="User Task Context" formControlName="userTaskContext">
+          <mat-label>Recipient Language</mat-label>
+          <input matInput placeholder="English" formControlName="recipientLanguage">
         </mat-form-field>
       </div>
+
       <hr>
-
-
-      <h3>Receiving Person</h3>
-      <div class="input">
-        <mat-form-field class="full-width">
-          <input matInput placeholder="Name" formControlName="receivingPersonName">
-        </mat-form-field>
-      </div>
-      <div class="input">
-        <mat-form-field class="full-width">
-          <input matInput placeholder="Telecom" formControlName="receivingPersonTelecom">
-        </mat-form-field>
-      </div>
-      <div class="input">
-        <mat-form-field class="full-width">
-          <input matInput placeholder="Gender" formControlName="receivingPersonGender">
-        </mat-form-field>
-      </div>
-      <div class="input">
-        <mat-form-field class="full-width">
-          <input matInput placeholder="Birth Date" formControlName="receivingPersonBirthDate">
-        </mat-form-field>
-      </div>
-      <div class="input">
-        <mat-form-field class="full-width">
-          <input matInput placeholder="Recipient Type" formControlName="recipientType">
-        </mat-form-field>
-      </div>
-      <div class="input">
-        <mat-form-field class="full-width">
-          <input matInput placeholder="Recipient Language" formControlName="recipientLanguage">
-        </mat-form-field>
-      </div>
-      <hr>
-
-      <div class="input">
-        <mat-form-field class="full-width">
-          <input matInput placeholder="Setting" formControlName="setting">
-        </mat-form-field>
-      </div>
 
       <div class="buttons">
-        <button [disabled]="!formData.valid" type="submit" class="actionButton">Save</button>
-        <span class="cancelButton" [routerLink]="['/users']">Cancel</span>
+        <button [disabled]="!formData.valid" type="submit" class="actionButton" (click)="updateSettings(this.formData)">Save</button>
+        <span class="cancelButton" [routerLink]="['/main']">Cancel</span>
       </div>
       <div class="alert alert-danger" *ngIf="updateError">
         {{ updateErrorMessage }}
+      </div>
+      <div class="alert alert-info" *ngIf="saved">
+        Settings saved successfully for this session.
       </div>
     </form>
   </div>

@@ -1,0 +1,25 @@
+<div class="row">
+  <div class="col-sm-12 text-center">
+    <div class="section">
+      <div class="sectionTitle">Select Patient</div>
+      <nav class="d-flex flex-wrap">
+        <div *ngFor="let patient of patients">
+          <button mat-raised-button [class.selected]="patient == selectedPatient"
+                  class="btnSearch" (click)="change(patient)" [disabled]="disabled">
+            <div>
+              {{ patient.title }} {{ patient.firstName }} {{ patient.lastName }}
+            </div>
+            <div>
+              Age: {{ patient.dateOfBirth | age }}
+            </div>
+          </button>
+        </div>
+        <div>
+          <button mat-raised-button class="btnSearch" (click)="openSearch()">
+              Search for a patient
+          </button>
+        </div>
+      </nav>
+    </div>
+  </div>
+</div>

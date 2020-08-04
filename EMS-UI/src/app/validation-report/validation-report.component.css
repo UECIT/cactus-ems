@@ -1,0 +1,43 @@
+h4 {
+    text-align: center;
+    padding: 10px;
+}
+
+
+.header {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #005EB8;
+    color: white;
+}
+
+.endpoints, .interactions {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    padding: 1%;
+    border-color: lightgrey;
+    border-style: solid;
+    border-width: 0 1px 1px 1px;
+    white-space: nowrap;
+}
+
+.endpoints tr, .interactions tr {
+    border-bottom: 1px solid lightgrey;
+}
+
+.actionButton {
+    background-color: white;
+    border: 2px solid #425563;
+    padding: 5px 25px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.actionButton:hover {
+    background-color: lightgray;
+    color: white;
+}
+
+.actions {
+    padding:10px;
+}

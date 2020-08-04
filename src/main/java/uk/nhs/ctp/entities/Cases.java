@@ -1,241 +1,119 @@
 package uk.nhs.ctp.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Entity
-@Table(name = "cases")
-public class Cases {
+@Table(name = "cases", indexes = @Index(columnList = "supplierId"))
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class Cases extends SupplierPartitioned {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-	@Column(name = "firstName")
-	private String firstName;
+  @Column
+  private String patientId;
 
-	@Column(name = "lastName")
-	private String lastName;
+  @Column
+  private String practitionerId;
 
-	@Column(name = "gender")
-	private String gender;
+  @Column(name = "firstName")
+  private String firstName;
 
-	@JsonFormat(pattern = "yyyy-MM-dd")
-	@Temporal(TemporalType.DATE)
-	@Column(name = "date_of_birth")
-	private Date dateOfBirth;
+  @Column(name = "lastName")
+  private String lastName;
 
-	@Column(name = "address")
-	private String address;
+  @Column(name = "gender")
+  private String gender;
 
-	@Column(name = "nhs_number")
-	private String nhsNumber;
+  @JsonFormat(pattern = "yyyy-MM-dd")
+  @Temporal(TemporalType.DATE)
+  @Column(name = "date_of_birth")
+  private Date dateOfBirth;
 
-	@ManyToOne
-	@JoinColumn(name = "party_id")
-	private Party party;
+  @Column(name = "address")
+  private String address;
 
-	@ManyToOne
-	@JoinColumn(name = "skillset_id")
-	private Skillset skillset;
+  @Column(name = "nhs_number")
+  private String nhsNumber;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-	@JoinColumn(name = "case_id")
-	private List<CaseImmunization> immunizations;
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+  @JoinColumn(name = "case_id")
+  private List<CaseImmunization> immunizations = new ArrayList<>();
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-	@JoinColumn(name = "case_id")
-	private List<CaseObservation> observations;
+  @OneToMany(mappedBy = "caseEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<CaseObservation> observations = new ArrayList<>();
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-	@JoinColumn(name = "case_id")
-	private List<CaseMedication> medications;
-	
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-	@JoinColumn(name = "case_id")
-	private List<CaseParameter> parameters;
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+  @JoinColumn(name = "case_id")
+  private List<CaseMedication> medications = new ArrayList<>();
 
-	@Column(name = "session_id")
-	private String sessionId;
-	
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "case_timestamp")
-	private Date timestamp;
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+  @JoinColumn(name = "case_id")
+  private List<CaseParameter> parameters = new ArrayList<>();
 
-	public Long getId() {
-		return id;
-	}
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+  @JoinColumn(name = "case_id")
+  private List<QuestionResponse> questionResponses = new ArrayList<>();
 
-	public String getGender() {
-		return gender;
-	}
+  @Column(name = "session_id")
+  private String sessionId;
 
-	public String getFirstName() {
-		return firstName;
-	}
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(name = "created_date")
+  private Date createdDate;
 
-	public String getLastName() {
-		return lastName;
-	}
+  @Column(name = "closed_date")
+  private Date closedDate;
 
-	public String getAddress() {
-		return address;
-	}
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+  @JoinColumn(name = "case_id")
+  private List<CompositionEntity> compositions = new ArrayList<>();
 
-	public String getNhsNumber() {
-		return nhsNumber;
-	}
+  @Column(name = "triage_complete")
+  private Boolean triageComplete;
 
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
+  public void addComposition(CompositionEntity composition) {
+    this.compositions.add(composition);
+    composition.setCaseEntity(this);
+  }
 
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
+  public void addMedication(CaseMedication medication) {
+    this.medications.add(medication);
+  }
 
-	public void setAddress(String address) {
-		this.address = address;
-	}
+  public void addImmunization(CaseImmunization immunization) {
+    this.immunizations.add(immunization);
+  }
 
-	public void setNhsNumber(String nhsNumber) {
-		this.nhsNumber = nhsNumber;
-	}
+  public void addObservation(CaseObservation observation) {
+    this.observations.add(observation);
+    observation.setCaseEntity(this);
+  }
 
-	public Date getDateOfBirth() {
-		return dateOfBirth;
-	}
+  public void addParameter(CaseParameter parameter) {
+    this.parameters.add(parameter);
+  }
 
-	public List<CaseImmunization> getImmunizations() {
-		if (this.immunizations == null) {
-			this.immunizations = new ArrayList<>();
-		}
-		return immunizations;
-	}
-
-	public List<CaseObservation> getObservations() {
-		if (this.observations == null) {
-			this.observations = new ArrayList<>();
-		}
-		return observations;
-	}
-	
-	public List<CaseParameter> getParameters() {
-		if (this.parameters == null) {
-			this.parameters = new ArrayList<>();
-		}
-		return parameters;
-	}
-
-	public List<CaseMedication> getMedications() {
-		if (this.medications == null) {
-			this.medications = new ArrayList<>();
-		}
-		return medications;
-	}
-
-	public void addMedication(CaseMedication medication) {
-		if (this.medications == null) {
-			this.medications = new ArrayList<>();
-		}
-		this.medications.add(medication);
-	}
-
-	public void setMedications(List<CaseMedication> medications) {
-		this.medications = medications;
-	}
-
-	public Date getTimestamp() {
-		return timestamp;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public void setGender(String gender) {
-		this.gender = gender;
-	}
-
-	public void setDateOfBirth(Date dateOfBirth) {
-		this.dateOfBirth = dateOfBirth;
-	}
-
-	public Party getParty() {
-		return party;
-	}
-
-	public Skillset getSkillset() {
-		return skillset;
-	}
-
-	public void setParty(Party party) {
-		this.party = party;
-	}
-
-	public void setSkillset(Skillset skillset) {
-		this.skillset = skillset;
-	}
-
-	public void setImmunizations(List<CaseImmunization> immunizations) {
-		this.immunizations = immunizations;
-	}
-
-	public void addImmunization(CaseImmunization immunization) {
-		if (this.immunizations == null) {
-			this.immunizations = new ArrayList<>();
-		}
-		this.immunizations.add(immunization);
-	}
-
-	public void setObservations(List<CaseObservation> observations) {
-		this.observations = observations;
-	}
-
-	public void addObservation(CaseObservation observation) {
-		if (this.observations == null) {
-			this.observations = new ArrayList<>();
-		}
-		this.observations.add(observation);
-	}
-	
-	public void setParameters(List<CaseParameter> parameters) {
-		this.parameters = parameters;
-	}
-
-	public void addParameter(CaseParameter parameter) {
-		if (this.parameters == null) {
-			this.parameters = new ArrayList<>();
-		}
-		this.parameters.add(parameter);
-	}
-
-	public String getSessionId() {
-		return sessionId;
-	}
-
-	public void setSessionId(String sessionId) {
-		this.sessionId = sessionId;
-	}
-
-	public void setTimestamp(Date timestamp) {
-		this.timestamp = timestamp;
-	}
+  public void addQuestionResponse(QuestionResponse questionResponse) {
+    this.questionResponses.add(questionResponse);
+  }
 }

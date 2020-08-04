@@ -4,12 +4,14 @@ import { Login } from '../model/login';
 import { environment } from '../../environments/environment';
 import { Subject, Observable } from 'rxjs';
 import * as jwt_decode from 'jwt-decode';
-import { Router } from '@angular/router';
+import { Router, Params } from '@angular/router';
 import { SessionStorage } from 'h5webstorage';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
 };
+
+const adminRoles = ['ROLE_ADMIN', 'ROLE_SUPPLIER_ADMIN'];
 
 @Injectable({
   providedIn: 'root'
@@ -25,12 +27,12 @@ export class LoginService {
     return this.http.post(url, login, { observe: 'response' });
   }
 
-  logout(returnUrl: string) {
+  logout(returnUrl: string, params: Params) {
     this.sessionStorage.removeItem('auth_token');
     this.authSub.next(true);
     if (returnUrl != null) {
       this.router.navigate(['/login'], {
-        queryParams: { returnUrl: returnUrl }
+        queryParams: params
       });
     } else {
       this.router.navigate(['/login']);
@@ -49,7 +51,10 @@ export class LoginService {
     const authToken: string = this.sessionStorage['auth_token'];
     if (authToken != null) {
       const tokenInfo: any = jwt_decode(authToken);
-      return tokenInfo.roles != null && tokenInfo.roles === 'ROLE_ADMIN';
+      const roles = (tokenInfo.roles || '').split(',');
+      return roles
+        .filter(role => adminRoles.includes(role))
+        .length > 0;
     }
     return false;
   }

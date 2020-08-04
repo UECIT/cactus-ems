@@ -1,22 +1,7 @@
 import { Patient } from '../model/patient';
 import * as PatientActions from '../actions/patient.actions';
 
-const initalState: Patient = {
-  address1: null,
-  address2: null,
-  address3: null,
-  dateOfBirth: null,
-  deceasedDateTime: null,
-  firstName: null,
-  gender: null,
-  id: null,
-  lastName: null,
-  nhsNumber: null,
-  phone: null,
-  postcode: null,
-  title: null,
-  testCaseSummary: null
-};
+const initalState = new Patient();
 
 export function patientReducer(
   state: Patient = initalState,

@@ -1,0 +1,11 @@
+{
+  "id": "gdc",
+  "name": "General Dental Council",
+  "identifiers": [
+    {
+      "value": "122645",
+      "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+      "type": "oc"
+    }
+  ]
+}

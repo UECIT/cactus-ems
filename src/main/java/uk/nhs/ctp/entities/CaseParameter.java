@@ -10,11 +10,12 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import lombok.Data;
 
 @Entity
 @Table(name = "case_parameter")
-public class CaseParameter {
-
+@Data
+public class CaseParameter extends SupplierPartitioned {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -28,36 +29,4 @@ public class CaseParameter {
 	@Temporal(TemporalType.DATE)
 	@Column(name = "parameter_timestamp")
 	private Date timestamp;
-
-	public Long getId() {
-		return id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public String getValue() {
-		return value;
-	}
-
-	public Date getTimestamp() {
-		return timestamp;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public void setValue(String value) {
-		this.value = value;
-	}
-
-	public void setTimestamp(Date timestamp) {
-		this.timestamp = timestamp;
-	}
 }

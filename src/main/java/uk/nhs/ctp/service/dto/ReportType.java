@@ -6,6 +6,9 @@ public enum ReportType {
 	ONE_ONE_ONE_V3,
 	AMBULANCE_V3,
 	AMBULANCE_V2,
-	DOS;
-	
+	DOS,
+	ECDS,
+	IUCDS,
+	VALIDATION
+
 }

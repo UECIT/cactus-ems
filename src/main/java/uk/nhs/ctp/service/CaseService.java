@@ -1,283 +1,351 @@
 package uk.nhs.ctp.service;
 
-import java.util.Date;
-import java.util.List;
+import static com.google.common.collect.MoreCollectors.onlyElement;
+import static uk.nhs.ctp.SystemConstants.DATE_FORMAT;
 
+import com.google.common.base.Preconditions;
+import java.util.Date;
+import javax.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Immunization;
 import org.hl7.fhir.dstu3.model.MedicationAdministration;
 import org.hl7.fhir.dstu3.model.Observation;
-import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
-import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import uk.nhs.ctp.entities.Cases;
+import uk.nhs.cactus.common.security.TokenAuthenticationService;
+import uk.nhs.ctp.SystemConstants;
+import uk.nhs.ctp.SystemURL;
 import uk.nhs.ctp.entities.CaseImmunization;
 import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.CaseParameter;
-import uk.nhs.ctp.entities.PatientEntity;
-import uk.nhs.ctp.entities.TestScenario;
+import uk.nhs.ctp.entities.Cases;
+import uk.nhs.ctp.entities.QuestionResponse;
+import uk.nhs.ctp.enums.Gender;
+import uk.nhs.ctp.exception.EMSException;
 import uk.nhs.ctp.repos.CaseRepository;
-import uk.nhs.ctp.repos.PatientRepository;
-import uk.nhs.ctp.repos.TestScenarioRepository;
-import uk.nhs.ctp.utils.ErrorHandlingUtils;
+import uk.nhs.ctp.service.dto.CdssResult;
+import uk.nhs.ctp.service.dto.PractitionerDTO;
+import uk.nhs.ctp.service.fhir.GenericResourceLocator;
+import uk.nhs.ctp.service.fhir.StorageService;
+import uk.nhs.ctp.transform.CaseObservationTransformer;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class CaseService {
-	private static final Logger LOG = LoggerFactory.getLogger(CaseService.class);
 
-	@Autowired
-	private CaseRepository caseRepository;
+  private final CaseRepository caseRepository;
+  private final GenericResourceLocator resourceLocator;
+  private final StorageService storageService;
+  private final CaseObservationTransformer caseObservationTransformer;
+  private final TokenAuthenticationService authService;
 
-	@Autowired
-	private PatientRepository patientRepository;
+  public Cases findCase(Long id) {
+    return caseRepository.getOneByIdAndSupplierId(id, authService.requireSupplierId())
+        .orElseThrow(EMSException::notFound);
+  }
 
-	@Autowired
-	private TestScenarioRepository testScenarioRepository;
+  public Cases createCase(String patientRef, PractitionerDTO practitioner) {
+    String resourceType = new Reference(patientRef).getReferenceElement().getResourceType();
+    Preconditions.checkArgument(resourceType.equalsIgnoreCase("Patient"),
+        "Case must be created with a Patient resource");
 
-	/**
-	 * Create new case from patient ID and store in database
-	 * 
-	 * @param patientId {@link Long}
-	 * @return {@link Cases}
-	 */
-	public Cases createCase(Long patientId) {
+    Patient patientResource = resourceLocator.findResource(patientRef);
+    return createCase(patientResource, practitioner);
+  }
 
-		PatientEntity patient = patientRepository.findOne(patientId);
-		ErrorHandlingUtils.checkEntityExists(patient, "Patient");
+  /**
+   * Create new case from patient resource
+   */
+  public Cases createCase(Patient patient, PractitionerDTO practitioner) {
 
-		TestScenario testScenario = testScenarioRepository.findByPatientId(patientId);
-		ErrorHandlingUtils.checkEntityExists(testScenario, "Test Scenario");
+    log.info("Creating case for patient: " + patient.getNameFirstRep().getNameAsSingleString());
 
-		Cases triageCase = new Cases();
+    Cases triageCase = new Cases();
+    triageCase.setPatientId(patient.getId());
+    triageCase.setSupplierId(authService.requireSupplierId());
 
-		LOG.info("Creating case for patient: " + patient.getFirstName());
+    if (practitioner != null) {
+      triageCase.setPractitionerId(practitioner.getId());
+    }
+    setCaseDetails(triageCase, patient);
 
-		setCaseDetails(patient, testScenario, triageCase);
+    // Store a mostly empty encounter record for future reference
+    return caseRepository.saveAndFlush(triageCase);
+  }
 
-		return caseRepository.save(triageCase);
-	}
+  private void setCaseDetails(Cases triageCase, Patient patient) {
+    HumanName name = patient.getNameFirstRep();
+    triageCase.setFirstName(name.getGivenAsSingleString());
+    triageCase.setLastName(name.getFamily());
 
-	private void setCaseDetails(PatientEntity patient, TestScenario testScenario, Cases triageCase) {
-		triageCase.setFirstName(patient.getFirstName());
-		triageCase.setLastName(patient.getLastName());
-		triageCase.setAddress(patient.getAddress());
-		triageCase.setNhsNumber(patient.getNhsNumber());
-		triageCase.setGender(patient.getGender());
-		triageCase.setDateOfBirth(patient.getDateOfBirth());
-		triageCase.setSkillset(testScenario.getSkillset());
-		triageCase.setParty(testScenario.getParty());
-		triageCase.setTimestamp(new Date());
-	}
+    // TODO handle address better
+    if (patient.hasAddress()) {
+      triageCase.setAddress(StringUtils.join(patient.getAddressFirstRep().getLine(), ", "));
+    }
 
-	/**
-	 * Convert Output Data Resources to Case Data Records and update Case
-	 * 
-	 * @param caseId              {@link Long}
-	 * @param outputDataResources {@link List} of {@link Resource}
-	 * @return {@link Cases}
-	 */
-	public Cases updateCase(Long caseId, List<Resource> outputDataResources, String sessionId) {
-		Cases triageCase = caseRepository.findOne(caseId);
-		ErrorHandlingUtils.checkEntityExists(triageCase, "Case");
+    if (patient.hasIdentifier()) {
+      triageCase.setNhsNumber(patient.getIdentifierFirstRep().getId());
+    }
+    if (patient.hasGender()) {
+      triageCase.setGender(patient.getGender().toCode());
+    }
+    triageCase.setDateOfBirth(patient.getBirthDate());
+    triageCase.setCreatedDate(new Date());
 
-		LOG.info("Updating case for " + triageCase.getId());
+    // Patient observations
+    CaseObservation genderObservation = new CaseObservation();
+    genderObservation.setSystem(SystemURL.SNOMED);
+    genderObservation.setCode("263495000");
+    genderObservation.setDisplay("Gender");
+    Gender gender = Gender.fromCode(triageCase.getGender());
+    genderObservation.setValueSystem(gender.getSystem());
+    genderObservation.setValueCode(gender.getValue());
+    genderObservation.setValueDisplay(gender.getDisplay());
+    triageCase.addObservation(genderObservation);
 
-		triageCase.setSessionId(sessionId);
+    CaseObservation ageObservation = new CaseObservation();
+    ageObservation.setSystem(SystemURL.SNOMED);
+    ageObservation.setCode("397669002");
+    ageObservation.setDisplay("Age");
+    ageObservation.setValueSystem("string");
+    ageObservation.setValueCode(DATE_FORMAT.format(triageCase.getDateOfBirth()));
+    triageCase.addObservation(ageObservation);
+  }
 
-		outputDataResources.forEach(resource -> {
-			if (resource instanceof Observation) {
-				boolean amended = false;
-				Observation currentObs = (Observation) resource;
-				if (currentObs.getValue().hasType("boolean")) {
-					for (CaseObservation observation : triageCase.getObservations()) {
-						if (observation.getCode().equalsIgnoreCase(currentObs.getCode().getCoding().get(0).getCode())) {
-							LOG.info("Amending Observation for case " + triageCase.getId());
-							updateObservationCoding(currentObs, observation);
-							observation.setTimestamp(new Date());
-							amended = true;
-						}
-					}
+  /**
+   * Convert Output Data Resources to Case Data Records and update Case
+   *
+   * @param caseId           {@link Long}
+   * @param evaluateResponse results of a request to ServiceDefinition/[id]/$evaluate
+   * @return {@link Cases}
+   */
+  @Transactional
+  public Cases updateCase(Long caseId, CdssResult evaluateResponse, String sessionId) {
+    Cases triageCase = caseRepository
+        .getOneByIdAndSupplierId(caseId, authService.requireSupplierId())
+        .orElseThrow(EMSException::notFound);
 
-					if (!amended) {
-						LOG.info("Adding Observation for case " + triageCase.getId());
-						triageCase.addObservation(createCaseObservation((Observation) resource));
-					}
-				}
-			} else if (resource instanceof Immunization) {
-				boolean amended = false;
-				Immunization currentImm = (Immunization) resource;
-				for (CaseImmunization immunisation : triageCase.getImmunizations()) {
-					if (immunisation.getCode()
-							.equalsIgnoreCase(currentImm.getVaccineCode().getCodingFirstRep().getCode())) {
-						LOG.info("Amending Immunisation for case " + triageCase.getId());
-						updateImmunisationCoding(currentImm, immunisation);
-						immunisation.setTimestamp(new Date());
-					}
-				}
-				
-				if (!amended) {
-					LOG.info("Adding Immunization for case " + triageCase.getId());
-					triageCase.addImmunization(createCaseImmunization((Immunization) resource));
-				}
-			} else if (resource instanceof MedicationAdministration) {
-				boolean amended = false;
-				MedicationAdministration currentMed = (MedicationAdministration) resource;
-				for (CaseMedication medicationAdmin : triageCase.getMedications()) {
-					try {
-						if (medicationAdmin.getCode().equalsIgnoreCase(
-								currentMed.getMedicationCodeableConcept().getCodingFirstRep().getCode())) {
-							LOG.info("Amending Medication for case " + triageCase.getId());
-							updateMedicationCoding(currentMed, medicationAdmin);
-							medicationAdmin.setTimestamp(new Date());
-						}
-					} catch (FHIRException e) {
-						LOG.error(e.getMessage());
-					}
-				}
-				
-				if (!amended) {
-					LOG.info("Adding Medication for case " + triageCase.getId());
-					triageCase.addMedication(createCaseMedication((MedicationAdministration) resource));
-				}
-			}
-			// add code here to deal with storing any items that do not match the above
-			else {
-				Parameters currentParameters = (Parameters) resource;
-				ParametersParameterComponent currentParameter = currentParameters.getParameterFirstRep();
-				
-				triageCase.addParameter(createCaseParameter(currentParameter));
-			}
-			
-		});
+    triageCase.setSessionId(sessionId);
+    caseRepository.saveAndFlush(triageCase);
 
-		return caseRepository.save(triageCase);
-	}
+    // Store output data
+    for (ParametersParameterComponent parameter : evaluateResponse.getOutputData().getParameter()) {
+      var resource = parameter.getResource();
+      if (SystemConstants.OUTPUT_DATA.equals(parameter.getName())) {
+        if (resource instanceof Observation) {
+          updateObservation(triageCase, (Observation) resource);
+        } else if (resource instanceof Immunization) {
+          updateImmunization(triageCase, (Immunization) resource);
+        } else if (resource instanceof MedicationAdministration) {
+          updateMedication(triageCase, (MedicationAdministration) resource);
+        } else if (resource instanceof QuestionnaireResponse) {
+          updateQuestionnaireResponse(triageCase, (QuestionnaireResponse) resource);
+        } else {
+          log.warn("Unsupported outputData type: {}", resource == null ? null : resource.getClass().getSimpleName());
+        }
+      } else {
+        triageCase.addParameter(createCaseParameter(parameter));
+      }
+    }
 
-	/**
-	 * Create CaseImmunization from Immunization resource
-	 * 
-	 * @param immunization {@link Immunization}
-	 * @return {@link CaseImmunization}
-	 */
-	protected CaseImmunization createCaseImmunization(Immunization immunization) {
-		CaseImmunization caseImmunization = new CaseImmunization();
+    if (evaluateResponse.getResult() != null && evaluateResponse.getSwitchTrigger() == null) {
+      triageCase.setTriageComplete(true);
+      triageCase.setClosedDate(new Date());
+    }
 
-		updateImmunisationCoding(immunization, caseImmunization);
+    return caseRepository.saveAndFlush(triageCase);
+  }
 
-		caseImmunization.setNotGiven(immunization.getNotGiven());
-		caseImmunization.setTimestamp(new Date());
+  private void updateQuestionnaireResponse(Cases triageCase, QuestionnaireResponse response) {
+    QuestionResponse existingResponse = triageCase.getQuestionResponses().stream()
+        .filter(answer -> answer.getQuestionnaireId()
+            .equals(response.getQuestionnaire().getReference()))
+        .collect(onlyElement());
 
-		return caseImmunization;
-	}
+    response.setId(existingResponse.getReference());
 
-	/**
-	 * Update the coding for a caseImmunisation
-	 * 
-	 * @param immunization
-	 * @param caseImmunization
-	 */
-	private void updateImmunisationCoding(Immunization immunization, CaseImmunization caseImmunization) {
-		Coding coding = immunization.getVaccineCode().getCodingFirstRep();
-		caseImmunization.setCode(coding.getCode());
-		caseImmunization.setDisplay(coding.getDisplay());
-	}
+    try {
+      storageService.updateExternal(response);
+    } catch (Exception e) {
+      log.error("Could not update questionnaire response with id " + response.getId() + "\n" + e
+          .getMessage());
+    }
+  }
 
-	/**
-	 * Create CaseObservation from Observation resource
-	 * 
-	 * @param observation {@link Observation}
-	 * @return {@link CaseObservation}
-	 */
-	protected CaseObservation createCaseObservation(Observation observation) {
-		CaseObservation caseObservation = new CaseObservation();
+  private void updateMedication(Cases triageCase, MedicationAdministration currentMed) {
+    boolean amended = false;
+    for (CaseMedication medicationAdmin : triageCase.getMedications()) {
+      try {
+        if (medicationAdmin.getCode().equalsIgnoreCase(
+            currentMed.getMedicationCodeableConcept().getCodingFirstRep().getCode())) {
+          log.info("Amending Medication {} for case {}", medicationAdmin.getCode(),
+              triageCase.getId());
+          updateMedicationCoding(currentMed, medicationAdmin);
 
-		updateObservationCoding(observation, caseObservation);
+          amended = true;
+        }
+      } catch (FHIRException e) {
+        log.error(e.getMessage());
+      }
+    }
 
-		// Try to set dataAbsenseReason here
-		Coding dataAbsentReason = observation.getDataAbsentReason().getCodingFirstRep();
-		caseObservation.setDataAbsentCode(dataAbsentReason.getCode());
-		caseObservation.setDataAbsentDisplay(dataAbsentReason.getDisplay());
-		caseObservation.setTimestamp(new Date());
+    if (!amended) {
+      log.info("Adding Medication {} for case {}",
+          currentMed.getMedicationCodeableConcept().getCodingFirstRep(), triageCase.getId());
+      triageCase.addMedication(createCaseMedication(currentMed));
+    }
+  }
 
-		return caseObservation;
-	}
-	
-	/**
-	 * Create CaseParameter from ParametersParameterComponent resource
-	 * 
-	 * @param parameter {@link ParametersParameterComponent}
-	 * @return {@link CaseParameter}
-	 */
-	protected CaseParameter createCaseParameter(ParametersParameterComponent parameter) {
-		CaseParameter caseParameter = new CaseParameter();
-		// Try to set dataAbsenseReason here
-		caseParameter.setName(parameter.getName());
-		try {
-			caseParameter.setValue(parameter.getValue().toString());
-		} catch (Exception e) {
-			
-		}
-		caseParameter.setTimestamp(new Date());
+  private void updateImmunization(Cases triageCase, Immunization resource) {
+    boolean amended = false;
+    for (CaseImmunization immunisation : triageCase.getImmunizations()) {
+      if (immunisation.getCode()
+          .equalsIgnoreCase(resource.getVaccineCode().getCodingFirstRep().getCode())) {
+        log.info("Amending Immunisation {} for case {}", immunisation.getCode(),
+            triageCase.getId());
+        updateImmunisationCoding(resource, immunisation);
 
-		return caseParameter;
-	}
+        amended = true;
+      }
+    }
 
-	/**
-	 * Update the coding a for a given observation
-	 * 
-	 * @param observation
-	 * @param caseObservation
-	 */
-	private void updateObservationCoding(Observation observation, CaseObservation caseObservation) {
-		Coding coding = observation.getCode().getCodingFirstRep();
-		caseObservation.setCode(coding.getCode());
-		caseObservation.setDisplay(coding.getDisplay());
-		try {
-			caseObservation.setValue(observation.getValueBooleanType().booleanValue());
-		} catch (FHIRException e) {
-			LOG.error("Unable to get boolean type", e);
-		}
-	}
+    if (!amended) {
+      log.info("Adding Immunization {} for case {}", resource.getVaccineCode().getCodingFirstRep(),
+          triageCase.getId());
+      triageCase.addImmunization(createCaseImmunization(resource));
+    }
+  }
 
-	/**
-	 * Create CaseMedication from MedicationAdministration resource
-	 * 
-	 * @param medication {@link MedicationAdministration}
-	 * @return {@link CaseMedication}
-	 */
-	protected CaseMedication createCaseMedication(MedicationAdministration medication) {
-		CaseMedication caseMedication = new CaseMedication();
+  private void updateObservation(Cases triageCase, Observation currentObs) {
+    boolean amended = false;
+    for (CaseObservation observation : triageCase.getObservations()) {
+      // TODO match code system and code
+      if (observation.getCode()
+          .equalsIgnoreCase(currentObs.getCode().getCoding().get(0).getCode())) {
+        log.info("Amending Observation {}-{} for case {}",
+            observation.getDisplay(),
+            ObjectUtils.defaultIfNull(observation.getValueDisplay(), observation.getValueCode()),
+            triageCase.getId());
 
-		updateMedicationCoding(medication, caseMedication);
+        caseObservationTransformer.updateObservationCoding(currentObs, observation);
 
-		caseMedication.setNotGiven(medication.getNotGiven());
-		caseMedication.setTimestamp(new Date());
+        amended = true;
+        break;
+      }
+    }
 
-		return caseMedication;
-	}
+    if (!amended) {
+      CaseObservation caseObs = caseObservationTransformer.transform(currentObs);
+      log.info("Adding Observation {}-{} for case {}",
+          caseObs.getDisplay(),
+          caseObs.getValueDisplay(),
+          triageCase.getId());
+      triageCase.addObservation(caseObs);
+    }
+  }
 
-	/**
-	 * Update the coding for a Medication
-	 * 
-	 * @param medication
-	 * @param caseMedication
-	 */
-	private void updateMedicationCoding(MedicationAdministration medication, CaseMedication caseMedication) {
-		Coding coding;
-		try {
-			coding = medication.getMedicationCodeableConcept().getCodingFirstRep();
-			caseMedication.setCode(coding.getCode());
-			caseMedication.setDisplay(coding.getDisplay());
-		} catch (FHIRException e) {
-			LOG.error("Unable to fetch medication codeable concept", e);
-		}
-	}
+  /**
+   * Create CaseImmunization from Immunization resource
+   *
+   * @param immunization {@link Immunization}
+   * @return {@link CaseImmunization}
+   */
+  protected CaseImmunization createCaseImmunization(Immunization immunization) {
+    CaseImmunization caseImmunization = new CaseImmunization();
 
+    updateImmunisationCoding(immunization, caseImmunization);
+
+    caseImmunization.setNotGiven(immunization.getNotGiven());
+
+    return caseImmunization;
+  }
+
+  /**
+   * Update the coding for a caseImmunisation
+   *
+   * @param immunization
+   * @param caseImmunization
+   */
+  private void updateImmunisationCoding(Immunization immunization,
+      CaseImmunization caseImmunization) {
+    Coding coding = immunization.getVaccineCode().getCodingFirstRep();
+    caseImmunization.setCode(coding.getCode());
+    caseImmunization.setDisplay(coding.getDisplay());
+  }
+
+  public void addObservation(Long caseId, CaseObservation observation) {
+    Cases existingCase = caseRepository
+        .getOneByIdAndSupplierId(caseId, authService.requireSupplierId())
+        .orElseThrow(EMSException::notFound);
+    if (!existingCase.getObservations().contains(observation)) {
+      existingCase.addObservation(observation);
+      caseRepository.save(existingCase);
+    }
+  }
+
+  /**
+   * Create CaseParameter from ParametersParameterComponent resource
+   *
+   * @param parameter {@link ParametersParameterComponent}
+   * @return {@link CaseParameter}
+   */
+  protected CaseParameter createCaseParameter(ParametersParameterComponent parameter) {
+    CaseParameter caseParameter = new CaseParameter();
+    // Try to set dataAbsenseReason here
+    caseParameter.setName(parameter.getName());
+    try {
+      caseParameter.setValue(parameter.getValue().toString());
+    } catch (Exception e) {
+
+    }
+    caseParameter.setTimestamp(new Date());
+
+    return caseParameter;
+  }
+
+  /**
+   * Create CaseMedication from MedicationAdministration resource
+   *
+   * @param medication {@link MedicationAdministration}
+   * @return {@link CaseMedication}
+   */
+  protected CaseMedication createCaseMedication(MedicationAdministration medication) {
+    CaseMedication caseMedication = new CaseMedication();
+
+    updateMedicationCoding(medication, caseMedication);
+
+    caseMedication.setNotGiven(medication.getNotGiven());
+
+    return caseMedication;
+  }
+
+  /**
+   * Update the coding for a Medication
+   *
+   * @param medication
+   * @param caseMedication
+   */
+  private void updateMedicationCoding(
+      MedicationAdministration medication,
+      CaseMedication caseMedication) {
+    Coding coding;
+    try {
+      coding = medication.getMedicationCodeableConcept().getCodingFirstRep();
+      caseMedication.setCode(coding.getCode());
+      caseMedication.setDisplay(coding.getDisplay());
+    } catch (FHIRException e) {
+      log.error("Unable to fetch medication codeable concept", e);
+    }
+  }
 }

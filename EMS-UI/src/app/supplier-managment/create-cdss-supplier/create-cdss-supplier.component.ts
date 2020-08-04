@@ -1,12 +1,8 @@
+import { ResourceReferenceType, CdssSupplier, ServiceDefinition } from './../../model/cdssSupplier';
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
-import {
-  NewCdssSupplier,
-  ServiceDefinition
-} from '../../model/cdssSupplier';
-import { ManageUsersService } from 'src/app/service/manage-users.service';
 import { CdssService } from 'src/app/service/cdss.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { LoginService } from 'src/app/service/login.service';
 
 @Component({
@@ -16,16 +12,21 @@ import { LoginService } from 'src/app/service/login.service';
 })
 export class CreateCdssSupplierComponent implements OnInit {
   data: any = {};
-  supplier: NewCdssSupplier;
+  supplier: CdssSupplier;
   title: String = 'Create New Supplier';
   formData: FormGroup = new FormGroup({ password: new FormControl() });
   loaded = false;
   serviceDefinitions: ServiceDefinition[] = [];
+  resourceReferenceType = ResourceReferenceType;
+  inputDataRefType: ResourceReferenceType = ResourceReferenceType.ByReference;
+  inputParamRefType: ResourceReferenceType = ResourceReferenceType.ByReference;
   warning: boolean;
   warningMessage: string;
   error: boolean;
   errorMessage: string;
   errorObject: any;
+
+  supportedVersions: string[] = ['1.1', '2.0'];
 
   constructor(
     private cdssService: CdssService,
@@ -65,7 +66,10 @@ export class CreateCdssSupplierComponent implements OnInit {
       name: new FormControl('', [Validators.required]),
       baseUrl: new FormControl('', [Validators.required]),
       serviceDefinitionId: new FormControl('', []),
-      serviceDescription: new FormControl('', [])
+      serviceDescription: new FormControl('', []),
+      // Support version 1.1 by default
+      supportedVersion: new FormControl(this.supportedVersions[0], [Validators.required]),
+      authToken: new FormControl('', []),
     });
   }
 
@@ -82,24 +86,30 @@ export class CreateCdssSupplierComponent implements OnInit {
     return this.formData.get('serviceDescription');
   }
 
+  get supportedVersion() {
+    return this.formData.get('supportedVersion');
+  }
+
   createSupplier(data) {
     this.supplier = {
       id: data.id,
       name: data.name,
       baseUrl: data.baseUrl,
-      serviceDefinitions: []
+      serviceDefinitions: [],
+      inputDataRefType: this.inputDataRefType,
+      inputParamsRefType: this.inputParamRefType,
+      supportedVersion: data.supportedVersion,
+      authToken: data.authToken
     };
     this.serviceDefinitions.forEach(serviceDefinition => {
       this.supplier.serviceDefinitions.push(serviceDefinition);
     });
     this.cdssService.createCdssSupplier(this.supplier).subscribe(
-      supplier => {
-        this.router.navigate(['/suppliers']);
-      },
+      () => this.router.navigate(['/suppliers']),
       error => {
         this.error = true;
         if (error.status === 401) {
-          this.loginService.logout(null);
+          this.loginService.logout(null, null);
         } else {
           this.errorMessage = 'Error creating new supplier.';
           this.errorObject = error;

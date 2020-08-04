@@ -1,80 +1,113 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { ReferralRequest } from 'src/app/model/questionnaire';
-import { DosService } from 'src/app/service/dos.service';
-import { CheckCapacitySummary } from 'src/app/model/checkCapacitySummary';
-import { Store } from '@ngrx/store';
-import { AppState } from 'src/app/app.state';
-import { Patient } from 'src/app/model/patient';
-import { Observable } from 'rxjs';
+import {MatDialogRef, MAT_DIALOG_DATA, MatDialog} from '@angular/material';
+import {Component, Input, Inject} from '@angular/core';
+import {ReferralRequest} from 'src/app/model/questionnaire';
+import {DosService} from 'src/app/service/dos.service';
+import {HealthcareService} from 'src/app/model/dos';
+import {TriageService} from "../../service/triage.service";
+import {ReportService} from "../../service/report.service";
+import {ToastrService} from "ngx-toastr";
+import {AppState} from 'src/app/app.state';
+import {Store} from '@ngrx/store';
+import {HandoverMessageDialogComponent} from '../handover-message-dialog/handover-message-dialog.component';
 
 @Component({
   selector: 'app-dos-display',
   templateUrl: './dos-display.component.html',
   styleUrls: ['./dos-display.component.css']
 })
-export class DosDisplayComponent implements OnInit {
+export class DosDisplayComponent {
   @Input() referralRequest: ReferralRequest;
+  @Input() caseId: number;
 
-  checkCapacitySummaryResponse: object;
-  checkCapacitySummaryError: object;
-  checkCapacitySummary: CheckCapacitySummary = new CheckCapacitySummary();
-  state: Observable<Patient>;
+  response: HealthcareService[];
+  selectedService: HealthcareService;
+  patientId: string;
+  error: object;
+  isReportEnabled: boolean;
 
-  constructor(private dosService: DosService, private store: Store<AppState>) {
-    this.state = this.store.select('patient');
-  }
-
-  ngOnInit() {
-    this.state.subscribe(res => {
-      if (res.gender === 'female') {
-        this.checkCapacitySummary.gender = 'F';
-      } else if (res.gender === 'male') {
-        this.checkCapacitySummary.gender = 'M';
-      } else {
-        this.checkCapacitySummary.gender = 'I';
-      }
-    });
-
-    this.checkCapacitySummary.postcode = null;
-    this.checkCapacitySummary.disposition = null;
-    this.checkCapacitySummary.symptomGroup = null;
-    this.checkCapacitySummary.symptomDiscriminatorInt = null;
-    this.checkCapacitySummary.searchDistance = null;
-    this.checkCapacitySummary.service = 'rest';
-
-    this.referralRequest.serviceRequested.forEach(element => {
-      if (element.serviceRequestedSystem === 'DX') {
-        this.checkCapacitySummary.disposition = element.serviceRequestedCode;
-      }
-
-      if (element.serviceRequestedSystem === 'SG') {
-        this.checkCapacitySummary.symptomGroup = element.serviceRequestedCode;
-      }
-
-      if (element.serviceRequestedSystem === 'SD') {
-        this.checkCapacitySummary.symptomDiscriminatorInt =
-          element.serviceRequestedCode;
-      }
-    });
-  }
-
-  nullifyCheckCapacitySummaryResponse() {
-    this.checkCapacitySummaryResponse = null;
+  constructor(
+      private dosService: DosService,
+      private triageService: TriageService,
+      private reportService: ReportService,
+      private toastr: ToastrService,
+      public dialog: MatDialog,
+      store: Store<AppState>) {
+    store.select('patient').subscribe(({ id }) => this.patientId = id);
   }
 
   async getDosResponse() {
-    this.checkCapacitySummaryResponse = null;
-    this.checkCapacitySummaryError = null;
+    this.response = null;
+    this.error = null;
     await this.dosService
-      .getDosResponse(this.checkCapacitySummary)
-      .toPromise()
+    .getDosResponse(this.referralRequest, this.patientId)
+    .toPromise()
       .then(
-        response => {
-          this.checkCapacitySummaryResponse = response;
-        },
-        error => {
-          this.checkCapacitySummaryError = error;
-        }
+        response => this.response = response,
+        error => this.error = error
       );
+    this.isReportEnabled = await this.reportService.getEnabled();
+  }
+
+  viewDetails(selected: HealthcareService) {
+    this.dialog.open(HealthcareServiceDialog, {
+      data: selected
+    });
+  }
+
+  invoke() {
+    const encounterRef = this.referralRequest.contextReference;
+    const url = `${this.selectedService.endpoint}?encounterId=${encounterRef}`;
+
+    // Service must be updated in referral request before invoking handover
+    this.selectService()
+      .then(() => window.open(url))
+      .catch(e => this.toastr.error('Unable to update selected service for case - ' + e.message));
+  }
+
+  async generateReport() {
+    // Service must be updated in referral request before generating the report
+    await this.selectService();
+
+    await this.reportService.generateReport(this.referralRequest.contextReference)
+        .then(result => {
+          this.openDialog(result);
+        })
+        .catch(err => {
+          this.toastr.error('Unable to generate reports - ' + err);
+        });
+  }
+
+  private async selectService() {
+    return await this.triageService.updateSelectedService(this.caseId, this.selectedService);
+  }
+
+  openDialog(reports) {
+    this.dialog.open(HandoverMessageDialogComponent, {
+      height: '95vh',
+      width: '95vw',
+      panelClass: 'report',
+      backdropClass: 'report-backdrop',
+      data: {
+        reports: reports
+      }
+    });
+  }
+
+  get reportEnabled() {
+    return this.isReportEnabled;
+  }
+}
+
+@Component({
+  selector: 'healthcare-service-dialog',
+  templateUrl: 'healthcare-service-dialog.html'
+})
+export class HealthcareServiceDialog {
+  constructor(public dialogRef: MatDialogRef<HealthcareServiceDialog>,
+              @Inject(MAT_DIALOG_DATA) public service: HealthcareService) {
+  }
+
+  close(): void {
+    this.dialogRef.close();
   }
 }

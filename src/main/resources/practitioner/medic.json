@@ -1,0 +1,12 @@
+{
+  "id": "medic",
+  "name": {
+    "given": "Gregory",
+    "family": "Home"
+  },
+  "identifiers": [{
+    "issuerId": "gmc",
+    "system": "https://fhir.hl7.org.uk/Id/gmc-number",
+    "value": "7777777"
+  }]
+}

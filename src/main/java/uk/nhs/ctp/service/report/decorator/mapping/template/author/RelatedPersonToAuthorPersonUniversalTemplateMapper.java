@@ -15,7 +15,6 @@ import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145200GB01AssignedAuthor;
 import uk.nhs.ctp.service.report.org.hl7.v3.COCDTP145200GB01AssignedAuthor.TemplateId;
 import uk.nhs.ctp.service.report.org.hl7.v3.IINPfITOidRequiredAssigningAuthorityName;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02Author;
-import uk.nhs.ctp.utils.ResourceProviderUtils;
 
 @Component
 public class RelatedPersonToAuthorPersonUniversalTemplateMapper implements TemplateMapper<CareConnectRelatedPerson, POCDMT200001GB02Author> {
@@ -34,8 +33,8 @@ public class RelatedPersonToAuthorPersonUniversalTemplateMapper implements Templ
 	
 	@Override
 	public void map(CareConnectRelatedPerson relatedPerson, POCDMT200001GB02Author author, ReportRequestDTO request) {
-		CareConnectOrganization organization = ResourceProviderUtils.getResource(
-				request.getReferralRequest().getRequester().getOnBehalfOf().getResource(), CareConnectOrganization.class);
+		var organization = (CareConnectOrganization)
+				request.getReferralRequest().getRequester().getOnBehalfOf().getResource();
 		
 		COCDTP145200GB01AssignedAuthor assignedAuthor = new COCDTP145200GB01AssignedAuthor();
 		assignedAuthor.setClassCode(assignedAuthor.getClassCode());

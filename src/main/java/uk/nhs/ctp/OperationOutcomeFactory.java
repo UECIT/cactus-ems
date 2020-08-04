@@ -16,14 +16,20 @@ public class OperationOutcomeFactory {
 	private OperationOutcomeFactory() {
 	}
 
-	public static BaseServerResponseException buildOperationOutcomeException(BaseServerResponseException exception,
-			String code, IssueType issueType) {
+	public static BaseServerResponseException buildOperationOutcomeException(
+			BaseServerResponseException exception,
+			String code,
+			IssueType issueType) {
 
 		return buildOperationOutcomeException(exception, code, issueType, null);
 	}
 
-	public static BaseServerResponseException buildOperationOutcomeException(BaseServerResponseException exception,
-			String code, IssueType issueType, String diagnostics) {
+	public static BaseServerResponseException buildOperationOutcomeException(
+			BaseServerResponseException exception,
+			String code,
+			IssueType issueType,
+			String diagnostics) {
+
 		CodeableConcept codeableConcept = new CodeableConcept();
 		Coding coding = new Coding(SystemURL.VS_ERROR_WARNING_CODE, code, code);
 		codeableConcept.addCoding(coding);

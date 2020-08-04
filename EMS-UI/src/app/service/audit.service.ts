@@ -1,7 +1,7 @@
+import { ValidationRequest, Token, Interaction } from '../model';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { Token } from '../model/token';
 import { SessionStorage } from 'h5webstorage';
 
 const httpOptions = {
@@ -26,6 +26,33 @@ export class AuditService {
     }
   }
 
+  getAudits(): Promise<Interaction[]> {
+    if (this.sessionStorage['auth_token'] != null) {
+      httpOptions.headers = httpOptions.headers.set(
+          'Authorization',
+          this.sessionStorage['auth_token']
+      );
+      const url = `${environment.EMS_API}/audit/interactions`;
+      return this.http.get<Interaction[]>(url, httpOptions).toPromise();
+    }
+  }
+
+  sendValidationRequest(request: ValidationRequest) {
+    if (this.sessionStorage['auth_token'] != null) {
+      httpOptions.headers = httpOptions.headers.set(
+        'Authorization',
+        this.sessionStorage['auth_token']
+      );
+      httpOptions.headers = httpOptions.headers.set(
+        'Content-Type',
+        'application/json'
+    );
+      
+      const url = `${environment.EMS_API}/audit/validate/`;
+      return this.http.post(url, JSON.stringify(request), httpOptions).toPromise();
+    }
+  }
+
   searchAudits(fromDate: any, toDate: any, pageNumber: any, pageSize: any, includeClosed: boolean, includeIncomplete: boolean) {
     const searchParams = {
       from: '2019-03-02T00:00:00.474Z',
@@ -37,7 +64,7 @@ export class AuditService {
       sorts: [
         {
           direction: 'ASC',
-          sortField: 'TIMESTAMP'
+          sortField: 'DATE_CREATED'
         },
         {
           direction: 'ASC',

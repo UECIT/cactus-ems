@@ -1,20 +1,22 @@
-import { ProcessTriage } from 'src/app/model/processTriage';
+import { AnswerService } from '../../service';
 import {
   Component,
   OnInit,
-  Input
+  Input, OnDestroy
 } from '@angular/core';
 import {
+  Case,
+  CdssSupplier,
   QuestionResponse,
-  Questionnaire
-} from '../../model/questionnaire';
-import { Case } from '../../model/case';
+  Questionnaire,
+  ProgressTriageRequest,
+  Settings
+} from '../../model';
 import { MatDialog } from '@angular/material';
-import { SwitchSupplierDialogComponent } from 'src/app/switch-supplier-dialog/switch-supplier-dialog.component';
-import { CdssSupplier } from 'src/app/model/cdssSupplier';
+import { SwitchSupplierDialogComponent } from '../../switch-supplier-dialog/switch-supplier-dialog.component';
 import { Router } from '@angular/router';
 import { SessionStorage } from 'h5webstorage';
-import { ToastrService } from 'ngx-toastr';
+import { Subscription } from 'rxjs';
 
 export interface DialogData {
   cdssSupplier: CdssSupplier;
@@ -26,24 +28,37 @@ export interface DialogData {
   templateUrl: './case.component.html',
   styleUrls: ['./case.component.css']
 })
-export class CaseComponent implements OnInit {
+export class CaseComponent implements OnInit, OnDestroy {
+
+  //TODO: CDSCT-35 Remove this property once all question types using answer service
   @Input() answerSelected: QuestionResponse[];
   @Input() case: Case;
   @Input() cdssSupplierName: string;
   @Input() questionnaire: Questionnaire;
   @Input() amendingPrevious: boolean;
-  @Input() ExternalProcessTriage: (
+  @Input() ExternalProgressTriage: (
     switchCdss: boolean,
     back: boolean,
-    selectedTriage: ProcessTriage
+    selectedTriage: ProgressTriageRequest
   ) => boolean;
 
   caseId: Number;
+  role: String;
 
   cdssSupplier: CdssSupplier;
   serviceDefinition: string;
+  answerSubscription: Subscription;
 
-  constructor(public dialog: MatDialog, public router: Router, private sessionStorage: SessionStorage, private toastr: ToastrService) {}
+  constructor(
+    public dialog: MatDialog,
+    public router: Router,
+    private sessionStorage: SessionStorage,
+    private answerService: AnswerService
+  ) 
+  {
+    this.answerSubscription = this.answerService.answerSelected$
+      .subscribe(answer => this.answerSelected = answer);
+  }
 
   openDialog(): void {
     const dialogRef = this.dialog.open(SwitchSupplierDialogComponent, {
@@ -64,14 +79,21 @@ export class CaseComponent implements OnInit {
 
   ngOnInit() {
     if (this.case) {
-      this.caseId = new Number(this.case.id);
+      this.caseId = this.case.id;
     }
+
+    var settings: Settings = this.sessionStorage['settings'];
+
+    if (settings) {
+      this.role = settings.userType.description;
+    }
+
   }
 
   async continue(switchCdss: boolean) {
-    const isValid = await this.ExternalProcessTriage(switchCdss, false, null);
+    const isValid = await this.ExternalProgressTriage(switchCdss, false, null);
     if (isValid) {
-      this.caseId = new Number(this.case.id);
+      this.caseId = this.case.id;
     }
   }
 
@@ -79,28 +101,28 @@ export class CaseComponent implements OnInit {
     this.sessionStorage.setItem('cdssSupplierId', cdssSupplierId);
     this.sessionStorage.setItem('serviceDefinitionId', serviceDefinitionId);
     // carry on with triage process
-    this.continue(true);
+    await this.continue(true);
   }
 
-  endTriage() {
+  async endTriage() {
     // call audit close endpoint
     // redirect to the homepage
-    this.router.navigate(['/main']);
+    await this.router.navigate(['/main']);
   }
 
-  checkAllRequieredQuestionsAreAnswered(): boolean {
-    let requieredComplete = false;
-    let requieredQuestions: Boolean = false;
+  checkAllRequiredQuestionsAreAnswered(): boolean {
+    let requiredComplete = false;
+    let requiredQuestions: Boolean = false;
 
     if (!this.questionnaire || !this.questionnaire.triageQuestions) {
       return false;
     }
 
     this.questionnaire.triageQuestions.forEach(question => {
-      requieredQuestions = question.required;
+      requiredQuestions = question.required;
     });
 
-    if (!requieredQuestions) {
+    if (!requiredQuestions) {
       return true;
     }
 
@@ -109,14 +131,18 @@ export class CaseComponent implements OnInit {
         for (let index = 0; index < this.answerSelected.length; index++) {
           const answer = this.answerSelected[index];
           if (answer.triageQuestion.questionId === question.questionId) {
-            requieredComplete = true;
+            requiredComplete = true;
             break;
           } else {
-            requieredComplete = false;
+            requiredComplete = false;
           }
         }
       }
     });
-    return requieredComplete;
+    return requiredComplete;
+  }
+
+  ngOnDestroy() {
+    this.answerSubscription.unsubscribe();
   }
 }

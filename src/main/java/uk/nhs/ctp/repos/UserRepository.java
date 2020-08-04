@@ -7,5 +7,5 @@ import uk.nhs.ctp.entities.UserEntity;
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, String> {
 
-	UserEntity findByUsername(String username);
+  UserEntity findByUsername(String username);
 }

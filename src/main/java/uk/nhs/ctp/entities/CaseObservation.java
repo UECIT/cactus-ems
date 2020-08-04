@@ -1,96 +1,63 @@
 package uk.nhs.ctp.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "case_observation")
-public class CaseObservation {
+@Data
+public class CaseObservation extends SupplierPartitioned {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @EqualsAndHashCode.Exclude
+  private Long id;
 
-	@Column(name = "code")
-	private String code;
+  @JsonIgnore
+  @ManyToOne(optional = false)
+  @JoinColumn(name = "case_id")
+  @ToString.Exclude
+  @EqualsAndHashCode.Exclude
+  private Cases caseEntity;
 
-	@Column(name = "display")
-	private String display;
+  @Column(name = "system")
+  private String system;
 
-	@Column(name = "data_absent_code")
-	private String dataAbsentCode;
+  @Column(name = "code")
+  private String code;
 
-	@Column(name = "data_absent_display")
-	private String dataAbsentDisplay;
+  @Column(name = "display")
+  private String display;
 
-	@Column(name = "value")
-	private Boolean value;
+  @Column(name = "value_system")
+  private String valueSystem;
 
-	@Temporal(TemporalType.DATE)
-	@Column(name = "observation_timestamp")
-	private Date timestamp;
+  @Column(name = "value_code")
+  private String valueCode;
 
-	public Long getId() {
-		return id;
-	}
+  @Column(name = "value_display")
+  private String valueDisplay;
 
-	public String getCode() {
-		return code;
-	}
+  @CreationTimestamp
+  @Column(name = "created")
+  @EqualsAndHashCode.Exclude
+  private Date dateCreated;
 
-	public String getDisplay() {
-		return display;
-	}
-
-	public Boolean getValue() {
-		return value;
-	}
-
-	public Date getTimestamp() {
-		return timestamp;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public void setCode(String code) {
-		this.code = code;
-	}
-
-	public void setDisplay(String display) {
-		this.display = display;
-	}
-
-	public void setValue(Boolean value) {
-		this.value = value;
-	}
-
-	public void setTimestamp(Date timestamp) {
-		this.timestamp = timestamp;
-	}
-
-	public String getDataAbsentCode() {
-		return dataAbsentCode;
-	}
-
-	public void setDataAbsentCode(String dataAbsentCode) {
-		this.dataAbsentCode = dataAbsentCode;
-	}
-
-	public String getDataAbsentDisplay() {
-		return dataAbsentDisplay;
-	}
-
-	public void setDataAbsentDisplay(String dataAbsentDisplay) {
-		this.dataAbsentDisplay = dataAbsentDisplay;
-	}
+  @UpdateTimestamp
+  @Column(name = "updated")
+  @EqualsAndHashCode.Exclude
+  private Date dateUpdated;
 }

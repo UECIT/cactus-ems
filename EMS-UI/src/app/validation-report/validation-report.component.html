@@ -1,0 +1,84 @@
+<h4>Request Validation Report</h4>
+<div class="container-fluid" *ngIf="loaded">
+  <div class="row">
+    <div class="col-xs-12 col-md-10 offset-md-1">
+      <div class="header">Select a registered endpoint</div>
+      <mat-progress-bar mode="indeterminate" *ngIf="!loaded"></mat-progress-bar>
+      <div *ngIf="loaded" class="endpoints table-responsive">
+        <table class="table table-borderless table-hover">
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">URL</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="endpoint" *ngFor="let endpoint of endpoints"
+                (click)="endpointSelection.toggle(endpoint)">
+              <td class="endpointName">{{ endpoint.name }}</td>
+              <td class="endpointBaseUrl">{{ endpoint.baseUrl }}</td>
+              <td>
+                <mat-checkbox class="endpointCheckbox"
+                    (click)="$event.stopPropagation()"
+                    (change)="$event ? endpointSelection.toggle(endpoint) : null"
+                    [checked]="endpointSelection.isSelected(endpoint)">
+                </mat-checkbox>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-xs-12 col-md-10 offset-md-1">
+      <div class="header">Select interactions</div>
+      <div class="table-responsive interactions">
+        <table class="table table-borderless table-hover">
+          <thead>
+            <tr>
+              <th scope="col">Type</th>
+              <th scope="col">Date</th>
+              <th scope="col">Interaction ID</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="interaction" *ngFor="let interaction of interactions"
+                (click)="interactionSelection.toggle(interaction)">
+              <td class="interactionType">{{ interaction.type }}</td>
+              <td class="interactionCreatedDate">{{ interaction.startedAt | date:'medium' }}</td>
+              <td class="interactionCaseId">{{ interaction.interactionId }}</td>
+              <td>
+                <mat-checkbox class="interactionCheckbox"
+                    (click)="$event.stopPropagation()"
+                    (change)="$event ? interactionSelection.toggle(interaction) : null"
+                    [checked]="interactionSelection.isSelected(interaction)">
+                </mat-checkbox>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-xs-12 col-md-10 offset-md-5">
+      <div class="actions">
+        <button [disabled]="eitherNotSelected" class="actionButton" (click)="sendValidationRequest()">Validate</button>
+      </div>
+    </div>
+    <div class="col-xs-12 col-md-10 offset-md-1">
+      <div class="alert alert-danger" *ngIf="sentError">
+        An error occurred: {{ sentError }}
+      </div>
+      <div class="alert alert-info" *ngIf="sentSuccess">
+        Validation request sent succesfully.
+      </div>
+    </div>
+  </div>
+</div>
+  

@@ -1,53 +1,63 @@
-import { Injectable } from '@angular/core';
-import { HttpHeaders, HttpClient } from '@angular/common/http';
-import { environment } from '../../environments/environment';
-import { SessionStorage } from 'h5webstorage';
+import {EncounterReportInput} from '../model';
+import {Injectable} from '@angular/core';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {environment} from '../../environments/environment';
+import {SessionStorage} from 'h5webstorage';
+import {AuthService} from "./auth.service";
+
+const httpOptions = {
+  headers: new HttpHeaders()
+};
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReportService {
 
-  constructor(private http: HttpClient, private sessionStorage: SessionStorage) { }
+  constructor(
+      private http: HttpClient,
+      private sessionStorage: SessionStorage,
+      private authService: AuthService) {
+  }
 
-  getHandover(caseId: any, resourceUrl: any) {
-    const httpOptions = {
-      headers: new HttpHeaders()
-    };
-    if (this.sessionStorage['auth_token'] != null) {
-      httpOptions.headers = httpOptions.headers.set(
-        'Authorization',
-        this.sessionStorage['auth_token']
-      );
-      const url = `${environment.EMS_API}/handover`;
-      const handoverRequest = {'resourceUrl': resourceUrl, 'caseId': caseId};
-      return this.http.post<any>(url, handoverRequest, httpOptions).toPromise();
+  getEnabled(): Promise<boolean> {
+    const token = this.authService.getAuthToken();
+    if (token != null) {
+      httpOptions.headers = httpOptions.headers.set('Authorization', token);
+      const url = `${environment.EMS_API}/report/enabled`;
+      return this.http.get<any>(url, httpOptions).toPromise();
+    }
+  }
+  
+  async getEncounterReport(encounterId: string): Promise<EncounterReportInput> {
+    const token = this.authService.getAuthToken();
+    if (token != null) {
+      httpOptions.headers = httpOptions.headers.set('Authorization', token);
+
+      const url = `${environment.EMS_API}/report/encounter?encounterId=${encounterId}`;
+      return await this.http.get<EncounterReportInput>(url, httpOptions).toPromise();
     }
   }
 
-  postHandoverTemplate(handoverMessage) {
-    const httpOptions = {
-      headers: new HttpHeaders()
-    };
-    httpOptions.headers = httpOptions.headers.set(
-      'Content-Type',
-      'application/json'
-    );
-    return this.http.post<any>(`${environment.UECDI_API}/handover`, handoverMessage, httpOptions).toPromise();
+  async searchByPatient(nhsNumber: string) {
+    const token = this.authService.getAuthToken();
+    if (token != null) {
+      httpOptions.headers = httpOptions.headers.set('Authorization', token);
+
+      const encounterSearchUrl = `${environment.EMS_API}/report/search?nhsNumber=${nhsNumber}`;
+      const encounterIds = await this.http.get<string[]>(encounterSearchUrl, httpOptions).toPromise();
+
+      return await Promise.all(encounterIds.map(id => this.getEncounterReport(id)));
+    }
   }
 
-  getReport(caseId: any, resourceUrl: any, handoverMessage: any) {
-    const httpOptions = {
-      headers: new HttpHeaders()
-    };
-    if (this.sessionStorage['auth_token'] != null) {
-      httpOptions.headers = httpOptions.headers.set(
-        'Authorization',
-        this.sessionStorage['auth_token']
-      );
-      const url = `${environment.EMS_API}/report`;
-      const handoverRequest = {'handoverJson': JSON.stringify(handoverMessage), 'caseId': caseId};
-      return this.http.post<any>(url, handoverRequest, httpOptions).toPromise();
+  generateReport(encounterId: string) {
+    const token = this.authService.getAuthToken();
+    if (token != null) {
+      httpOptions.headers = httpOptions.headers.set('Authorization', token);
+
+      const url = `${environment.EMS_API}/report/encounter`;
+      return this.http.post<any>(url, encounterId, httpOptions).toPromise();
     }
   }
 
@@ -57,8 +67,8 @@ export class ReportService {
       responseType: 'text' as 'json'
     };
     httpOptions.headers = httpOptions.headers.set(
-      'Content-Type',
-      'application/xml'
+        'Content-Type',
+        'application/xml'
     );
     const url = `${environment.UECDI_VALIDATE_API}/validate/111v2`;
     return this.http.post<any>(url, oneOneOneReportXml, httpOptions).toPromise();
@@ -70,8 +80,8 @@ export class ReportService {
       responseType: 'text' as 'json'
     };
     httpOptions.headers = httpOptions.headers.set(
-      'Content-Type',
-      'application/xml'
+        'Content-Type',
+        'application/xml'
     );
     const url = `${environment.UECDI_VALIDATE_API}/validate/111v3`;
     return this.http.post<any>(url, oneOneOneReportXml, httpOptions).toPromise();
@@ -83,8 +93,8 @@ export class ReportService {
       responseType: 'text' as 'json'
     };
     httpOptions.headers = httpOptions.headers.set(
-      'Content-Type',
-      'application/xml'
+        'Content-Type',
+        'application/xml'
     );
     const url = `${environment.UECDI_VALIDATE_API}/validate/ambulancev2`;
     return this.http.post<any>(url, oneOneOneReportXml, httpOptions).toPromise();
@@ -96,8 +106,8 @@ export class ReportService {
       responseType: 'text' as 'json'
     };
     httpOptions.headers = httpOptions.headers.set(
-      'Content-Type',
-      'application/xml'
+        'Content-Type',
+        'application/xml'
     );
     const url = `${environment.UECDI_VALIDATE_API}/validate/ambulancev3`;
     return this.http.post<any>(url, ambulanceRequestXml, httpOptions).toPromise();

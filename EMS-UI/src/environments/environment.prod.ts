@@ -1,13 +1,9 @@
+// The values in this file will be replaced with environment variables in run.sh
 export const environment = {
-  production: true,
-  EMS_API: 'http://localhost:8081',
-  UECDI_API: 'http://localhost:5000',
-  UECDI_VALIDATE_API: 'http://localhost:7000',
-
-  // EMS_API: 'http://uecdi-tom-ems.eu-west-2.elasticbeanstalk.com:5000',
-  // UECDI_API: 'http://uecdi-pci-20190401.eu-west-2.elasticbeanstalk.com:5000',
-  // UECDI_VALIDATE_API: 'http://uecdi-tom-tkw.eu-west-2.elasticbeanstalk.com/tkw-client',
-
-  TERM_API: 'https://ontoserver.dataproducts.nhs.uk/fhir',
-  version: 'v1.0.6'
+  ENV_NAME: '$ENV_NAME',
+  EMS_API: '$EMS_API',
+  UECDI_API: '$UECDI_API',
+  UECDI_VALIDATE_API: '$UECDI_VALIDATE_API',
+  TERM_API: '$TERM_API',
+  USER_GUIDE: '$USER_GUIDE',
 };

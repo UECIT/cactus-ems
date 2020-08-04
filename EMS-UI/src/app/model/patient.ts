@@ -1,16 +1,15 @@
-export interface Patient {
-  address1: string;
-  address2: string;
-  address3: string;
+export class Patient {
+  address: string;
   dateOfBirth: string;
-  deceasedDateTime: string;
   firstName: string;
   gender: string;
-  id: number;
+  id: string;
   lastName: string;
-  nhsNumber: string;
-  phone: string;
-  postcode: string;
+  homePhone: string;
+  mobile: string;
+  postalCode: string;
   title: string;
-  testCaseSummary: string;
+  email: string;
+  language: string;
+  nhsNumber: string
 }

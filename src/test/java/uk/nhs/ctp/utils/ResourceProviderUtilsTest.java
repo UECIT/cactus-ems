@@ -1,5 +1,6 @@
 package uk.nhs.ctp.utils;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -47,7 +48,7 @@ public class ResourceProviderUtilsTest {
 
 	@Test
 	public void testGetParameterByNameReturnsParameterWhenParameterSetOnce() {
-		assertTrue(parameterSetOnce.size() == 1);
+		assertEquals(1, parameterSetOnce.size());
 		assertTrue(parameterSetOnce.contains(testParameterOne));
 		
 		assertNotNull(ResourceProviderUtils.getParameterByName(parameterSetOnce, "test1"));
@@ -55,7 +56,7 @@ public class ResourceProviderUtilsTest {
 	
 	@Test(expected = BaseServerResponseException.class)
 	public void testGetParameterByNameThrowsExceptionWhenParameterSetMoreThanOnce() {
-		assertTrue(parameterSetTwice.size() == 3);
+		assertEquals(3, parameterSetTwice.size());
 		assertTrue(parameterSetTwice.contains(testParameterTwoA));
 		assertTrue(parameterSetTwice.contains(testParameterTwoB));
 		
@@ -65,16 +66,16 @@ public class ResourceProviderUtilsTest {
 	
 	@Test
 	public void testGetParametersByNameReturnsParametersWhenParameterSetMoreThanOnce() {
-		assertTrue(parameterSetTwice.size() == 3);
+		assertEquals(3, parameterSetTwice.size());
 		assertTrue(parameterSetTwice.contains(testParameterTwoA));
 		assertTrue(parameterSetTwice.contains(testParameterTwoB));
-		
-		assertTrue(ResourceProviderUtils.getParametersByName(parameterSetTwice, "test2").size() == 2);
+
+		assertEquals(2, ResourceProviderUtils.getParametersByName(parameterSetTwice, "test2").size());
 	}
 	
 	@Test
 	public void testGetParameterByNameReturnsNullIfParameterDoesNotExist() {
-		assertTrue(parameterDoesNotExist.size() == 2);
+		assertEquals(2, parameterDoesNotExist.size());
 		assertFalse(parameterDoesNotExist.contains(testParameterOne));
 
 		assertNull(ResourceProviderUtils.getParameterByName(parameterDoesNotExist, "test1"));
@@ -82,7 +83,7 @@ public class ResourceProviderUtilsTest {
 	
 	@Test
 	public void testGetParametersByNameReturnsEmptyListIfParameterDoesNotExist() {
-		assertTrue(parameterDoesNotExist.size() == 2);
+		assertEquals(2, parameterDoesNotExist.size());
 		assertFalse(parameterDoesNotExist.contains(testParameterOne));
 		
 		assertTrue(ResourceProviderUtils.getParametersByName(parameterDoesNotExist, "test1").isEmpty());
