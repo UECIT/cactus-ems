@@ -55,16 +55,8 @@ public class Cases extends SupplierPartitioned {
   @Column(name = "nhs_number")
   private String nhsNumber;
 
-  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-  @JoinColumn(name = "case_id")
-  private List<CaseImmunization> immunizations = new ArrayList<>();
-
   @OneToMany(mappedBy = "caseEntity", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<CaseObservation> observations = new ArrayList<>();
-
-  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-  @JoinColumn(name = "case_id")
-  private List<CaseMedication> medications = new ArrayList<>();
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "case_id")
@@ -73,9 +65,6 @@ public class Cases extends SupplierPartitioned {
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "case_id")
   private List<QuestionResponse> questionResponses = new ArrayList<>();
-
-  @Column(name = "session_id")
-  private String sessionId;
 
   @Temporal(TemporalType.TIMESTAMP)
   @Column(name = "created_date")
@@ -94,14 +83,6 @@ public class Cases extends SupplierPartitioned {
   public void addComposition(CompositionEntity composition) {
     this.compositions.add(composition);
     composition.setCaseEntity(this);
-  }
-
-  public void addMedication(CaseMedication medication) {
-    this.medications.add(medication);
-  }
-
-  public void addImmunization(CaseImmunization immunization) {
-    this.immunizations.add(immunization);
   }
 
   public void addObservation(CaseObservation observation) {

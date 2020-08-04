@@ -20,7 +20,6 @@ public class CdssResult {
   private String switchTrigger;
   private ReferralRequest referralRequest;
   private List<CarePlanDTO> careAdvice;
-  private String sessionId;
   private List<Resource> contained;
   private OperationOutcome operationOutcome;
 

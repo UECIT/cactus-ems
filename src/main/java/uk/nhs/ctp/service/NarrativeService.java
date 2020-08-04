@@ -27,8 +27,11 @@ public class NarrativeService {
 
   public Narrative buildCombinedNarrative(List<Narrative> narratives) {
     return buildNarrative(narratives.stream()
-        .map(Narrative::getDiv)
+        .map(narrative -> narrative.hasDiv()
+            ? narrative.getDiv()
+            : buildNarrative("unknown").getDiv())
         .map(XhtmlNode::toString)
         .collect(Collectors.joining("", DIV_START, DIV_END)));
   }
+
 }

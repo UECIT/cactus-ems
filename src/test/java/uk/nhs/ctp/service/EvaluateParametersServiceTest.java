@@ -54,8 +54,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
-import uk.nhs.ctp.entities.CaseImmunization;
-import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseObservation;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.entities.CdssSupplier;
@@ -107,32 +105,16 @@ public class EvaluateParametersServiceTest {
     caseObservation.setDisplay("Test Observation");
     caseObservation.setValueCode("true");
 
-    var caseImmunization = new CaseImmunization();
-    caseImmunization.setId(1L);
-    caseImmunization.setCode("123456");
-    caseImmunization.setDisplay("Test Immunization");
-    caseImmunization.setNotGiven(true);
-
-    var caseMedication = new CaseMedication();
-    caseMedication.setId(1L);
-    caseMedication.setCode("123456");
-    caseMedication.setDisplay("Test Medication");
-    caseMedication.setNotGiven(false);
-
     caseWithNoData = newCase();
 
     caseWithImmunization = newCase();
-    caseWithImmunization.addImmunization(caseImmunization);
 
     caseWithMedication = newCase();
-    caseWithMedication.addMedication(caseMedication);
 
     caseWithObservation = newCase();
     caseWithObservation.addObservation(caseObservation);
 
     caseWithData = newCase();
-    caseWithData.addImmunization(caseImmunization);
-    caseWithData.addMedication(caseMedication);
     caseWithData.addObservation(caseObservation);
 
     var questionnaire = new Questionnaire();

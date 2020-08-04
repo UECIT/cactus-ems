@@ -1,36 +1,30 @@
 package uk.nhs.ctp.service;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Immunization;
-import org.hl7.fhir.dstu3.model.MedicationAdministration;
-import org.hl7.fhir.dstu3.model.MedicationAdministration.MedicationAdministrationStatus;
 import org.hl7.fhir.dstu3.model.Meta;
-import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
-import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.stereotype.Service;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.SystemConstants;
 import uk.nhs.ctp.SystemURL;
-import uk.nhs.ctp.entities.CaseImmunization;
-import uk.nhs.ctp.entities.CaseMedication;
 import uk.nhs.ctp.entities.CaseParameter;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.entities.CdssSupplier;
@@ -44,8 +38,8 @@ import uk.nhs.ctp.service.dto.CdssRequestDTO;
 import uk.nhs.ctp.service.dto.CodeDTO;
 import uk.nhs.ctp.service.dto.SettingsDTO;
 import uk.nhs.ctp.service.dto.TriageQuestion;
+import uk.nhs.ctp.service.fhir.GenericResourceLocator;
 import uk.nhs.ctp.service.fhir.ReferenceService;
-import uk.nhs.ctp.transform.ObservationTransformer;
 
 @Service
 @AllArgsConstructor
@@ -59,9 +53,9 @@ public class EvaluateParametersService {
 
   private final CaseRepository caseRepository;
   private final ReferenceService referenceService;
-  private final ObservationTransformer observationTransformer;
   private final QuestionnaireService questionnaireService;
   private final TokenAuthenticationService authService;
+  private final GenericResourceLocator resourceLocator;
 
   Parameters getEvaluateParameters(CdssRequestDTO requestDetails, CdssSupplier cdssSupplier,
       String requestId) {
@@ -79,7 +73,8 @@ public class EvaluateParametersService {
 
     addPeople(builder, caseEntity.getPatientId(), settings);
     addInputData(caseEntity, builder, cdssSupplier.getInputDataRefType());
-    addInputParameters(caseEntity, builder, cdssSupplier.getInputParamsRefType());
+    //TODO: not sure we need this
+//    addInputParameters(caseEntity, builder, cdssSupplier.getInputParamsRefType());
     addQuestionnaireResponses(
         builder,
         caseEntity,
@@ -93,28 +88,22 @@ public class EvaluateParametersService {
   }
 
   private void addInputData(Cases caseEntity, Builder builder, ReferencingType inputDataRefType) {
-    Stream<Observation> observations = getObservations(caseEntity)
-        .peek(observation -> log.info("Adding Observation to inputData: {}",
-            observation.getCode().getCodingFirstRep().getDisplay()));
-    if (inputDataRefType == null) {
-      // don't fall over just default to referencing
-      inputDataRefType = ReferencingType.BY_REFERENCE;
-    }
-    switch (inputDataRefType) {
+    List<Reference> references = caseEntity.getParameters().stream()
+        .filter(caseParameter -> !caseParameter.isDeleted())
+        .map(CaseParameter::getReference)
+        .map(Reference::new)
+        .collect(Collectors.toUnmodifiableList());
+
+    switch (defaultIfNull(inputDataRefType, ReferencingType.BY_REFERENCE)) {
       case BY_REFERENCE:
-        observations
-            .map(obs -> referenceService.buildRef(obs.getIdElement()))
-            .forEach(builder::addInputData);
+        references.forEach(builder::addInputData);
         break;
       case BY_RESOURCE:
-        observations
+        references.stream()
+            .map(reference -> (Resource)resourceLocator.findResource(reference))
             .forEach(builder::addInputData);
         break;
     }
-
-    // TODO: CDSCT-167 - Can't reference these as we never save them anywhere. We should remove them
-    getImmunizations(caseEntity).forEach(builder::addInputData);
-    getMedications(caseEntity).forEach(builder::addInputData);
   }
 
   private void addPeople(Builder builder, String patientId, SettingsDTO settings) {
@@ -179,59 +168,21 @@ public class EvaluateParametersService {
     builder.addQuestionnaireResponses(questionnaireResponses);
   }
 
-  private ArrayList<Immunization> getImmunizations(Cases caseEntity) {
-    ArrayList<Immunization> immunizations = new ArrayList<>();
-
-    if (!caseEntity.getImmunizations().isEmpty()) {
-      for (CaseImmunization immunizationEntity : caseEntity.getImmunizations()) {
-        Immunization immunization = new Immunization()
-            .setStatus(Immunization.ImmunizationStatus.COMPLETED)
-            .setVaccineCode(new CodeableConcept().addCoding(new Coding(SystemURL.SNOMED,
-                immunizationEntity.getCode(), immunizationEntity.getDisplay())))
-            .setNotGiven(immunizationEntity.getNotGiven());
-
-        immunizations.add(immunization);
-      }
-    }
-
-    return immunizations;
-  }
-
-  private ArrayList<MedicationAdministration> getMedications(Cases caseEntity) {
-    ArrayList<MedicationAdministration> medications = new ArrayList<>();
-    for (CaseMedication medicationEntity : caseEntity.getMedications()) {
-      MedicationAdministration medication = new MedicationAdministration()
-          .setStatus(MedicationAdministrationStatus.COMPLETED)
-          .setMedication(new CodeableConcept().addCoding(new Coding(SystemURL.SNOMED,
-              medicationEntity.getCode(), medicationEntity.getDisplay())))
-          .setNotGiven(medicationEntity.getNotGiven());
-
-      medications.add(medication);
-    }
-
-    return medications;
-  }
-
-  private Stream<Observation> getObservations(Cases caseEntity) {
-    return caseEntity.getObservations().stream()
-        .map(observationTransformer::transform);
-  }
-
-  private void addInputParameters(Cases caseEntity, Builder builder,
-      ReferencingType inputParamsRefType) {
-    // TODO review this in more detail. Non outputData output parameters are included here
-    if (!caseEntity.getParameters().isEmpty()) {
-      Parameters inputParameters = new Parameters();
-      builder.addParameter(SystemConstants.INPUT_PARAMETERS)
-          .setResource(inputParameters);
-
-      for (CaseParameter parameterEntity : caseEntity.getParameters()) {
-        inputParameters.addParameter()
-            .setName(parameterEntity.getName())
-            .setValue(new StringType(parameterEntity.getValue()));
-      }
-    }
-  }
+//  private void addInputParameters(Cases caseEntity, Builder builder,
+//      ReferencingType inputParamsRefType) {
+//    // TODO review this in more detail. Non outputData output parameters are included here
+//    if (!caseEntity.getParameters().isEmpty()) {
+//      Parameters inputParameters = new Parameters();
+//      builder.addParameter(SystemConstants.INPUT_PARAMETERS)
+//          .setResource(inputParameters);
+//
+//      for (CaseParameter parameterEntity : caseEntity.getParameters()) {
+//        inputParameters.addParameter()
+//            .setName(parameterEntity.getName())
+//            .setValue(new StringType(parameterEntity.getValue()));
+//      }
+//    }
+//  }
 
   private class Builder {
 

@@ -7,10 +7,12 @@ import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.springframework.stereotype.Service;
 import uk.nhs.ctp.entities.CaseObservation;
+import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.service.dto.CdssRequestDTO;
 import uk.nhs.ctp.service.dto.CdssResponseDTO;
 import uk.nhs.ctp.service.dto.CdssResult;
 import uk.nhs.ctp.service.dto.EncounterReportInput;
+import uk.nhs.ctp.service.dto.PractitionerDTO;
 import uk.nhs.ctp.service.dto.TriageLaunchDTO;
 import uk.nhs.ctp.service.dto.TriageQuestion;
 import uk.nhs.ctp.transform.CaseObservationTransformer;
@@ -36,11 +38,12 @@ public class TriageService {
    * @return response {@link CdssResponseDTO}
    */
   public Long launchTriage(TriageLaunchDTO requestDetails) {
+    String patientId = requestDetails.getPatientId();
+    PractitionerDTO practitioner = requestDetails.getSettings().getPractitioner();
+    Cases caseEntity = caseService.createCase(patientId, practitioner);
+    Long caseId = caseEntity.getId();
+    caseService.setupCaseDetails(caseEntity, patientId);
 
-    Long caseId = caseService.createCase(
-        requestDetails.getPatientId(),
-        requestDetails.getSettings().getPractitioner()
-    ).getId();
     String encounterId = requestDetails.getEncounterId();
     if (encounterId != null) {
       log.info("Continuing triage journey for encounter {}", encounterId);
