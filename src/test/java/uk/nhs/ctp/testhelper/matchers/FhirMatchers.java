@@ -32,7 +32,7 @@ public class FhirMatchers {
     }, "x:" + x + " , y:" + y);
   }
 
-  public static Matcher<Element> isFhir(Element expected) {
+  public static <T extends Element> Matcher<T> isFhir(T expected) {
     return new FunctionMatcher<>(
         actual -> actual.equalsDeep(expected),
         expected.toString());
@@ -48,6 +48,10 @@ public class FhirMatchers {
         actual.hasReference()
             ? actual.getReference().equals(ref)
             : actual.getResource().getIdElement().getValue().equals(ref), "reference to " + ref);
+  }
+
+  public static Matcher<Reference> referenceTo(Reference ref) {
+    return ref.hasReference() ? referenceTo(ref.getReference()) : referenceTo((Resource)ref.getResource());
   }
 
   public static Matcher<Reference> referenceTo(Resource resource) {
