@@ -15,14 +15,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.stereotype.Component;
 import uk.nhs.ctp.service.dto.ConditionDTO;
 import uk.nhs.ctp.service.fhir.GenericResourceLocator;
-import uk.nhs.ctp.service.fhir.ReferenceService;
 
 @Component
 @AllArgsConstructor
 public class ConditionDTOTransformer implements Transformer<Condition, ConditionDTO> {
 
   private final GenericResourceLocator resourceLocator;
-  private final ReferenceService referenceService;
 
   @Override
   public ConditionDTO transform(Condition condition) {
