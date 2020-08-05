@@ -1,10 +1,10 @@
 package uk.nhs.ctp.service;
 
-import static org.hamcrest.Matchers.both;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import com.google.common.collect.Iterables;
 import java.util.Collections;
 import java.util.Optional;
 import org.hamcrest.Matcher;
@@ -24,6 +25,7 @@ import org.hl7.fhir.dstu3.model.CareConnectPatient;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Composition;
+import org.hl7.fhir.dstu3.model.Composition.SectionComponent;
 import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.Encounter.EncounterStatus;
@@ -40,7 +42,7 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
 import uk.nhs.ctp.config.FHIRConfig;
-import uk.nhs.ctp.entities.CaseObservation;
+import uk.nhs.ctp.entities.CaseParameter;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.entities.CompositionEntity;
 import uk.nhs.ctp.repos.CaseRepository;
@@ -54,6 +56,7 @@ import uk.nhs.ctp.transform.CompositionTransformer;
 public class CompositionServiceTest {
 
   public static final String SUPPLIER = "supplier";
+
   @Mock
   private ReferenceService referenceService;
 
@@ -69,7 +72,7 @@ public class CompositionServiceTest {
   @Mock
   private CompositionEntityTransformer compositionEntityTransformer;
 
-  @Mock()
+  @Mock
   private NarrativeService narrativeService;
 
   @Mock
@@ -144,7 +147,11 @@ public class CompositionServiceTest {
     var composition = fhirContext.newJsonParser()
         .parseResource(Composition.class, caseComposition.getResource());
 
-    assertThat(composition.getSection(), contains(isInterimSection()));
+    assertThat(composition.getSection(), hasSize(1));
+    SectionComponent section = Iterables.getOnlyElement(composition.getSection());
+
+    assertThat(section.getTitle(), containsString("Request/id"));
+    assertThat(section.getEntry(), contains(isReferenceTo("Observation/1")));
   }
 
   private void buildInterimCase() {
@@ -167,24 +174,16 @@ public class CompositionServiceTest {
             ));
     observation.setId("Observation/1");
     locateResource("Observation/1", observation);
-    CaseObservation caseObservation = new CaseObservation();
-    caseObservation.setId(1L);
-    caseObservation.setDisplay("test code");
-    caseObservation.setValueDisplay("Test observation");
-
+    CaseParameter parameter = new CaseParameter();
+    parameter.setReference("Observation/1");
     Cases caseEntity = new Cases();
     caseEntity.setId(1L);
     caseEntity.setPatientId("Patient/1");
-    caseEntity.addObservation(caseObservation);
+    caseEntity.addParameter(parameter);
     when(caseRepository.getOneByIdAndSupplierId(1L, SUPPLIER)).thenReturn(Optional.of(caseEntity));
 
     cdssResult = new CdssResult();
     cdssResult.setRequestId("Request/id");
-  }
-
-  private Matcher<Object> isInterimSection() {
-    return both(hasProperty("title", containsString("Request/id")))
-        .and(hasProperty("entry", contains(isReferenceTo("Observation/1"))));
   }
 
   private void locateResource(String id, DomainResource resource) {

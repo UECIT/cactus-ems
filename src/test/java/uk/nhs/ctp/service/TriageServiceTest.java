@@ -17,7 +17,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.nhs.ctp.service.dto.CdssRequestDTO;
 import uk.nhs.ctp.service.dto.CdssResult;
-import uk.nhs.ctp.transform.CaseObservationTransformer;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TriageServiceTest {
@@ -36,9 +35,6 @@ public class TriageServiceTest {
 
   @Mock
   private EncounterService encounterService;
-
-  @Mock
-  private CaseObservationTransformer caseObservationTransformer;
 
   @Mock
   private CompositionService compositionService;

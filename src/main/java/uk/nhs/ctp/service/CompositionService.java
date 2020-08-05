@@ -23,12 +23,9 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.springframework.stereotype.Service;
 import uk.nhs.cactus.common.security.TokenAuthenticationService;
-import uk.nhs.ctp.entities.CaseImmunization;
-import uk.nhs.ctp.entities.CaseMedication;
-import uk.nhs.ctp.entities.CaseObservation;
+import uk.nhs.ctp.entities.CaseParameter;
 import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.entities.CompositionEntity;
-import uk.nhs.ctp.entities.QuestionResponse;
 import uk.nhs.ctp.enums.DocumentSectionCode;
 import uk.nhs.ctp.enums.DocumentType;
 import uk.nhs.ctp.enums.ListOrder;
@@ -192,26 +189,11 @@ public class CompositionService {
           .forEach(references::add);
     }
 
-    // MAYBEDO: only add the latest assertions
-    caseEntity.getObservations()
+    caseEntity.getParameters()
         .stream()
-        .map(CaseObservation::getId)
-        .map(id -> referenceService.buildRef(ResourceType.Observation, id))
-        .forEach(references::add);
-    caseEntity.getImmunizations()
-        .stream()
-        .map(CaseImmunization::getId)
-        .map(id -> referenceService.buildRef(ResourceType.Immunization, id))
-        .forEach(references::add);
-    caseEntity.getMedications()
-        .stream()
-        .map(CaseMedication::getId)
-        .map(id -> referenceService.buildRef(ResourceType.Medication, id))
-        .forEach(references::add);
-    caseEntity.getQuestionResponses()
-        .stream()
-        .map(QuestionResponse::getReference)
-        .map(ref -> referenceService.buildRef(ResourceType.QuestionnaireResponse, ref))
+        .filter(caseParameter -> !caseParameter.isDeleted())
+        .map(CaseParameter::getReference)
+        .map(Reference::new)
         .forEach(references::add);
 
     return references;

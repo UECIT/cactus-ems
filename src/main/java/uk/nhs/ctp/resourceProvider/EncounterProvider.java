@@ -28,7 +28,6 @@ import org.hl7.fhir.dstu3.model.Composition;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.Encounter.EncounterParticipantComponent;
 import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
@@ -43,6 +42,7 @@ import uk.nhs.ctp.service.CarePlanService;
 import uk.nhs.ctp.service.CompositionService;
 import uk.nhs.ctp.service.EncounterService;
 import uk.nhs.ctp.service.ListService;
+import uk.nhs.ctp.service.ObservationService;
 import uk.nhs.ctp.service.ReferralRequestService;
 import uk.nhs.ctp.service.fhir.GenericResourceLocator;
 import uk.nhs.ctp.service.fhir.ReferenceService;
@@ -59,6 +59,7 @@ public class EncounterProvider implements IResourceProvider {
   private final ReferenceService referenceService;
   private final ListService listService;
   private final CompositionService compositionService;
+  private final ObservationService observationService;
   private final AuditService auditService;
   private final FhirContext context;
 
@@ -197,8 +198,7 @@ public class EncounterProvider implements IResourceProvider {
   }
 
   private void addObservations(Bundle bundle, Long caseId) {
-    List<Observation> observations = encounterService.getObservationsForEncounter(caseId);
-    observations.stream()
+    observationService.getByCaseId(caseId).stream()
         .map(obs -> new BundleEntryComponent()
             .setFullUrl(referenceService
                 .buildId(ResourceType.Observation, obs.getIdElement().toVersionless().toString()))

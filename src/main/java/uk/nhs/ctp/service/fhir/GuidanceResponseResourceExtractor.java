@@ -70,8 +70,4 @@ public class GuidanceResponseResourceExtractor {
     return resources;
   }
 
-  public GuidanceResponse extractGuidanceResponse(GuidanceResponse resource) {
-    return resource;
-  }
-
 }
