@@ -137,8 +137,6 @@ public class CaseService {
         .getOneByIdAndSupplierId(caseId, authService.requireSupplierId())
         .orElseThrow(EMSException::notFound);
 
-    caseRepository.saveAndFlush(triageCase);
-
     // Delete existing parameters and create new ones
     triageCase.getParameters()
         .forEach(param -> param.setDeleted(true));
@@ -148,8 +146,7 @@ public class CaseService {
       caseParameter.setTimestamp(Date.from(clock.instant()));
 
       String paramReference;
-      if (parameter.hasValue()
-          && parameter.getValue().hasType(FHIRAllTypes.REFERENCE.toCode())) {
+      if (parameter.hasValue() && parameter.getValue().hasType(FHIRAllTypes.REFERENCE.toCode())) {
         // Store the reference
         paramReference = ((Reference)parameter.getValue()).getReference();
       }
@@ -175,9 +172,7 @@ public class CaseService {
   }
 
   public void addResourceToCaseInputData(Long caseId, Resource resource) {
-    Cases existingCase = caseRepository
-        .getOneByIdAndSupplierId(caseId, authService.requireSupplierId())
-        .orElseThrow(EMSException::notFound);
+    Cases existingCase = findCase(caseId);
 
     CaseParameter caseParameter = new CaseParameter();
     caseParameter.setReference(storageService.storeExternal(resource));
