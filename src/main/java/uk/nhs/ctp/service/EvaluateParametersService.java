@@ -76,6 +76,8 @@ public class EvaluateParametersService {
         .filter(caseParameter -> !caseParameter.isDeleted())
         .map(CaseParameter::getReference)
         .map(Reference::new)
+        // QuestionnaireResponse added from database later so filter out now
+        .filter(ref -> !ref.getReferenceElement().getResourceType().equals(ResourceType.QuestionnaireResponse.toString()))
         .collect(Collectors.toUnmodifiableList());
 
     switch (defaultIfNull(inputDataRefType, ReferencingType.BY_REFERENCE)) {

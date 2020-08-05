@@ -175,6 +175,10 @@ public class EvaluateParametersServiceTest {
     CaseParameter parameter = new CaseParameter();
     parameter.setReference("Observation/Something");
     caseEntity.addParameter(parameter);
+
+    CaseParameter parameter2 = new CaseParameter();
+    parameter2.setReference("QuestionnaireResponse/Something");
+    caseEntity.addParameter(parameter2);
     return caseEntity;
   }
 
