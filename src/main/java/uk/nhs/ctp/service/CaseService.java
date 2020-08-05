@@ -9,9 +9,9 @@ import java.util.List;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Observation;
@@ -79,96 +79,111 @@ public class CaseService {
 
   public void setupCaseDetails(Cases triageCase, String patientRef) {
     Patient patient = resourceLocator.findResource(patientRef);
-    HumanName name = patient.getNameFirstRep();
-    triageCase.setFirstName(name.getGivenAsSingleString());
-    triageCase.setLastName(name.getFamily());
 
-    // TODO handle address better
-    if (patient.hasAddress()) {
-      triageCase.setAddress(StringUtils.join(patient.getAddressFirstRep().getLine(), ", "));
+    if (patient.hasName()) {
+      HumanName name = patient.getNameFirstRep();
+      if (name.hasGiven()) {
+        triageCase.setFirstName(name.getGivenAsSingleString());
+      }
+      triageCase.setLastName(name.getFamily());
     }
+
+    triageCase.setCreatedDate(Date.from(clock.instant()));
 
     if (patient.hasIdentifier()) {
-      triageCase.setNhsNumber(patient.getIdentifierFirstRep().getId());
+      //TODO: CDSCT-482 - find the NHS number properly
+      triageCase.setNhsNumber(patient.getIdentifierFirstRep().getValue());
     }
-    if (patient.hasGender()) {
-      triageCase.setGender(patient.getGender().toCode());
-    }
-    triageCase.setDateOfBirth(patient.getBirthDate());
-    triageCase.setCreatedDate(new Date());
 
     // Initial patient observations
-    Gender gender = Gender.fromCode(triageCase.getGender());
     Reference subject = referenceService
         .buildRef(ResourceType.Patient, triageCase.getPatientId());
     Reference context = referenceService.buildRef(ResourceType.Encounter, triageCase.getId());
 
-    Observation genderObs = new Observation()
-        .setStatus(ObservationStatus.FINAL)
-        .setIssued(Date.from(clock.instant()))
-        .setCode(new CodeableConcept(new Coding(SystemURL.SNOMED, "263495000", "Gender")))
-        .setValue(gender.toCodeableConcept())
-        .setSubject(subject)
-        .setContext(context);
-    genderObs.setText(narrativeService.buildNarrative("Observed that 'Gender' was " + gender.getDisplay()));
-    CaseParameter genderObsParameter = new CaseParameter();
-    genderObsParameter.setTimestamp(genderObs.getIssued());
-    genderObsParameter.setReference(storageService.storeExternal(genderObs));
-    triageCase.addParameter(genderObsParameter);
+    if (patient.hasGender()) {
+      Observation genderObs = genderObservation(subject, context, patient.getGender());
+      CaseParameter genderObsParameter = new CaseParameter();
+      genderObsParameter.setTimestamp(genderObs.getIssued());
+      genderObsParameter.setReference(storageService.storeExternal(genderObs));
+      triageCase.addParameter(genderObsParameter);
+    }
 
+    if (patient.hasBirthDate()) {
+      Observation ageObs = dateOfBirthObservation(subject, context, patient.getBirthDate());
+      CaseParameter ageObsParameter = new CaseParameter();
+      ageObsParameter.setTimestamp(ageObs.getIssued());
+      ageObsParameter.setReference(storageService.storeExternal(ageObs));
+      triageCase.addParameter(ageObsParameter);
+    }
+
+    caseRepository.saveAndFlush(triageCase);
+  }
+
+  private Observation dateOfBirthObservation(Reference subject, Reference context, Date date) {
+    String dateOfBirth = DATE_FORMAT.format(date);
     Observation ageObs = new Observation()
         .setStatus(ObservationStatus.FINAL)
         .setIssued(Date.from(clock.instant()))
         .setCode(new CodeableConcept(new Coding(SystemURL.SNOMED, "397669002", "Age")))
-        .setValue(new StringType(DATE_FORMAT.format(triageCase.getDateOfBirth())))
+        .setValue(new StringType(dateOfBirth))
         .setSubject(subject)
         .setContext(context);
-    ageObs.setText(narrativeService.buildNarrative("Observed that 'Gender' was " + gender.getDisplay()));
-    CaseParameter ageObsParameter = new CaseParameter();
-    ageObsParameter.setTimestamp(ageObs.getIssued());
-    ageObsParameter.setReference(storageService.storeExternal(ageObs));
-    triageCase.addParameter(ageObsParameter);
-    caseRepository.saveAndFlush(triageCase);
+    ageObs.setText(narrativeService.buildNarrative("Observed that 'Age' was " + dateOfBirth));
+    return ageObs;
+  }
+
+  private Observation genderObservation(Reference subject, Reference context, AdministrativeGender gender) {
+    Gender genderEnum = Gender.fromCode(gender.toCode());
+    Observation genderObs = new Observation()
+        .setStatus(ObservationStatus.FINAL)
+        .setIssued(Date.from(clock.instant()))
+        .setCode(new CodeableConcept(new Coding(SystemURL.SNOMED, "263495000", "Gender")))
+        .setValue(genderEnum.toCodeableConcept())
+        .setSubject(subject)
+        .setContext(context);
+    genderObs.setText(narrativeService.buildNarrative("Observed that 'Gender' was " + genderEnum.getDisplay()));
+    return genderObs;
   }
 
   @Transactional
-  public Cases updateCase(Long caseId, CdssResult evaluateResponse) {
-    Cases triageCase = caseRepository
-        .getOneByIdAndSupplierId(caseId, authService.requireSupplierId())
-        .orElseThrow(EMSException::notFound);
+  public void updateCase(Long caseId, CdssResult evaluateResponse) {
+    Cases triageCase = findCase(caseId);
 
-    // Delete existing parameters and create new ones
+    // 'Soft' delete existing parameters and create new ones
     triageCase.getParameters()
         .forEach(param -> param.setDeleted(true));
 
-    for (ParametersParameterComponent parameter : evaluateResponse.getOutputData().getParameter()) {
-      CaseParameter caseParameter = new CaseParameter();
-      caseParameter.setTimestamp(Date.from(clock.instant()));
-
-      String paramReference;
-      if (parameter.hasValue() && parameter.getValue().hasType(FHIRAllTypes.REFERENCE.toCode())) {
-        // Store the reference
-        paramReference = ((Reference)parameter.getValue()).getReference();
+    if (evaluateResponse.hasOutputData()) {
+      for (ParametersParameterComponent parameter : evaluateResponse.getOutputData().getParameter()) {
+        addCaseParameter(parameter, triageCase);
       }
-      else if (parameter.hasResource()) {
-        // Save resource then store reference
-        paramReference = storageService.storeExternal(parameter.getResource());
-      }
-      else {
-        log.warn("Output Parameter with name {} was not a resource or reference", parameter.getName());
-        continue;
-      }
-
-      caseParameter.setReference(paramReference);
-      triageCase.addParameter(caseParameter);
     }
 
     if (evaluateResponse.getResult() != null && evaluateResponse.getSwitchTrigger() == null) {
       triageCase.setTriageComplete(true);
-      triageCase.setClosedDate(new Date());
+      triageCase.setClosedDate(Date.from(clock.instant()));
     }
 
-    return caseRepository.saveAndFlush(triageCase);
+    caseRepository.saveAndFlush(triageCase);
+  }
+
+  private void addCaseParameter(ParametersParameterComponent parameter, Cases triageCase) {
+    CaseParameter caseParameter = new CaseParameter();
+    caseParameter.setTimestamp(Date.from(clock.instant()));
+
+    String paramReference;
+    if (parameter.hasValue() && parameter.getValue().hasType(FHIRAllTypes.REFERENCE.toCode())) {
+      paramReference = ((Reference)parameter.getValue()).getReference();
+    }
+    else if (parameter.hasResource()) {
+      paramReference = storageService.storeExternal(parameter.getResource());
+    }
+    else {
+      log.warn("Output Parameter with name {} was not a resource or reference", parameter.getName());
+      return;
+    }
+    caseParameter.setReference(paramReference);
+    triageCase.addParameter(caseParameter);
   }
 
   public void addResourceToCaseInputData(Long caseId, Resource resource) {
@@ -178,7 +193,7 @@ public class CaseService {
     caseParameter.setReference(storageService.storeExternal(resource));
     caseParameter.setTimestamp(Date.from(clock.instant()));
     existingCase.addParameter(caseParameter);
-    caseRepository.save(existingCase);
+    caseRepository.saveAndFlush(existingCase);
   }
 
 }

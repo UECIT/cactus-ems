@@ -1,6 +1,5 @@
 package uk.nhs.ctp.entities;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -40,17 +39,6 @@ public class Cases extends SupplierPartitioned {
 
   @Column(name = "lastName")
   private String lastName;
-
-  @Column(name = "gender")
-  private String gender;
-
-  @JsonFormat(pattern = "yyyy-MM-dd")
-  @Temporal(TemporalType.DATE)
-  @Column(name = "date_of_birth")
-  private Date dateOfBirth;
-
-  @Column(name = "address")
-  private String address;
 
   @Column(name = "nhs_number")
   private String nhsNumber;
