@@ -11,7 +11,8 @@ import { ReportService } from 'src/app/service';
 export class ReportSearchDialogComponent {
 
   nhsNumber: string;
-  reportsFound: EncounterReportInput[];
+  encountersFound: string[];
+  selectedReport: EncounterReportInput;
 
   constructor(
     public dialogRef: MatDialogRef<ReportSearchDialogComponent>,
@@ -24,7 +25,13 @@ export class ReportSearchDialogComponent {
 
   search() {
     this.reportService.searchByPatient(this.nhsNumber)
-      .then(result => this.reportsFound = result);
+      .then(result => this.encountersFound = result);
+  }
+
+  select(encounterId: string) {
+    this.selectedReport = null;
+    this.reportService.getEncounterReport(encounterId)
+      .then(result => this.selectedReport = result);
   }
 
   handover(report: EncounterReportInput) {

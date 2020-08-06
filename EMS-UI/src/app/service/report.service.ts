@@ -39,15 +39,13 @@ export class ReportService {
     }
   }
 
-  async searchByPatient(nhsNumber: string) {
+  async searchByPatient(nhsNumber: string): Promise<string[]> {
     const token = this.authService.getAuthToken();
     if (token != null) {
       httpOptions.headers = httpOptions.headers.set('Authorization', token);
 
       const encounterSearchUrl = `${environment.EMS_API}/report/search?nhsNumber=${nhsNumber}`;
-      const encounterIds = await this.http.get<string[]>(encounterSearchUrl, httpOptions).toPromise();
-
-      return await Promise.all(encounterIds.map(id => this.getEncounterReport(id)));
+      return await this.http.get<string[]>(encounterSearchUrl, httpOptions).toPromise();
     }
   }
 

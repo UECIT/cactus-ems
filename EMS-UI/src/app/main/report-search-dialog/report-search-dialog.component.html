@@ -8,26 +8,28 @@
       <mat-error *ngIf="!nhsNumber">Required</mat-error>
     </mat-form-field>
   </div>
-  <div *ngIf="reportsFound">
+  <div *ngIf="encountersFound">
     <mat-accordion>
-      <mat-expansion-panel *ngFor="let report of reportsFound">
+      <mat-expansion-panel *ngFor="let encounter of encountersFound" (opened)="select(encounter)">
         <mat-expansion-panel-header>
-          <mat-panel-title>{{report.encounterId}}</mat-panel-title>
+          <mat-panel-title>{{encounter}}</mat-panel-title>
           <mat-panel-description>View Details</mat-panel-description>
         </mat-expansion-panel-header>
-        <p>Start: {{report.encounterStart}}</p>
-        <p>End: {{report.encounterEnd}}</p>
-        <p>Patient Name: {{report.patientName}}</p>
-        <p>Patient Address: {{report.patientAddress}}</p>
-        <p>Observations:</p>
-        <ul>
-          <li *ngFor="let obs of report.observations">{{obs}}</li>
-        </ul>
-        <button mat-raised-button (click)="handover(report)">Continue This Encounter</button>
+        <div *ngIf="selectedReport">
+          <p>Start: {{selectedReport.encounterStart}}</p>
+          <p>End: {{selectedReport.encounterEnd}}</p>
+          <p>Patient Name: {{selectedReport.patientName}}</p>
+          <p>Patient Address: {{selectedReport.patientAddress}}</p>
+          <p>Observations:</p>
+          <ul>
+            <li *ngFor="let obs of selectedReport.observations">{{obs}}</li>
+          </ul>
+          <button mat-raised-button (click)="handover(selectedReport)">Continue This Encounter</button>
+        </div>
       </mat-expansion-panel>
     </mat-accordion>
   </div>
-  <div *ngIf="reportsFound && !reportsFound.length">
+  <div *ngIf="encountersFound && !encountersFound.length">
     <p>No results found.</p>
   </div>
 </div>
