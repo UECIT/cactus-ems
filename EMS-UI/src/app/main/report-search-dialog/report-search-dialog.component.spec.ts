@@ -44,7 +44,7 @@ class Page {
     }
 }
 
-fdescribe('Report Search Dialog Component', () => {
+describe('Report Search Dialog Component', () => {
 
     let reportServiceSpy: {searchByPatient: jasmine.Spy, getEncounterReport: jasmine.Spy};
     let dialogRefSpy: {close: jasmine.Spy};
