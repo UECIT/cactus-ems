@@ -3,7 +3,7 @@
   <div>
     <mat-form-field class="full-width">
       <mat-label>NHS Number</mat-label>
-      <input required matInput [(ngModel)]="nhsNumber" />
+      <input id="nhsNumber" required matInput [(ngModel)]="nhsNumber" />
       <mat-hint>Search will return all encounter reports for patients with this NHS Number</mat-hint>
       <mat-error *ngIf="!nhsNumber">Required</mat-error>
     </mat-form-field>
@@ -12,7 +12,7 @@
     <mat-accordion>
       <mat-expansion-panel *ngFor="let encounter of encountersFound" (opened)="select(encounter)">
         <mat-expansion-panel-header>
-          <mat-panel-title>{{encounter}}</mat-panel-title>
+          <mat-panel-title [id]="encounter">{{encounter}}</mat-panel-title>
           <mat-panel-description>View Details</mat-panel-description>
         </mat-expansion-panel-header>
         <div *ngIf="selectedReport">
@@ -24,16 +24,24 @@
           <ul>
             <li *ngFor="let obs of selectedReport.observations">{{obs}}</li>
           </ul>
-          <button mat-raised-button (click)="handover(selectedReport)">Continue This Encounter</button>
+          <button id="continue" mat-raised-button (click)="handover(selectedReport)">
+            Continue This Encounter
+          </button>
+        </div>
+        <div class="alert alert-danger" *ngIf="fetchReportErr">
+          <app-error-display id="fetchReportError" [(errorObject)]="fetchReportErr"></app-error-display>
         </div>
       </mat-expansion-panel>
     </mat-accordion>
   </div>
-  <div *ngIf="encountersFound && !encountersFound.length">
+  <div id="noResults" *ngIf="encountersFound && !encountersFound.length">
     <p>No results found.</p>
+  </div>
+  <div class="alert alert-danger" *ngIf="searchErr">
+    <app-error-display id="searchError" [(errorObject)]="searchErr"></app-error-display>
   </div>
 </div>
 <div mat-dialog-actions>
-  <button mat-button (click)="cancel()">Cancel</button>
-  <button mat-button [disabled]="!nhsNumber" (click)="search()">Search</button>
+  <button id="cancel" mat-button (click)="cancel()">Cancel</button>
+  <button id="search" mat-button [disabled]="!nhsNumber" (click)="search()">Search</button>
 </div>

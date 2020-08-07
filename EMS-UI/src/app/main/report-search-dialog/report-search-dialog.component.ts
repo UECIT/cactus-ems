@@ -14,6 +14,9 @@ export class ReportSearchDialogComponent {
   encountersFound: string[];
   selectedReport: EncounterReportInput;
 
+  searchErr: any;
+  fetchReportErr: any;
+
   constructor(
     public dialogRef: MatDialogRef<ReportSearchDialogComponent>,
     private reportService: ReportService 
@@ -24,14 +27,19 @@ export class ReportSearchDialogComponent {
   }
 
   search() {
+    this.searchErr = null;
+    this.encountersFound = null;
     this.reportService.searchByPatient(this.nhsNumber)
-      .then(result => this.encountersFound = result);
+      .then(result => this.encountersFound = result)
+      .catch(err => this.searchErr = err);
   }
 
   select(encounterId: string) {
     this.selectedReport = null;
+    this.fetchReportErr = null;
     this.reportService.getEncounterReport(encounterId)
-      .then(result => this.selectedReport = result);
+      .then(result => this.selectedReport = result)
+      .catch(err => this.fetchReportErr = err);
   }
 
   handover(report: EncounterReportInput) {
