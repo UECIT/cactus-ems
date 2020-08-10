@@ -75,8 +75,8 @@ public class EvaluateService {
         .resolve(response, cdssSupplier, requestDetails.getSettings(),
             requestDetails.getPatientId());
 
-    if (result.hasOutputData() || result.getSessionId() != null) {
-      caseService.updateCase(caseId, result, result.getSessionId());
+    if (result.hasOutputData()) {
+      caseService.updateCase(caseId, result);
     } else {
       log.warn("Result has no outputData");
     }

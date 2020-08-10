@@ -58,10 +58,7 @@ public class ListService {
     /* Timestamped Resources */
     List<Pair<Date, Reference>> entityTimeList = new ArrayList<>();
     addQuestionnaires(caseEntity, entityTimeList);
-    addQuestionnaireResponses(caseEntity, entityTimeList);
-    addObservations(caseEntity, entityTimeList);
-    addMedications(caseEntity, entityTimeList);
-    addImmunizations(caseEntity, entityTimeList);
+    addTriageState(caseEntity, entityTimeList);
     addCarePlans(caseEntity, entityTimeList);
     addReferralRequest(caseEntity, entityTimeList);
 
@@ -81,24 +78,6 @@ public class ListService {
         .buildRef(ResourceType.Practitioner, caseEntity.getPractitionerId());
 
     listResource.addEntry(new ListEntryComponent(practitionerRef));
-  }
-
-  private void addImmunizations(Cases caseEntity, List<Pair<Date, Reference>> dateRefList) {
-    List<Pair<Date, Reference>> immunizationRefs = caseEntity.getImmunizations().stream()
-        .map(imm -> Pair.of(imm.getDateCreated(),
-            referenceService.buildRef(ResourceType.Immunization, imm.getId())))
-        .collect(Collectors.toUnmodifiableList());
-
-    dateRefList.addAll(immunizationRefs);
-  }
-
-  private void addMedications(Cases caseEntity, List<Pair<Date, Reference>> dateRefList) {
-    List<Pair<Date, Reference>> medRefs = caseEntity.getMedications().stream()
-        .map(med -> Pair.of(med.getDateCreated(),
-            referenceService.buildRef(ResourceType.Medication, med.getId())))
-        .collect(Collectors.toUnmodifiableList());
-
-    dateRefList.addAll(medRefs);
   }
 
   private void addReferralRequest(Cases caseEntity, List<Pair<Date, Reference>> dateRefList) {
@@ -124,21 +103,12 @@ public class ListService {
     dateRefList.addAll(dateRefPairs);
   }
 
-  private void addQuestionnaireResponses(Cases caseEntity,
-      List<Pair<Date, Reference>> dateRefList) {
-    List<Pair<Date, Reference>> qrRefs = caseEntity.getQuestionResponses().stream()
-        .map(qr -> Pair.of(qr.getDateCreated(), new Reference(qr.getReference())))
+  private void addTriageState(Cases caseEntity, List<Pair<Date, Reference>> dateRefList) {
+    List<Pair<Date, Reference>> paramRefs = caseEntity.getParameters().stream()
+        .filter(caseParameter -> !caseParameter.isDeleted())
+        .map(param -> Pair.of(param.getTimestamp(), new Reference(param.getReference())))
         .collect(Collectors.toUnmodifiableList());
-    dateRefList.addAll(qrRefs);
+    dateRefList.addAll(paramRefs);
   }
-
-  private void addObservations(Cases caseEntity, List<Pair<Date, Reference>> dateRefList) {
-    List<Pair<Date, Reference>> obsRefs = caseEntity.getObservations().stream()
-        .map(obs -> Pair.of(obs.getDateCreated(),
-            referenceService.buildRef(ResourceType.Observation, obs.getId())))
-        .collect(Collectors.toUnmodifiableList());
-    dateRefList.addAll(obsRefs);
-  }
-
 
 }

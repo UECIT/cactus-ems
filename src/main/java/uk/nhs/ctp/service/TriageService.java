@@ -6,14 +6,14 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.springframework.stereotype.Service;
-import uk.nhs.ctp.entities.CaseObservation;
+import uk.nhs.ctp.entities.Cases;
 import uk.nhs.ctp.service.dto.CdssRequestDTO;
 import uk.nhs.ctp.service.dto.CdssResponseDTO;
 import uk.nhs.ctp.service.dto.CdssResult;
 import uk.nhs.ctp.service.dto.EncounterReportInput;
+import uk.nhs.ctp.service.dto.PractitionerDTO;
 import uk.nhs.ctp.service.dto.TriageLaunchDTO;
 import uk.nhs.ctp.service.dto.TriageQuestion;
-import uk.nhs.ctp.transform.CaseObservationTransformer;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +25,6 @@ public class TriageService {
   private final ResponseService responseService;
   private final EncounterService encounterService;
   private final EvaluateService evaluateService;
-  private final CaseObservationTransformer caseObservationTransformer;
   private final CompositionService compositionService;
   private final CarePlanService carePlanService;
 
@@ -36,11 +35,12 @@ public class TriageService {
    * @return response {@link CdssResponseDTO}
    */
   public Long launchTriage(TriageLaunchDTO requestDetails) {
+    String patientId = requestDetails.getPatientId();
+    PractitionerDTO practitioner = requestDetails.getSettings().getPractitioner();
+    Cases caseEntity = caseService.createCase(patientId, practitioner);
+    Long caseId = caseEntity.getId();
+    caseService.setupCaseDetails(caseEntity, patientId);
 
-    Long caseId = caseService.createCase(
-        requestDetails.getPatientId(),
-        requestDetails.getSettings().getPractitioner()
-    ).getId();
     String encounterId = requestDetails.getEncounterId();
     if (encounterId != null) {
       log.info("Continuing triage journey for encounter {}", encounterId);
@@ -55,14 +55,11 @@ public class TriageService {
   }
 
   private void updateCaseFromEncounterReport(Long caseId, String encounterId) {
-    //TODO: This could be moved out when we have more than observations
     //TODO: Ideally we cached the ER somewhere, for now we fetch it again
     EncounterReportInput encounterReportInput = encounterService
         .getEncounterReport(new IdType(encounterId));
-    encounterReportInput.getObservations().forEach(obs -> {
-      CaseObservation caseObservation = caseObservationTransformer.transform(obs);
-      caseService.addObservation(caseId, caseObservation);
-    });
+    encounterReportInput.getObservations()
+        .forEach(obs -> caseService.addResourceToCaseInputData(caseId, obs));
   }
 
   /**

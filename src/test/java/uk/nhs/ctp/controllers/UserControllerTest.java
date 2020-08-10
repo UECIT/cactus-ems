@@ -46,7 +46,7 @@ public class UserControllerTest {
 
   @After
   public void cleanup() {
-    var createdUser = userRepository.findByUsername("admin_testid");
+    var createdUser = userRepository.findByUsername("testid");
     if (createdUser != null) {
       userRepository.delete(createdUser);
     }

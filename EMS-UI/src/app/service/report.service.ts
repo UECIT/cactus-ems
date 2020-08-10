@@ -29,25 +29,23 @@ export class ReportService {
     }
   }
   
-  async getEncounterReport(encounterId: string): Promise<EncounterReportInput> {
+  getEncounterReport(encounterId: string): Promise<EncounterReportInput> {
     const token = this.authService.getAuthToken();
     if (token != null) {
       httpOptions.headers = httpOptions.headers.set('Authorization', token);
 
       const url = `${environment.EMS_API}/report/encounter?encounterId=${encounterId}`;
-      return await this.http.get<EncounterReportInput>(url, httpOptions).toPromise();
+      return this.http.get<EncounterReportInput>(url, httpOptions).toPromise();
     }
   }
 
-  async searchByPatient(nhsNumber: string) {
+  searchByPatient(nhsNumber: string): Promise<string[]> {
     const token = this.authService.getAuthToken();
     if (token != null) {
       httpOptions.headers = httpOptions.headers.set('Authorization', token);
 
       const encounterSearchUrl = `${environment.EMS_API}/report/search?nhsNumber=${nhsNumber}`;
-      const encounterIds = await this.http.get<string[]>(encounterSearchUrl, httpOptions).toPromise();
-
-      return await Promise.all(encounterIds.map(id => this.getEncounterReport(id)));
+      return this.http.get<string[]>(encounterSearchUrl, httpOptions).toPromise();
     }
   }
 

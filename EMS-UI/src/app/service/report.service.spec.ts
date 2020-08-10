@@ -45,26 +45,17 @@ describe('Report Service', () => {
     });
 
     it('should search for reports by patient', () => {
-        const expectedReports = [
-            buildReport("validEncounterId1", "validPatientId"),
-            buildReport("validEncounterId2", "validPatientId")
-        ];
+        const expectedIds = ["validEncounterId1", "validEncounterId2"];
 
         httpClientSpy.get.and.callFake((url: string) => {
             if (url.includes("/report/search?nhsNumber=validNhsNumber")) {
-                return asyncData(expectedReports.map(er => er.encounterId));
-            }Promise.resolve()
-            if (url.includes("report/encounter?encounterId=validEncounterId1")) {
-                return asyncData(expectedReports[0]);
-            }
-            if (url.includes("report/encounter?encounterId=validEncounterId2")) {
-                return asyncData(expectedReports[1]);
+                return asyncData(expectedIds);
             }
         });
 
         reportService.searchByPatient("validNhsNumber")
-        .then(res => expect(res).toEqual(expectedReports))
-        .catch(fail);
+            .then(res => expect(res).toEqual(expectedIds))
+            .catch(fail);
 
         for (const call of httpClientSpy.get.calls.all()) {
             const headers: HttpHeaders = httpClientSpy.get.calls.first().args[1].headers;

@@ -20,7 +20,6 @@ public class CdssResult {
   private String switchTrigger;
   private ReferralRequest referralRequest;
   private List<CarePlanDTO> careAdvice;
-  private String sessionId;
   private List<Resource> contained;
   private OperationOutcome operationOutcome;
 
@@ -28,7 +27,7 @@ public class CdssResult {
   private CdsApiVersion apiVersion;
 
   public boolean hasOutputData() {
-    return !this.outputData.getParameter().isEmpty();
+    return this.outputData != null && !this.outputData.getParameter().isEmpty();
   }
 
   public boolean hasResult() {

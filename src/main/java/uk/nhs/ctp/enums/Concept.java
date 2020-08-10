@@ -2,7 +2,7 @@ package uk.nhs.ctp.enums;
 
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
-import uk.nhs.ctp.service.report.org.hl7.v3.Code;
+import uk.nhs.ctp.service.dto.CodeDTO;
 
 public interface Concept {
 
@@ -20,6 +20,10 @@ public interface Concept {
         .setCode(getValue())
         .setDisplay(getDisplay())
         .setSystem(getSystem());
+  }
+
+  default CodeDTO toDTO() {
+    return new CodeDTO(getValue(), getDisplay(), getSystem());
   }
 
   default String toCode() {

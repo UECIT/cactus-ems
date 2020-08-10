@@ -1,6 +1,5 @@
 package uk.nhs.ctp.entities;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -41,30 +40,8 @@ public class Cases extends SupplierPartitioned {
   @Column(name = "lastName")
   private String lastName;
 
-  @Column(name = "gender")
-  private String gender;
-
-  @JsonFormat(pattern = "yyyy-MM-dd")
-  @Temporal(TemporalType.DATE)
-  @Column(name = "date_of_birth")
-  private Date dateOfBirth;
-
-  @Column(name = "address")
-  private String address;
-
   @Column(name = "nhs_number")
   private String nhsNumber;
-
-  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-  @JoinColumn(name = "case_id")
-  private List<CaseImmunization> immunizations = new ArrayList<>();
-
-  @OneToMany(mappedBy = "caseEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<CaseObservation> observations = new ArrayList<>();
-
-  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-  @JoinColumn(name = "case_id")
-  private List<CaseMedication> medications = new ArrayList<>();
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "case_id")
@@ -73,9 +50,6 @@ public class Cases extends SupplierPartitioned {
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "case_id")
   private List<QuestionResponse> questionResponses = new ArrayList<>();
-
-  @Column(name = "session_id")
-  private String sessionId;
 
   @Temporal(TemporalType.TIMESTAMP)
   @Column(name = "created_date")
@@ -94,19 +68,6 @@ public class Cases extends SupplierPartitioned {
   public void addComposition(CompositionEntity composition) {
     this.compositions.add(composition);
     composition.setCaseEntity(this);
-  }
-
-  public void addMedication(CaseMedication medication) {
-    this.medications.add(medication);
-  }
-
-  public void addImmunization(CaseImmunization immunization) {
-    this.immunizations.add(immunization);
-  }
-
-  public void addObservation(CaseObservation observation) {
-    this.observations.add(observation);
-    observation.setCaseEntity(this);
   }
 
   public void addParameter(CaseParameter parameter) {
