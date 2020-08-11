@@ -8,7 +8,7 @@ import lombok.Data;
 @MappedSuperclass
 public class SupplierPartitioned {
 
-  @Column(name = "supplierId")
+  @Column(name = "supplierId", length = 45)
   private String supplierId;
 
 }

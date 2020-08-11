@@ -41,3 +41,7 @@ h4 {
 .actions {
     padding:10px;
 }
+
+.limit-height {
+    max-height: 50vh;
+}

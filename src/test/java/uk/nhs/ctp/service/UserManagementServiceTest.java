@@ -34,6 +34,7 @@ import uk.nhs.ctp.model.SupplierAccountDetails;
 import uk.nhs.ctp.model.SupplierAccountDetails.EndpointDetails;
 import uk.nhs.ctp.repos.UserRepository;
 import uk.nhs.ctp.security.CognitoService;
+import uk.nhs.ctp.service.dto.ChangePasswordDTO;
 import uk.nhs.ctp.service.dto.NewUserDTO;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -73,7 +74,7 @@ public class UserManagementServiceTest {
         .role("ROLE_SUPPLIER_ADMIN")
         .build();
     when(jwtHandler.generate(argThat(is(jwtRequest))))
-      .thenReturn("random_jwt_value");
+        .thenReturn("random_jwt_value");
     ReflectionTestUtils.setField(userManagementService, "ems", "http://ems.com");
     ReflectionTestUtils.setField(userManagementService, "emsUi", "http://ems-ui.com");
     ReflectionTestUtils.setField(userManagementService, "cdss", "http://cdss.com");
@@ -104,7 +105,7 @@ public class UserManagementServiceTest {
         .build();
 
     assertThat(returned, sameBeanAs(expected)
-      .with("password", any(String.class)));
+        .with("password", any(String.class)));
     verify(cognitoService).signUp("supplier_id", returned);
     verify(roleMapper).setupSupplierRoles("supplier_id", returned.getUsername());
   }
@@ -168,5 +169,24 @@ public class UserManagementServiceTest {
 
     expectedException.expect(EMSException.class);
     userManagementService.createUser(getTestUser());
+  }
+
+  @Test
+  public void reset_success() {
+
+    var existingUser = new UserEntity();
+    existingUser.setUsername("test_username");
+    when(userRepository.findByUsername("test_username")).thenReturn(existingUser);
+
+    ChangePasswordDTO changePasswordDTO = new ChangePasswordDTO();
+    changePasswordDTO.setUsername("test_username");
+    changePasswordDTO.setNewPassword("new password");
+    userManagementService.resetPassword(changePasswordDTO);
+
+    var expectedUser = new UserEntity();
+    expectedUser.setUsername("test_username");
+    expectedUser.setPassword("new password");
+
+    verify(userRepository).save(argThat(sameBeanAs(expectedUser)));
   }
 }

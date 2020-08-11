@@ -42,6 +42,18 @@ public class UserController {
     return new ResponseEntity<>(newSupplierUser, HttpStatus.OK);
   }
 
+
+  @PostMapping(path = "/reset")
+  @PreAuthorize(value = "hasRole('ROLE_ADMIN')") // Only admin users can create suppliers
+  public @ResponseBody
+  ResponseEntity<SupplierAccountDetails> reset(@RequestBody RegisterSupplierRequest request) {
+    if (request.getSupplierId() == null) {
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+    SupplierAccountDetails newDetails = userManagementService.resetSupplierUser(request);
+    return new ResponseEntity<>(newDetails, HttpStatus.OK);
+  }
+
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @GetMapping
   public @ResponseBody

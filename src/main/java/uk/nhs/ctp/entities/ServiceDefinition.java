@@ -2,10 +2,12 @@ package uk.nhs.ctp.entities;
 
 import javax.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Entity
 @Table(name = "service_definition")
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class ServiceDefinition extends SupplierPartitioned {
 
   @Id

@@ -32,6 +32,7 @@ import uk.nhs.ctp.utils.PasswordUtil;
 @RequiredArgsConstructor
 @Slf4j
 public class UserManagementService {
+  private static final String role = "ROLE_SUPPLIER_ADMIN";
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
@@ -64,7 +65,6 @@ public class UserManagementService {
   private String logs;
 
   public SupplierAccountDetails createNewSupplierUser(RegisterSupplierRequest request) {
-    final String role = "ROLE_SUPPLIER_ADMIN";
     String supplierId = request.getSupplierId().toLowerCase();
 
     validateIndexOrAliasName(supplierId, InvalidIndexNameException::new);
@@ -106,6 +106,45 @@ public class UserManagementService {
       return supplierAccountDetails;
     } catch (Exception e) {
       log.error("Error creating user: {}", supplierId);
+      throw e;
+    }
+  }
+
+  public SupplierAccountDetails resetSupplierUser(RegisterSupplierRequest request) {
+    String supplierId = request.getSupplierId().toLowerCase();
+
+    validateIndexOrAliasName(supplierId, InvalidIndexNameException::new);
+
+    var newPassword = new ChangePasswordDTO();
+    newPassword.setUsername(supplierId);
+    newPassword.setNewPassword(PasswordUtil.getStrongPassword());
+
+    try {
+      var user = resetPassword(newPassword);
+      cognitoService.setPassword(supplierId, newPassword.getNewPassword());
+
+      return SupplierAccountDetails.builder()
+          .jwt(jwtHandler.generate(JWTRequest.builder()
+              .username(supplierId)
+              .supplierId(supplierId)
+              .role(role)
+              .build()))
+          .username(supplierId)
+          .password(newPassword.getNewPassword())
+//          .email(user.getEmail())
+          .endpoints(EndpointDetails.builder()
+              .ems(ems)
+              .emsUi(emsUi)
+              .cdss(cdss)
+              .cdss2(cdss2)
+              .fhirServer(fhirServer)
+              .blobServer(blobServer)
+              .dos(dos)
+              .logs(logs)
+              .build())
+          .build();
+    } catch (Exception e) {
+      log.error("Error resetting user: {}", supplierId);
       throw e;
     }
   }

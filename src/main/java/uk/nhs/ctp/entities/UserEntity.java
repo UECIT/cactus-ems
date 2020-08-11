@@ -12,7 +12,7 @@ import lombok.Data;
 public class UserEntity extends SupplierPartitioned {
 
   @Id
-  @Column(name = "username")
+  @Column(name = "username", length = 45)
   private String username;
 
   @Column(name = "name")
