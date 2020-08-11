@@ -19,6 +19,8 @@ import lombok.Value;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AuditUnzipper {
 
+  public static final short FULL_URL = (short) 0x0707;
+
   public static List<ZippedEntry> unzipEntries(byte[] bytes) throws IOException {
     try (var input = new ByteArrayInputStream(bytes)) {
       try (var zip = new ZipInputStream(input)) {
@@ -30,7 +32,7 @@ public class AuditUnzipper {
           entries.add(ZippedEntry.builder()
               .instant(zipEntry.getCreationTime().toInstant())
               .path(zipEntry.getName())
-              .fullUrl(getStringField((short) 0x0707, zipEntry.getExtra()))
+              .fullUrl(getStringField(FULL_URL, zipEntry.getExtra()))
               .body(new String(zip.readAllBytes(), UTF_8))
               .build());
         }
