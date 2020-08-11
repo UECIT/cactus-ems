@@ -12,6 +12,8 @@ import java.util.zip.ZipOutputStream;
 
 public class ZipBuilder {
 
+  public static final short FULL_URL_FIELD_ID = (short) 0x0707;
+
   private final ByteArrayOutputStream output;
   private final ZipOutputStream zip;
 
@@ -26,7 +28,7 @@ public class ZipBuilder {
 
     byte[] fullPathBytes = fullUrl.getBytes(UTF_8);
     ByteBuffer extra = ByteBuffer.allocate(fullPathBytes.length + 4);
-    extra.putShort((short) 0x0707);
+    extra.putShort(FULL_URL_FIELD_ID);
     extra.putShort(Short.reverseBytes((short) fullPathBytes.length));
     extra.put(fullPathBytes);
 
