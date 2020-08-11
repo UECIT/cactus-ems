@@ -4,10 +4,12 @@ import static java.lang.Boolean.TRUE;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import com.amazonaws.regions.Regions;
+import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProviderClientBuilder;
 import com.amazonaws.services.cognitoidp.model.AdminAddUserToGroupRequest;
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminSetUserPasswordRequest;
+import com.amazonaws.services.cognitoidp.model.AdminSetUserPasswordResult;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,15 +29,16 @@ public class CognitoService {
   private static final String EMAIL_ATTRIBUTE = "email";
   private static final String SUPPLIER_GROUP_NAME = "cactus_admin_suppliers";
 
+  private final AWSCognitoIdentityProvider cognito =
+      AWSCognitoIdentityProviderClientBuilder.standard()
+          .withRegion(Regions.EU_WEST_2)
+          .build();
+
   public void signUp(String supplierId, SupplierAccountDetails accountDetails) {
     if (isEmpty(userPool)) {
       log.warn("No user pool set, skipping creating user in cognito");
       return;
     }
-
-    var cognitoIdentityProvider = AWSCognitoIdentityProviderClientBuilder.standard()
-        .withRegion(Regions.EU_WEST_2)
-        .build();
 
     var tempPassword = PasswordUtil.getStrongPassword();
     String username = accountDetails.getUsername();
@@ -56,16 +59,10 @@ public class CognitoService {
                 .withValue("true")
         );
     // Create the user
-    cognitoIdentityProvider.adminCreateUser(adminCreateUserRequest);
+    cognito.adminCreateUser(adminCreateUserRequest);
 
-    var setPasswordRequest = new AdminSetUserPasswordRequest()
-        .withUserPoolId(userPool)
-        .withUsername(username)
-        .withPassword(accountDetails.getPassword())
-        .withPermanent(TRUE);
-    // Set the password to the permanent one
     log.info("confirming password");
-    cognitoIdentityProvider.adminSetUserPassword(setPasswordRequest);
+    setPassword(username, accountDetails.getPassword());
 
     // Add user to the suppliers group
     var addToGroupRequest = new AdminAddUserToGroupRequest()
@@ -73,6 +70,16 @@ public class CognitoService {
         .withUsername(username)
         .withGroupName(SUPPLIER_GROUP_NAME);
     log.info("adding user '{}' to supplier group '{}'", username, SUPPLIER_GROUP_NAME);
-    cognitoIdentityProvider.adminAddUserToGroup(addToGroupRequest);
+    cognito.adminAddUserToGroup(addToGroupRequest);
+  }
+
+  public AdminSetUserPasswordResult setPassword(String username, String password) {
+    var setPasswordRequest = new AdminSetUserPasswordRequest()
+        .withUserPoolId(userPool)
+        .withUsername(username)
+        .withPassword(password)
+        .withPermanent(TRUE);
+    // Set the password to the permanent one
+    return cognito.adminSetUserPassword(setPasswordRequest);
   }
 }
