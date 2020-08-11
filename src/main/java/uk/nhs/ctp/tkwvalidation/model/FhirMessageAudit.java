@@ -8,6 +8,7 @@ import lombok.Value;
 @Builder
 public class FhirMessageAudit {
   String filePath;
+  String fullUrl;
   String requestBody;
   String responseBody;
   Instant moment;

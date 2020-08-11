@@ -24,6 +24,7 @@ import uk.nhs.ctp.tkwvalidation.model.FhirMessageAudit;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AuditZipBuilderTest {
+
   private static final Instant CREATED_AT_1 = Instant.parse("2020-07-06T10:23:31Z");
   private static final Instant CREATED_AT_2 = Instant.parse("2019-06-05T09:12:20Z");
 
@@ -48,7 +49,7 @@ public class AuditZipBuilderTest {
 
     var zipData = auditZipBuilder.zipMessageAudits(emptyList());
 
-    verify(zipBuilder, never()).addEntry(anyString(), anyString(), any(Instant.class));
+    verify(zipBuilder, never()).addEntry(anyString(), anyString(), anyString(), any(Instant.class));
     assertThat(zipData, is(expectedZipData));
   }
 
@@ -60,6 +61,7 @@ public class AuditZipBuilderTest {
     var selectedAudits = Collections.singletonList(
         FhirMessageAudit.builder()
             .filePath("path")
+            .fullUrl("https://path")
             .responseBody("responseBody1")
             .moment(CREATED_AT_1).build());
     var zipData = auditZipBuilder.zipMessageAudits(selectedAudits);
@@ -72,10 +74,12 @@ public class AuditZipBuilderTest {
     var selectedAudits = List.of(
         FhirMessageAudit.builder()
             .filePath("path")
+            .fullUrl("https://path")
             .responseBody("responseBody1")
             .moment(CREATED_AT_1).build(),
         FhirMessageAudit.builder()
             .filePath("path")
+            .fullUrl("https://path")
             .requestBody("requestBody2")
             .responseBody("responseBody2")
             .moment(CREATED_AT_2).build());
@@ -84,14 +88,17 @@ public class AuditZipBuilderTest {
 
     verify(zipBuilder).addEntry(
         "path.1.response.xml",
+        "https://path",
         "responseBody1",
         CREATED_AT_1);
     verify(zipBuilder).addEntry(
         "path.2.request.xml",
+        "https://path",
         "requestBody2",
         CREATED_AT_2);
     verify(zipBuilder).addEntry(
         "path.2.response.xml",
+        "https://path",
         "responseBody2",
         CREATED_AT_2);
   }
@@ -101,18 +108,22 @@ public class AuditZipBuilderTest {
     var selectedAudits = List.of(
         FhirMessageAudit.builder()
             .filePath("jsonPath")
+            .fullUrl("https://jsonPath")
             .responseBody("{ \"a\": \"b\" }")
             .moment(CREATED_AT_1).build(),
         FhirMessageAudit.builder()
             .filePath("xmlPath")
+            .fullUrl("https://xmlPath")
             .responseBody("<a>b</a>")
             .moment(CREATED_AT_1).build(),
         FhirMessageAudit.builder()
             .filePath("emptyPath")
+            .fullUrl("https://emptyPath")
             .responseBody("")
             .moment(CREATED_AT_1).build(),
         FhirMessageAudit.builder()
             .filePath("undefinedPath")
+            .fullUrl("https://undefinedPath")
             .responseBody("Base64==")
             .moment(CREATED_AT_1).build());
 
@@ -120,18 +131,22 @@ public class AuditZipBuilderTest {
 
     verify(zipBuilder).addEntry(
         "jsonPath.1.response.json",
+        "https://jsonPath",
         "{ \"a\": \"b\" }",
         CREATED_AT_1);
     verify(zipBuilder).addEntry(
         "xmlPath.1.response.xml",
+        "https://xmlPath",
         "<a>b</a>",
         CREATED_AT_1);
     verify(zipBuilder).addEntry(
         "emptyPath.1.response.xml",
+        "https://emptyPath",
         "",
         CREATED_AT_1);
     verify(zipBuilder).addEntry(
         "undefinedPath.1.response.xml",
+        "https://undefinedPath",
         "Base64==",
         CREATED_AT_1);
   }

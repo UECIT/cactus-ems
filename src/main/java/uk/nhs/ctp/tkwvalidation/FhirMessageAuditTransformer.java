@@ -5,7 +5,9 @@ import static org.springframework.http.MediaType.parseMediaType;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -18,6 +20,7 @@ import uk.nhs.ctp.tkwvalidation.model.FhirMessageAudit;
 @Component
 @RequiredArgsConstructor
 public class FhirMessageAuditTransformer {
+
   private static final List<MediaType> FHIR_FORMATS = Arrays.asList(
       parseMediaType("application/fhir+json"),
       parseMediaType("application/fhir+xml"),
@@ -37,10 +40,31 @@ public class FhirMessageAuditTransformer {
 
     return FhirMessageAudit.builder()
         .filePath(mergePaths(basePath, session.getRequestUrl()))
+        .fullUrl(fullUrl(session.getRequestHeaders(), session.getRequestUrl()))
         .requestBody(requestBody)
         .responseBody(responseBody)
         .moment(session.getCreatedDate())
         .build();
+  }
+
+  private String fullUrl(String requestHeaders, String requestUrl) {
+    final var HOST_HEADER = HttpHeaders.HOST.toLowerCase();
+    var allHeaders = auditParser.getHeadersFrom(defaultIfEmpty(requestHeaders, ""));
+    if (!allHeaders.containsKey(HOST_HEADER)) {
+      return "";
+    }
+
+    StringBuilder sb = new StringBuilder();
+    sb.append(singleHeader(allHeaders, "x-forwarded-proto", "http"));
+    sb.append("://").append(singleHeader(allHeaders, "host", "unknown-host"));
+    sb.append(requestUrl);
+
+    return sb.toString();
+  }
+
+  private String singleHeader(Map<String, Collection<String>> headers, String name,
+      String defaultValue) {
+    return headers.getOrDefault(name, List.of(defaultValue)).iterator().next();
   }
 
   public FhirMessageAudit from(AuditEntry entry, String basePath, boolean includeRequestBody) {
@@ -53,6 +77,7 @@ public class FhirMessageAuditTransformer {
 
     return FhirMessageAudit.builder()
         .filePath(mergePaths(basePath, entry.getRequestUrl()))
+        .fullUrl(fullUrl(entry.getRequestHeaders(), entry.getRequestUrl()))
         .requestBody(requestBody)
         .responseBody(responseBody)
         .moment(entry.getDateOfEntry())

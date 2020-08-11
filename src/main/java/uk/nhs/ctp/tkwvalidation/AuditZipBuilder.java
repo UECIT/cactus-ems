@@ -59,7 +59,7 @@ public class AuditZipBuilder {
         type.name().toLowerCase(),
         extension);
 
-    zipBuilder.addEntry(fullPath, body, audit.getMoment());
+    zipBuilder.addEntry(fullPath, audit.getFullUrl(), body, audit.getMoment());
   }
 
   private static boolean naiveIsJson(String text) {
