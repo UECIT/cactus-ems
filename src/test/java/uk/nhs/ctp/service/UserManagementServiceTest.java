@@ -74,7 +74,7 @@ public class UserManagementServiceTest {
         .role("ROLE_SUPPLIER_ADMIN")
         .build();
     when(jwtHandler.generate(argThat(is(jwtRequest))))
-      .thenReturn("random_jwt_value");
+        .thenReturn("random_jwt_value");
     ReflectionTestUtils.setField(userManagementService, "ems", "http://ems.com");
     ReflectionTestUtils.setField(userManagementService, "emsUi", "http://ems-ui.com");
     ReflectionTestUtils.setField(userManagementService, "cdss", "http://cdss.com");
@@ -105,7 +105,7 @@ public class UserManagementServiceTest {
         .build();
 
     assertThat(returned, sameBeanAs(expected)
-      .with("password", any(String.class)));
+        .with("password", any(String.class)));
     verify(cognitoService).signUp("supplier_id", returned);
     verify(roleMapper).setupSupplierRoles("supplier_id", returned.getUsername());
   }
