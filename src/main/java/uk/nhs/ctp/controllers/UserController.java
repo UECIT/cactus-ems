@@ -44,7 +44,7 @@ public class UserController {
 
 
   @PostMapping(path = "/reset")
-  @PreAuthorize(value = "hasRole('ROLE_ADMIN')") // Only admin users can create suppliers
+  @PreAuthorize(value = "hasRole('ROLE_ADMIN')") // Only admin users can reset suppliers
   public @ResponseBody
   ResponseEntity<SupplierAccountDetails> reset(@RequestBody RegisterSupplierRequest request) {
     if (request.getSupplierId() == null) {

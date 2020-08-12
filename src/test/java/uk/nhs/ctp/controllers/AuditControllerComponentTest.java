@@ -125,22 +125,26 @@ public class AuditControllerComponentTest {
     var decodedBytes = Base64.getDecoder().decode((byte[])tkwRequest.getBody());
 
     var entry1 = ZippedEntry.builder()
-        .path("encounter91/null/case/.1.request.xml")
+        .path("encounter91/unknown-host/case/.1.request.xml")
+        .fullUrl("http://unknown-host/case/")
         .body("auditRequestBody")
         .instant(Instant.parse("2020-06-30T07:56:31Z"))
         .build();
     var entry2 = ZippedEntry.builder()
-        .path("encounter91/null/case/.1.response.xml")
+        .path("encounter91/unknown-host/case/.1.response.xml")
+        .fullUrl("http://unknown-host/case/")
         .body("auditResponseBody")
         .instant(Instant.parse("2020-06-30T07:56:31Z"))
         .build();
     var entry3 = ZippedEntry.builder()
         .path("encounter91/cdss.cactus-staging.iucdspilot.uk/fhir/ServiceDefinition/palpitations2.1.response.xml")
+        .fullUrl("https://cdss.cactus-staging.iucdspilot.uk/fhir/ServiceDefinition/palpitations2")
         .body("entry1ResponseBody")
         .instant(Instant.parse("2020-06-30T07:56:32Z"))
         .build();
     var entry4 = ZippedEntry.builder()
         .path("encounter91/fhir-server.cactus-staging.iucdspilot.uk/fhir/QuestionnaireResponse/849.1.response.xml")
+        .fullUrl("http://fhir-server.cactus-staging.iucdspilot.uk/fhir/QuestionnaireResponse/849")
         .body("entry1ResponseBody")
         .instant(Instant.parse("2020-06-30T07:56:33Z"))
         .build();
@@ -169,22 +173,26 @@ public class AuditControllerComponentTest {
     var responseBytes = response.getBody();
 
     var entry1 = ZippedEntry.builder()
-        .path("encounter91/null/case/.1.request.xml")
+        .path("encounter91/unknown-host/case/.1.request.xml")
+        .fullUrl("http://unknown-host/case/")
         .body("auditRequestBody")
         .instant(Instant.parse("2020-06-30T07:56:31Z"))
         .build();
     var entry2 = ZippedEntry.builder()
-        .path("encounter91/null/case/.1.response.xml")
+        .path("encounter91/unknown-host/case/.1.response.xml")
+        .fullUrl("http://unknown-host/case/")
         .body("auditResponseBody")
         .instant(Instant.parse("2020-06-30T07:56:31Z"))
         .build();
     var entry3 = ZippedEntry.builder()
         .path("encounter91/cdss.cactus-staging.iucdspilot.uk/fhir/ServiceDefinition/palpitations2.1.response.xml")
+        .fullUrl("https://cdss.cactus-staging.iucdspilot.uk/fhir/ServiceDefinition/palpitations2")
         .body("entry1ResponseBody")
         .instant(Instant.parse("2020-06-30T07:56:32Z"))
         .build();
     var entry4 = ZippedEntry.builder()
         .path("encounter91/fhir-server.cactus-staging.iucdspilot.uk/fhir/QuestionnaireResponse/849.1.response.xml")
+        .fullUrl("http://fhir-server.cactus-staging.iucdspilot.uk/fhir/QuestionnaireResponse/849")
         .body("entry1ResponseBody")
         .instant(Instant.parse("2020-06-30T07:56:33Z"))
         .build();
@@ -213,12 +221,14 @@ public class AuditControllerComponentTest {
     var decodedBytes = Base64.getDecoder().decode((byte[])tkwRequest.getBody());
 
     var entry1 = ZippedEntry.builder()
-        .path("service_searchvalidGuidValue/null/case/serviceDefinitions.1.response.xml")
+        .path("service_searchvalidGuidValue/unknown-host/case/serviceDefinitions.1.response.xml")
+        .fullUrl("http://unknown-host/case/serviceDefinitions")
         .body("auditResponseBody")
         .instant(Instant.parse("2020-06-30T07:56:31Z"))
         .build();
     var entry2 = ZippedEntry.builder()
         .path("service_searchvalidGuidValue/cdss.cactus-staging.iucdspilot.uk/fhir/ServiceDefinition/palpitations2.1.response.xml")
+        .fullUrl("https://cdss.cactus-staging.iucdspilot.uk/fhir/ServiceDefinition/palpitations2")
         .body("entry1ResponseBody")
         .instant(Instant.parse("2020-06-30T07:56:32Z"))
         .build();
