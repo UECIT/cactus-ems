@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
-import org.hl7.fhir.dstu3.model.CareConnectCarePlan;
 import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementCodeFilterComponent;
 import org.hl7.fhir.dstu3.model.GuidanceResponse;
@@ -83,7 +82,7 @@ public class ResponseResolverImpl implements ResponseResolver {
         ResourceProviderUtils.getResource(guidanceResponse.getContained(), ReferralRequest.class));
 
     cdssResult.setCareAdvice(
-        ResourceProviderUtils.getResources(guidanceResponse.getContained(), CareConnectCarePlan.class)
+        ResourceProviderUtils.getResources(guidanceResponse.getContained(), CarePlan.class)
             .stream().map(CarePlanDTO::new).collect(Collectors.toList()));
 
     return cdssResult;
