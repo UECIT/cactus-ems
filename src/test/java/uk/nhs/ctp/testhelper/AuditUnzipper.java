@@ -28,7 +28,6 @@ public class AuditUnzipper {
 
         ZipEntry zipEntry;
         while ((zipEntry = zip.getNextEntry()) != null) {
-          byte[] extra = zipEntry.getExtra();
           entries.add(ZippedEntry.builder()
               .instant(zipEntry.getCreationTime().toInstant())
               .path(zipEntry.getName())
