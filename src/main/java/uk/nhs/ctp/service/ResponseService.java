@@ -8,7 +8,6 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.Attachment;
-import org.hl7.fhir.dstu3.model.CareConnectCarePlan;
 import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueType;
@@ -119,7 +118,7 @@ public class ResponseService {
 	private void addCdssResult(CdssResult cdssResult, CdssResponseDTO response) throws FHIRException {
 		if (cdssResult.hasResult()) {
 			CarePlan careplan = ResourceProviderUtils
-					.castToType(cdssResult.getResult().getActionFirstRep().getResource().getResource(), CareConnectCarePlan.class);
+					.castToType(cdssResult.getResult().getActionFirstRep().getResource().getResource(), CarePlan.class);
 			setResult(careplan, response);
 			if (cdssResult.hasTrigger()) {
 				response.setSwitchTrigger(cdssResult.getSwitchTrigger());

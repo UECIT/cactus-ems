@@ -6,7 +6,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.CareConnectCarePlan;
+import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Type;
@@ -28,8 +28,8 @@ public class BundleToIntegratedUrgentCareTextSectionTemplateMapper extends Abstr
 		List<QuestionnaireResponse> questionnaireResponses = 
 				ResourceProviderUtils.getResources(bundle, QuestionnaireResponse.class);
 
-		List<CareConnectCarePlan> carePlans = 
-				ResourceProviderUtils.getResources(bundle, CareConnectCarePlan.class);
+		List<CarePlan> carePlans =
+				ResourceProviderUtils.getResources(bundle, CarePlan.class);
 		
 		StrucDocList list = new StrucDocList();
 		list.getItem().add(new StrucDocItem("The following interview..."));
@@ -65,7 +65,7 @@ public class BundleToIntegratedUrgentCareTextSectionTemplateMapper extends Abstr
 		});
 	}
 	
-	private void addCarePlan(StrucDocList list, CareConnectCarePlan carePlan) {
+	private void addCarePlan(StrucDocList list, CarePlan carePlan) {
 		carePlan.getActivity().stream().forEach(activity -> 
 				list.getItem().add(new StrucDocItem(activity.getDetail().getDescription())));
 
