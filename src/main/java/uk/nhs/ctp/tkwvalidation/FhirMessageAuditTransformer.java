@@ -77,7 +77,7 @@ public class FhirMessageAuditTransformer {
 
     return FhirMessageAudit.builder()
         .filePath(mergePaths(basePath, entry.getRequestUrl()))
-        .fullUrl(fullUrl(entry.getRequestHeaders(), entry.getRequestUrl()))
+        .fullUrl(entry.getRequestUrl())
         .requestBody(requestBody)
         .responseBody(responseBody)
         .moment(entry.getDateOfEntry())
