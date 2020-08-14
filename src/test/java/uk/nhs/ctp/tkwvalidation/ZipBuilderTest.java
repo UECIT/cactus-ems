@@ -41,17 +41,19 @@ public class ZipBuilderTest {
   public void buildAndCloseZip_withEntries_shouldBuildWithRightData() throws IOException {
     var entry1 = ZippedEntry.builder()
         .path("valid/path1.txt")
+        .fullUrl("https://valid/path1.txt")
         .body("{ validBody 1 }")
         .instant(Instant.parse("2020-07-07T08:31:52Z"))
         .build();
     var entry2 = ZippedEntry.builder()
         .path("valid/path2")
+        .fullUrl("https://valid/path2")
         .body("< validBody 2 >")
         .instant(Instant.parse("2010-06-06T07:20:41Z"))
         .build();
 
-    zipBuilder.addEntry(entry1.getPath(), entry1.getBody(), entry1.getInstant());
-    zipBuilder.addEntry(entry2.getPath(), entry2.getBody(), entry2.getInstant());
+    zipBuilder.addEntry(entry1.getPath(), entry1.getFullUrl(), entry1.getBody(), entry1.getInstant());
+    zipBuilder.addEntry(entry2.getPath(), entry2.getFullUrl(), entry2.getBody(), entry2.getInstant());
 
     var zipData = zipBuilder.buildAndCloseZip();
 
@@ -64,11 +66,12 @@ public class ZipBuilderTest {
     var roughInstant = preciseInstant.with(MILLI_OF_SECOND, 0).with(MICRO_OF_SECOND, 0);
     var entry = ZippedEntry.builder()
         .path("valid/path1.txt")
+        .fullUrl("https://valid/path1")
         .body("{ validBody 1 }")
         .instant(Instant.parse("2020-07-07T08:31:52.26345Z"))
         .build();
 
-    zipBuilder.addEntry(entry.getPath(), entry.getBody(), entry.getInstant());
+    zipBuilder.addEntry(entry.getPath(), entry.getFullUrl(), entry.getBody(), entry.getInstant());
 
     var zipData = zipBuilder.buildAndCloseZip();
 
@@ -80,6 +83,7 @@ public class ZipBuilderTest {
   public void addEntry_afterClosingZip_shouldFail() throws IOException {
     var entry = ZippedEntry.builder()
         .path("valid/path1.txt")
+        .fullUrl("https://valid/path1")
         .body("{ validBody 1 }")
         .instant(Instant.parse("2020-07-07T08:31:52.26345Z"))
         .build();
@@ -87,6 +91,6 @@ public class ZipBuilderTest {
     zipBuilder.buildAndCloseZip();
 
     expectedException.expect(IOException.class);
-    zipBuilder.addEntry(entry.getPath(), entry.getBody(), entry.getInstant());
+    zipBuilder.addEntry(entry.getPath(), entry.getFullUrl(), entry.getBody(), entry.getInstant());
   }
 }

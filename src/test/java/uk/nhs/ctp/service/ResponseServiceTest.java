@@ -7,7 +7,6 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
-import org.hl7.fhir.dstu3.model.CareConnectCarePlan;
 import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.CarePlan.CarePlanActivityComponent;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -269,7 +268,7 @@ public class ResponseServiceTest {
 	public void shouldBuildAmendResponseResultReferralRequestV1() {
 		CdssResult resultWithReferral = new CdssResult();
 		IBaseReference carePlan = new Reference().setResource(
-				new CareConnectCarePlan()
+				new CarePlan()
 						.addActivity(new CarePlanActivityComponent()
 								.addOutcomeCodeableConcept(
 										new CodeableConcept(
@@ -304,7 +303,7 @@ public class ResponseServiceTest {
 	public void shouldBuildAmendResponseResultReferralRequestV2() {
 		CdssResult resultWithReferral = new CdssResult();
 		IBaseReference carePlan = new Reference().setResource(
-				new CareConnectCarePlan()
+				new CarePlan()
 						.addActivity(new CarePlanActivityComponent()
 								.addOutcomeCodeableConcept(
 										new CodeableConcept(

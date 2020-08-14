@@ -8,8 +8,8 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.Attachment;
-import org.hl7.fhir.dstu3.model.CareConnectCarePlan;
 import org.hl7.fhir.dstu3.model.CarePlan;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueType;
 import org.hl7.fhir.dstu3.model.Questionnaire;
@@ -119,7 +119,7 @@ public class ResponseService {
 	private void addCdssResult(CdssResult cdssResult, CdssResponseDTO response) throws FHIRException {
 		if (cdssResult.hasResult()) {
 			CarePlan careplan = ResourceProviderUtils
-					.castToType(cdssResult.getResult().getActionFirstRep().getResource().getResource(), CareConnectCarePlan.class);
+					.castToType(cdssResult.getResult().getActionFirstRep().getResource().getResource(), CarePlan.class);
 			setResult(careplan, response);
 			if (cdssResult.hasTrigger()) {
 				response.setSwitchTrigger(cdssResult.getSwitchTrigger());
@@ -158,9 +158,9 @@ public class ResponseService {
 				triageQuestion.setQuestionType(question.getType().toString());
 
 				if (!question.getExtension().isEmpty()) {
-					if (question.getExtensionFirstRep().getValue() instanceof Coding) {
-						Coding code = (Coding) question.getExtensionFirstRep().getValue();
-						ExtensionDTO ex = new ExtensionDTO(code);
+					if (question.getExtensionFirstRep().getValue() instanceof CodeableConcept) {
+						CodeableConcept code = (CodeableConcept) question.getExtensionFirstRep().getValue();
+						ExtensionDTO ex = new ExtensionDTO(code.getCodingFirstRep());
 						triageQuestion.setExtension(ex);
 					}
 				}
@@ -215,9 +215,9 @@ public class ResponseService {
 			triageQuestion.setQuestionType(question.getType().toString());
 
 			if (!question.getExtension().isEmpty()) {
-				if (question.getExtensionFirstRep().getValue() instanceof Coding) {
-					Coding code = (Coding) question.getExtensionFirstRep().getValue();
-					ExtensionDTO ex = new ExtensionDTO(code);
+				if (question.getExtensionFirstRep().getValue() instanceof CodeableConcept) {
+					CodeableConcept code = (CodeableConcept) question.getExtensionFirstRep().getValue();
+					ExtensionDTO ex = new ExtensionDTO(code.getCodingFirstRep());
 					triageQuestion.setExtension(ex);
 				}
 			}

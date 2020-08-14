@@ -1,6 +1,6 @@
 package uk.nhs.ctp.service.report.decorator.mapping.template.codedentry;
 
-import org.hl7.fhir.dstu3.model.CareConnectObservation;
+import org.hl7.fhir.dstu3.model.Observation;
 import org.springframework.stereotype.Component;
 
 import uk.nhs.ctp.service.dto.ReportRequestDTO;
@@ -11,15 +11,15 @@ import uk.nhs.ctp.service.report.org.hl7.v3.CV;
 import uk.nhs.ctp.service.report.org.hl7.v3.POCDMT200001GB02Component2;
 
 @Component
-public class ObservationToClinicalDiscriminatorTemplateMapper implements TemplateMapper<CareConnectObservation, POCDMT200001GB02Component2> {
+public class ObservationToClinicalDiscriminatorTemplateMapper implements TemplateMapper<Observation, POCDMT200001GB02Component2> {
 
 	@Override
-	public Class<CareConnectObservation> getResourceClass() {
-		return CareConnectObservation.class;
+	public Class<Observation> getResourceClass() {
+		return Observation.class;
 	}
 
 	@Override
-	public void map(CareConnectObservation observation, POCDMT200001GB02Component2 component, ReportRequestDTO request) {	
+	public void map(Observation observation, POCDMT200001GB02Component2 component, ReportRequestDTO request) {
 		COCDTP146092GB01ClinicalDiscriminator clinicalDiscriminator = new COCDTP146092GB01ClinicalDiscriminator();
 		clinicalDiscriminator.setClassCode(clinicalDiscriminator.getClassCode());
 		clinicalDiscriminator.setMoodCode(clinicalDiscriminator.getMoodCode());
