@@ -24,6 +24,11 @@ public class QuestionnaireOptionValueTransformer
       TriageExtension triageExtension = new TriageExtension(extension.getUrl(),
           extension.getValue().primitiveValue());
       option.setExtension(triageExtension);
+    } else if (optionComponent.hasModifierExtension()) {
+      Extension extension = optionComponent.getModifierExtensionFirstRep();
+      TriageExtension triageExtension = new TriageExtension(extension.getUrl(),
+          extension.getValue().primitiveValue());
+      option.setExtension(triageExtension);
     }
 
     if (optionComponent.hasValueCoding()) {
