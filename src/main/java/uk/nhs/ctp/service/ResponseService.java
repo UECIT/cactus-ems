@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.CarePlan;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueType;
 import org.hl7.fhir.dstu3.model.Questionnaire;
@@ -157,9 +158,9 @@ public class ResponseService {
 				triageQuestion.setQuestionType(question.getType().toString());
 
 				if (!question.getExtension().isEmpty()) {
-					if (question.getExtensionFirstRep().getValue() instanceof Coding) {
-						Coding code = (Coding) question.getExtensionFirstRep().getValue();
-						ExtensionDTO ex = new ExtensionDTO(code);
+					if (question.getExtensionFirstRep().getValue() instanceof CodeableConcept) {
+						CodeableConcept code = (CodeableConcept) question.getExtensionFirstRep().getValue();
+						ExtensionDTO ex = new ExtensionDTO(code.getCodingFirstRep());
 						triageQuestion.setExtension(ex);
 					}
 				}
@@ -214,9 +215,9 @@ public class ResponseService {
 			triageQuestion.setQuestionType(question.getType().toString());
 
 			if (!question.getExtension().isEmpty()) {
-				if (question.getExtensionFirstRep().getValue() instanceof Coding) {
-					Coding code = (Coding) question.getExtensionFirstRep().getValue();
-					ExtensionDTO ex = new ExtensionDTO(code);
+				if (question.getExtensionFirstRep().getValue() instanceof CodeableConcept) {
+					CodeableConcept code = (CodeableConcept) question.getExtensionFirstRep().getValue();
+					ExtensionDTO ex = new ExtensionDTO(code.getCodingFirstRep());
 					triageQuestion.setExtension(ex);
 				}
 			}
