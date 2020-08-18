@@ -11,6 +11,7 @@ import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminSetUserPasswordRequest;
 import com.amazonaws.services.cognitoidp.model.AdminSetUserPasswordResult;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
+import com.amazonaws.services.cognitoidp.model.MessageActionType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -47,6 +48,7 @@ public class CognitoService {
         .withUserPoolId(userPool)
         .withUsername(username)
         .withTemporaryPassword(tempPassword)
+        .withMessageAction(MessageActionType.SUPPRESS)
         .withUserAttributes(
             new AttributeType()
                 .withName(SUPPLIER_ID_ATTRIBUTE)
